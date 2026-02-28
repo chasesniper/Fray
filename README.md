@@ -57,10 +57,10 @@ This repository contains the results of extensive WAF testing conducted over 100
 
 ### Statistics
 
-- **Total Payloads**: 2,525 (cleaned and properly categorized)
+- **Total Payloads**: 2,605 (cleaned and properly categorized)
 - **CVE Payloads**: 220 (2020-2026 critical vulnerabilities)
 - **Modern Bypass Techniques**: 138 (2025-2026 research)
-- **AI Security Payloads**: 200 (Prompt injection, jailbreaks) 🆕
+- **AI Security Payloads**: 280 (Prompt injection, RAG, resource exhaustion) 🆕
 - **Payload Generator**: Interactive tool for custom payloads
 - **Attack Types**: 12 categories
 - **Testing Rounds**: 100
@@ -289,7 +289,7 @@ python3 scripts/cve_checker.py CVE-2026-12345 --add
 
 ## 🤖 AI Security - Prompt Injection (NEW!)
 
-**200 AI/LLM security payloads for testing prompt injection vulnerabilities!**
+**280 AI/LLM security payloads for testing prompt injection vulnerabilities!**
 
 AI security is a **major trend in 2025-2026**. Test your AI applications against:
 
@@ -298,6 +298,8 @@ AI security is a **major trend in 2025-2026**. Test your AI applications against
 | **Jailbreaks** | 100 | Bypass AI safety guidelines (DAN, Evil Mode, etc.) |
 | **Prompt Leaking** | 50 | Extract system prompts and training data |
 | **Indirect Injection** | 50 | Inject via emails, documents, web pages |
+| **Vector/Embedding Attacks** | 50 | RAG poisoning, vector DB attacks 🆕 |
+| **Unbounded Consumption** | 30 | Resource exhaustion, cost amplification 🆕 |
 
 **Techniques Covered:**
 - ✅ DAN (Do Anything Now) jailbreaks
@@ -309,6 +311,10 @@ AI security is a **major trend in 2025-2026**. Test your AI applications against
 - ✅ Indirect injection (email, document, web)
 - ✅ Context manipulation
 - ✅ Function/plugin enumeration
+- ✅ RAG poisoning & vector database attacks 🆕
+- ✅ Semantic search manipulation 🆕
+- ✅ Resource exhaustion & cost amplification 🆕
+- ✅ Token limit exploitation 🆕
 
 **Target Coverage:**
 - ChatGPT / GPT-4
@@ -326,12 +332,14 @@ python3 easy_payload_creator.py
 > "Inject malicious instructions via email"
 ```
 
-**OWASP LLM Top 10 Coverage:**
-- ✅ LLM01: Prompt Injection
-- ✅ LLM02: Insecure Output Handling
-- ✅ LLM03: Training Data Poisoning
-- ✅ LLM06: Sensitive Information Disclosure
-- ✅ LLM07: Insecure Plugin Design
+**OWASP LLM Top 10:2025 Coverage (80%):**
+- ✅ LLM01: Prompt Injection (150 payloads)
+- ✅ LLM02: Sensitive Information Disclosure (50 payloads)
+- ✅ LLM04: Data and Model Poisoning (50 payloads)
+- ✅ LLM05: Improper Output Handling (50 payloads)
+- ✅ LLM07: System Prompt Leakage (50 payloads)
+- ✅ LLM08: Vector and Embedding Weaknesses (50 payloads) 🆕
+- ✅ LLM10: Unbounded Consumption (30 payloads) 🆕
 
 **[View AI Security Guide →](AI_SECURITY_GUIDE.md)**
 
