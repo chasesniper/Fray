@@ -1,6 +1,6 @@
 # WAF Payload Database
 
-> 🛡️ Comprehensive WAF testing tool with 1,548 security payloads for Claude Code, ChatGPT, and security professionals
+> 🛡️ Comprehensive WAF testing tool with 2,155 security payloads for Claude Code, ChatGPT, and security professionals
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
@@ -29,7 +29,7 @@ python3 waf_tester.py -i
 
 - ✅ **Interactive Mode**: Guided testing for beginners
 - ✅ **CLI Mode**: Automation-ready for experts
-- ✅ **1,548 Payloads**: Organized by 12 attack types
+- ✅ **2,155 Payloads**: Organized by 12 attack types
 - ✅ **No Dependencies**: Pure Python standard library
 - ✅ **Docker Support**: Portable containerized testing
 - ✅ **JSON Reports**: Detailed, shareable results
@@ -61,29 +61,35 @@ python3 waf_tester.py -t https://example.com -p payloads/xss/basic.json
 
 ## 📊 Payload Categories
 
-**1,548 total payloads across 12 attack types:**
+**2,155 total payloads across 12 attack types:**
 
-### XSS (681 payloads - 44%)
+### XSS (681 payloads - 31.6%)
 - Basic, SVG-based, Advanced, Event Handlers
 - DOM-based, Encoded, Obfuscated, Mutation, Polyglot
 
-### SQL Injection (28 payloads - 1.8%)
+### SQL Injection (148 payloads - 6.9%)
 - PostgreSQL, MySQL, MSSQL, Oracle, SQLite, NoSQL
+- Union, Boolean, Time-based, Error-based, Stacked queries
 
-### SSRF (22 payloads - 1.4%)
-- Cloud metadata, Protocol smuggling, DNS rebinding
+### Command Injection (125 payloads - 5.8%)
+- Reverse shells (Bash, Netcat, Python, Perl, Ruby, PHP, PowerShell)
+- Encoding bypass, Time-based detection
 
-### SSTI (17 payloads - 1.1%)
-- Jinja2, Twig, Freemarker, Velocity, Pug
+### SSRF (72 payloads - 3.3%)
+- Cloud metadata (AWS, GCP, Azure), Protocol smuggling
+- DNS rebinding, IPv6, Port scanning
 
-### Command Injection (10 payloads)
-### Path Traversal (9 payloads)
-### XXE (7 payloads)
-### LDAP Injection (5 payloads)
-### XPath Injection (4 payloads)
-### CRLF Injection (4 payloads)
-### Open Redirect (1 payload)
-### Other/Mixed (760 payloads)
+### SSTI (62 payloads - 2.9%)
+- Jinja2, Twig, Freemarker, Velocity
+- RCE techniques, Sandbox escape
+
+### Path Traversal (59 payloads - 2.7%)
+### LDAP Injection (55 payloads - 2.6%)
+### XPath Injection (54 payloads - 2.5%)
+### CRLF Injection (54 payloads - 2.5%)
+### Open Redirect (51 payloads - 2.4%)
+### XXE (34 payloads - 1.6%)
+### Other/Mixed (760 payloads - 35.3%)
 
 See [PAYLOAD_CLASSIFICATION.md](PAYLOAD_CLASSIFICATION.md) for detailed breakdown.
 

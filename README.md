@@ -1,6 +1,6 @@
 # WAF Payload Database
 
-A comprehensive collection of **1,548 Web Application Firewall (WAF) bypass payloads** tested against Cloudflare WAF, organized by attack type and technique. Extracted and classified from 24,700+ original test cases.
+A comprehensive collection of **2,155 Web Application Firewall (WAF) bypass payloads** tested against Cloudflare WAF, organized by attack type and technique. Extracted and classified from 24,700+ original test cases.
 
 ## 📊 Project Overview
 
@@ -8,7 +8,7 @@ This repository contains the results of extensive WAF testing conducted over 100
 
 ### Statistics
 
-- **Total Payloads**: 1,548 (organized and classified)
+- **Total Payloads**: 2,155 (organized and classified)
 - **Attack Types**: 12 categories
 - **Testing Rounds**: 100
 - **Original Tests**: 24,705 payloads
@@ -108,7 +108,7 @@ tester.generate_report(results)
 
 ## 📚 Payload Categories
 
-### 1. Cross-Site Scripting (XSS) - 681 payloads (44.0%)
+### 1. Cross-Site Scripting (XSS) - 681 payloads (31.6%)
 
 - **Basic XSS** (412): Standard script tags and event handlers
 - **SVG-based XSS** (175): SVG onload, animation, namespace abuse
@@ -120,59 +120,73 @@ tester.generate_report(results)
 - **Mutation XSS** (4): Browser parsing mutations
 - **Polyglot XSS** (1): Multi-context payloads
 
-### 2. SQL Injection - 28 payloads (1.8%)
+### 2. SQL Injection - 148 payloads (6.9%)
 
-- **General SQLi** (13): Union, Boolean, Stacked queries
-- **Advanced SQLi** (15): PostgreSQL, MySQL, MSSQL, Oracle, SQLite, NoSQL
-- Time-based blind, Error-based, Out-of-band exfiltration
+- **Comprehensive SQLi** (120): Union, Boolean, Time-based, Error-based, Stacked queries
+- **Database-specific**: PostgreSQL, MySQL, MSSQL, Oracle, SQLite
+- **NoSQL injection**: MongoDB, CouchDB
+- Blind SQLi, Out-of-band exfiltration
 
-### 3. Server-Side Request Forgery (SSRF) - 22 payloads (1.4%)
+### 3. Command Injection - 125 payloads (5.8%)
 
-- **General SSRF** (7): AWS, GCP, Azure metadata
-- **Advanced SSRF** (15): Protocol smuggling, DNS rebinding, IPv6, IP encoding
+- **Comprehensive** (115): Reverse shells, Command substitution, Encoding bypass
+- **Shells**: Bash, Netcat, Python, Perl, Ruby, PHP, PowerShell
+- **Time-based detection**: Sleep, Ping, Timeout
+- **File operations**: Cat, Ls, Find, Grep
 
-### 4. Server-Side Template Injection (SSTI) - 17 payloads (1.1%)
+### 4. Server-Side Request Forgery (SSRF) - 72 payloads (3.3%)
 
-- **General SSTI** (8): Jinja2, Twig, Freemarker, Velocity
-- **Advanced SSTI** (9): RCE techniques, sandbox escape
+- **Cloud metadata**: AWS, GCP, Azure (multiple endpoints)
+- **Protocol smuggling**: Gopher, Dict, FTP, TFTP
+- **DNS rebinding**, IPv6, IP encoding (decimal, hex, octal)
+- **Port scanning**: Common ports (80, 443, 8080, 3306, 6379, 27017)
 
-### 5. Command Injection - 10 payloads (0.6%)
+### 5. Server-Side Template Injection (SSTI) - 62 payloads (2.9%)
 
-- Reverse shells (bash, nc, python, perl, ruby)
-- Base64 encoding bypass
-- Time-based detection
+- **Jinja2/Flask**: Config access, RCE, Sandbox escape
+- **Twig**: Filter callback exploitation
+- **Freemarker**: Execute utility, Classloader
+- **Velocity**: Runtime exploitation
 
-### 6. Path Traversal - 9 payloads (0.6%)
+### 6. Path Traversal - 59 payloads (2.7%)
 
-- Unicode/UTF-8 encoding
-- Windows/Linux paths
-- Null byte bypass, Zip slip
+- **Encoding variations**: Unicode, UTF-8, Double URL encoding
+- **Multiple depths**: 1-10 levels deep
+- **Target files**: /etc/passwd, /etc/shadow, Windows config files
+- **Null byte bypass**, Zip slip
 
-### 7. XML External Entity (XXE) - 7 payloads (0.5%)
+### 7. LDAP Injection - 55 payloads (2.6%)
 
-- **General XXE** (3): File disclosure, SSRF, Blind XXE
-- **Advanced XXE** (4): Parameter entities, PHP/Expect wrappers
+- **Wildcard injection**: *, *)(uid=*
+- **Boolean bypass**: AND, OR, NOT operators
+- **Authentication bypass**: Multiple username variations
 
-### 8. LDAP Injection - 5 payloads (0.3%)
+### 8. XPath Injection - 54 payloads (2.5%)
 
-- Wildcard, AND/OR/NOT bypass
-- Authentication bypass
+- **Boolean bypass**: OR/AND conditions
+- **Function exploitation**: name(), substring(), string-length()
+- **Data extraction**: Multiple value testing
 
-### 9. XPath Injection - 4 payloads (0.3%)
+### 9. CRLF Injection - 54 payloads (2.5%)
 
-- OR/Numeric bypass
-- Function exploitation
+- **Header injection**: Set-Cookie, Location, Content-Type
+- **Encoding variations**: %0d%0a, %0a, \r\n
+- **Response splitting**: Double CRLF for XSS
 
-### 10. CRLF Injection - 4 payloads (0.3%)
+### 10. Open Redirect - 51 payloads (2.4%)
 
-- Cookie injection, HTTP redirect
-- Response splitting
+- **Protocol variations**: http://, https://, //, javascript:
+- **Multiple domains**: evil.com, attacker.com, phishing.com
+- **@ symbol bypass**: example.com@evil.com
 
-### 11. Open Redirect - 1 payload (0.1%)
+### 11. XML External Entity (XXE) - 34 payloads (1.6%)
 
-- URL manipulation
+- **File disclosure**: Multiple system files
+- **SSRF via XXE**: Internal network access
+- **Parameter entities**: OOB data exfiltration
+- **PHP wrappers**: Base64 encoding, Expect wrapper
 
-### 12. Other/Mixed - 760 payloads (49.1%)
+### 12. Other/Mixed - 760 payloads (35.3%)
 
 - Experimental payloads
 - Multi-vector attacks
