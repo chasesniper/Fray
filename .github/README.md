@@ -1,6 +1,6 @@
 # WAF Payload Database
 
-> 🛡️ Comprehensive WAF testing tool with 1,423+ security payloads for Claude Code, ChatGPT, and security professionals
+> 🛡️ Comprehensive WAF testing tool with 1,548 security payloads for Claude Code, ChatGPT, and security professionals
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
@@ -29,7 +29,7 @@ python3 waf_tester.py -i
 
 - ✅ **Interactive Mode**: Guided testing for beginners
 - ✅ **CLI Mode**: Automation-ready for experts
-- ✅ **1,423+ Payloads**: Organized by attack type
+- ✅ **1,548 Payloads**: Organized by 12 attack types
 - ✅ **No Dependencies**: Pure Python standard library
 - ✅ **Docker Support**: Portable containerized testing
 - ✅ **JSON Reports**: Detailed, shareable results
@@ -61,12 +61,31 @@ python3 waf_tester.py -t https://example.com -p payloads/xss/basic.json
 
 ## 📊 Payload Categories
 
-- **XSS**: 631 payloads (basic, SVG, encoded, obfuscated, mutation, DOM-based, polyglot)
-- **SQL Injection**: 13 payloads
-- **SSRF**: 7 payloads
-- **XXE**: 3 payloads
-- **SSTI**: 8 payloads
-- **Other**: 760+ payloads
+**1,548 total payloads across 12 attack types:**
+
+### XSS (681 payloads - 44%)
+- Basic, SVG-based, Advanced, Event Handlers
+- DOM-based, Encoded, Obfuscated, Mutation, Polyglot
+
+### SQL Injection (28 payloads - 1.8%)
+- PostgreSQL, MySQL, MSSQL, Oracle, SQLite, NoSQL
+
+### SSRF (22 payloads - 1.4%)
+- Cloud metadata, Protocol smuggling, DNS rebinding
+
+### SSTI (17 payloads - 1.1%)
+- Jinja2, Twig, Freemarker, Velocity, Pug
+
+### Command Injection (10 payloads)
+### Path Traversal (9 payloads)
+### XXE (7 payloads)
+### LDAP Injection (5 payloads)
+### XPath Injection (4 payloads)
+### CRLF Injection (4 payloads)
+### Open Redirect (1 payload)
+### Other/Mixed (760 payloads)
+
+See [PAYLOAD_CLASSIFICATION.md](PAYLOAD_CLASSIFICATION.md) for detailed breakdown.
 
 ## 🔒 Legal & Ethical Use
 

@@ -1,6 +1,6 @@
 # WAF Payload Database
 
-A comprehensive collection of **24,700+ Web Application Firewall (WAF) bypass payloads** tested against Cloudflare WAF, organized by attack type and technique.
+A comprehensive collection of **1,548 Web Application Firewall (WAF) bypass payloads** tested against Cloudflare WAF, organized by attack type and technique. Extracted and classified from 24,700+ original test cases.
 
 ## 📊 Project Overview
 
@@ -8,9 +8,10 @@ This repository contains the results of extensive WAF testing conducted over 100
 
 ### Statistics
 
-- **Total Payloads Tested**: 24,705
-- **Attack Types**: 10+ categories
+- **Total Payloads**: 1,548 (organized and classified)
+- **Attack Types**: 12 categories
 - **Testing Rounds**: 100
+- **Original Tests**: 24,705 payloads
 - **Block Rate**: 99.9%
 - **Bypasses Found**: 0 (demonstrating WAF effectiveness)
 
@@ -107,79 +108,76 @@ tester.generate_report(results)
 
 ## 📚 Payload Categories
 
-### 1. Cross-Site Scripting (XSS) - 21,755 payloads
+### 1. Cross-Site Scripting (XSS) - 681 payloads (44.0%)
 
-- **Basic XSS**: Standard script tags and event handlers
-- **Encoded XSS**: URL, HTML entity, Unicode encoding
-- **Obfuscated XSS**: Case variation, whitespace, comments
-- **Polyglot XSS**: Multi-context payloads
-- **Mutation XSS (mXSS)**: Browser parsing mutations
-- **DOM-based XSS**: Client-side execution
-- **SVG-based XSS**: SVG and image-based vectors
-- **Event Handlers**: Comprehensive event handler testing
-- **Advanced Techniques**: PortSwigger 2026, research-based
+- **Basic XSS** (412): Standard script tags and event handlers
+- **SVG-based XSS** (175): SVG onload, animation, namespace abuse
+- **Advanced XSS** (15): ES6+, WebAssembly, Service Workers
+- **Event Handlers** (35): Rare events (onbounce, media events)
+- **DOM-based XSS** (24): Client-side manipulation
+- **Encoded XSS** (12): URL, HTML entity, Unicode encoding
+- **Obfuscated XSS** (3): Case variation, whitespace, comments
+- **Mutation XSS** (4): Browser parsing mutations
+- **Polyglot XSS** (1): Multi-context payloads
 
-### 2. SQL Injection - 14 payloads
+### 2. SQL Injection - 28 payloads (1.8%)
 
-- Basic SQLi
-- Blind SQLi
-- Time-based blind
-- Error-based
-- Union-based
+- **General SQLi** (13): Union, Boolean, Stacked queries
+- **Advanced SQLi** (15): PostgreSQL, MySQL, MSSQL, Oracle, SQLite, NoSQL
+- Time-based blind, Error-based, Out-of-band exfiltration
 
-### 3. Command Injection - 11 payloads
+### 3. Server-Side Request Forgery (SSRF) - 22 payloads (1.4%)
 
-- Shell command injection
-- OS command execution
-- Encoded commands
+- **General SSRF** (7): AWS, GCP, Azure metadata
+- **Advanced SSRF** (15): Protocol smuggling, DNS rebinding, IPv6, IP encoding
 
-### 4. Server-Side Request Forgery (SSRF) - 14 payloads
+### 4. Server-Side Template Injection (SSTI) - 17 payloads (1.1%)
 
-- AWS metadata
-- GCP metadata
-- Azure metadata
-- Internal network access
+- **General SSTI** (8): Jinja2, Twig, Freemarker, Velocity
+- **Advanced SSTI** (9): RCE techniques, sandbox escape
 
-### 5. XML External Entity (XXE) - 3 payloads
+### 5. Command Injection - 10 payloads (0.6%)
 
-- File disclosure
-- SSRF via XXE
-- Blind XXE
+- Reverse shells (bash, nc, python, perl, ruby)
+- Base64 encoding bypass
+- Time-based detection
 
-### 6. Path Traversal - 10 payloads
+### 6. Path Traversal - 9 payloads (0.6%)
 
-- Directory traversal
-- File inclusion
-- Encoded paths
+- Unicode/UTF-8 encoding
+- Windows/Linux paths
+- Null byte bypass, Zip slip
 
-### 7. Server-Side Template Injection (SSTI) - 10 payloads
+### 7. XML External Entity (XXE) - 7 payloads (0.5%)
 
-- Jinja2/Flask
-- Twig
-- Freemarker
-- Velocity
+- **General XXE** (3): File disclosure, SSRF, Blind XXE
+- **Advanced XXE** (4): Parameter entities, PHP/Expect wrappers
 
-### 8. Open Redirect - 9 payloads
+### 8. LDAP Injection - 5 payloads (0.3%)
 
-- Protocol-relative URLs
-- JavaScript protocol
-- Data URIs
+- Wildcard, AND/OR/NOT bypass
+- Authentication bypass
 
-### 9. Encoding Techniques
+### 9. XPath Injection - 4 payloads (0.3%)
 
-- URL encoding (single, double, triple)
-- HTML entity encoding
-- Unicode encoding
-- Base64 encoding
-- Hex encoding
-- Mixed encoding
+- OR/Numeric bypass
+- Function exploitation
 
-### 10. Research-Based Payloads
+### 10. CRLF Injection - 4 payloads (0.3%)
 
-- GenXSS AI-generated
-- PortSwigger 2026 XSS Cheat Sheet
-- Cloudflare July 2025 WAF Changelog
-- Community-confirmed bypasses
+- Cookie injection, HTTP redirect
+- Response splitting
+
+### 11. Open Redirect - 1 payload (0.1%)
+
+- URL manipulation
+
+### 12. Other/Mixed - 760 payloads (49.1%)
+
+- Experimental payloads
+- Multi-vector attacks
+- Fuzzing patterns
+- Edge cases
 
 ## 🔬 Testing Methodology
 

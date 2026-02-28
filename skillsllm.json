@@ -1,6 +1,6 @@
 {
   "name": "WAF Payload Database",
-  "description": "Comprehensive WAF testing tool with 1,423+ security payloads for automated vulnerability testing. Interactive CLI for easy use with Claude Code, ChatGPT, and security workflows.",
+  "description": "Comprehensive WAF testing tool with 1,548 security payloads for automated vulnerability testing. Interactive CLI for easy use with Claude Code, ChatGPT, and security workflows.",
   "version": "1.0.0",
   "author": "Security Research Community",
   "license": "MIT",
@@ -31,8 +31,8 @@
   ],
   "features": [
     "Interactive mode for guided testing",
-    "1,423+ organized security payloads",
-    "XSS, SQLi, SSRF, XXE, SSTI testing",
+    "1,548 organized security payloads across 12 attack types",
+    "XSS, SQLi, SSRF, XXE, SSTI, Command Injection, Path Traversal, LDAP, XPath, CRLF testing",
     "No external dependencies",
     "Docker support",
     "JSON report generation",
