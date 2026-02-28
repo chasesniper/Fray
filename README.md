@@ -261,22 +261,26 @@ python3 scripts/cve_checker.py CVE-2026-12345 --add
 
 ## 🎯 OWASP Top 10:2025 Coverage
 
-**We provide comprehensive coverage for OWASP Top 10:2025!**
+**We provide 95%+ coverage for OWASP Top 10:2025!** 🎉
 
 | OWASP Category | Coverage | Payloads |
 |----------------|----------|----------|
 | **A01: Broken Access Control** | ✅ Full | 359 |
 | **A02: Security Misconfiguration** | ✅ Full | 220 CVEs |
 | **A03: Software Supply Chain** | ✅ Full | 220 CVEs |
-| **A04: Cryptographic Failures** | ⚠️ Partial | Limited |
+| **A04: Cryptographic Failures** | ✅ **Full** | **75** 🆕 |
 | **A05: Injection** | ✅ **Full** | **1,842** ⭐ |
 | **A06: Insecure Design** | ✅ Full | 138 |
 | **A07: Authentication Failures** | ✅ Full | 456 |
 | **A08: Integrity Failures** | ✅ Full | 220 CVEs |
-| **A09: Logging Failures** | ⚠️ Partial | 87 |
+| **A09: Logging Failures** | ✅ **Full** | **137** 🆕 |
 | **A10: Exception Handling** | ✅ Full | 359 |
 
-**Overall: 9/10 categories fully supported (90%)**
+**Overall: 10/10 categories fully supported (95%+)** 🎉
+
+**Recent Additions:**
+- ✅ A04: Cryptographic Failures - 75 payloads (weak SSL/TLS, JWT, padding oracle)
+- ✅ A09: Logging Failures - 50 additional payloads (log injection, tampering, evasion)
 
 **[View detailed OWASP coverage →](OWASP_TOP10_COVERAGE.md)**
 

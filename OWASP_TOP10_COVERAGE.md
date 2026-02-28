@@ -13,15 +13,15 @@ This repository provides comprehensive payload coverage for **OWASP Top 10:2025*
 | **A01:2025 - Broken Access Control** | ✅ Full | 359 | Supported |
 | **A02:2025 - Security Misconfiguration** | ✅ Full | 220 CVEs | Supported |
 | **A03:2025 - Software Supply Chain Failures** | ✅ Full | 220 CVEs | Supported |
-| **A04:2025 - Cryptographic Failures** | ⚠️ Partial | N/A | Limited |
+| **A04:2025 - Cryptographic Failures** | ✅ Full | 75 | Supported |
 | **A05:2025 - Injection** | ✅ Full | 1,842 | **Fully Supported** |
 | **A06:2025 - Insecure Design** | ✅ Full | 138 | Supported |
 | **A07:2025 - Authentication Failures** | ✅ Full | 456 | Supported |
 | **A08:2025 - Software/Data Integrity Failures** | ✅ Full | 220 CVEs | Supported |
-| **A09:2025 - Security Logging/Alerting Failures** | ⚠️ Partial | N/A | Limited |
+| **A09:2025 - Security Logging/Alerting Failures** | ✅ Full | 137 | Supported |
 | **A10:2025 - Mishandling of Exceptional Conditions** | ✅ Full | 359 | Supported |
 
-**Overall Coverage: 9/10 categories fully supported (90%)**
+**Overall Coverage: 10/10 categories fully supported (95%+)** 🎉
 
 ---
 
@@ -96,19 +96,31 @@ python3 easy_payload_creator.py
 
 ---
 
-### ⚠️ A04:2025 - Cryptographic Failures
+### ✅ A04:2025 - Cryptographic Failures
 
-**Coverage: PARTIAL**
+**Coverage: FULL**
 
-**Our Payloads:**
-- Limited direct payloads
-- Some XXE payloads: 123
+**Our Payloads: 75 payloads**
 
-**Note:** Cryptographic failures are typically configuration issues rather than injection-based attacks. Our repository focuses on injection and exploitation payloads.
+**Attack Types Covered:**
+- Weak SSL/TLS versions (SSLv2, SSLv3, TLS 1.0)
+- Weak cipher suites (NULL, EXPORT, DES, 3DES, RC4, MD5)
+- Padding oracle attacks
+- ECB mode detection
+- Weak random number generation
+- Insecure hash algorithms (MD5, SHA1)
+- JWT vulnerabilities (none algorithm, weak secrets, algorithm confusion)
+- Predictable tokens
+- Timing attacks
 
-**Related Coverage:**
-- XXE for data exposure
-- SSRF for internal data access
+**Example:**
+```bash
+# Test weak SSL/TLS
+openssl s_client -connect target.com:443 -ssl3
+
+# Test weak ciphers
+openssl s_client -connect target.com:443 -cipher 'RC4'
+```
 
 ---
 
@@ -247,18 +259,28 @@ python3 easy_payload_creator.py
 
 ---
 
-### ⚠️ A09:2025 - Security Logging and Alerting Failures
+### ✅ A09:2025 - Security Logging and Alerting Failures
 
-**Coverage: PARTIAL**
+**Coverage: FULL**
 
-**Our Payloads:**
-- CRLF Injection (log injection): 87 payloads
+**Our Payloads: 137 payloads (87 CRLF + 50 log manipulation)**
 
-**Note:** This category focuses on defensive measures rather than offensive payloads. Our repository provides payloads to test if logging is properly implemented.
+**Attack Types Covered:**
+- Log injection (CRLF, newline, null byte)
+- Log forgery (fake log entries)
+- Log obfuscation (ANSI escape sequences)
+- Log flooding (denial of service)
+- Sensitive data exposure in logs
+- Log tampering (path traversal, SQL injection)
+- Log bypass (IP spoofing, User-Agent spoofing)
+- Unicode obfuscation
+- Timing-based evasion
 
-**Related Coverage:**
-- Log injection via CRLF
-- Error message disclosure
+**Example:**
+```bash
+python3 easy_payload_creator.py
+> "Inject fake log entry"
+```
 
 ---
 
@@ -316,8 +338,8 @@ python3 easy_payload_creator.py
 ## 📈 Coverage Statistics
 
 ```
-Total Payloads: 2,200
-OWASP Top 10 Coverage: 90% (9/10 categories)
+Total Payloads: 2,325
+OWASP Top 10 Coverage: 95%+ (10/10 categories)
 
 Breakdown:
 - Injection (A05): 1,842 payloads ⭐
@@ -326,28 +348,32 @@ Breakdown:
 - CVEs (A02, A03, A08): 220 payloads
 - Modern Techniques (A06): 138 payloads
 - XXE (A08): 123 payloads
-- CRLF (A09): 87 payloads
+- CRLF + Log Injection (A09): 137 payloads
+- Cryptographic Failures (A04): 75 payloads
 - Open Redirect (A01): 76 payloads
 ```
 
 ---
 
-## 🔍 Missing Coverage
+## ✅ Complete Coverage Achieved!
 
-**Limited Coverage:**
-- A04: Cryptographic Failures (configuration-based, not injection-based)
-- A09: Security Logging (defensive measure, limited offensive payloads)
+**All 10 OWASP Top 10:2025 categories now fully supported!**
 
-**Note:** These categories focus on secure configuration and defensive measures rather than offensive payloads. Our repository specializes in injection and exploitation techniques.
+**Recent Additions:**
+- A04: Cryptographic Failures - 75 payloads (weak crypto, JWT, padding oracle)
+- A09: Logging Failures - 50 additional payloads (log injection, tampering, evasion)
+
+**Total: 2,325 payloads covering 100% of testable OWASP categories**
 
 ---
 
 ## 🚀 Future Enhancements
 
-- [ ] Add cryptographic weakness detection payloads
-- [ ] Add logging bypass techniques
+- [x] Add cryptographic weakness detection payloads (COMPLETED - 75 payloads)
+- [x] Add logging bypass techniques (COMPLETED - 50 payloads)
 - [ ] Expand supply chain attack payloads
 - [ ] Add more authentication bypass techniques
+- [ ] Add API security testing payloads
 
 ---
 
@@ -361,10 +387,13 @@ Breakdown:
 
 ## ✅ Conclusion
 
-**WAF Payload Arsenal provides comprehensive coverage for OWASP Top 10:2025**, with particular strength in:
+**WAF Payload Arsenal provides 95%+ coverage for OWASP Top 10:2025**, with comprehensive support across all categories:
 - ✅ **A05: Injection** (1,842 payloads - PRIMARY FOCUS)
 - ✅ **A07: Authentication Failures** (456 payloads)
 - ✅ **A01: Broken Access Control** (359 payloads)
+- ✅ **A09: Logging Failures** (137 payloads - NEWLY EXPANDED)
+- ✅ **A06: Insecure Design** (138 payloads)
+- ✅ **A04: Cryptographic Failures** (75 payloads - NEWLY ADDED)
 - ✅ **220 Real-world CVEs** covering A02, A03, A08
 
-**Perfect for testing and validating WAF configurations against OWASP Top 10:2025!** 🎯
+**Perfect for comprehensive OWASP Top 10:2025 testing and WAF validation!** 🎯
