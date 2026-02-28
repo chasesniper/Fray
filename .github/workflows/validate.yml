@@ -1,0 +1,141 @@
+name: Validate Payloads
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-json:
+    name: Validate JSON Payloads
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Validate JSON files
+      run: |
+        echo "🔍 Validating JSON payload files..."
+        find payloads -name "*.json" -type f | while read file; do
+          echo "Checking: $file"
+          python3 -m json.tool "$file" > /dev/null || exit 1
+        done
+        echo "✅ All JSON files are valid!"
+        
+    - name: Count payloads
+      run: |
+        echo "📊 Counting payloads..."
+        python3 << 'EOF'
+        import json
+        from pathlib import Path
+        
+        total = 0
+        categories = {}
+        
+        for json_file in Path('payloads').rglob('*.json'):
+            with open(json_file, 'r') as f:
+                data = json.load(f)
+                count = data.get('count', len(data.get('payloads', [])))
+                category = json_file.parent.name
+                categories[category] = categories.get(category, 0) + count
+                total += count
+        
+        print(f"\n{'='*60}")
+        print(f"PAYLOAD STATISTICS")
+        print(f"{'='*60}")
+        print(f"Total payloads: {total}")
+        print(f"\nBy category:")
+        for cat, cnt in sorted(categories.items(), key=lambda x: x[1], reverse=True):
+            print(f"  {cat:25} {cnt:5} payloads")
+        print(f"{'='*60}\n")
+        
+        # Verify expected count
+        expected = 2258
+        if total != expected:
+            print(f"⚠️  WARNING: Expected {expected} payloads, found {total}")
+            exit(1)
+        else:
+            print(f"✅ Payload count matches expected: {total}")
+        EOF
+        
+    - name: Validate CVE payloads
+      run: |
+        echo "🔍 Validating CVE payloads..."
+        python3 << 'EOF'
+        import json
+        
+        cve_file = 'payloads/xss/cve_2025_real_world.json'
+        with open(cve_file, 'r') as f:
+            data = json.load(f)
+            
+        cve_count = len(data['payloads'])
+        expected_cve = 103
+        
+        print(f"CVE payloads found: {cve_count}")
+        
+        if cve_count != expected_cve:
+            print(f"⚠️  WARNING: Expected {expected_cve} CVE payloads, found {cve_count}")
+            exit(1)
+        else:
+            print(f"✅ CVE count matches expected: {cve_count}")
+            
+        # Validate CVE format
+        for payload in data['payloads']:
+            if 'cve' in payload:
+                cve_id = payload['cve']
+                if not cve_id.startswith('CVE-'):
+                    print(f"⚠️  Invalid CVE format: {cve_id}")
+                    exit(1)
+        
+        print("✅ All CVE payloads validated successfully!")
+        EOF
+        
+    - name: Check documentation
+      run: |
+        echo "📚 Checking documentation files..."
+        required_docs=(
+          "README.md"
+          "LICENSE"
+          "CONTRIBUTING.md"
+          "CHANGELOG.md"
+          "POC_SIMULATION_GUIDE.md"
+          "CVE_AND_REAL_WORLD_BYPASSES.md"
+          "QUICKSTART.md"
+        )
+        
+        missing=0
+        for doc in "${required_docs[@]}"; do
+          if [ ! -f "$doc" ]; then
+            echo "❌ Missing: $doc"
+            missing=$((missing + 1))
+          else
+            echo "✅ Found: $doc"
+          fi
+        done
+        
+        if [ $missing -gt 0 ]; then
+          echo "⚠️  $missing required documentation files are missing"
+          exit 1
+        fi
+        
+        echo "✅ All required documentation files present!"
+        
+    - name: Summary
+      if: success()
+      run: |
+        echo ""
+        echo "🎉 All validation checks passed!"
+        echo ""
+        echo "✅ JSON files validated"
+        echo "✅ Payload counts verified"
+        echo "✅ CVE payloads validated"
+        echo "✅ Documentation complete"
+        echo ""
+        echo "Repository is ready for production! 🚀"

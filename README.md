@@ -1,5 +1,12 @@
 # WAF Payload Arsenal
 
+[![Payloads](https://img.shields.io/badge/Payloads-2258-brightgreen.svg)](https://github.com/dalisecurity/waf-payload-arsenal)
+[![CVEs](https://img.shields.io/badge/CVEs-103-red.svg)](https://github.com/dalisecurity/waf-payload-arsenal)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Maintenance](https://img.shields.io/badge/Maintained-Yes-green.svg)](https://github.com/dalisecurity/waf-payload-arsenal/graphs/commit-activity)
+
 > ⚠️ **FOR EDUCATIONAL AND AUTHORIZED SECURITY RESEARCH ONLY**  
 > This tool is designed for security professionals, researchers, and students to learn about WAF bypass techniques and test systems they own or have explicit permission to test. Unauthorized testing is illegal.
 
@@ -98,19 +105,50 @@ This database serves multiple purposes:
 4. **Penetration Testing**: Reference for security assessments
 5. **Defense Development**: Help security teams understand attack patterns
 
-## � Why WAF Payload Arsenal?
+## 🔬 Testing Methodology
+
+Our testing approach:
+
+1. **Systematic Coverage**: 100 rounds of testing across all major attack vectors
+2. **Multiple Delivery Methods**: GET, POST (urlencoded/JSON), multipart, HTTP/2
+3. **Encoding Variations**: All common encoding methods tested
+4. **Browser Automation**: Playwright-based testing for client-side execution
+5. **Reverse Engineering**: Pattern analysis and hypothesis-driven testing
+
+See [docs/methodology.md](docs/methodology.md) for detailed methodology.
+
+## 💎 Why WAF Payload Arsenal?
 
 ### The First Purpose-Built WAF Testing Tool
 
 Unlike general payload collections (SecLists, PayloadsAllTheThings) or complex security frameworks (OWASP ZAP, Metasploit), WAF Payload Arsenal is **100% focused on WAF bypass testing**.
 
-| Feature | WAF Arsenal | SecLists | PayloadsAll | OWASP ZAP | Metasploit |
-|---------|-------------|----------|-------------|-----------|------------|
-| **WAF-Specific** | ✅ 100% | ⚠️ ~10% | ⚠️ ~15% | ⚠️ Partial | ❌ No |
-| **Interactive CLI** | ✅ Yes | ❌ Files only | ❌ Wiki | ⚠️ GUI | ⚠️ Complex |
-| **Setup Time** | ✅ 30 sec | ⚠️ 5 min | ⚠️ Manual | ❌ 10+ min | ❌ 15+ min |
-| **AI Compatible** | ✅ Yes | ❌ No | ❌ No | ❌ No | ❌ No |
-| **Team Ready** | ✅ Docker | ⚠️ Manual | ⚠️ Manual | ❌ Complex | ❌ Complex |
+### 📊 Comprehensive Comparison
+
+| Feature | **WAF Payload Arsenal** | SecLists | PayloadsAll | OWASP ZAP | Metasploit |
+|---------|------------------------|----------|-------------|-----------|------------|
+| **Total Payloads** | ✅ **2,258** | ~10,000+ | ~2,000 | Built-in | Modules |
+| **CVE Coverage (2020-2026)** | ✅ **103 CVEs** | ❌ None | ❌ None | ⚠️ Limited | ⚠️ Some |
+| **WAF-Specific Focus** | ✅ **100%** | ⚠️ ~10% | ⚠️ ~15% | ⚠️ Partial | ❌ No |
+| **Interactive CLI** | ✅ **Yes** | ❌ Files only | ❌ Wiki | ⚠️ GUI only | ⚠️ Complex |
+| **POC Simulation Guide** | ✅ **Yes** | ❌ No | ❌ No | ❌ No | ❌ No |
+| **Setup Time** | ✅ **30 seconds** | ⚠️ 5 min | ⚠️ Manual | ❌ 10+ min | ❌ 15+ min |
+| **AI Compatible** | ✅ **Claude/ChatGPT** | ❌ No | ❌ No | ❌ No | ❌ No |
+| **Docker Support** | ✅ **Yes** | ❌ No | ❌ No | ✅ Yes | ✅ Yes |
+| **Team Collaboration** | ✅ **Built-in** | ⚠️ Manual | ⚠️ Manual | ❌ Complex | ❌ Complex |
+| **Organized by Category** | ✅ **12 categories** | ⚠️ Many files | ⚠️ Wiki pages | N/A | N/A |
+| **JSON Format** | ✅ **Yes** | ⚠️ Mixed | ⚠️ Text | N/A | N/A |
+| **Learning Curve** | ✅ **Low** | ✅ Low | ✅ Low | ❌ High | ❌ Very High |
+| **Commercial Use** | ✅ **MIT License** | ✅ MIT | ✅ MIT | ⚠️ Apache | ⚠️ BSD |
+| **Active Maintenance** | ✅ **2026** | ✅ Yes | ⚠️ Sporadic | ✅ Yes | ✅ Yes |
+
+### 🎯 Our Unique Advantages
+
+1. **Only tool with 100+ CVE coverage (2020-2026)** - Including Log4Shell, Spring4Shell, ProxyShell
+2. **POC simulation guide** - Step-by-step tutorials for each CVE
+3. **AI-native design** - First tool built for Claude Code, ChatGPT integration
+4. **WAF-focused** - Not diluted with general security testing
+5. **Production-ready** - Interactive CLI + Docker + comprehensive docs
 
 ### 🚀 Key Advantages
 

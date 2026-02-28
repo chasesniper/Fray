@@ -1,0 +1,15 @@
+# WAF Payload Arsenal - Python Dependencies
+# Minimal dependencies for maximum compatibility
+
+# HTTP requests (optional - only needed for waf_tester.py)
+# requests>=2.31.0
+# urllib3>=2.0.0
+
+# Note: This tool uses Python standard library only for core functionality
+# No external dependencies required for payload files (JSON format)
+# Install requests only if you want to use the interactive CLI tester
+
+# For development/testing:
+# pytest>=7.4.0
+# black>=23.0.0
+# flake8>=6.0.0
