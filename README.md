@@ -40,6 +40,11 @@ python3 api_example.py
 # Or use payload generator for custom payloads
 python3 payload_generator.py
 # Interactive mode - easy payload creation!
+
+# 🌟 NEW: Super Easy Mode - No Expertise Needed!
+python3 easy_payload_creator.py
+# Just describe what you want in plain English!
+# Example: "Show an alert saying Hello"
 ```
 
 **That's it!** No dependencies needed. Pure Python standard library (API requires Flask).
@@ -189,6 +194,34 @@ python3 payload_generator.py sqli union "users"
 - ✅ **Obfuscation methods** - Case mixing, comments, concatenation
 - ✅ **Quick generators** - Fast XSS and SQLi payload creation
 - ✅ **No expertise needed** - Perfect for beginners and testing
+
+### 🌟 Easy Payload Creator (SUPER EASY!)
+
+**Just describe what you want in plain English - No expertise needed!**
+
+```bash
+# Interactive mode
+python3 easy_payload_creator.py
+
+# What you say: "Show an alert saying Hello"
+# What you get: <script>alert("Hello")</script>
+```
+
+**Examples of what you can say:**
+- "Show an alert saying Test" → XSS payloads
+- "Bypass login as admin" → SQL injection payloads
+- "Execute command whoami" → Command injection payloads
+- "Read file /etc/passwd" → Path traversal payloads
+- "Access internal localhost" → SSRF payloads
+
+**Features:**
+- 💬 **Plain English input** - Just describe what you want
+- 🤖 **Auto-detection** - Understands your intent
+- 🔧 **Auto-encoding** - URL, Base64, Hex options
+- 📚 **Perfect for beginners** - No security knowledge needed
+- ✨ **Instant results** - Get payloads in seconds
+
+**[Read the Easy Payload Guide →](EASY_PAYLOAD_GUIDE.md)**
 
 **[View all 2,200 payloads →](payloads/)**
 
