@@ -1,11 +1,11 @@
 {
-  "name": "WAF Payload Database",
-  "description": "Comprehensive WAF testing tool with 2,155 security payloads for automated vulnerability testing. Interactive CLI for easy use with Claude Code, ChatGPT, and security workflows.",
+  "name": "WAF Payload Arsenal",
+  "description": "Your arsenal for WAF security testing - 2,155+ comprehensive payloads for automated vulnerability testing. Interactive CLI for easy use with Claude Code, ChatGPT, and security workflows.",
   "version": "1.0.0",
   "author": "Security Research Community",
   "license": "MIT",
-  "repository": "https://github.com/YOUR_USERNAME/waf-payload-database",
-  "homepage": "https://github.com/YOUR_USERNAME/waf-payload-database",
+  "repository": "https://github.com/YOUR_USERNAME/waf-payload-arsenal",
+  "homepage": "https://github.com/YOUR_USERNAME/waf-payload-arsenal",
   "keywords": [
     "security",
     "waf",

@@ -7,8 +7,8 @@ Get started with WAF Tester in 5 minutes!
 ### Option 1: Clone from GitHub (Recommended)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/waf-payload-database.git
-cd waf-payload-database
+git clone https://github.com/YOUR_USERNAME/waf-payload-arsenal.git
+cd waf-payload-arsenal
 chmod +x waf_tester.py
 ```
 

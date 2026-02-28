@@ -1,6 +1,6 @@
-# WAF Payload Database
+# WAF Payload Arsenal
 
-A comprehensive collection of **2,155 Web Application Firewall (WAF) bypass payloads** tested against Cloudflare WAF, organized by attack type and technique. Extracted and classified from 24,700+ original test cases.
+**Your arsenal for WAF security testing** - A comprehensive collection of **2,155 Web Application Firewall (WAF) bypass payloads** tested against Cloudflare WAF, organized by attack type and technique. Extracted and classified from 24,700+ original test cases.
 
 ## 📊 Project Overview
 
@@ -74,8 +74,8 @@ waf-payload-database/
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/waf-payload-database.git
-cd waf-payload-database
+git clone https://github.com/yourusername/waf-payload-arsenal.git
+cd waf-payload-arsenal
 pip install -r requirements.txt
 ```
 

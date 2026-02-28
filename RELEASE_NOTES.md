@@ -6,12 +6,12 @@
 
 ### 📊 Overview
 
-First public release of the WAF Payload Database - a comprehensive security testing tool with 1,548 carefully classified payloads across 12 attack types.
+First public release of the **WAF Payload Arsenal** - your comprehensive security testing arsenal with 2,155 carefully classified payloads across 12 attack types.
 
 ### ✨ Features
 
 #### Core Functionality
-- ✅ **1,548 Security Payloads** - Extracted and classified from 24,700+ original test cases
+- ✅ **2,155 Security Payloads** - Extracted and classified from 24,700+ original test cases
 - ✅ **12 Attack Types** - XSS, SQLi, SSRF, SSTI, Command Injection, Path Traversal, XXE, LDAP, XPath, CRLF, Open Redirect, and more
 - ✅ **Interactive CLI Tool** - Easy-to-use interface for non-technical users
 - ✅ **Command-Line Mode** - Automation-ready for security professionals
@@ -113,8 +113,8 @@ First public release of the WAF Payload Database - a comprehensive security test
 #### Quick Start
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/waf-payload-database.git
-cd waf-payload-database
+git clone https://github.com/YOUR_USERNAME/waf-payload-arsenal.git
+cd waf-payload-arsenal
 
 # Interactive mode
 python3 waf_tester.py -i

@@ -1,6 +1,6 @@
-# WAF Payload Database
+# WAF Payload Arsenal
 
-> 🛡️ Comprehensive WAF testing tool with 2,155 security payloads for Claude Code, ChatGPT, and security professionals
+> 🛡️ Your arsenal for WAF security testing - 2,155+ comprehensive payloads for Claude Code, ChatGPT, and security professionals
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
@@ -12,7 +12,7 @@ This is an **AI-powered security testing skill** that enables:
 - Automated WAF (Web Application Firewall) testing
 - XSS, SQLi, SSRF, and other vulnerability testing
 - Interactive CLI for easy use
-- Comprehensive payload database (1,423+ payloads)
+- Comprehensive payload database (2,155+ payloads)
 
 Perfect for use with **Claude Code**, **ChatGPT**, **Codex CLI**, and security automation workflows.
 
@@ -20,8 +20,8 @@ Perfect for use with **Claude Code**, **ChatGPT**, **Codex CLI**, and security a
 
 ```bash
 # Clone and run
-git clone https://github.com/YOUR_USERNAME/waf-payload-database.git
-cd waf-payload-database
+git clone https://github.com/YOUR_USERNAME/waf-payload-arsenal.git
+cd waf-payload-arsenal
 python3 waf_tester.py -i
 ```
 
@@ -109,4 +109,4 @@ MIT License - See [LICENSE](LICENSE)
 
 **⭐ Star this repo if you find it useful!**
 
-[View on SkillsLLM.com](https://skillsllm.com/skill/waf-payload-database) (coming soon)
+[View on SkillsLLM.com](https://skillsllm.com/skill/waf-payload-arsenal) (coming soon)
