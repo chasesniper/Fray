@@ -32,7 +32,7 @@ SecurityForge can detect **21 major WAF vendors**:
 ### **Specialized & Regional WAFs**
 - ✅ **Qualys WAF** - Cloud-based WAF
 - ✅ **Penta Security (WAPPLES)** - Korean WAF solution
-- ✅ **Signal Sciences (Fastly)** - Next-gen WAF
+- ✅ **Fastly (Signal Sciences WAF)** - Next-gen WAF (acquired by Fastly)
 - ✅ **Trustwave (ModSecurity)** - Open-source based WAF
 - ✅ **Scutum** - Web security platform
 - ✅ **Rohde & Schwarz Cybersecurity** - European security solutions

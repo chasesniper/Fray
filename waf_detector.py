@@ -61,11 +61,11 @@ class WAFDetector:
                 'response_text': ['the requested url was rejected', 'f5'],
                 'server': ['big-ip', 'bigip']
             },
-            'Fastly': {
-                'headers': ['fastly-io-info', 'x-fastly-request-id', 'fastly-restarts', 'x-served-by', 'x-cache', 'x-timer'],
+            'Fastly (Signal Sciences WAF)': {
+                'headers': ['fastly-io-info', 'x-fastly-request-id', 'fastly-restarts', 'x-served-by', 'x-cache', 'x-timer', 'x-sigsci-requestid', 'x-sigsci-tags'],
                 'cookies': ['fastly_'],
-                'response_codes': [403],
-                'response_text': ['fastly', 'varnish'],
+                'response_codes': [403, 406],
+                'response_text': ['fastly', 'varnish', 'signal sciences', 'sigsci'],
                 'server': ['fastly', 'varnish']
             },
             'Barracuda': {
@@ -115,13 +115,6 @@ class WAFDetector:
                 'cookies': ['wapples'],
                 'response_codes': [403],
                 'response_text': ['wapples', 'penta security'],
-                'server': []
-            },
-            'Signal Sciences (Fastly)': {
-                'headers': ['x-sigsci-requestid', 'x-sigsci-tags', 'x-sigsci-agentresponse'],
-                'cookies': [],
-                'response_codes': [406, 403],
-                'response_text': ['signal sciences', 'sigsci', 'request blocked'],
                 'server': []
             },
             'StackPath': {
@@ -417,7 +410,7 @@ Supported WAF Vendors:
   • AWS WAF
   • Imperva (Incapsula)
   • F5 BIG-IP
-  • Fastly
+  • Fastly (Signal Sciences WAF)
   • Barracuda Networks
   • Citrix NetScaler
   • Radware
@@ -425,7 +418,6 @@ Supported WAF Vendors:
   • Google Cloud Armor
   • Qualys WAF
   • Penta Security (WAPPLES)
-  • Signal Sciences (Fastly)
   • StackPath
   • Sophos
   • Palo Alto Networks (Prisma Cloud)
