@@ -34,25 +34,25 @@ class WAFDetector:
                 'server': ['cloudflare']
             },
             'Akamai': {
-                'headers': ['akamai-origin-hop', 'akamai-grn', 'x-akamai-session-id', 'akamai-x-cache'],
-                'cookies': ['ak_bmsc', 'bm_sv', 'bm_sz'],
+                'headers': ['akamai-origin-hop', 'akamai-grn', 'x-akamai-session-id', 'akamai-x-cache', 'x-akamai-transformed', 'akamai-cache-status'],
+                'cookies': ['ak_bmsc', 'bm_sv', 'bm_sz', 'akacd_'],
                 'response_codes': [403],
-                'response_text': ['akamai', 'reference #'],
-                'server': ['akamaighost']
+                'response_text': ['akamai', 'reference #', 'akamai technologies'],
+                'server': ['akamaighost', 'akamaighost', 'akamai']
             },
             'AWS WAF': {
-                'headers': ['x-amzn-requestid', 'x-amz-cf-id', 'x-amzn-trace-id', 'x-amz-apigw-id'],
-                'cookies': ['awsalb', 'awsalbcors'],
+                'headers': ['x-amzn-requestid', 'x-amz-cf-id', 'x-amzn-trace-id', 'x-amz-apigw-id', 'x-amz-id', 'x-amz-request-id'],
+                'cookies': ['awsalb', 'awsalbcors', 'awsalbapp', 'awsalbtg'],
                 'response_codes': [403],
-                'response_text': ['aws', 'forbidden'],
-                'server': ['awselb']
+                'response_text': ['aws', 'forbidden', 'access denied'],
+                'server': ['awselb', 'awselb/2.0', 'amazon']
             },
             'Imperva (Incapsula)': {
-                'headers': ['x-cdn', 'x-iinfo'],
-                'cookies': ['incap_ses', 'visid_incap', 'nlbi'],
+                'headers': ['x-cdn', 'x-iinfo', 'x-true-client-ip'],
+                'cookies': ['incap_ses', 'visid_incap', 'nlbi', 'incap'],
                 'response_codes': [403],
-                'response_text': ['incapsula', 'imperva', 'incident id'],
-                'server': []
+                'response_text': ['incapsula', 'imperva', 'incident id', 'incap'],
+                'server': ['imperva', 'incapsula']
             },
             'F5 BIG-IP': {
                 'headers': ['x-wa-info', 'x-cnection'],
@@ -90,11 +90,11 @@ class WAFDetector:
                 'server': []
             },
             'Microsoft Azure WAF': {
-                'headers': ['x-azure-ref', 'x-msedge-ref', 'x-azure-requestid'],
-                'cookies': ['arr_affinity', 'arraffinity'],
+                'headers': ['x-azure-ref', 'x-msedge-ref', 'x-azure-requestid', 'x-ms-', 'x-azure-', 'x-msedge-', 'azure-'],
+                'cookies': ['arr_affinity', 'arraffinity', 'arraffinitysamessite', 'ai_session', 'ai_user'],
                 'response_codes': [403],
-                'response_text': ['azure', 'microsoft'],
-                'server': ['microsoft-iis', 'azure']
+                'response_text': ['azure', 'microsoft', 'access denied', 'azure front door'],
+                'server': ['microsoft-iis', 'azure', 'kestrel', 'microsoft-httpapi']
             },
             'Google Cloud Armor': {
                 'headers': ['x-goog-', 'x-cloud-trace-context', 'x-gfe-'],
@@ -281,48 +281,73 @@ class WAFDetector:
         for waf_name, signatures in self.waf_signatures.items():
             confidence = 0
             found_signatures = []
+            signature_count = 0
             
-            # Check headers
+            # Check headers (higher weight for unique headers)
             for header in signatures['headers']:
                 for resp_header in results['headers'].keys():
                     if header.lower() in resp_header.lower():
-                        confidence += 30
+                        # Give more weight to vendor-specific headers
+                        if header.startswith(('cf-', 'x-amz', 'x-azure', 'akamai', 'x-iinfo')):
+                            confidence += 35  # Unique vendor headers
+                        else:
+                            confidence += 25  # Generic headers
                         found_signatures.append(f"Header: {resp_header}")
+                        signature_count += 1
             
-            # Check cookies
+            # Check cookies (high confidence for vendor-specific cookies)
             for cookie in signatures['cookies']:
                 for resp_cookie in results['cookies']:
                     if cookie.lower() in resp_cookie.lower():
-                        confidence += 25
+                        # Vendor-specific cookies are strong indicators
+                        if cookie.startswith(('__cfd', 'incap', 'ak_', 'awsalb', 'bigip')):
+                            confidence += 30  # Unique vendor cookies
+                        else:
+                            confidence += 20  # Generic cookies
                         found_signatures.append(f"Cookie: {resp_cookie}")
+                        signature_count += 1
             
-            # Check server header
+            # Check server header (very strong indicator)
             if results['server']:
                 for server_sig in signatures['server']:
                     if server_sig.lower() in results['server'].lower():
-                        confidence += 20
+                        # Server header is a strong indicator
+                        confidence += 35
                         found_signatures.append(f"Server: {results['server']}")
+                        signature_count += 1
             
-            # Check response text
+            # Check response text (moderate confidence)
             if results['response_snippet']:
                 for text_sig in signatures['response_text']:
                     if text_sig.lower() in results['response_snippet'].lower():
-                        confidence += 15
+                        # Vendor-specific error messages
+                        if text_sig in ['cloudflare', 'incapsula', 'imperva', 'akamai']:
+                            confidence += 20  # Unique vendor text
+                        else:
+                            confidence += 10  # Generic error text
                         found_signatures.append(f"Response text: {text_sig}")
+                        signature_count += 1
             
-            # Check status code
+            # Check status code (low weight, many WAFs use same codes)
             if results['status_code'] in signatures['response_codes']:
+                confidence += 5  # Reduced from 10
+            
+            # Bonus for multiple signature types (indicates stronger match)
+            if signature_count >= 3:
+                confidence += 15
+            elif signature_count >= 2:
                 confidence += 10
             
             if confidence > 0:
                 detected_wafs.append({
                     'vendor': waf_name,
                     'confidence': min(confidence, 100),
-                    'signatures': found_signatures
+                    'signatures': found_signatures,
+                    'signature_count': signature_count
                 })
         
-        # Sort by confidence
-        detected_wafs.sort(key=lambda x: x['confidence'], reverse=True)
+        # Sort by confidence, then by signature count
+        detected_wafs.sort(key=lambda x: (x['confidence'], x['signature_count']), reverse=True)
         
         if detected_wafs:
             top_match = detected_wafs[0]
