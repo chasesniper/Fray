@@ -19,7 +19,78 @@
 
 ## Overview
 
-SecurityForge now includes **intelligent WAF detection and automated security recommendations** that help security professionals quickly identify protection gaps and deploy appropriate security controls.
+SecurityForge is a **comprehensive security testing platform** with **intelligent WAF detection and automated security recommendations** that help security professionals quickly identify protection gaps and deploy appropriate security controls.
+
+### 🎯 Complete Attack Coverage
+
+<table>
+<tr>
+<td width="50%">
+
+**📊 Payload Database Statistics**
+
+- **4,025+ Attack Payloads** across 15 categories
+- **25+ WAF Vendors** supported for detection
+- **3 WordPress CVEs** (Critical/High severity)
+- **100% OWASP Top 10** coverage
+- **Mobile Security** (OWASP Mobile Top 10:2024)
+- **AI/LLM Security** testing payloads
+
+**Attack Categories Covered:**
+- ✅ XSS (Cross-Site Scripting) - 100+ payloads
+- ✅ SQL Injection - 150+ payloads
+- ✅ XXE (XML External Entity) - 30+ payloads
+- ✅ SSTI (Server-Side Template Injection) - 80+ payloads
+- ✅ File Upload Bypass - 70+ payloads
+- ✅ Path Traversal - 150+ payloads
+- ✅ Web Shells (PHP, ASP, JSP, Python, Perl) - 160+ payloads
+- ✅ LLM/AI Testing - 200+ payloads
+- ✅ WordPress Vulnerabilities - 450+ payloads
+- ✅ Command Injection, SSRF, CRLF, and more
+
+</td>
+<td width="50%">
+
+**🤖 AI Assistant Integration**
+
+**Claude Code (Windsurf IDE)**
+- ✅ Direct integration with IDE
+- ✅ Interactive security testing
+- ✅ Real-time payload suggestions
+- ✅ Automated report generation
+- ✅ Context-aware recommendations
+
+**ChatGPT Integration**
+- ✅ Payload analysis and explanation
+- ✅ Custom payload generation
+- ✅ Security guidance and best practices
+- ✅ Vulnerability assessment assistance
+- ✅ Report interpretation
+
+**AI-Powered Features:**
+- 🧠 Intelligent payload selection
+- 🎯 Context-aware testing strategies
+- 📊 Automated vulnerability analysis
+- 💡 Smart remediation suggestions
+- 🔄 Continuous learning from results
+
+**Example AI Workflow:**
+```
+You: "Test my WordPress site for CVE-2026-28515"
+
+Claude/ChatGPT: 
+✅ Loads 150+ REST API bypass payloads
+✅ Tests authentication mechanisms
+✅ Detects WAF presence (Cloudflare 95%)
+✅ Generates comprehensive report
+✅ Provides deployment recommendations
+```
+
+</td>
+</tr>
+</table>
+
+### 🛡️ Intelligent WAF Detection
 
 When testing a target with SecurityForge, the system automatically:
 1. ✅ **Detects if a WAF is present**
@@ -27,6 +98,85 @@ When testing a target with SecurityForge, the system automatically:
 3. 📊 **Provides confidence scoring** (0-100%)
 4. 💡 **Generates actionable recommendations** based on findings
 5. 🚀 **Suggests deployment options** if no WAF is detected
+
+### 📈 Comprehensive Statistics
+
+<p align="center">
+<table>
+<tr>
+<td align="center" width="20%">
+<h3>4,025+</h3>
+<strong>Attack Payloads</strong><br/>
+Across 15 categories
+</td>
+<td align="center" width="20%">
+<h3>25+</h3>
+<strong>WAF Vendors</strong><br/>
+Detection supported
+</td>
+<td align="center" width="20%">
+<h3>3</h3>
+<strong>WordPress CVEs</strong><br/>
+Critical/High severity
+</td>
+<td align="center" width="20%">
+<h3>100%</h3>
+<strong>OWASP Coverage</strong><br/>
+Top 10 + Mobile
+</td>
+<td align="center" width="20%">
+<h3>2</h3>
+<strong>AI Integrations</strong><br/>
+Claude + ChatGPT
+</td>
+</tr>
+</table>
+</p>
+
+### 🎓 Skills for Claude Code & ChatGPT
+
+**Pre-configured Security Testing Skills:**
+
+1. **WAF Detection & Analysis**
+   - Automatic vendor identification
+   - Confidence scoring
+   - Bypass detection
+   - Configuration assessment
+
+2. **Vulnerability Testing**
+   - OWASP Top 10 coverage
+   - WordPress security testing
+   - Mobile app security
+   - API security testing
+
+3. **Report Generation**
+   - Professional HTML reports
+   - Executive summaries
+   - Technical details
+   - Remediation guidance
+
+4. **Recommendation Engine**
+   - WAF deployment suggestions
+   - Vendor comparisons with pricing
+   - Quick deployment guides
+   - Security best practices
+
+5. **Payload Management**
+   - 4,025+ ready-to-use payloads
+   - Category-based organization
+   - CVE-specific testing
+   - Custom payload generation
+
+**AI Assistant Capabilities:**
+```
+✅ "Test this WordPress site for authentication bypass"
+✅ "Detect WAF and recommend deployment if missing"
+✅ "Generate security report with vendor recommendations"
+✅ "Test OWASP Top 10 vulnerabilities"
+✅ "Analyze this site's security posture"
+✅ "Compare WAF vendors for my use case"
+✅ "Create custom payloads for XSS testing"
+```
 
 ---
 
@@ -253,7 +403,7 @@ OWASP Top 10<br/>Mobile Security<br/>AI/LLM Testing
 
 ---
 
-## �📊 Use Cases
+## �� Use Cases
 
 ### Use Case 1: CVE Testing with WAF Recommendations
 
