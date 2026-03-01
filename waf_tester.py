@@ -45,6 +45,8 @@ class WAFTester:
         self.host = parsed.hostname
         self.port = parsed.port or (443 if parsed.scheme == 'https' else 80)
         self.use_ssl = parsed.scheme == 'https'
+        self.path = parsed.path or '/'
+        self.query = parsed.query
     
     def test_payload(self, payload: str, method: str = 'GET', param: str = 'input') -> Dict:
         """Test a single payload"""
@@ -61,11 +63,12 @@ class WAFTester:
             
             if method == 'GET':
                 enc = urllib.parse.quote(payload, safe='')
-                req = f"GET /?{param}={enc} HTTP/1.1\r\nHost: {self.host}\r\nConnection: close\r\n\r\n"
+                query_string = f"{self.query}&{param}={enc}" if self.query else f"{param}={enc}"
+                req = f"GET {self.path}?{query_string} HTTP/1.1\r\nHost: {self.host}\r\nConnection: close\r\n\r\n"
             else:
                 enc = urllib.parse.quote(payload, safe='')
                 body = f"{param}={enc}"
-                req = f"POST / HTTP/1.1\r\nHost: {self.host}\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: {len(body)}\r\nConnection: close\r\n\r\n{body}"
+                req = f"POST {self.path} HTTP/1.1\r\nHost: {self.host}\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: {len(body)}\r\nConnection: close\r\n\r\n{body}"
             
             conn.sendall(req.encode('utf-8', errors='replace'))
             
@@ -279,21 +282,28 @@ Examples:
   # Interactive mode
   python waf_tester.py -i
   
-  # Test XSS payloads
+  # Test single domain
   python waf_tester.py -t https://example.com -p payloads/xss/basic.json
   
+  # Test specific endpoint/path
+  python waf_tester.py -t https://example.com/api/search -p payloads/sqli/general.json
+  
   # Test with POST method
-  python waf_tester.py -t https://example.com -p payloads/sqli/general.json -m POST
+  python waf_tester.py -t https://example.com/login -p payloads/sqli/general.json -m POST
   
-  # Limit to 10 payloads
-  python waf_tester.py -t https://example.com -p payloads/xss/basic.json --max 10
+  # Test multiple domains from file
+  python waf_tester.py --targets-file targets.txt -p payloads/xss/ --html-report
   
-  # Custom output file
-  python waf_tester.py -t https://example.com -p payloads/xss/basic.json -o results.json
+  # Test with custom parameters
+  python waf_tester.py -t https://api.example.com/v1/users -p payloads/ --param query --max 50
+  
+  # Generate HTML report
+  python waf_tester.py -t https://example.com -p payloads/xss/basic.json --html-report
         """
     )
     
-    parser.add_argument('-t', '--target', help='Target URL to test')
+    parser.add_argument('-t', '--target', help='Target URL to test (supports full URLs with paths/endpoints)')
+    parser.add_argument('--targets-file', help='File containing list of target URLs (one per line)')
     parser.add_argument('-p', '--payloads', help='Path to payload JSON file or directory')
     parser.add_argument('-m', '--method', default='GET', choices=['GET', 'POST'], help='HTTP method')
     parser.add_argument('-i', '--interactive', action='store_true', help='Interactive mode')
@@ -310,29 +320,74 @@ Examples:
         interactive_mode()
         return
     
-    if not args.target or not args.payloads:
+    # Get list of targets
+    targets = []
+    if args.targets_file:
+        # Load targets from file
+        try:
+            with open(args.targets_file, 'r') as f:
+                targets = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
+            print(f"\n{Colors.BLUE}Loaded {len(targets)} targets from {args.targets_file}{Colors.END}")
+        except Exception as e:
+            print(f"\n{Colors.RED}Error loading targets file: {e}{Colors.END}\n")
+            sys.exit(1)
+    elif args.target:
+        targets = [args.target]
+    else:
         parser.print_help()
         print(f"\n{Colors.YELLOW}Tip: Use -i for interactive mode{Colors.END}\n")
         sys.exit(1)
     
-    # Run test
-    tester = WAFTester(args.target, timeout=args.timeout, delay=args.delay)
+    if not args.payloads:
+        parser.print_help()
+        print(f"\n{Colors.RED}Error: --payloads is required{Colors.END}\n")
+        sys.exit(1)
     
-    # Load payloads
-    payload_path = Path(args.payloads)
-    if payload_path.is_dir():
-        all_payloads = []
-        for file in payload_path.glob('*.json'):
-            all_payloads.extend(tester.load_payloads(str(file)))
-        payloads = all_payloads
-    else:
-        payloads = tester.load_payloads(args.payloads)
+    # Test each target
+    all_results = []
+    for idx, target in enumerate(targets, 1):
+        print(f"\n{Colors.HEADER}{'='*60}{Colors.END}")
+        print(f"{Colors.BOLD}Testing Target {idx}/{len(targets)}: {target}{Colors.END}")
+        print(f"{Colors.HEADER}{'='*60}{Colors.END}")
+        
+        # Run test
+        tester = WAFTester(target, timeout=args.timeout, delay=args.delay)
+        
+        # Load payloads
+        payload_path = Path(args.payloads)
+        if payload_path.is_dir():
+            all_payloads = []
+            for file in payload_path.glob('*.json'):
+                all_payloads.extend(tester.load_payloads(str(file)))
+            payloads = all_payloads
+        else:
+            payloads = tester.load_payloads(args.payloads)
+        
+        # Test payloads
+        results = tester.test_payloads(payloads, method=args.method, param=args.param, max_payloads=args.max)
+        
+        # Generate report for this target
+        if len(targets) > 1:
+            # Multiple targets - create separate reports
+            output_name = args.output.replace('.json', f'_{idx}.json')
+            tester.generate_report(results, output=output_name, html=args.html_report)
+            all_results.append({'target': target, 'results': results})
+        else:
+            # Single target - use specified output name
+            tester.generate_report(results, output=args.output, html=args.html_report)
     
-    # Test payloads
-    results = tester.test_payloads(payloads, method=args.method, param=args.param, max_payloads=args.max)
-    
-    # Generate report
-    tester.generate_report(results, output=args.output, html=args.html_report)
+    # Generate combined report for multiple targets
+    if len(targets) > 1:
+        combined_output = args.output.replace('.json', '_combined.json')
+        combined_report = {
+            'targets': targets,
+            'timestamp': datetime.now().isoformat(),
+            'total_targets': len(targets),
+            'results_by_target': all_results
+        }
+        with open(combined_output, 'w', encoding='utf-8') as f:
+            json.dump(combined_report, f, indent=2, ensure_ascii=False)
+        print(f"\n{Colors.GREEN}✅ Combined report saved to: {combined_output}{Colors.END}")
 
 if __name__ == '__main__':
     main()

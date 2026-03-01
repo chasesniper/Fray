@@ -1,0 +1,30 @@
+# Target URLs for WAF Testing
+# One URL per line. Lines starting with # are comments.
+# Supports full URLs with paths, endpoints, and query parameters
+
+# Example: Test root domain
+https://example.com
+
+# Example: Test specific endpoints
+https://example.com/api/search
+https://example.com/api/users
+https://example.com/login
+https://example.com/admin/dashboard
+
+# Example: Test with existing query parameters
+https://api.example.com/v1/products?category=electronics
+https://api.example.com/v2/search?q=test
+
+# Example: Multiple domains
+https://app1.example.com
+https://app2.example.com
+https://staging.example.com
+
+# Example: Different ports
+https://example.com:8443/api
+http://example.com:8080/test
+
+# Example: Subdomains
+https://api.example.com/v1/endpoint
+https://admin.example.com/panel
+https://blog.example.com/search
