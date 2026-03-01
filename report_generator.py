@@ -458,11 +458,11 @@ class SecurityReportGenerator:
             </div>
             <div class="meta-card">
                 <div class="label">Target URL</div>
-                <div class="value">{test_results.get('target', 'N/A')}</div>
+                <div class="value">{waf_detection.get('target', 'N/A') if waf_detection else 'N/A'}</div>
             </div>
             <div class="meta-card">
                 <div class="label">Test Duration</div>
-                <div class="value">{test_results.get('duration', 'N/A')}</div>
+                <div class="value">N/A</div>
             </div>
             <div class="meta-card">
                 <div class="label">Security Score</div>
@@ -542,7 +542,11 @@ class SecurityReportGenerator:
     
     def _calculate_statistics(self, test_results):
         """Calculate testing statistics"""
-        results = test_results.get('results', [])
+        # Handle both dict and list formats
+        if isinstance(test_results, dict):
+            results = test_results.get('results', [])
+        else:
+            results = test_results if isinstance(test_results, list) else []
         
         total = len(results)
         blocked = sum(1 for r in results if r.get('blocked', False))
@@ -573,8 +577,14 @@ class SecurityReportGenerator:
     
     def _identify_vulnerabilities(self, test_results):
         """Identify vulnerabilities from test results"""
+        # Handle both dict and list formats
+        if isinstance(test_results, dict):
+            results = test_results.get('results', [])
+        else:
+            results = test_results if isinstance(test_results, list) else []
+        
         vulnerabilities = []
-        results = test_results.get('results', [])
+        results = results
         
         # Group bypassed payloads by category
         bypassed_by_category = defaultdict(list)
@@ -797,7 +807,11 @@ class SecurityReportGenerator:
     
     def _render_detailed_results(self, test_results):
         """Render detailed test results table"""
-        results = test_results.get('results', [])[:50]  # Show first 50
+        # Handle both dict and list formats
+        if isinstance(test_results, dict):
+            results = test_results.get('results', [])[:50]
+        else:
+            results = (test_results if isinstance(test_results, list) else [])[:50]
         
         html = '<table>'
         html += '<thead><tr><th>#</th><th>Category</th><th>Payload</th><th>Status</th><th>Response Code</th></tr></thead>'
@@ -819,8 +833,14 @@ class SecurityReportGenerator:
         
         html += '</tbody></table>'
         
-        if len(test_results.get('results', [])) > 50:
-            html += f'<p style="margin-top: 10px; color: #718096;">Showing first 50 of {len(test_results.get("results", []))} results.</p>'
+        # Handle both dict and list formats for total count
+        if isinstance(test_results, dict):
+            total_results = len(test_results.get('results', []))
+        else:
+            total_results = len(test_results if isinstance(test_results, list) else [])
+        
+        if total_results > 50:
+            html += f'<p style="margin-top: 10px; color: #718096;">Showing first 50 of {total_results} results.</p>'
         
         return html
     
