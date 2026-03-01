@@ -12,9 +12,9 @@ SecurityForge provides comprehensive security testing capabilities covering all 
 |-----------------|------------|----------|----------|---------------|
 | **OWASP Top 10:2021** | 10 | 1,690+ | ✅ 100% | [OWASP_TOP10_COVERAGE.md](OWASP_TOP10_COVERAGE.md) |
 | **OWASP Mobile Top 10:2024** | 10 | 575+ | ✅ 100% | [OWASP_MOBILE_TOP10_COVERAGE.md](OWASP_MOBILE_TOP10_COVERAGE.md) |
-| **OWASP LLM Top 10** | 10 | 270+ | ✅ 100% | [OWASP_LLM_TOP10_COVERAGE.md](OWASP_LLM_TOP10_COVERAGE.md) |
+| **OWASP LLM Top 10** | 10 | 300+ | ✅ 100% | [OWASP_LLM_TOP10_COVERAGE.md](OWASP_LLM_TOP10_COVERAGE.md) |
 | **OWASP API Security Top 10** | 10 | 520+ | ✅ 100% | [OWASP_API_SECURITY_COVERAGE.md](OWASP_API_SECURITY_COVERAGE.md) |
-| **Total** | **40** | **3,055+** | **✅ 100%** | **4 Frameworks** |
+| **Total** | **40** | **3,085+** | **✅ 100%** | **4 Frameworks** |
 
 ---
 
@@ -75,24 +75,24 @@ The OWASP Mobile Top 10 addresses the most critical security risks for mobile ap
 ## 🤖 OWASP LLM Top 10 - AI/LLM Security
 
 ### Overview
-The OWASP LLM Top 10 addresses security risks specific to Large Language Models and AI applications. SecurityForge provides cutting-edge coverage with 270+ payloads.
+The OWASP LLM Top 10 addresses security risks specific to Large Language Models and AI applications. SecurityForge provides cutting-edge coverage with 300+ payloads.
 
 ### Coverage Breakdown
 
 | # | Category | Payloads | Key Attack Vectors |
 |---|----------|----------|-------------------|
-| **LLM01** | Prompt Injection | 80+ | Direct injection, indirect injection, jailbreaking |
+| **LLM01** | Prompt Injection | 100+ | Direct injection, indirect injection, jailbreaking |
 | **LLM02** | Insecure Output Handling | 30+ | XSS via LLM output, code injection, command execution |
 | **LLM03** | Training Data Poisoning | 20+ | Backdoor attacks, data manipulation, bias injection |
 | **LLM04** | Model Denial of Service | 25+ | Resource exhaustion, infinite loops, token flooding |
 | **LLM05** | Supply Chain Vulnerabilities | 15+ | Compromised models, malicious plugins, poisoned datasets |
 | **LLM06** | Sensitive Information Disclosure | 40+ | Data leakage, training data extraction, PII exposure |
 | **LLM07** | Insecure Plugin Design | 20+ | Plugin vulnerabilities, API abuse, privilege escalation |
-| **LLM08** | Excessive Agency | 15+ | Unauthorized actions, privilege abuse, unintended operations |
+| **LLM08** | Excessive Agency | 25+ | Unauthorized actions, privilege abuse, unintended operations |
 | **LLM09** | Overreliance | 10+ | Misinformation exploitation, hallucination abuse |
-| **LLM10** | Model Theft | 15+ | Model extraction, API abuse, intellectual property theft |
+| **LLM10** | Model Theft | 25+ | Model extraction, API abuse, intellectual property theft |
 
-**Total**: 270+ payloads
+**Total**: 300+ payloads
 
 **AI Platforms**: GPT, Claude, Gemini, LLaMA, and more
 
@@ -160,7 +160,7 @@ python3 report_generator.py --html-report owasp_complete_report.html
 ### By Framework
 - **Web Applications**: 1,690+ payloads (OWASP Top 10:2021)
 - **Mobile Applications**: 575+ payloads (OWASP Mobile Top 10:2024)
-- **AI/LLM Systems**: 270+ payloads (OWASP LLM Top 10)
+- **AI/LLM Systems**: 300+ payloads (OWASP LLM Top 10)
 - **APIs**: 520+ payloads (OWASP API Security Top 10)
 
 ### By Attack Type
@@ -173,7 +173,7 @@ python3 report_generator.py --html-report owasp_complete_report.html
 
 ### Total Coverage
 - **40 OWASP Categories** across 4 frameworks
-- **3,055+ Specialized Payloads**
+- **3,085+ Specialized Payloads**
 - **100% Coverage** of all major OWASP standards
 - **4 Comprehensive Documentation Files**
 
@@ -343,5 +343,5 @@ SecurityForge is regularly updated to maintain 100% OWASP coverage:
 
 *Last Updated: March 2026*
 *Version: 2.0*
-*Total OWASP Payloads: 3,055+*
+*Total OWASP Payloads: 3,085+*
 *Frameworks Covered: 4 (100% coverage)*

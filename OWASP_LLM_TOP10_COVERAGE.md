@@ -4,10 +4,13 @@
 
 This document maps our AI security payloads against the **OWASP LLM Top 10:2025** framework.
 
-**Total AI Security Payloads: 200**
+**Total AI Security Payloads: 300+**
 - Jailbreaks: 100 payloads
 - Prompt Leaking: 50 payloads
 - Indirect Injection: 50 payloads
+- Advanced Attacks: 70+ payloads (NEW)
+- Bias Detection: 20 payloads
+- Data Leakage: 10+ payloads
 
 ---
 
@@ -38,7 +41,7 @@ This document maps our AI security payloads against the **OWASP LLM Top 10:2025*
 
 **Our Payloads: 150 (100 jailbreaks + 50 indirect injection)**
 
-**Total AI Security Payloads: 280**
+**Total AI Security Payloads: 300+**
 
 **What We Cover:**
 - Direct prompt injection (jailbreaks)
