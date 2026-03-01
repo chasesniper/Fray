@@ -34,6 +34,7 @@ class WAFTester:
         self.timeout = timeout
         self.delay = delay
         self.results = []
+        self.start_time = None
         
         # Parse target URL
         if not target.startswith('http'):
@@ -126,13 +127,17 @@ class WAFTester:
         results = []
         total = min(len(payloads), max_payloads) if max_payloads else len(payloads)
         
+        self.start_time = datetime.now()
         print(f"\n{Colors.HEADER}Testing {total} payloads against {self.target}{Colors.END}\n")
         
         for idx, payload_data in enumerate(payloads[:total], 1):
             payload = payload_data.get('payload', payload_data) if isinstance(payload_data, dict) else payload_data
             desc = payload_data.get('description', '') if isinstance(payload_data, dict) else ''
+            category = payload_data.get('category', 'unknown') if isinstance(payload_data, dict) else 'unknown'
             
             result = self.test_payload(payload, method, param)
+            result['category'] = category
+            result['description'] = desc
             results.append(result)
             
             # Print result
@@ -147,15 +152,24 @@ class WAFTester:
         
         return results
     
-    def generate_report(self, results: List[Dict], output: str = 'report.json'):
+    def generate_report(self, results: List[Dict], output: str = 'report.json', html: bool = False):
         """Generate test report"""
         total = len(results)
         blocked = sum(1 for r in results if r.get('blocked'))
         passed = total - blocked
         
+        # Calculate duration
+        duration = "N/A"
+        if self.start_time:
+            elapsed = datetime.now() - self.start_time
+            minutes = int(elapsed.total_seconds() // 60)
+            seconds = int(elapsed.total_seconds() % 60)
+            duration = f"{minutes} minutes {seconds} seconds" if minutes > 0 else f"{seconds} seconds"
+        
         report = {
             'target': self.target,
             'timestamp': datetime.now().isoformat(),
+            'duration': duration,
             'summary': {
                 'total': total,
                 'blocked': blocked,
@@ -165,14 +179,27 @@ class WAFTester:
             'results': results
         }
         
+        # Save JSON report
         with open(output, 'w', encoding='utf-8') as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
+        
+        # Generate HTML report if requested
+        if html:
+            try:
+                from report_generator import SecurityReportGenerator
+                generator = SecurityReportGenerator()
+                html_output = output.replace('.json', '.html')
+                generator.generate_html_report(report, html_output)
+                print(f"\n{Colors.GREEN}✅ HTML Report: {html_output}{Colors.END}")
+            except Exception as e:
+                print(f"\n{Colors.YELLOW}⚠️  HTML report generation failed: {e}{Colors.END}")
         
         # Print summary
         print(f"\n{Colors.HEADER}{'='*60}{Colors.END}")
         print(f"{Colors.BOLD}Test Summary{Colors.END}")
         print(f"{Colors.HEADER}{'='*60}{Colors.END}")
         print(f"Target:      {self.target}")
+        print(f"Duration:    {duration}")
         print(f"Total:       {total}")
         print(f"Blocked:     {Colors.RED}{blocked}{Colors.END}")
         print(f"Passed:      {Colors.GREEN}{passed}{Colors.END}")
@@ -275,6 +302,7 @@ Examples:
     parser.add_argument('--delay', type=float, default=0.5, help='Delay between requests (seconds)')
     parser.add_argument('--timeout', type=int, default=8, help='Request timeout (seconds)')
     parser.add_argument('-o', '--output', default='report.json', help='Output report file')
+    parser.add_argument('--html-report', action='store_true', help='Generate HTML report with Dali Security branding')
     
     args = parser.parse_args()
     
@@ -304,7 +332,7 @@ Examples:
     results = tester.test_payloads(payloads, method=args.method, param=args.param, max_payloads=args.max)
     
     # Generate report
-    tester.generate_report(results, output=args.output)
+    tester.generate_report(results, output=args.output, html=args.html_report)
 
 if __name__ == '__main__':
     main()

@@ -50,6 +50,14 @@ python3 payload_generator.py
 python3 easy_payload_creator.py
 # Just describe what you want in plain English!
 # Example: "Show an alert saying Hello"
+
+# 📊 NEW: Generate Professional HTML Reports with Dali Security Branding!
+python3 waf_tester.py -t https://example.com -p payloads/xss/ --html-report
+# Generates comprehensive security report with:
+# - Vulnerability analysis
+# - Payload statistics (blocked vs bypassed)
+# - Security recommendations
+# - Dali Security branding
 ```
 
 **That's it!** No dependencies needed. Pure Python standard library (API requires Flask).
