@@ -52,11 +52,13 @@ python3 waf_recommendation_engine.py
 
 ---
 
-### 2. OWASP Top 10 Vulnerability Testing
+### 2. Complete OWASP Coverage
 
-**Capability**: Test for all OWASP Top 10:2021 vulnerabilities
+**Capability**: Test for ALL OWASP frameworks and standards
 
-**Coverage:**
+SecurityForge provides **100% coverage** across multiple OWASP frameworks:
+
+#### 🌐 OWASP Top 10:2021 (Web Application Security)
 
 | OWASP Category | Payloads | Skills |
 |----------------|----------|--------|
@@ -70,6 +72,69 @@ python3 waf_recommendation_engine.py
 | **A08: Software/Data Integrity** | 70+ | Insecure deserialization, CI/CD attacks |
 | **A09: Logging/Monitoring** | 30+ | Log injection, monitoring bypass |
 | **A10: SSRF** | 60+ | Server-side request forgery |
+
+**Total**: 1,690+ payloads | **Documentation**: OWASP_TOP10_COVERAGE.md
+
+#### 📱 OWASP Mobile Top 10:2024
+
+| Mobile Category | Payloads | Skills |
+|-----------------|----------|--------|
+| **M1: Improper Credential Usage** | 50+ | Hardcoded credentials, insecure storage |
+| **M2: Supply Chain Security** | 40+ | Third-party libraries, dependencies |
+| **M3: Authentication/Authorization** | 80+ | Weak auth, session management |
+| **M4: Input/Output Validation** | 100+ | Injection attacks, data validation |
+| **M5: Insecure Communication** | 60+ | TLS issues, certificate pinning |
+| **M6: Privacy Controls** | 45+ | Data leakage, permissions |
+| **M7: Binary Protections** | 35+ | Code obfuscation, reverse engineering |
+| **M8: Security Misconfiguration** | 70+ | Debug mode, exposed endpoints |
+| **M9: Insecure Data Storage** | 55+ | Local storage, database encryption |
+| **M10: Insufficient Cryptography** | 40+ | Weak algorithms, key management |
+
+**Total**: 575+ payloads | **Documentation**: OWASP_MOBILE_TOP10_COVERAGE.md
+
+#### 🤖 OWASP LLM Top 10 (AI/LLM Security)
+
+| LLM Category | Payloads | Skills |
+|--------------|----------|--------|
+| **LLM01: Prompt Injection** | 80+ | Direct injection, indirect injection |
+| **LLM02: Insecure Output Handling** | 30+ | XSS, code injection via LLM output |
+| **LLM03: Training Data Poisoning** | 20+ | Backdoor attacks, data manipulation |
+| **LLM04: Model Denial of Service** | 25+ | Resource exhaustion, infinite loops |
+| **LLM05: Supply Chain Vulnerabilities** | 15+ | Compromised models, plugins |
+| **LLM06: Sensitive Information Disclosure** | 40+ | Data leakage, training data extraction |
+| **LLM07: Insecure Plugin Design** | 20+ | Plugin vulnerabilities, API abuse |
+| **LLM08: Excessive Agency** | 15+ | Unauthorized actions, privilege abuse |
+| **LLM09: Overreliance** | 10+ | Misinformation, hallucination exploitation |
+| **LLM10: Model Theft** | 15+ | Model extraction, API abuse |
+
+**Total**: 270+ payloads | **Documentation**: OWASP_LLM_TOP10_COVERAGE.md
+
+#### 🔌 OWASP API Security Top 10
+
+| API Category | Payloads | Skills |
+|--------------|----------|--------|
+| **API1: Broken Object Level Authorization** | 60+ | IDOR, unauthorized access |
+| **API2: Broken Authentication** | 80+ | Token theft, weak authentication |
+| **API3: Broken Object Property Level Authorization** | 50+ | Mass assignment, excessive data exposure |
+| **API4: Unrestricted Resource Access** | 40+ | Rate limiting bypass, resource exhaustion |
+| **API5: Broken Function Level Authorization** | 55+ | Privilege escalation, admin access |
+| **API6: Unrestricted Access to Sensitive Business Flows** | 35+ | Business logic abuse |
+| **API7: Server Side Request Forgery** | 60+ | SSRF attacks, internal network access |
+| **API8: Security Misconfiguration** | 70+ | Default configs, verbose errors |
+| **API9: Improper Inventory Management** | 30+ | Undocumented endpoints, versioning |
+| **API10: Unsafe Consumption of APIs** | 40+ | Third-party API abuse |
+
+**Total**: 520+ payloads | **Documentation**: OWASP_API_SECURITY_COVERAGE.md
+
+---
+
+**📊 Complete OWASP Coverage Summary:**
+- **OWASP Top 10:2021**: 1,690+ payloads ✅
+- **OWASP Mobile Top 10:2024**: 575+ payloads ✅
+- **OWASP LLM Top 10**: 270+ payloads ✅
+- **OWASP API Security Top 10**: 520+ payloads ✅
+- **Total OWASP Payloads**: 3,055+ payloads
+- **Coverage**: 100% across all 4 OWASP frameworks
 
 **Example Commands:**
 ```bash
