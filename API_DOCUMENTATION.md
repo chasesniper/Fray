@@ -2,7 +2,7 @@
 
 ## 📚 Programmatic Usage Guide
 
-WAF Payload Arsenal can be used programmatically in your Python scripts and automation workflows.
+SecurityForge can be used programmatically in your Python scripts and automation workflows.
 
 ---
 

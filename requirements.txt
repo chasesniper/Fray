@@ -1,4 +1,4 @@
-# WAF Payload Arsenal - Python Dependencies
+# SecurityForge - Python Dependencies
 # Minimal dependencies for maximum compatibility
 
 # HTTP requests (optional - only needed for waf_tester.py)

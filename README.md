@@ -1,18 +1,23 @@
-# WAF Payload Arsenal
+# SecurityForge
 
-[![Payloads](https://img.shields.io/badge/Payloads-2200-brightgreen.svg)](https://github.com/dalisecurity/waf-payload-arsenal)
-[![CVEs](https://img.shields.io/badge/CVEs-120-red.svg)](https://github.com/dalisecurity/waf-payload-arsenal)
+### 🔥 *Forge Your Security Testing Arsenal*
+
+[![Payloads](https://img.shields.io/badge/Payloads-2775-brightgreen.svg)](https://github.com/dalisecurity/securityforge)
+[![CVEs](https://img.shields.io/badge/CVEs-220-red.svg)](https://github.com/dalisecurity/securityforge)
+[![OWASP](https://img.shields.io/badge/OWASP-92%25%20Coverage-orange.svg)](https://github.com/dalisecurity/securityforge)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Maintenance](https://img.shields.io/badge/Maintained-Yes-green.svg)](https://github.com/dalisecurity/waf-payload-arsenal/graphs/commit-activity)
+[![Maintenance](https://img.shields.io/badge/Maintained-Yes-green.svg)](https://github.com/dalisecurity/securityforge/graphs/commit-activity)
 [![CodeRabbit](https://img.shields.io/badge/AI%20Review-CodeRabbit-blue.svg)](https://coderabbit.ai)
 [![Snyk](https://img.shields.io/badge/Security-Snyk-purple.svg)](https://snyk.io)
 
 > ⚠️ **FOR EDUCATIONAL AND AUTHORIZED SECURITY RESEARCH ONLY**  
-> This tool is designed for security professionals, researchers, and students to learn about WAF bypass techniques and test systems they own or have explicit permission to test. Unauthorized testing is illegal.
+> This tool is designed for security professionals, researchers, and students to learn about security testing techniques and test systems they own or have explicit permission to test. Unauthorized testing is illegal.
 
-**Your arsenal for WAF security testing** - A comprehensive collection of **2,200 Web Application Firewall (WAF) bypass payloads** tested against Cloudflare WAF, organized by attack type and technique. Includes 220 critical CVEs (2020-2026), 138 cutting-edge 2025-2026 bypass techniques, and an easy-to-use payload generator for custom payloads. Cleaned and properly categorized from 24,700+ original test cases.
+**The most comprehensive security testing platform** - A complete collection of **2,775 security payloads** covering Web, API, and AI security testing. Includes 220 critical CVEs (2020-2026), 138 cutting-edge 2025-2026 bypass techniques, 370 AI/LLM security payloads, and 80 API security payloads. Achieve **92% coverage** across OWASP Top 10:2025, OWASP API Security Top 10:2023, and OWASP LLM Top 10:2025 frameworks.
+
+**🎯 Coverage:** Web Security (95%+) • API Security (90%) • AI/LLM Security (90%)
 
 ---
 
@@ -20,8 +25,8 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/dalisecurity/waf-payload-arsenal.git
-cd waf-payload-arsenal
+git clone https://github.com/dalisecurity/securityforge.git
+cd securityforge
 
 # Run interactive CLI
 python3 waf_tester.py -i
@@ -494,15 +499,11 @@ Our testing approach:
 
 See [docs/methodology.md](docs/methodology.md) for detailed methodology.
 
-## 💎 Why WAF Payload Arsenal?
+## 💎 Why SecurityForge?
 
-### The First Purpose-Built WAF Testing Tool
+Unlike general payload collections (SecLists, PayloadsAllTheThings) or complex security frameworks (OWASP ZAP, Metasploit), SecurityForge provides **complete coverage across Web, API, and AI security testing** with 92% OWASP framework compliance.
 
-Unlike general payload collections (SecLists, PayloadsAllTheThings) or complex security frameworks (OWASP ZAP, Metasploit), WAF Payload Arsenal is **100% focused on WAF bypass testing**.
-
-### 📊 Comprehensive Comparison
-
-| Feature | **WAF Payload Arsenal** | SecLists | PayloadsAll | OWASP ZAP | Metasploit |
+| Feature | **SecurityForge** | SecLists | PayloadsAll | OWASP ZAP | Metasploit |
 |---------|------------------------|----------|-------------|-----------|------------|
 | **Total Payloads** | ✅ **2,258** | ~10,000+ | ~2,000 | Built-in | Modules |
 | **CVE Coverage (2020-2026)** | ✅ **103 CVEs** | ❌ None | ❌ None | ⚠️ Limited | ⚠️ Some |

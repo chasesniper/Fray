@@ -1,8 +1,8 @@
-# 🎯 POC Simulation Guide - Testing CVEs with WAF Payload Arsenal
+# 🎯 POC Simulation Guide - Testing CVEs with SecurityForge
 
 ## Overview
 
-This guide demonstrates how to use **WAF Payload Arsenal** to simulate Proof-of-Concept (POC) attacks for recent CVEs and validate WAF protection. Perfect for security researchers, penetration testers, and WAF vendors.
+This guide demonstrates how to use **SecurityForge** to simulate Proof-of-Concept (POC) attacks for recent CVEs and validate security protection. Perfect for security researchers, penetration testers, and security vendors.
 
 ---
 
@@ -39,7 +39,7 @@ python3 waf_tester.py -i
 
 **Interactive prompts:**
 ```
-WAF Payload Arsenal - Interactive Mode
+SecurityForge - Interactive Mode
 ======================================
 
 Enter target URL: https://vulnerable-nextjs-app.com
@@ -120,7 +120,7 @@ app.get('/api/user', (req, res) => {
 {{__proto__.constructor.constructor('return process')().mainModule.require('child_process').execSync('whoami')}}
 ```
 
-#### Testing with WAF Payload Arsenal
+#### Testing with SecurityForge
 
 **Method 1: Interactive Testing**
 ```bash
@@ -500,7 +500,7 @@ for method, result in results.items():
 ```python
 #!/usr/bin/env python3
 """
-Automated CVE Scanner using WAF Payload Arsenal
+Automated CVE Scanner using SecurityForge
 """
 
 import json
@@ -687,7 +687,7 @@ def log_test(target, cve, payload, result):
 - **Affected Component**: [Component Name]
 
 ## POC Steps
-1. Load payload from WAF Payload Arsenal
+1. Load payload from SecurityForge
 2. Send to [endpoint]
 3. Observe [result]
 

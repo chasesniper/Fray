@@ -1,4 +1,4 @@
-# Why WAF Payload Arsenal?
+# Why SecurityForge?
 
 ## 🎯 The Problem
 
@@ -11,7 +11,7 @@ Security professionals testing Web Application Firewalls face several challenges
 5. **Complex Setup**: Enterprise tools require significant time investment
 6. **Team Friction**: Hard to standardize testing across teams
 
-## 💡 The Solution: WAF Payload Arsenal
+## 💡 The Solution: SecurityForge
 
 **The first and only tool purpose-built for WAF bypass testing.**
 
@@ -155,7 +155,7 @@ WAF Arsenal:      2,155 payloads  → Comprehensive + Usable ✅
 
 ## 🎓 Educational Value
 
-Unlike exploitation tools, WAF Payload Arsenal is:
+Unlike exploitation tools, SecurityForge is:
 - ✅ **Educational** → Learn attack patterns
 - ✅ **Defensive** → Improve WAF rules
 - ✅ **Research** → Study bypass techniques
@@ -181,7 +181,7 @@ Unlike exploitation tools, WAF Payload Arsenal is:
 ## 🎯 Bottom Line
 
 **If you need to test WAFs specifically:**
-- ✅ WAF Payload Arsenal is purpose-built for you
+- ✅ SecurityForge is purpose-built for you
 - ✅ Faster than manual payload collections
 - ✅ Easier than enterprise security tools
 - ✅ More focused than general-purpose scanners
@@ -196,7 +196,7 @@ Unlike exploitation tools, WAF Payload Arsenal is:
 
 > "The best tool is the one you'll actually use."
 
-WAF Payload Arsenal is designed to be:
+SecurityForge is designed to be:
 - **Fast** → Start testing in 30 seconds
 - **Easy** → Interactive mode for everyone
 - **Focused** → WAF testing only
