@@ -1,68 +1,60 @@
 # Quick Start Guide
 
-Get started with WAF Tester in 5 minutes!
+Get started with SecurityForge in 5 minutes!
 
 ## 🚀 Installation
 
-### Option 1: Clone from GitHub (Recommended)
+### Option 1: Install from PyPI (Recommended)
 
 ```bash
-git clone https://github.com/dalisecurity/waf-payload-arsenal.git
-cd waf-payload-arsenal
-chmod +x waf_tester.py
+pip install securityforge
 ```
 
-### Option 2: Download ZIP
+### Option 2: Clone from GitHub
 
-1. Download the repository as ZIP
-2. Extract to your desired location
-3. Navigate to the directory
+```bash
+git clone https://github.com/dalisecurity/securityforge.git
+cd securityforge
+```
 
 ## 📋 Prerequisites
 
-- Python 3.7+
+- Python 3.8+
 - No additional dependencies required (uses standard library only!)
 
 ## 🎯 Usage
 
-### Interactive Mode (Easiest!)
+### Detect WAF Vendor
+
+```bash
+securityforge detect https://example.com
+```
+
+### Test with Specific Category
+
+```bash
+# Test XSS payloads
+securityforge test https://example.com -c xss --max 10
+
+# Test SQL injection
+securityforge test https://example.com -c sqli --max 10
+
+# Test SSRF
+securityforge test https://example.com -c ssrf --max 10
+```
+
+### List Available Payload Categories
+
+```bash
+securityforge payloads
+```
+
+### Legacy CLI (also works)
 
 ```bash
 python3 waf_tester.py -i
-```
-
-Follow the prompts:
-1. Enter target URL
-2. Select payload category
-3. Choose HTTP method
-4. Set max payloads (optional)
-5. Watch the results!
-
-### Command Line Mode
-
-#### Test XSS Payloads
-```bash
 python3 waf_tester.py -t https://example.com -p payloads/xss/basic.json
-```
-
-#### Test SQL Injection
-```bash
-python3 waf_tester.py -t https://example.com -p payloads/sqli/general.json
-```
-
-#### Test with POST Method
-```bash
-python3 waf_tester.py -t https://example.com -p payloads/xss/basic.json -m POST
-```
-
-#### Limit Number of Payloads
-```bash
 python3 waf_tester.py -t https://example.com -p payloads/xss/basic.json --max 10
-```
-
-#### Test All XSS Payloads
-```bash
-python3 waf_tester.py -t https://example.com -p payloads/xss/
 ```
 
 ## 📊 Understanding Results
@@ -100,50 +92,44 @@ After testing, a JSON report is generated:
 
 ### 1. Quick WAF Check
 ```bash
-# Test 10 basic XSS payloads
-python3 waf_tester.py -t https://your-site.com -p payloads/xss/basic.json --max 10
+securityforge detect https://your-site.com
 ```
 
-### 2. Comprehensive XSS Test
+### 2. Quick XSS Test
 ```bash
-# Test all XSS categories
-python3 waf_tester.py -t https://your-site.com -p payloads/xss/
+securityforge test https://your-site.com -c xss --max 10
 ```
 
 ### 3. Multi-Vector Test
 ```bash
 # Test XSS
-python3 waf_tester.py -t https://your-site.com -p payloads/xss/basic.json -o xss_report.json
+securityforge test https://your-site.com -c xss -o xss_results.json
 
 # Test SQLi
-python3 waf_tester.py -t https://your-site.com -p payloads/sqli/general.json -o sqli_report.json
+securityforge test https://your-site.com -c sqli -o sqli_results.json
 
 # Test SSRF
-python3 waf_tester.py -t https://your-site.com -p payloads/ssrf/general.json -o ssrf_report.json
+securityforge test https://your-site.com -c ssrf -o ssrf_results.json
 ```
 
-### 4. Custom Parameter Testing
+### 4. Comprehensive Test (all categories)
 ```bash
-# Test with custom parameter name
-python3 waf_tester.py -t https://your-site.com -p payloads/xss/basic.json --param search
+securityforge test https://your-site.com --max 20
 ```
 
 ## ⚙️ Advanced Options
 
 ```bash
-python3 waf_tester.py --help
+securityforge test --help
 ```
 
 Options:
-- `-t, --target`: Target URL
-- `-p, --payloads`: Payload file or directory
-- `-m, --method`: HTTP method (GET/POST)
-- `-i, --interactive`: Interactive mode
-- `--param`: Parameter name (default: input)
-- `--max`: Max payloads to test
-- `--delay`: Delay between requests (default: 0.5s)
-- `--timeout`: Request timeout (default: 8s)
-- `-o, --output`: Output report file
+- `-c, --category`: Payload category (e.g. xss, sqli, ssrf)
+- `-p, --payload-file`: Specific payload file to use
+- `-m, --max`: Maximum number of payloads to test
+- `-d, --delay`: Delay between requests (default: 0.5s)
+- `-t, --timeout`: Request timeout (default: 8s)
+- `-o, --output`: Output results JSON file
 
 ## 🔒 Important Notes
 
@@ -166,13 +152,13 @@ Unauthorized testing is:
 ### Connection Errors
 ```bash
 # Increase timeout
-python3 waf_tester.py -t https://example.com -p payloads/xss/basic.json --timeout 15
+securityforge test https://example.com -c xss --timeout 15
 ```
 
 ### Rate Limiting
 ```bash
 # Increase delay between requests
-python3 waf_tester.py -t https://example.com -p payloads/xss/basic.json --delay 2
+securityforge test https://example.com -c xss --delay 2
 ```
 
 ### SSL Certificate Errors
@@ -203,8 +189,9 @@ Coming soon! Check the repository for updates.
 
 ## 💬 Getting Help
 
-- **Issues**: [GitHub Issues](https://github.com/dalisecurity/waf-payload-database/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/dalisecurity/waf-payload-database/discussions)
+- **Issues**: [GitHub Issues](https://github.com/dalisecurity/securityforge/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/dalisecurity/securityforge/discussions)
+- **PyPI**: [pypi.org/project/securityforge](https://pypi.org/project/securityforge/)
 - **Documentation**: See `/docs` folder
 
 ## 🚀 Next Steps

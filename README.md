@@ -20,7 +20,8 @@
 [![GitHub watchers](https://img.shields.io/github/watchers/dalisecurity/securityforge?style=social)](https://github.com/dalisecurity/securityforge/watchers)
 [![Topics](https://img.shields.io/badge/Topics-10-blue.svg)](https://github.com/dalisecurity/securityforge)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/pypi/v/securityforge.svg)](https://pypi.org/project/securityforge/)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Maintenance](https://img.shields.io/badge/Maintained-Yes-green.svg)](https://github.com/dalisecurity/securityforge/graphs/commit-activity)
 [![CodeRabbit](https://img.shields.io/badge/AI%20Review-CodeRabbit-blue.svg)](https://coderabbit.ai)
@@ -37,7 +38,7 @@ Most payload collections are just static text files. **SecurityForge is differen
 - 🔍 **Auto-detect which WAF** you're facing — 25 vendors fingerprinted instantly
 - 📊 **One-command reports** — professional HTML output with vuln analysis
 - 🎯 **4,025+ battle-tested payloads** — XSS, SQLi, SSRF, SSTI, LLM jailbreaks, and more
-- ⚡ **Zero config** — `python3 waf_tester.py -i` and you're testing
+- ⚡ **Zero config** — `pip install securityforge` and you're testing
 
 ### 📊 Full OWASP Coverage (100%)
 
@@ -97,44 +98,42 @@ SecurityForge detects and fingerprints **25 major WAF vendors** using header ana
 
 ## ⚡ Quick Start
 
+### Option 1: Install from PyPI (Recommended)
+
 ```bash
-# Clone repository
-git clone https://github.com/dalisecurity/securityforge.git
-cd securityforge
+pip install securityforge
 
-# Run interactive CLI
-python3 waf_tester.py -i
+# Detect WAF vendor
+securityforge detect https://example.com
 
-# Or test specific CVE
-python3 waf_tester.py --cve CVE-2021-44228
+# Test with XSS payloads (limit to 10)
+securityforge test https://example.com -c xss --max 10
 
-# Or use Docker
-docker-compose up
+# Test with SQL injection payloads
+securityforge test https://example.com -c sqli --max 10
 
-# Or start API server for JSON testing
-pip install flask flask-cors
-python3 api_example.py
-# API available at http://localhost:5000
+# List all payload categories
+securityforge payloads
 
-# Or use payload generator for custom payloads
-python3 payload_generator.py
-# Interactive mode - easy payload creation!
-
-# 🌟 NEW: Super Easy Mode - No Expertise Needed!
-python3 easy_payload_creator.py
-# Just describe what you want in plain English!
-# Example: "Show an alert saying Hello"
-
-# 📊 NEW: Generate Professional HTML Reports with Dali Security Branding!
-python3 waf_tester.py -t https://example.com -p payloads/xss/ --html-report
-# Generates comprehensive security report with:
-# - Vulnerability analysis
-# - Payload statistics (blocked vs bypassed)
-# - Security recommendations
-# - Dali Security branding
+# Show version
+securityforge version
 ```
 
-**That's it!** No dependencies needed. Pure Python standard library (API requires Flask).
+### Option 2: Clone and Run Directly
+
+```bash
+git clone https://github.com/dalisecurity/securityforge.git
+cd securityforge
+python3 waf_tester.py -i
+```
+
+### Option 3: Docker
+
+```bash
+docker-compose up
+```
+
+**Zero dependencies** for core functionality. Pure Python standard library.
 
 ---
 
@@ -874,9 +873,12 @@ waf-payload-database/
 ### Installation
 
 ```bash
-git clone https://github.com/dalisecurity/waf-payload-arsenal.git
-cd waf-payload-arsenal
-pip install -r requirements.txt
+# Install from PyPI (recommended)
+pip install securityforge
+
+# Or clone from GitHub
+git clone https://github.com/dalisecurity/securityforge.git
+cd securityforge
 ```
 
 ### Usage

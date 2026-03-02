@@ -9,8 +9,9 @@
 [![WAF Detection](https://img.shields.io/badge/WAF_Vendors-25+-blue.svg?style=for-the-badge&logo=cloudflare)](https://github.com/dalisecurity/securityforge)
 [![AI Powered](https://img.shields.io/badge/AI_Powered-Claude_+_ChatGPT-purple.svg?style=for-the-badge&logo=openai)](https://github.com/dalisecurity/securityforge)
 
+[![PyPI](https://img.shields.io/pypi/v/securityforge.svg)](https://pypi.org/project/securityforge/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ## ⚡ Why SecurityForge?
@@ -21,7 +22,7 @@ Most payload collections are just static text files. **SecurityForge is differen
 - 🔍 **Auto-detect which WAF** you're facing — 25 vendors fingerprinted instantly
 - 📊 **One-command reports** — professional HTML output with vuln analysis
 - 🎯 **4,025+ battle-tested payloads** — XSS, SQLi, SSRF, SSTI, LLM jailbreaks, and more
-- ⚡ **Zero config** — `python3 waf_tester.py -i` and you're testing
+- ⚡ **Zero config** — `pip install securityforge` and you're testing
 
 ### 🔥 Built For
 
@@ -66,7 +67,19 @@ SecurityForge detects and fingerprints **25 major WAF vendors** using header ana
 ## ⚡ Quick Start
 
 ```bash
-# Clone and run
+# Install from PyPI
+pip install securityforge
+
+# Detect WAF vendor
+securityforge detect https://example.com
+
+# Test with XSS payloads
+securityforge test https://example.com -c xss --max 10
+
+# List all payload categories
+securityforge payloads
+
+# Or clone and use directly
 git clone https://github.com/dalisecurity/securityforge.git
 cd securityforge
 python3 waf_tester.py -i
@@ -74,26 +87,27 @@ python3 waf_tester.py -i
 
 ## 📚 Documentation
 
-- [Quick Start Guide](QUICKSTART.md)
+- [Quick Start Guide](docs/quickstart.md)
 - [Full Documentation](README.md)
-- [Docker Usage](DOCKER.md)
-- [Team Sharing](SHARE_WITH_TEAM.md)
+- [Docker Usage](docs/docker.md)
+- [OWASP Coverage](docs/owasp-complete-coverage.md)
 
 ## 🤖 Use with AI Assistants
 
 ### Claude Code
 ```
-Use the WAF Payload Database to test our staging environment
+Use SecurityForge to detect WAF and test our staging environment
 ```
 
 ### ChatGPT
 ```
-Run WAF tests using the payload database against https://example.com
+Run securityforge detect and test against https://example.com
 ```
 
-### Codex CLI
+### CLI
 ```bash
-python3 waf_tester.py -t https://example.com -p payloads/xss/basic.json
+securityforge detect https://example.com
+securityforge test https://example.com -c xss --max 10
 ```
 
 ## 📊 Complete OWASP Coverage
@@ -130,7 +144,7 @@ python3 waf_tester.py -t https://example.com -p payloads/xss/basic.json
 ### Additional Attack Vectors - 490+ Payloads
 - XSS, SQLi, SSRF, Path Traversal, LDAP, XPath, CRLF, and more
 
-See [OWASP_COMPLETE_COVERAGE.md](OWASP_COMPLETE_COVERAGE.md) for detailed breakdown.
+See [docs/owasp-complete-coverage.md](docs/owasp-complete-coverage.md) for detailed breakdown.
 
 ## 🔒 Legal & Ethical Use
 
@@ -148,4 +162,4 @@ MIT License - See [LICENSE](LICENSE)
 
 **⭐ Star this repo if you find it useful!**
 
-📚 **Documentation**: [OWASP_COMPLETE_COVERAGE.md](OWASP_COMPLETE_COVERAGE.md) | [SKILLS.md](SKILLS.md) | [CLAUDE_CODE_GUIDE.md](CLAUDE_CODE_GUIDE.md)
+📚 **Documentation**: [docs/](docs/) | [PyPI](https://pypi.org/project/securityforge/) | [Blog](https://dalisec.io/research/blog-securityforge-launch.html)
