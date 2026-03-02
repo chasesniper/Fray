@@ -2,13 +2,13 @@
 
 ## Overview
 
-SecurityForge now includes **automatic WAF (Web Application Firewall) detection** to identify which vendor is protecting your target. This helps you understand the security infrastructure before running payload tests.
+Fray now includes **automatic WAF (Web Application Firewall) detection** to identify which vendor is protecting your target. This helps you understand the security infrastructure before running payload tests.
 
 ---
 
 ## 🎯 Supported WAF Vendors
 
-SecurityForge can detect **21 major WAF vendors**:
+Fray can detect **21 major WAF vendors**:
 
 ### **Cloud-Based WAFs**
 - ✅ **Cloudflare** - Most popular cloud WAF
@@ -73,7 +73,7 @@ python3 waf_tester.py --targets-file targets.txt -p payloads/ --detect-waf --htm
 
 ### **Detection Methods**
 
-SecurityForge uses multiple detection techniques:
+Fray uses multiple detection techniques:
 
 #### **1. HTTP Headers Analysis**
 Identifies vendor-specific headers:
@@ -513,7 +513,7 @@ Possible reasons:
 
 ## ✅ Summary
 
-**SecurityForge WAF Detection provides:**
+**Fray WAF Detection provides:**
 - ✅ 21 major WAF vendor detection
 - ✅ Multiple detection methods
 - ✅ Confidence scoring

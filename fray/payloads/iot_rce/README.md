@@ -27,7 +27,7 @@ These CVEs demonstrate attack patterns increasingly relevant to network security
 ## Usage
 
 ```bash
-securityforge test <target> -c iot_rce
+fray test <target> -c iot_rce
 ```
 
 ## References

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SecurityForge test suite — validates package structure, payload integrity, and CLI.
+Fray test suite — validates package structure, payload integrity, and CLI.
 
 Run:
     pytest tests/test_package.py -v
@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-PKG = ROOT / "securityforge"
+PKG = ROOT / "fray"
 PAYLOADS = PKG / "payloads"
 
 
@@ -22,19 +22,19 @@ PAYLOADS = PKG / "payloads"
 
 class TestPackageStructure:
     def test_package_importable(self):
-        import securityforge
-        assert hasattr(securityforge, "__version__")
+        import fray
+        assert hasattr(fray, "__version__")
 
     def test_version_format(self):
-        import securityforge
-        parts = securityforge.__version__.split(".")
+        import fray
+        parts = fray.__version__.split(".")
         assert len(parts) == 3
         assert all(p.isdigit() for p in parts)
 
     def test_core_modules_importable(self):
-        from securityforge.detector import WAFDetector
-        from securityforge.tester import WAFTester
-        from securityforge.cli import main
+        from fray.detector import WAFDetector
+        from fray.tester import WAFTester
+        from fray.cli import main
         assert callable(WAFDetector)
         assert callable(WAFTester)
         assert callable(main)
@@ -43,9 +43,9 @@ class TestPackageStructure:
         assert PAYLOADS.is_dir()
 
     def test_init_exports(self):
-        import securityforge
-        assert securityforge.__author__ == "DALI Security"
-        assert securityforge.__license__ == "MIT"
+        import fray
+        assert fray.__author__ == "DALI Security"
+        assert fray.__license__ == "MIT"
 
 
 # ── Payload integrity ──────────────────────────────────────────────────
@@ -164,20 +164,20 @@ class TestPayloads:
 
 class TestWAFDetector:
     def test_detector_instantiation(self):
-        from securityforge.detector import WAFDetector
+        from fray.detector import WAFDetector
         d = WAFDetector()
         assert hasattr(d, "detect_waf")
         assert hasattr(d, "print_results")
         assert hasattr(d, "waf_signatures")
 
     def test_detector_has_25_vendors(self):
-        from securityforge.detector import WAFDetector
+        from fray.detector import WAFDetector
         d = WAFDetector()
         assert len(d.waf_signatures) >= 25, \
             f"Expected 25+ WAF vendors, got {len(d.waf_signatures)}"
 
     def test_all_signatures_have_required_keys(self):
-        from securityforge.detector import WAFDetector
+        from fray.detector import WAFDetector
         d = WAFDetector()
         required = {"headers", "cookies", "response_codes", "response_text", "server"}
         for name, sig in d.waf_signatures.items():
@@ -203,7 +203,7 @@ class TestWAFDetectionLogic:
         }
 
     def _detect(self, **kwargs):
-        from securityforge.detector import WAFDetector
+        from fray.detector import WAFDetector
         d = WAFDetector()
         return d._analyze_signatures(self._make_results(**kwargs))
 
@@ -295,7 +295,7 @@ class TestWAFDetectionLogic:
 
 class TestPayloadLoading:
     def test_load_json_payloads(self):
-        from securityforge.tester import WAFTester
+        from fray.tester import WAFTester
         t = WAFTester(target="https://test.local")
         xss_files = list((PAYLOADS / "xss").glob("*.json"))
         assert len(xss_files) > 0, "No XSS JSON files found"
@@ -306,7 +306,7 @@ class TestPayloadLoading:
         assert "payload" in payloads[0]
 
     def test_load_all_categories(self):
-        from securityforge.tester import WAFTester
+        from fray.tester import WAFTester
         t = WAFTester(target="https://test.local")
         for cat_dir in PAYLOADS.iterdir():
             if not cat_dir.is_dir():
@@ -316,7 +316,7 @@ class TestPayloadLoading:
                 assert isinstance(payloads, list), f"Failed: {jf}"
 
     def test_load_nonexistent_file_raises(self):
-        from securityforge.tester import WAFTester
+        from fray.tester import WAFTester
         t = WAFTester(target="https://test.local")
         with pytest.raises(FileNotFoundError):
             t.load_payloads("/nonexistent/path.json")
@@ -326,7 +326,7 @@ class TestPayloadLoading:
 
 class TestReportGeneration:
     def test_generate_json_report(self, tmp_path):
-        from securityforge.tester import WAFTester
+        from fray.tester import WAFTester
         t = WAFTester(target="https://test.local")
         t.start_time = __import__("datetime").datetime.now()
         fake_results = [
@@ -347,7 +347,7 @@ class TestReportGeneration:
         assert "50.00%" in report["summary"]["block_rate"]
 
     def test_report_empty_results(self, tmp_path):
-        from securityforge.tester import WAFTester
+        from fray.tester import WAFTester
         t = WAFTester(target="https://test.local")
         t.start_time = __import__("datetime").datetime.now()
         out = str(tmp_path / "empty_report.json")
@@ -416,7 +416,7 @@ class TestMCPServer:
     """Test MCP server tool functions directly (no network, no stdio)."""
 
     def test_mcp_helpers_importable(self):
-        from securityforge.mcp_server import (
+        from fray.mcp_server import (
             _list_categories, _load_payloads, _get_waf_signatures
         )
         assert callable(_list_categories)
@@ -424,7 +424,7 @@ class TestMCPServer:
         assert callable(_get_waf_signatures)
 
     def test_list_categories(self):
-        from securityforge.mcp_server import _list_categories
+        from fray.mcp_server import _list_categories
         cats = _list_categories()
         assert len(cats) >= 20
         names = [c["name"] for c in cats]
@@ -435,25 +435,25 @@ class TestMCPServer:
             assert c["total_files"] >= 1
 
     def test_load_payloads_valid_category(self):
-        from securityforge.mcp_server import _load_payloads
+        from fray.mcp_server import _load_payloads
         payloads = _load_payloads("xss", max_payloads=5)
         assert len(payloads) == 5
         assert all(isinstance(p, dict) for p in payloads)
         assert all("payload" in p for p in payloads)
 
     def test_load_payloads_bad_category(self):
-        from securityforge.mcp_server import _load_payloads
+        from fray.mcp_server import _load_payloads
         assert _load_payloads("nonexistent_xyz") == []
 
     def test_load_payloads_respects_max(self):
-        from securityforge.mcp_server import _load_payloads
+        from fray.mcp_server import _load_payloads
         p3 = _load_payloads("xss", max_payloads=3)
         p10 = _load_payloads("xss", max_payloads=10)
         assert len(p3) == 3
         assert len(p10) == 10
 
     def test_get_waf_signatures(self):
-        from securityforge.mcp_server import _get_waf_signatures
+        from fray.mcp_server import _get_waf_signatures
         sigs = _get_waf_signatures()
         assert len(sigs) >= 25
         assert "Cloudflare" in sigs
@@ -464,7 +464,7 @@ class TestMCPServer:
 
     def test_create_server_registers_6_tools(self):
         try:
-            from securityforge.mcp_server import create_server
+            from fray.mcp_server import create_server
             server = create_server()
             tools = server._tool_manager._tools
             assert len(tools) == 6
@@ -478,7 +478,7 @@ class TestMCPServer:
     def test_tool_list_categories_returns_string(self):
         import asyncio
         try:
-            from securityforge.mcp_server import create_server
+            from fray.mcp_server import create_server
             server = create_server()
             fn = server._tool_manager._tools["list_payload_categories"].fn
             result = asyncio.run(fn())
@@ -491,7 +491,7 @@ class TestMCPServer:
     def test_tool_get_payloads_xss(self):
         import asyncio
         try:
-            from securityforge.mcp_server import create_server
+            from fray.mcp_server import create_server
             server = create_server()
             fn = server._tool_manager._tools["get_payloads"].fn
             result = asyncio.run(fn(category="xss", max_results=3))
@@ -503,7 +503,7 @@ class TestMCPServer:
     def test_tool_get_payloads_bad_category(self):
         import asyncio
         try:
-            from securityforge.mcp_server import create_server
+            from fray.mcp_server import create_server
             server = create_server()
             fn = server._tool_manager._tools["get_payloads"].fn
             result = asyncio.run(fn(category="nonexistent", max_results=5))
@@ -514,7 +514,7 @@ class TestMCPServer:
     def test_tool_search_payloads(self):
         import asyncio
         try:
-            from securityforge.mcp_server import create_server
+            from fray.mcp_server import create_server
             server = create_server()
             fn = server._tool_manager._tools["search_payloads"].fn
             result = asyncio.run(fn(query="reverse shell", max_results=3))
@@ -525,7 +525,7 @@ class TestMCPServer:
     def test_tool_get_cve_details(self):
         import asyncio
         try:
-            from securityforge.mcp_server import create_server
+            from fray.mcp_server import create_server
             server = create_server()
             fn = server._tool_manager._tools["get_cve_details"].fn
             result = asyncio.run(fn(cve_id="CVE-2026-27509"))
@@ -537,7 +537,7 @@ class TestMCPServer:
     def test_tool_get_cve_details_not_found(self):
         import asyncio
         try:
-            from securityforge.mcp_server import create_server
+            from fray.mcp_server import create_server
             server = create_server()
             fn = server._tool_manager._tools["get_cve_details"].fn
             result = asyncio.run(fn(cve_id="CVE-9999-99999"))
@@ -548,7 +548,7 @@ class TestMCPServer:
     def test_tool_get_waf_signatures_filtered(self):
         import asyncio
         try:
-            from securityforge.mcp_server import create_server
+            from fray.mcp_server import create_server
             server = create_server()
             fn = server._tool_manager._tools["get_waf_signatures"].fn
             result = asyncio.run(fn(vendor="Cloudflare"))
@@ -589,7 +589,7 @@ class TestPayloadDataQuality:
 class TestCLI:
     def _run(self, *args):
         result = subprocess.run(
-            [sys.executable, "-m", "securityforge.cli", *args],
+            [sys.executable, "-m", "fray.cli", *args],
             capture_output=True, text=True, timeout=10
         )
         return result
@@ -597,12 +597,12 @@ class TestCLI:
     def test_help(self):
         r = self._run("--help")
         assert r.returncode == 0
-        assert "SecurityForge" in r.stdout
+        assert "Fray" in r.stdout
 
     def test_version(self):
         r = self._run("version")
         assert r.returncode == 0
-        assert "SecurityForge v" in r.stdout
+        assert "Fray v" in r.stdout
 
     def test_payloads(self):
         r = self._run("payloads")
@@ -630,7 +630,7 @@ class TestCLI:
         assert r.returncode != 0
 
     def test_payloads_lists_categories(self):
-        from securityforge.cli import list_categories
+        from fray.cli import list_categories
         cats = list_categories()
         assert isinstance(cats, list)
         assert "xss" in cats

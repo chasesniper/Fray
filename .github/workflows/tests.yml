@@ -29,7 +29,7 @@ jobs:
     - name: Lint (syntax errors only)
       run: |
         pip install flake8
-        flake8 securityforge/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 fray/ --count --select=E9,F63,F7,F82 --show-source --statistics
 
     - name: Run test suite
       run: |
@@ -37,4 +37,4 @@ jobs:
 
     - name: Verify package import
       run: |
-        python -c "import securityforge; print(f'SecurityForge v{securityforge.__version__} OK')"
+        python -c "import fray; print(f'Fray v{fray.__version__} OK')"

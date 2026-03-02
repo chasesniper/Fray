@@ -1,28 +1,28 @@
-# SecurityForge
+# Fray
 
 ### ⚔️ *Open-source WAF security testing toolkit — 5,500+ payloads, 25 WAF detections, MCP server for AI workflows*
 
 **The open-source offensive security toolkit** • 5,500+ Payloads • 25 WAF Fingerprints • Zero Dependencies • 61 Tests
 
-[![Total Payloads](https://img.shields.io/badge/Total_Payloads-5500+-brightgreen.svg?style=for-the-badge)](https://github.com/dalisecurity/securityforge)
-[![OWASP Coverage](https://img.shields.io/badge/OWASP_Coverage-100%25-success.svg?style=for-the-badge&logo=owasp)](https://github.com/dalisecurity/securityforge)
-[![WAF Detection](https://img.shields.io/badge/WAF_Vendors-25+-blue.svg?style=for-the-badge&logo=cloudflare)](https://github.com/dalisecurity/securityforge)
-[![Tests](https://img.shields.io/badge/Tests-61_Passing-success.svg?style=for-the-badge)](https://github.com/dalisecurity/securityforge/actions)
+[![Total Payloads](https://img.shields.io/badge/Total_Payloads-5500+-brightgreen.svg?style=for-the-badge)](https://github.com/dalisecurity/fray)
+[![OWASP Coverage](https://img.shields.io/badge/OWASP_Coverage-100%25-success.svg?style=for-the-badge&logo=owasp)](https://github.com/dalisecurity/fray)
+[![WAF Detection](https://img.shields.io/badge/WAF_Vendors-25+-blue.svg?style=for-the-badge&logo=cloudflare)](https://github.com/dalisecurity/fray)
+[![Tests](https://img.shields.io/badge/Tests-61_Passing-success.svg?style=for-the-badge)](https://github.com/dalisecurity/fray/actions)
 
-[![PyPI](https://img.shields.io/pypi/v/securityforge.svg)](https://pypi.org/project/securityforge/)
+[![PyPI](https://img.shields.io/pypi/v/fray.svg)](https://pypi.org/project/fray/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-## ⚡ Why SecurityForge?
+## ⚡ Why Fray?
 
-Most payload collections are just static text files. **SecurityForge is different** — it's a structured toolkit that lets you **detect, test, and report** in seconds:
+Most payload collections are just static text files. **Fray is different** — it's a structured toolkit that lets you **detect, test, and report** in seconds:
 
 - 🤖 **AI-compatible** — structured JSON payloads work well with Claude Code & ChatGPT
 - 🔍 **Auto-detect which WAF** you're facing — 25 vendors fingerprinted instantly
 - 📊 **One-command reports** — professional HTML output with vuln analysis
 - 🎯 **4,025+ battle-tested payloads** — XSS, SQLi, SSRF, SSTI, LLM jailbreaks, and more
-- ⚡ **Zero config** — `pip install securityforge` and you're testing
+- ⚡ **Zero config** — `pip install fray` and you're testing
 
 ### 🔥 Built For
 
@@ -34,7 +34,7 @@ Most payload collections are just static text files. **SecurityForge is differen
 
 ### �️ WAF Vendor Detection — 25 Vendors Supported
 
-SecurityForge detects and fingerprints **25 major WAF vendors** using header analysis, cookie inspection, response patterns, and error signatures.
+Fray detects and fingerprints **25 major WAF vendors** using header analysis, cookie inspection, response patterns, and error signatures.
 
 | # | WAF Vendor | Detection Method | Key Signatures |
 |---|-----------|-----------------|----------------|
@@ -68,35 +68,35 @@ SecurityForge detects and fingerprints **25 major WAF vendors** using header ana
 
 ```bash
 # Install from PyPI
-pip install securityforge
+pip install fray
 
 # Detect WAF vendor
-securityforge detect https://example.com
+fray detect https://example.com
 
 # Test with XSS payloads
-securityforge test https://example.com -c xss --max 10
+fray test https://example.com -c xss --max 10
 
 # List all payload categories
-securityforge payloads
+fray payloads
 
 # Or clone and use directly
-git clone https://github.com/dalisecurity/securityforge.git
-cd securityforge
+git clone https://github.com/dalisecurity/fray.git
+cd fray
 python3 waf_tester.py -i
 ```
 
-## � Why SecurityForge?
+## � Why Fray?
 
-[PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings) is a great payload reference. SecurityForge solves a different problem — it's a **testing toolkit**, not an encyclopedia.
+[PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings) is a great payload reference. Fray solves a different problem — it's a **testing toolkit**, not an encyclopedia.
 
-| | PayloadsAllTheThings | SecurityForge |
+| | PayloadsAllTheThings | Fray |
 |---|---|---|
 | **Format** | Markdown docs | Structured JSON (`id`, `description`, `technique`, `source`) |
 | **WAF detection** | ❌ | ✅ 25-vendor fingerprinting |
 | **MCP server** | ❌ | ✅ 6 tools for AI assistants |
-| **CLI testing** | ❌ Reference only | ✅ `securityforge test <url> -c xss` |
+| **CLI testing** | ❌ Reference only | ✅ `fray test <url> -c xss` |
 | **Reports** | ❌ | ✅ JSON/HTML with block rate analysis |
-| **pip install** | ❌ | ✅ `pip install securityforge` |
+| **pip install** | ❌ | ✅ `pip install fray` |
 | **Payload breadth** | **Deeper** | Narrower — value is in tooling |
 
 ## 🧪 Test Suite — 61 Tests
@@ -115,7 +115,7 @@ Real tests that run in CI on every push (Python 3.9–3.13):
 
 ## 📄 Sample Report
 
-After running a scan, SecurityForge generates a self-contained HTML report you can share with your team or attach to a pentest deliverable.
+After running a scan, Fray generates a self-contained HTML report you can share with your team or attach to a pentest deliverable.
 
 **What's in the report:**
 - **Executive summary** — total payloads tested, blocked vs bypassed count, security score
@@ -125,12 +125,12 @@ After running a scan, SecurityForge generates a self-contained HTML report you c
 - **Recommendations** — WAF-specific tuning advice and OWASP remediation steps
 - **Detailed results** — full payload-by-payload log with status codes
 
-![SecurityForge Sample Report](https://raw.githubusercontent.com/dalisecurity/securityforge/main/docs/sample-report.png)
+![Fray Sample Report](https://raw.githubusercontent.com/dalisecurity/fray/main/docs/sample-report.png)
 
 **Export:**
 ```bash
-securityforge report --sample                      # generate a demo report
-securityforge report -i results.json -o report.html  # from real scan results
+fray report --sample                      # generate a demo report
+fray report -i results.json -o report.html  # from real scan results
 ```
 
 Output is a self-contained HTML file — open in any browser or print to PDF.
@@ -144,11 +144,11 @@ Output is a self-contained HTML file — open in any browser or print to PDF.
 
 ## 🤖 MCP Server — AI Integration
 
-SecurityForge includes an MCP server that AI assistants can call directly:
+Fray includes an MCP server that AI assistants can call directly:
 
 ```bash
-pip install securityforge[mcp]
-securityforge mcp
+pip install fray[mcp]
+fray mcp
 ```
 
 **6 MCP tools:** `list_payload_categories`, `get_payloads`, `search_payloads`, `get_waf_signatures`, `get_cve_details`, `suggest_payloads_for_waf`
@@ -157,9 +157,9 @@ Configure Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_c
 ```json
 {
   "mcpServers": {
-    "securityforge": {
+    "fray": {
       "command": "python",
-      "args": ["-m", "securityforge.mcp_server"]
+      "args": ["-m", "fray.mcp_server"]
     }
   }
 }
@@ -167,9 +167,9 @@ Configure Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_c
 
 ### CLI
 ```bash
-securityforge detect https://example.com
-securityforge test https://example.com -c xss --max 10
-securityforge payloads
+fray detect https://example.com
+fray test https://example.com -c xss --max 10
+fray payloads
 ```
 
 ## 📊 Complete OWASP Coverage
@@ -224,4 +224,4 @@ MIT License - See [LICENSE](LICENSE)
 
 **⭐ Star this repo if you find it useful!**
 
-📚 **Documentation**: [docs/](docs/) | [PyPI](https://pypi.org/project/securityforge/) | [Blog](https://dalisec.io/research/blog-securityforge-launch.html)
+📚 **Documentation**: [docs/](docs/) | [PyPI](https://pypi.org/project/fray/) | [Blog](https://dalisec.io/research/blog-fray-launch.html)

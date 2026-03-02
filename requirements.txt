@@ -1,4 +1,4 @@
-# SecurityForge - Python Dependencies
+# Fray - Python Dependencies
 # Minimal dependencies for maximum compatibility
 
 # HTTP requests (optional - only needed for waf_tester.py)

@@ -114,11 +114,11 @@ curl -X POST "https://target.com/xmlrpc.php" \
   -H "Content-Type: text/xml" \
   -d @CVE-2026-28517.txt
 
-# Test with SecurityForge
+# Test with Fray
 python3 waf_tester.py -t https://target.com -p payloads/wordpress/
 ```
 
-### Integration with SecurityForge
+### Integration with Fray
 
 ```python
 from waf_tester import WAFTester

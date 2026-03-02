@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-SecurityForge provides **100% coverage** of the OWASP Mobile Security Top 10:2024, the definitive standard for mobile application security. This document details our comprehensive testing payloads for iOS and Android applications.
+Fray provides **100% coverage** of the OWASP Mobile Security Top 10:2024, the definitive standard for mobile application security. This document details our comprehensive testing payloads for iOS and Android applications.
 
 **Coverage**: 10/10 categories ✅  
 **Total Mobile Payloads**: 150+  

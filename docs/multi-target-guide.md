@@ -2,7 +2,7 @@
 
 ## Overview
 
-SecurityForge now supports testing **multiple targets, endpoints, and domains** in a single test run. You can test specific URLs, API endpoints, or entire lists of targets from a file.
+Fray now supports testing **multiple targets, endpoints, and domains** in a single test run. You can test specific URLs, API endpoints, or entire lists of targets from a file.
 
 ---
 
@@ -171,7 +171,7 @@ python3 waf_tester.py \
 
 ## 📊 Output for Multiple Targets
 
-When testing multiple targets, SecurityForge generates:
+When testing multiple targets, Fray generates:
 
 ### **Individual Reports**
 Each target gets its own report:
@@ -447,7 +447,7 @@ Shows results for one specific URL/endpoint
 
 ## ✅ Summary
 
-**SecurityForge now supports:**
+**Fray now supports:**
 - ✅ Single domain testing
 - ✅ Specific endpoint testing
 - ✅ Multiple domain testing

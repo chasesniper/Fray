@@ -16,10 +16,10 @@ Payloads for testing WAF protection of WordPress installations. These cover thre
 
 ```bash
 # Test all WordPress payloads
-securityforge test https://your-wordpress-site.com -c wordpress
+fray test https://your-wordpress-site.com -c wordpress
 
 # Or test a specific file
-securityforge test https://your-wordpress-site.com -p securityforge/payloads/wordpress/rest-api-auth.txt
+fray test https://your-wordpress-site.com -p fray/payloads/wordpress/rest-api-auth.txt
 ```
 
 ## Mitigation

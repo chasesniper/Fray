@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 """
-SecurityForge MCP Server — Model Context Protocol integration.
+Fray MCP Server — Model Context Protocol integration.
 
-Exposes SecurityForge capabilities as MCP tools that AI assistants
+Exposes Fray capabilities as MCP tools that AI assistants
 (Claude, Windsurf, etc.) can call directly. No copy-paste prompts needed.
 
 Usage:
     # stdio mode (for Claude Desktop, Windsurf, etc.)
-    python -m securityforge.mcp_server
+    python -m fray.mcp_server
 
-    # Or via the securityforge CLI
-    securityforge mcp
+    # Or via the fray CLI
+    fray mcp
 
 Configure in Claude Desktop (~/Library/Application Support/Claude/claude_desktop_config.json):
     {
       "mcpServers": {
-        "securityforge": {
+        "fray": {
           "command": "python",
-          "args": ["-m", "securityforge.mcp_server"]
+          "args": ["-m", "fray.mcp_server"]
         }
       }
     }
@@ -37,7 +37,7 @@ except ImportError:
 
 # Configure logging to stderr (NEVER stdout for stdio MCP servers)
 logging.basicConfig(level=logging.INFO, stream=sys.stderr,
-                    format="%(asctime)s [securityforge-mcp] %(message)s")
+                    format="%(asctime)s [fray-mcp] %(message)s")
 logger = logging.getLogger(__name__)
 
 # Package paths
@@ -83,7 +83,7 @@ def _load_payloads(category: str, max_payloads: int = 50) -> list[dict]:
 
 def _get_waf_signatures() -> dict:
     """Get all WAF signatures from the detector."""
-    from securityforge.detector import WAFDetector
+    from fray.detector import WAFDetector
     d = WAFDetector()
     result = {}
     for name, sig in d.waf_signatures.items():
@@ -97,26 +97,26 @@ def _get_waf_signatures() -> dict:
 
 
 def create_server() -> "FastMCP":
-    """Create and configure the MCP server with SecurityForge tools."""
+    """Create and configure the MCP server with Fray tools."""
 
     mcp = FastMCP(
-        "securityforge",
-        instructions="SecurityForge v3.1.0 — open-source WAF security testing toolkit. "
-                     "4,025+ payloads, 25 WAF fingerprints, structured for AI workflows.",
+        "fray",
+        instructions="Fray v3.1.0 — open-source WAF security testing toolkit. "
+                     "5,500+ payloads, 25 WAF fingerprints, structured for AI workflows.",
     )
 
     # ── Tool: list_categories ──────────────────────────────────────────
 
     @mcp.tool()
     async def list_payload_categories() -> str:
-        """List all available payload categories in SecurityForge.
+        """List all available payload categories in Fray.
 
         Returns a summary of each category with file counts.
         Use this to discover what attack types are available before
         retrieving specific payloads.
         """
         cats = _list_categories()
-        lines = ["SecurityForge Payload Categories", "=" * 40, ""]
+        lines = ["Fray Payload Categories", "=" * 40, ""]
         total_files = 0
         for c in cats:
             lines.append(f"  {c['name']:30s}  {c['total_files']} files")
@@ -146,7 +146,7 @@ def create_server() -> "FastMCP":
         if not payloads:
             return f"No payloads found in category '{category}'."
 
-        lines = [f"SecurityForge — {category} payloads ({len(payloads)} shown)", ""]
+        lines = [f"Fray — {category} payloads ({len(payloads)} shown)", ""]
         for i, p in enumerate(payloads, 1):
             if isinstance(p, dict):
                 payload = p.get("payload", str(p))
@@ -244,7 +244,7 @@ def create_server() -> "FastMCP":
 
     @mcp.tool()
     async def get_cve_details(cve_id: str) -> str:
-        """Look up a specific CVE across all SecurityForge payload files.
+        """Look up a specific CVE across all Fray payload files.
 
         Args:
             cve_id: CVE identifier (e.g. 'CVE-2026-27509')
@@ -363,7 +363,7 @@ def main():
         print("  pip install 'mcp[cli]'", file=sys.stderr)
         sys.exit(1)
 
-    logger.info("Starting SecurityForge MCP server (stdio)")
+    logger.info("Starting Fray MCP server (stdio)")
     server = create_server()
     server.run(transport="stdio")
 

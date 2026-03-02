@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-SecurityForge CLI — Unified command-line interface
+Fray CLI — Unified command-line interface
 
 Usage:
-    securityforge detect <url>           Detect WAF vendor
-    securityforge test <url>             Test WAF with payloads
-    securityforge test <url> -c xss      Test specific category
-    securityforge report                 Generate HTML report
-    securityforge payloads               List available payload categories
-    securityforge version                Show version
+    fray detect <url>           Detect WAF vendor
+    fray test <url>             Test WAF with payloads
+    fray test <url> -c xss      Test specific category
+    fray report                 Generate HTML report
+    fray payloads               List available payload categories
+    fray version                Show version
 """
 
 import argparse
@@ -16,12 +16,12 @@ import json
 import sys
 from pathlib import Path
 
-from securityforge import __version__, PAYLOADS_DIR
+from fray import __version__, PAYLOADS_DIR
 
 
 def cmd_detect(args):
     """Detect WAF vendor on target"""
-    from securityforge.detector import WAFDetector
+    from fray.detector import WAFDetector
     detector = WAFDetector()
     results = detector.detect_waf(args.target)
     detector.print_results(results)
@@ -29,7 +29,7 @@ def cmd_detect(args):
 
 def cmd_test(args):
     """Run WAF tests against target"""
-    from securityforge.tester import WAFTester
+    from fray.tester import WAFTester
     tester = WAFTester(
         target=args.target,
         timeout=args.timeout,
@@ -63,7 +63,7 @@ def cmd_test(args):
     results = tester.test_payloads(all_payloads, max_payloads=args.max)
 
     # Save results
-    output = args.output or "securityforge_results.json"
+    output = args.output or "fray_results.json"
     tester.generate_report(results, output=output)
     print(f"\nResults saved to {output}")
 
@@ -71,11 +71,11 @@ def cmd_test(args):
 def cmd_report(args):
     """Generate HTML report from results"""
     if args.sample:
-        from securityforge.reporter import generate_sample_report
+        from fray.reporter import generate_sample_report
         generate_sample_report()
         return
 
-    from securityforge.reporter import SecurityReportGenerator
+    from fray.reporter import SecurityReportGenerator
     if not args.input:
         print("Error: provide --input results.json or use --sample for a demo report")
         sys.exit(1)
@@ -90,7 +90,7 @@ def cmd_report(args):
 def cmd_payloads(args):
     """List available payload categories"""
     categories = list_categories()
-    print(f"\nSecurityForge v{__version__} — Payload Categories\n")
+    print(f"\nFray v{__version__} — Payload Categories\n")
     print(f"{'Category':<30} {'Files':<8} {'Location'}")
     print("-" * 70)
     total_files = 0
@@ -102,18 +102,18 @@ def cmd_payloads(args):
         print(f"  {cat:<28} {count:<8} payloads/{cat}/")
     print("-" * 70)
     print(f"  {'TOTAL':<28} {total_files}")
-    print(f"\nUsage: securityforge test <url> -c <category>")
+    print(f"\nUsage: fray test <url> -c <category>")
 
 
 def cmd_version(args):
     """Show version"""
-    print(f"SecurityForge v{__version__}")
+    print(f"Fray v{__version__}")
 
 
 def cmd_mcp(args):
     """Start MCP server for AI assistant integration"""
     try:
-        from securityforge.mcp_server import main as mcp_main
+        from fray.mcp_server import main as mcp_main
         mcp_main()
     except ImportError:
         print("Error: MCP SDK not installed. Install with:")
@@ -131,18 +131,18 @@ def list_categories():
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="securityforge",
-        description=f"SecurityForge v{__version__} — AI-Powered WAF Security Testing Platform",
+        prog="fray",
+        description=f"Fray v{__version__} — AI-Powered WAF Security Testing Platform",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  securityforge detect https://example.com
-  securityforge test https://example.com --category xss
-  securityforge test https://example.com --all
-  securityforge payloads
-  securityforge report --output report.html
+  fray detect https://example.com
+  fray test https://example.com --category xss
+  fray test https://example.com --all
+  fray payloads
+  fray report --output report.html
 
-Documentation: https://github.com/dalisecurity/securityforge
+Documentation: https://github.com/dalisecurity/fray
         """
     )
 
@@ -168,7 +168,7 @@ Documentation: https://github.com/dalisecurity/securityforge
     # report
     p_report = subparsers.add_parser("report", help="Generate HTML security report")
     p_report.add_argument("-i", "--input", help="Input results JSON file")
-    p_report.add_argument("-o", "--output", default="securityforge_report.html", help="Output HTML file")
+    p_report.add_argument("-o", "--output", default="fray_report.html", help="Output HTML file")
     p_report.add_argument("--sample", action="store_true", help="Generate a sample demo report")
     p_report.set_defaults(func=cmd_report)
 

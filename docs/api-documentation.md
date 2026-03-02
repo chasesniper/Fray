@@ -2,7 +2,7 @@
 
 ## 📚 Programmatic Usage Guide
 
-SecurityForge can be used programmatically in your Python scripts and automation workflows.
+Fray can be used programmatically in your Python scripts and automation workflows.
 
 ---
 

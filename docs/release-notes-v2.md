@@ -1,4 +1,4 @@
-# SecurityForge v2.0 - Comprehensive Payload Database Release
+# Fray v2.0 - Comprehensive Payload Database Release
 
 ## 🎉 Major Release: Complete Attack Vector Coverage
 
@@ -368,8 +368,8 @@ cat PAYLOAD_DATABASE_COVERAGE.md
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/dalisecurity/securityforge/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/dalisecurity/securityforge/discussions)
+- **Issues**: [GitHub Issues](https://github.com/dalisecurity/fray/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/dalisecurity/fray/discussions)
 - **Security**: security@dalisecurity.com
 - **Commercial**: contact@dalisecurity.com
 
@@ -386,7 +386,7 @@ cat PAYLOAD_DATABASE_COVERAGE.md
 
 ---
 
-**Thank you for using SecurityForge!** 🔥
+**Thank you for using Fray!** 🔥
 
 **Star ⭐ this repository if you find it useful!**
 

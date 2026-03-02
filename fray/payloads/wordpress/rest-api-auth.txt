@@ -2,7 +2,7 @@
 # Category: Authentication & Authorization Testing
 # Description: Payloads for testing WordPress REST API access controls,
 # user enumeration, and privilege escalation via API endpoints.
-# Use: securityforge test <target> -c wordpress
+# Use: fray test <target> -c wordpress
 
 # Basic Authentication Bypass Payloads
 /wp-json/wp/v2/users?context=edit

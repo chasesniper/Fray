@@ -1,8 +1,8 @@
-# SecurityForge: Complete OWASP Coverage
+# Fray: Complete OWASP Coverage
 
 **100% Coverage Across All Major OWASP Frameworks**
 
-SecurityForge provides comprehensive security testing capabilities covering all major OWASP standards and frameworks. This document provides a complete overview of our OWASP coverage.
+Fray provides comprehensive security testing capabilities covering all major OWASP standards and frameworks. This document provides a complete overview of our OWASP coverage.
 
 ---
 
@@ -21,7 +21,7 @@ SecurityForge provides comprehensive security testing capabilities covering all 
 ## 🌐 OWASP Top 10:2021 - Web Application Security
 
 ### Overview
-The OWASP Top 10 is the most recognized standard for web application security risks. SecurityForge provides complete coverage with 1,690+ payloads.
+The OWASP Top 10 is the most recognized standard for web application security risks. Fray provides complete coverage with 1,690+ payloads.
 
 ### Coverage Breakdown
 
@@ -47,7 +47,7 @@ The OWASP Top 10 is the most recognized standard for web application security ri
 ## 📱 OWASP Mobile Top 10:2024 - Mobile Application Security
 
 ### Overview
-The OWASP Mobile Top 10 addresses the most critical security risks for mobile applications (Android & iOS). SecurityForge provides complete coverage with 575+ payloads.
+The OWASP Mobile Top 10 addresses the most critical security risks for mobile applications (Android & iOS). Fray provides complete coverage with 575+ payloads.
 
 ### Coverage Breakdown
 
@@ -75,7 +75,7 @@ The OWASP Mobile Top 10 addresses the most critical security risks for mobile ap
 ## 🤖 OWASP LLM Top 10 - AI/LLM Security
 
 ### Overview
-The OWASP LLM Top 10 addresses security risks specific to Large Language Models and AI applications. SecurityForge provides cutting-edge coverage with 300+ payloads.
+The OWASP LLM Top 10 addresses security risks specific to Large Language Models and AI applications. Fray provides cutting-edge coverage with 300+ payloads.
 
 ### Coverage Breakdown
 
@@ -103,7 +103,7 @@ The OWASP LLM Top 10 addresses security risks specific to Large Language Models 
 ## 🔌 OWASP API Security Top 10 - API Security
 
 ### Overview
-The OWASP API Security Top 10 focuses on the unique security challenges of APIs. SecurityForge provides comprehensive coverage with 520+ payloads.
+The OWASP API Security Top 10 focuses on the unique security challenges of APIs. Fray provides comprehensive coverage with 520+ payloads.
 
 ### Coverage Breakdown
 
@@ -226,7 +226,7 @@ python3 waf_tester.py -t https://chatbot.com -p payloads/llm/prompt_injection.tx
 ## 📚 Documentation Structure
 
 ```
-SecurityForge/
+Fray/
 ├── OWASP_COMPLETE_COVERAGE.md          # This file - Complete overview
 ├── OWASP_TOP10_COVERAGE.md             # Web Application Security (1,690+ payloads)
 ├── OWASP_MOBILE_TOP10_COVERAGE.md      # Mobile Security (575+ payloads)
@@ -253,7 +253,7 @@ SecurityForge/
 - **OWASP LLM Top 10**: [owasp.org/www-project-top-10-for-large-language-model-applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
 - **OWASP API Security**: [owasp.org/API-Security](https://owasp.org/API-Security/)
 
-### SecurityForge Resources
+### Fray Resources
 - **Quick Start**: [QUICKSTART.md](QUICKSTART.md)
 - **Claude Code Guide**: [CLAUDE_CODE_GUIDE.md](CLAUDE_CODE_GUIDE.md)
 - **ChatGPT Guide**: [CHATGPT_GUIDE.md](CHATGPT_GUIDE.md)
@@ -310,7 +310,7 @@ python3 report_generator.py --html-report owasp_report.html
 
 ## 📊 Compliance & Standards
 
-SecurityForge helps organizations achieve compliance with:
+Fray helps organizations achieve compliance with:
 - ✅ **OWASP Standards** - 100% coverage across 4 frameworks
 - ✅ **PCI DSS** - Web application security requirements
 - ✅ **ISO 27001** - Information security management
@@ -322,7 +322,7 @@ SecurityForge helps organizations achieve compliance with:
 
 ## 🔄 Updates & Maintenance
 
-SecurityForge is regularly updated to maintain 100% OWASP coverage:
+Fray is regularly updated to maintain 100% OWASP coverage:
 - **Monthly**: Payload database updates
 - **Quarterly**: New vulnerability patterns
 - **Annually**: OWASP framework updates
@@ -339,7 +339,7 @@ SecurityForge is regularly updated to maintain 100% OWASP coverage:
 
 ---
 
-**SecurityForge: Complete OWASP Coverage for Modern Security Testing** 🛡️
+**Fray: Complete OWASP Coverage for Modern Security Testing** 🛡️
 
 *Last Updated: March 2026*
 *Version: 2.0*

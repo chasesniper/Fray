@@ -2,7 +2,7 @@
 # Category: XML-RPC Abuse Testing
 # Description: Payloads for testing WordPress XML-RPC endpoint security,
 # including pingback amplification, brute force via multicall, and XXE.
-# Use: securityforge test <target> -c wordpress
+# Use: fray test <target> -c wordpress
 
 # Basic XML-RPC Endpoint Discovery
 /xmlrpc.php

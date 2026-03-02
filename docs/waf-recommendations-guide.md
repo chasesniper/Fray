@@ -2,7 +2,7 @@
 
 ## Overview
 
-SecurityForge now includes intelligent WAF detection and comprehensive security recommendations. When testing a target, the system will:
+Fray now includes intelligent WAF detection and comprehensive security recommendations. When testing a target, the system will:
 
 1. **Detect if a WAF is present**
 2. **Identify the WAF vendor** (Cloudflare, AWS, Akamai, etc.)
@@ -367,7 +367,7 @@ WAF is one layer of security. Always implement:
 Test your WAF effectiveness:
 
 1. **Quarterly Testing**
-   - Run SecurityForge tests
+   - Run Fray tests
    - Review blocked vs bypassed
    - Update rules based on findings
 
@@ -539,4 +539,4 @@ This helps security teams:
 **For more information:**
 - [WAF Detector Documentation](waf_detector.py)
 - [Report Generator Documentation](report_generator.py)
-- [SecurityForge README](README.md)
+- [Fray README](README.md)

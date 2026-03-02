@@ -2,7 +2,7 @@
 # Category: File Upload Bypass Testing
 # Description: Payloads for testing WordPress plugin/theme upload validation,
 # file extension filtering, and web shell detection in WAF configurations.
-# Use: securityforge test <target> -c wordpress
+# Use: fray test <target> -c wordpress
 
 # Basic Plugin Upload Bypass
 # POST to /wp-admin/update.php?action=upload-plugin

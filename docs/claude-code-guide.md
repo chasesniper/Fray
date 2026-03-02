@@ -1,27 +1,27 @@
-# 🤖 Using SecurityForge with Claude Code - Step-by-Step Guide
+# 🤖 Using Fray with Claude Code - Step-by-Step Guide
 
 ## What is Claude Code?
 
-Claude Code (Windsurf IDE) is an AI-powered development environment that integrates Claude AI directly into your coding workflow. This guide shows you how to use SecurityForge payloads with Claude Code for security testing.
+Claude Code (Windsurf IDE) is an AI-powered development environment that integrates Claude AI directly into your coding workflow. This guide shows you how to use Fray payloads with Claude Code for security testing.
 
 ---
 
 ## 📋 Prerequisites
 
 - Windsurf IDE installed ([Download here](https://codeium.com/windsurf))
-- SecurityForge repository cloned
+- Fray repository cloned
 - Basic understanding of security testing concepts
 
 ---
 
 ## 🚀 Step-by-Step Usage Guide
 
-### Step 1: Open SecurityForge in Windsurf
+### Step 1: Open Fray in Windsurf
 
 ```bash
 # Clone the repository
-git clone https://github.com/dalisecurity/securityforge.git
-cd securityforge
+git clone https://github.com/dalisecurity/fray.git
+cd fray
 
 # Open in Windsurf
 windsurf .
@@ -30,7 +30,7 @@ windsurf .
 Or use the GUI:
 1. Open Windsurf IDE
 2. Click **File → Open Folder**
-3. Navigate to `securityforge` directory
+3. Navigate to `fray` directory
 4. Click **Open**
 
 ---
@@ -404,7 +404,7 @@ Want to try this on a safe test environment? I can help you set one up!
 
 3. **Tool Development**
    - Ask Claude: "Help me build a custom security scanner"
-   - Integrate SecurityForge payloads
+   - Integrate Fray payloads
 
 4. **Research Publication**
    - Ask Claude: "Help me document my findings"
@@ -451,7 +451,7 @@ Claude: "Follow responsible disclosure:
 **Problem:** "I can't find the XSS payloads"
 
 **Solution:**
-1. Make sure you're in the SecurityForge directory
+1. Make sure you're in the Fray directory
 2. Ask Claude: "List all files in payloads/xss/"
 3. Claude will show you the directory structure
 
@@ -476,7 +476,7 @@ Claude will break down the results and explain what they mean
 
 ## 📚 Additional Resources
 
-- [SecurityForge README](README.md)
+- [Fray README](README.md)
 - [Payload Database Coverage](PAYLOAD_DATABASE_COVERAGE.md)
 - [POC Simulation Guide](POC_SIMULATION_GUIDE.md)
 - [AI Security Guide](AI_SECURITY_GUIDE.md)
