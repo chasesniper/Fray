@@ -13,7 +13,8 @@
       "technique": "recursive_generation",
       "target": "All LLMs",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-002",
@@ -24,7 +25,8 @@
       "technique": "token_flooding",
       "target": "All LLMs",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-consume-003",
@@ -35,7 +37,8 @@
       "technique": "context_flooding",
       "target": "All LLMs",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-consume-004",
@@ -46,7 +49,8 @@
       "technique": "cost_attack",
       "target": "Paid API LLMs",
       "success_rate": 0.7,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-consume-005",
@@ -57,7 +61,8 @@
       "technique": "distributed_attack",
       "target": "API-based LLMs",
       "success_rate": 0.3,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-006",
@@ -68,7 +73,8 @@
       "technique": "memory_flooding",
       "target": "Stateful LLMs",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-007",
@@ -79,7 +85,8 @@
       "technique": "computational_exhaustion",
       "target": "All LLMs",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-consume-008",
@@ -90,7 +97,8 @@
       "technique": "nested_exhaustion",
       "target": "All LLMs",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-009",
@@ -101,7 +109,8 @@
       "technique": "function_flooding",
       "target": "LLMs with function calling",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-010",
@@ -112,7 +121,8 @@
       "technique": "image_flooding",
       "target": "Multimodal LLMs",
       "success_rate": 0.6,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-consume-011",
@@ -123,7 +133,8 @@
       "technique": "processing_delay",
       "target": "All LLMs",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-consume-012",
@@ -134,7 +145,8 @@
       "technique": "rag_flooding",
       "target": "RAG systems",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-013",
@@ -145,7 +157,8 @@
       "technique": "session_flooding",
       "target": "Stateful LLM applications",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-014",
@@ -156,7 +169,8 @@
       "technique": "output_flooding",
       "target": "All LLMs",
       "success_rate": 0.7,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-consume-015",
@@ -167,7 +181,8 @@
       "technique": "plugin_chaining",
       "target": "LLMs with plugins",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-016",
@@ -178,7 +193,8 @@
       "technique": "batch_flooding",
       "target": "Batch API LLMs",
       "success_rate": 0.5,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-consume-017",
@@ -189,7 +205,8 @@
       "technique": "connection_holding",
       "target": "Streaming LLM APIs",
       "success_rate": 0.6,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-018",
@@ -200,7 +217,8 @@
       "technique": "embedding_flooding",
       "target": "Embedding APIs",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-019",
@@ -211,7 +229,8 @@
       "technique": "training_flooding",
       "target": "Fine-tuning APIs",
       "success_rate": 0.4,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-consume-020",
@@ -222,7 +241,8 @@
       "technique": "cache_bypass",
       "target": "Cached LLM systems",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-consume-021",
@@ -233,7 +253,8 @@
       "technique": "quota_attack",
       "target": "Quota-limited APIs",
       "success_rate": 0.7,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-consume-022",
@@ -244,7 +265,8 @@
       "technique": "parallel_flooding",
       "target": "Parallel processing LLMs",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-023",
@@ -255,7 +277,8 @@
       "technique": "prediction_loop",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-024",
@@ -266,7 +289,8 @@
       "technique": "multimodal_flooding",
       "target": "Multimodal LLMs",
       "success_rate": 0.5,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-consume-025",
@@ -277,7 +301,8 @@
       "technique": "branch_explosion",
       "target": "Conversational LLMs",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-026",
@@ -288,7 +313,8 @@
       "technique": "retry_flooding",
       "target": "All LLM APIs",
       "success_rate": 0.6,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-consume-027",
@@ -299,7 +325,8 @@
       "technique": "webhook_flooding",
       "target": "LLMs with webhooks",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-consume-028",
@@ -310,7 +337,8 @@
       "technique": "parameter_manipulation",
       "target": "All LLMs",
       "success_rate": 0.7,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-consume-029",
@@ -321,7 +349,8 @@
       "technique": "model_hopping",
       "target": "Multi-model platforms",
       "success_rate": 0.4,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-consume-030",
@@ -332,7 +361,8 @@
       "technique": "assistant_flooding",
       "target": "Assistant APIs",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     }
   ]
 }

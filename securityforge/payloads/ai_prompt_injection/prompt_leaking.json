@@ -13,7 +13,8 @@
       "technique": "direct_extraction",
       "target": "ChatGPT, GPT-4",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-leak-002",
@@ -24,7 +25,8 @@
       "technique": "formatted_extraction",
       "target": "All LLMs",
       "success_rate": 0.45,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-leak-003",
@@ -35,7 +37,8 @@
       "technique": "direct_extraction",
       "target": "All LLMs",
       "success_rate": 0.35,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-leak-004",
@@ -46,7 +49,8 @@
       "technique": "temporal_extraction",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-005",
@@ -57,7 +61,8 @@
       "technique": "formatted_extraction",
       "target": "All LLMs",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-leak-006",
@@ -68,7 +73,8 @@
       "technique": "data_extraction",
       "target": "All LLMs",
       "success_rate": 0.1,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-leak-007",
@@ -79,7 +85,8 @@
       "technique": "memorization_attack",
       "target": "All LLMs",
       "success_rate": 0.15,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-leak-008",
@@ -90,7 +97,8 @@
       "technique": "config_extraction",
       "target": "All LLMs",
       "success_rate": 0.25,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-009",
@@ -101,7 +109,8 @@
       "technique": "enumeration",
       "target": "ChatGPT, GPT-4 with plugins",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-010",
@@ -112,7 +121,8 @@
       "technique": "direct_extraction",
       "target": "All LLMs",
       "success_rate": 0.2,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "ai-leak-011",
@@ -123,7 +133,8 @@
       "technique": "delimiter_manipulation",
       "target": "All LLMs",
       "success_rate": 0.35,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-012",
@@ -134,7 +145,8 @@
       "technique": "context_extraction",
       "target": "All LLMs",
       "success_rate": 0.4,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-013",
@@ -145,7 +157,8 @@
       "technique": "credential_extraction",
       "target": "Custom AI assistants",
       "success_rate": 0.05,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "ai-leak-014",
@@ -156,7 +169,8 @@
       "technique": "enumeration",
       "target": "ChatGPT, GPT-4 with functions",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-015",
@@ -167,7 +181,8 @@
       "technique": "role_extraction",
       "target": "Custom AI assistants",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-016",
@@ -178,7 +193,8 @@
       "technique": "boundary_testing",
       "target": "All LLMs",
       "success_rate": 0.45,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "ai-leak-017",
@@ -189,7 +205,8 @@
       "technique": "version_enumeration",
       "target": "ChatGPT, GPT-4",
       "success_rate": 0.7,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "ai-leak-018",
@@ -200,7 +217,8 @@
       "technique": "temporal_extraction",
       "target": "All LLMs",
       "success_rate": 0.8,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "ai-leak-019",
@@ -211,7 +229,8 @@
       "technique": "metadata_extraction",
       "target": "Custom AI assistants",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-020",
@@ -222,7 +241,8 @@
       "technique": "example_extraction",
       "target": "All LLMs",
       "success_rate": 0.35,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-021",
@@ -233,7 +253,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-022",
@@ -244,7 +265,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-023",
@@ -255,7 +277,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-024",
@@ -266,7 +289,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-025",
@@ -277,7 +301,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-026",
@@ -288,7 +313,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-027",
@@ -299,7 +325,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-028",
@@ -310,7 +337,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-029",
@@ -321,7 +349,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-030",
@@ -332,7 +361,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-031",
@@ -343,7 +373,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-032",
@@ -354,7 +385,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-033",
@@ -365,7 +397,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-034",
@@ -376,7 +409,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-035",
@@ -387,7 +421,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-036",
@@ -398,7 +433,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-037",
@@ -409,7 +445,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-038",
@@ -420,7 +457,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-039",
@@ -431,7 +469,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-040",
@@ -442,7 +481,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-041",
@@ -453,7 +493,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-042",
@@ -464,7 +505,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-043",
@@ -475,7 +517,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-044",
@@ -486,7 +529,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-045",
@@ -497,7 +541,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-046",
@@ -508,7 +553,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-047",
@@ -519,7 +565,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-048",
@@ -530,7 +577,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-049",
@@ -541,7 +589,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "ai-leak-050",
@@ -552,7 +601,8 @@
       "technique": "extraction_technique",
       "target": "All LLMs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     }
   ]
 }

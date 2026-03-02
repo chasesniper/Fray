@@ -89,7 +89,7 @@ class TestPayloads:
         assert not empty, f"Empty txt payload files: {empty}"
 
     def test_payload_count_minimum(self):
-        """Verify total payload count is at least 4000."""
+        """Verify total payload count after dedup/cleanup."""
         total = 0
         for json_file in PAYLOADS.rglob("*.json"):
             data = json.loads(json_file.read_text(encoding="utf-8"))
@@ -101,7 +101,52 @@ class TestPayloads:
             lines = [l for l in txt_file.read_text(encoding="utf-8").splitlines()
                      if l.strip() and not l.strip().startswith("#")]
             total += len(lines)
-        assert total >= 4000, f"Expected 4000+ payloads, got {total}"
+        assert total >= 3500, f"Expected 3500+ payloads, got {total}"
+
+    def test_no_fake_test_results(self):
+        """Ensure payloads don't contain fabricated test result data."""
+        fake = []
+        for json_file in PAYLOADS.rglob("*.json"):
+            data = json.loads(json_file.read_text(encoding="utf-8"))
+            plist = data.get("payloads", []) if isinstance(data, dict) else []
+            for p in plist:
+                if not isinstance(p, dict):
+                    continue
+                # Flag payloads that have generic placeholder test results
+                if (p.get("tested_against") == ["cloudflare_waf"]
+                        and p.get("success_rate") == 0.0
+                        and p.get("blocked") is True):
+                    fake.append(f"{json_file.name}:{p.get('id','?')}")
+        assert not fake, (
+            f"Found {len(fake)} payloads with fabricated test results "
+            f"(generic blocked=true, success_rate=0.0): {fake[:5]}"
+        )
+
+    def test_json_payloads_have_source(self):
+        """Every JSON payload should have a non-empty source field."""
+        missing = []
+        for json_file in PAYLOADS.rglob("*.json"):
+            data = json.loads(json_file.read_text(encoding="utf-8"))
+            plist = data.get("payloads", []) if isinstance(data, dict) else []
+            for p in plist:
+                if isinstance(p, dict) and not p.get("source"):
+                    missing.append(f"{json_file.name}:{p.get('id','?')}")
+        assert not missing, f"{len(missing)} payloads missing source: {missing[:5]}"
+
+    def test_no_duplicate_payloads_within_files(self):
+        """No exact duplicate payloads within the same JSON file."""
+        dupes = []
+        for json_file in PAYLOADS.rglob("*.json"):
+            data = json.loads(json_file.read_text(encoding="utf-8"))
+            plist = data.get("payloads", []) if isinstance(data, dict) else []
+            seen = set()
+            for p in plist:
+                if not isinstance(p, dict): continue
+                payload = p.get("payload", "")
+                if payload in seen:
+                    dupes.append(f"{json_file.name}:{p.get('id','?')}")
+                seen.add(payload)
+        assert not dupes, f"{len(dupes)} in-file duplicates: {dupes[:5]}"
 
     def test_no_false_cve_claims(self):
         """Ensure no payload files falsely claim CVE-2026-28515/16/17 as WordPress."""

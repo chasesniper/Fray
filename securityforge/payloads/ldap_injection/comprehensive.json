@@ -10,12 +10,7 @@
       "payload": "admin*",
       "description": "LDAP admin with *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8001",
@@ -24,12 +19,7 @@
       "payload": "admin)(*",
       "description": "LDAP admin paren *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8002",
@@ -38,12 +28,7 @@
       "payload": "admin)(|(*",
       "description": "LDAP admin OR *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8003",
@@ -52,12 +37,7 @@
       "payload": "admin*)(uid=*",
       "description": "LDAP admin with *)(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8004",
@@ -66,12 +46,7 @@
       "payload": "admin)(*)(uid=*",
       "description": "LDAP admin paren *)(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8005",
@@ -80,12 +55,7 @@
       "payload": "admin)(|(*)(uid=*",
       "description": "LDAP admin OR *)(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8006",
@@ -94,12 +64,7 @@
       "payload": "admin*)(|(uid=*",
       "description": "LDAP admin with *)(|(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8007",
@@ -108,12 +73,7 @@
       "payload": "admin)(*)(|(uid=*",
       "description": "LDAP admin paren *)(|(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8008",
@@ -122,12 +82,7 @@
       "payload": "admin)(|(*)(|(uid=*",
       "description": "LDAP admin OR *)(|(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8009",
@@ -136,12 +91,7 @@
       "payload": "admin*)(objectClass=*",
       "description": "LDAP admin with *)(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8010",
@@ -150,12 +100,7 @@
       "payload": "admin)(*)(objectClass=*",
       "description": "LDAP admin paren *)(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8011",
@@ -164,12 +109,7 @@
       "payload": "admin)(|(*)(objectClass=*",
       "description": "LDAP admin OR *)(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8012",
@@ -178,12 +118,7 @@
       "payload": "admin*)(!(&(objectClass=*",
       "description": "LDAP admin with *)(!(&(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8013",
@@ -192,12 +127,7 @@
       "payload": "admin)(*)(!(&(objectClass=*",
       "description": "LDAP admin paren *)(!(&(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8014",
@@ -206,12 +136,7 @@
       "payload": "admin)(|(*)(!(&(objectClass=*",
       "description": "LDAP admin OR *)(!(&(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8015",
@@ -220,12 +145,7 @@
       "payload": "administrator*",
       "description": "LDAP administrator with *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8016",
@@ -234,12 +154,7 @@
       "payload": "administrator)(*",
       "description": "LDAP administrator paren *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8017",
@@ -248,12 +163,7 @@
       "payload": "administrator)(|(*",
       "description": "LDAP administrator OR *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8018",
@@ -262,12 +172,7 @@
       "payload": "administrator*)(uid=*",
       "description": "LDAP administrator with *)(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8019",
@@ -276,12 +181,7 @@
       "payload": "administrator)(*)(uid=*",
       "description": "LDAP administrator paren *)(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8020",
@@ -290,12 +190,7 @@
       "payload": "administrator)(|(*)(uid=*",
       "description": "LDAP administrator OR *)(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8021",
@@ -304,12 +199,7 @@
       "payload": "administrator*)(|(uid=*",
       "description": "LDAP administrator with *)(|(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8022",
@@ -318,12 +208,7 @@
       "payload": "administrator)(*)(|(uid=*",
       "description": "LDAP administrator paren *)(|(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8023",
@@ -332,12 +217,7 @@
       "payload": "administrator)(|(*)(|(uid=*",
       "description": "LDAP administrator OR *)(|(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8024",
@@ -346,12 +226,7 @@
       "payload": "administrator*)(objectClass=*",
       "description": "LDAP administrator with *)(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8025",
@@ -360,12 +235,7 @@
       "payload": "administrator)(*)(objectClass=*",
       "description": "LDAP administrator paren *)(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8026",
@@ -374,12 +244,7 @@
       "payload": "administrator)(|(*)(objectClass=*",
       "description": "LDAP administrator OR *)(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8027",
@@ -388,12 +253,7 @@
       "payload": "administrator*)(!(&(objectClass=*",
       "description": "LDAP administrator with *)(!(&(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8028",
@@ -402,12 +262,7 @@
       "payload": "administrator)(*)(!(&(objectClass=*",
       "description": "LDAP administrator paren *)(!(&(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8029",
@@ -416,12 +271,7 @@
       "payload": "administrator)(|(*)(!(&(objectClass=*",
       "description": "LDAP administrator OR *)(!(&(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8030",
@@ -430,12 +280,7 @@
       "payload": "root*",
       "description": "LDAP root with *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8031",
@@ -444,12 +289,7 @@
       "payload": "root)(*",
       "description": "LDAP root paren *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8032",
@@ -458,12 +298,7 @@
       "payload": "root)(|(*",
       "description": "LDAP root OR *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8033",
@@ -472,12 +307,7 @@
       "payload": "root*)(uid=*",
       "description": "LDAP root with *)(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8034",
@@ -486,12 +316,7 @@
       "payload": "root)(*)(uid=*",
       "description": "LDAP root paren *)(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8035",
@@ -500,12 +325,7 @@
       "payload": "root)(|(*)(uid=*",
       "description": "LDAP root OR *)(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8036",
@@ -514,12 +334,7 @@
       "payload": "root*)(|(uid=*",
       "description": "LDAP root with *)(|(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8037",
@@ -528,12 +343,7 @@
       "payload": "root)(*)(|(uid=*",
       "description": "LDAP root paren *)(|(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8038",
@@ -542,12 +352,7 @@
       "payload": "root)(|(*)(|(uid=*",
       "description": "LDAP root OR *)(|(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8039",
@@ -556,12 +361,7 @@
       "payload": "root*)(objectClass=*",
       "description": "LDAP root with *)(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8040",
@@ -570,12 +370,7 @@
       "payload": "root)(*)(objectClass=*",
       "description": "LDAP root paren *)(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8041",
@@ -584,12 +379,7 @@
       "payload": "root)(|(*)(objectClass=*",
       "description": "LDAP root OR *)(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8042",
@@ -598,12 +388,7 @@
       "payload": "root*)(!(&(objectClass=*",
       "description": "LDAP root with *)(!(&(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8043",
@@ -612,12 +397,7 @@
       "payload": "root)(*)(!(&(objectClass=*",
       "description": "LDAP root paren *)(!(&(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8044",
@@ -626,12 +406,7 @@
       "payload": "root)(|(*)(!(&(objectClass=*",
       "description": "LDAP root OR *)(!(&(objectClass=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8045",
@@ -640,12 +415,7 @@
       "payload": "user*",
       "description": "LDAP user with *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8046",
@@ -654,12 +424,7 @@
       "payload": "user)(*",
       "description": "LDAP user paren *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8047",
@@ -668,12 +433,7 @@
       "payload": "user)(|(*",
       "description": "LDAP user OR *",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8048",
@@ -682,12 +442,7 @@
       "payload": "user*)(uid=*",
       "description": "LDAP user with *)(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "ldap_injection-8049",
@@ -696,12 +451,7 @@
       "payload": "user)(*)(uid=*",
       "description": "LDAP user paren *)(uid=*",
       "technique": "ldap_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     }
   ]
 }

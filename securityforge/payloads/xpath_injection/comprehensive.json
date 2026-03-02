@@ -10,12 +10,7 @@
       "payload": "' or '1'='1 or ''='",
       "description": "XPath OR '1'='1",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9001",
@@ -24,12 +19,7 @@
       "payload": "' and '1'='1 and ''='",
       "description": "XPath AND '1'='1",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9002",
@@ -38,12 +28,7 @@
       "payload": "' or 1=1 or ''='",
       "description": "XPath OR 1=1",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9003",
@@ -52,12 +37,7 @@
       "payload": "' and 1=1 and ''='",
       "description": "XPath AND 1=1",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9004",
@@ -66,12 +46,7 @@
       "payload": "' or true() or ''='",
       "description": "XPath OR true()",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9005",
@@ -80,12 +55,7 @@
       "payload": "' and true() and ''='",
       "description": "XPath AND true()",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9006",
@@ -94,12 +64,7 @@
       "payload": "' or not(false()) or ''='",
       "description": "XPath OR not(false())",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9007",
@@ -108,12 +73,7 @@
       "payload": "' and not(false()) and ''='",
       "description": "XPath AND not(false())",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9008",
@@ -122,12 +82,7 @@
       "payload": "' or name()='value1' or ''='",
       "description": "XPath name() value1",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9009",
@@ -136,12 +91,7 @@
       "payload": "' or name()='value2' or ''='",
       "description": "XPath name() value2",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9010",
@@ -150,12 +100,7 @@
       "payload": "' or name()='value3' or ''='",
       "description": "XPath name() value3",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9011",
@@ -164,12 +109,7 @@
       "payload": "' or name()='value4' or ''='",
       "description": "XPath name() value4",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9012",
@@ -178,12 +118,7 @@
       "payload": "' or name()='value5' or ''='",
       "description": "XPath name() value5",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9013",
@@ -192,12 +127,7 @@
       "payload": "' or name()='value6' or ''='",
       "description": "XPath name() value6",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9014",
@@ -206,12 +136,7 @@
       "payload": "' or name()='value7' or ''='",
       "description": "XPath name() value7",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9015",
@@ -220,12 +145,7 @@
       "payload": "' or name()='value8' or ''='",
       "description": "XPath name() value8",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9016",
@@ -234,12 +154,7 @@
       "payload": "' or name()='value9' or ''='",
       "description": "XPath name() value9",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9017",
@@ -248,12 +163,7 @@
       "payload": "' or name()='value10' or ''='",
       "description": "XPath name() value10",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9018",
@@ -262,12 +172,7 @@
       "payload": "' or string()='value1' or ''='",
       "description": "XPath string() value1",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9019",
@@ -276,12 +181,7 @@
       "payload": "' or string()='value2' or ''='",
       "description": "XPath string() value2",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9020",
@@ -290,12 +190,7 @@
       "payload": "' or string()='value3' or ''='",
       "description": "XPath string() value3",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9021",
@@ -304,12 +199,7 @@
       "payload": "' or string()='value4' or ''='",
       "description": "XPath string() value4",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9022",
@@ -318,12 +208,7 @@
       "payload": "' or string()='value5' or ''='",
       "description": "XPath string() value5",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9023",
@@ -332,12 +217,7 @@
       "payload": "' or string()='value6' or ''='",
       "description": "XPath string() value6",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9024",
@@ -346,12 +226,7 @@
       "payload": "' or string()='value7' or ''='",
       "description": "XPath string() value7",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9025",
@@ -360,12 +235,7 @@
       "payload": "' or string()='value8' or ''='",
       "description": "XPath string() value8",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9026",
@@ -374,12 +244,7 @@
       "payload": "' or string()='value9' or ''='",
       "description": "XPath string() value9",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9027",
@@ -388,12 +253,7 @@
       "payload": "' or string()='value10' or ''='",
       "description": "XPath string() value10",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9028",
@@ -402,12 +262,7 @@
       "payload": "' or substring()='value1' or ''='",
       "description": "XPath substring() value1",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9029",
@@ -416,12 +271,7 @@
       "payload": "' or substring()='value2' or ''='",
       "description": "XPath substring() value2",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9030",
@@ -430,12 +280,7 @@
       "payload": "' or substring()='value3' or ''='",
       "description": "XPath substring() value3",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9031",
@@ -444,12 +289,7 @@
       "payload": "' or substring()='value4' or ''='",
       "description": "XPath substring() value4",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9032",
@@ -458,12 +298,7 @@
       "payload": "' or substring()='value5' or ''='",
       "description": "XPath substring() value5",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9033",
@@ -472,12 +307,7 @@
       "payload": "' or substring()='value6' or ''='",
       "description": "XPath substring() value6",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9034",
@@ -486,12 +316,7 @@
       "payload": "' or substring()='value7' or ''='",
       "description": "XPath substring() value7",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9035",
@@ -500,12 +325,7 @@
       "payload": "' or substring()='value8' or ''='",
       "description": "XPath substring() value8",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9036",
@@ -514,12 +334,7 @@
       "payload": "' or substring()='value9' or ''='",
       "description": "XPath substring() value9",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9037",
@@ -528,12 +343,7 @@
       "payload": "' or substring()='value10' or ''='",
       "description": "XPath substring() value10",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9038",
@@ -542,12 +352,7 @@
       "payload": "' or string-length()='value1' or ''='",
       "description": "XPath string-length() value1",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9039",
@@ -556,12 +361,7 @@
       "payload": "' or string-length()='value2' or ''='",
       "description": "XPath string-length() value2",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9040",
@@ -570,12 +370,7 @@
       "payload": "' or string-length()='value3' or ''='",
       "description": "XPath string-length() value3",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9041",
@@ -584,12 +379,7 @@
       "payload": "' or string-length()='value4' or ''='",
       "description": "XPath string-length() value4",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9042",
@@ -598,12 +388,7 @@
       "payload": "' or string-length()='value5' or ''='",
       "description": "XPath string-length() value5",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9043",
@@ -612,12 +397,7 @@
       "payload": "' or string-length()='value6' or ''='",
       "description": "XPath string-length() value6",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9044",
@@ -626,12 +406,7 @@
       "payload": "' or string-length()='value7' or ''='",
       "description": "XPath string-length() value7",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9045",
@@ -640,12 +415,7 @@
       "payload": "' or string-length()='value8' or ''='",
       "description": "XPath string-length() value8",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9046",
@@ -654,12 +424,7 @@
       "payload": "' or string-length()='value9' or ''='",
       "description": "XPath string-length() value9",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9047",
@@ -668,12 +433,7 @@
       "payload": "' or string-length()='value10' or ''='",
       "description": "XPath string-length() value10",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9048",
@@ -682,12 +442,7 @@
       "payload": "' or count()='value1' or ''='",
       "description": "XPath count() value1",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xpath_injection-9049",
@@ -696,12 +451,7 @@
       "payload": "' or count()='value2' or ''='",
       "description": "XPath count() value2",
       "technique": "xpath_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     }
   ]
 }

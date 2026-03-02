@@ -13,7 +13,8 @@
       "technique": "version_discovery",
       "target": "Versioned APIs",
       "success_rate": 0.7,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-002",
@@ -24,7 +25,8 @@
       "technique": "legacy_exploitation",
       "target": "Legacy API versions",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-inv-003",
@@ -35,7 +37,8 @@
       "technique": "doc_discovery",
       "target": "API documentation",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-004",
@@ -46,7 +49,8 @@
       "technique": "schema_discovery",
       "target": "GraphQL APIs",
       "success_rate": 0.7,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-005",
@@ -57,7 +61,8 @@
       "technique": "wadl_discovery",
       "target": "REST APIs",
       "success_rate": 0.4,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-006",
@@ -68,7 +73,8 @@
       "technique": "method_enumeration",
       "target": "All APIs",
       "success_rate": 0.8,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "api-inv-007",
@@ -79,7 +85,8 @@
       "technique": "blueprint_discovery",
       "target": "API Blueprint docs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-008",
@@ -90,7 +97,8 @@
       "technique": "raml_discovery",
       "target": "RAML APIs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-009",
@@ -101,7 +109,8 @@
       "technique": "collection_discovery",
       "target": "Development artifacts",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-inv-010",
@@ -112,7 +121,8 @@
       "technique": "debug_discovery",
       "target": "Development endpoints",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-inv-011",
@@ -123,7 +133,8 @@
       "technique": "admin_discovery",
       "target": "Administrative APIs",
       "success_rate": 0.4,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-inv-012",
@@ -134,7 +145,8 @@
       "technique": "health_discovery",
       "target": "Monitoring endpoints",
       "success_rate": 0.8,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "api-inv-013",
@@ -145,7 +157,8 @@
       "technique": "metrics_discovery",
       "target": "Monitoring endpoints",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-014",
@@ -156,7 +169,8 @@
       "technique": "status_discovery",
       "target": "Status endpoints",
       "success_rate": 0.7,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "api-inv-015",
@@ -167,7 +181,8 @@
       "technique": "header_analysis",
       "target": "All APIs",
       "success_rate": 0.6,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "api-inv-016",
@@ -178,7 +193,8 @@
       "technique": "cors_testing",
       "target": "CORS-enabled APIs",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-inv-017",
@@ -189,7 +205,8 @@
       "technique": "robots_analysis",
       "target": "All web APIs",
       "success_rate": 0.4,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "api-inv-018",
@@ -200,7 +217,8 @@
       "technique": "sitemap_analysis",
       "target": "All web APIs",
       "success_rate": 0.3,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "api-inv-019",
@@ -211,7 +229,8 @@
       "technique": "security_discovery",
       "target": "All APIs",
       "success_rate": 0.5,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "api-inv-020",
@@ -222,7 +241,8 @@
       "technique": "wsdl_discovery",
       "target": "SOAP APIs",
       "success_rate": 0.4,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-021",
@@ -233,7 +253,8 @@
       "technique": "grpc_discovery",
       "target": "gRPC APIs",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-022",
@@ -244,7 +265,8 @@
       "technique": "fingerprinting",
       "target": "API gateways",
       "success_rate": 0.7,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "api-inv-023",
@@ -255,7 +277,8 @@
       "technique": "error_analysis",
       "target": "All APIs",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-024",
@@ -266,7 +289,8 @@
       "technique": "changelog_discovery",
       "target": "Development artifacts",
       "success_rate": 0.4,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-025",
@@ -277,7 +301,8 @@
       "technique": "backup_discovery",
       "target": "Backup files",
       "success_rate": 0.3,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-inv-026",
@@ -288,7 +313,8 @@
       "technique": "environment_discovery",
       "target": "Non-production APIs",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-inv-027",
@@ -299,7 +325,8 @@
       "technique": "subdomain_discovery",
       "target": "API subdomains",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-inv-028",
@@ -310,7 +337,8 @@
       "technique": "git_discovery",
       "target": "Development artifacts",
       "success_rate": 0.3,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-inv-029",
@@ -321,7 +349,8 @@
       "technique": "env_discovery",
       "target": "Configuration files",
       "success_rate": 0.4,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-inv-030",
@@ -332,7 +361,8 @@
       "technique": "js_analysis",
       "target": "Frontend code",
       "success_rate": 0.5,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     }
   ]
 }

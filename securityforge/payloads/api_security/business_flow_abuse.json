@@ -13,7 +13,8 @@
       "technique": "header_manipulation",
       "target": "Rate-limited APIs",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-002",
@@ -24,7 +25,8 @@
       "technique": "parameter_manipulation",
       "target": "E-commerce APIs",
       "success_rate": 0.3,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-flow-003",
@@ -35,7 +37,8 @@
       "technique": "vote_stuffing",
       "target": "Voting/rating APIs",
       "success_rate": 0.35,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-004",
@@ -46,7 +49,8 @@
       "technique": "resource_hoarding",
       "target": "Reservation systems",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-005",
@@ -57,7 +61,8 @@
       "technique": "coupon_stacking",
       "target": "Promotion APIs",
       "success_rate": 0.3,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-flow-006",
@@ -68,7 +73,8 @@
       "technique": "referral_farming",
       "target": "Referral program APIs",
       "success_rate": 0.4,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-007",
@@ -79,7 +85,8 @@
       "technique": "email_flooding",
       "target": "Authentication APIs",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-008",
@@ -90,7 +97,8 @@
       "technique": "account_farming",
       "target": "Registration APIs",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-009",
@@ -101,7 +109,8 @@
       "technique": "price_tampering",
       "target": "Payment APIs",
       "success_rate": 0.2,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-flow-010",
@@ -112,7 +121,8 @@
       "technique": "stock_tampering",
       "target": "Inventory APIs",
       "success_rate": 0.25,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-flow-011",
@@ -123,7 +133,8 @@
       "technique": "race_condition_exploit",
       "target": "Financial APIs",
       "success_rate": 0.3,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-flow-012",
@@ -134,7 +145,8 @@
       "technique": "points_farming",
       "target": "Loyalty program APIs",
       "success_rate": 0.3,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-013",
@@ -145,7 +157,8 @@
       "technique": "review_flooding",
       "target": "Review APIs",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-014",
@@ -156,7 +169,8 @@
       "technique": "captcha_evasion",
       "target": "Protected endpoints",
       "success_rate": 0.2,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-015",
@@ -167,7 +181,8 @@
       "technique": "session_manipulation",
       "target": "Authentication APIs",
       "success_rate": 0.25,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-016",
@@ -178,7 +193,8 @@
       "technique": "otp_evasion",
       "target": "2FA APIs",
       "success_rate": 0.15,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-flow-017",
@@ -189,7 +205,8 @@
       "technique": "cost_evasion",
       "target": "Shipping APIs",
       "success_rate": 0.35,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-018",
@@ -200,7 +217,8 @@
       "technique": "subscription_evasion",
       "target": "Subscription APIs",
       "success_rate": 0.3,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-flow-019",
@@ -211,7 +229,8 @@
       "technique": "trial_abuse",
       "target": "Trial APIs",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-020",
@@ -222,7 +241,8 @@
       "technique": "refund_fraud",
       "target": "Refund APIs",
       "success_rate": 0.2,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-flow-021",
@@ -233,7 +253,8 @@
       "technique": "limit_evasion",
       "target": "Download APIs",
       "success_rate": 0.4,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-022",
@@ -244,7 +265,8 @@
       "technique": "priority_escalation",
       "target": "Queue management APIs",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-023",
@@ -255,7 +277,8 @@
       "technique": "balance_tampering",
       "target": "Wallet APIs",
       "success_rate": 0.15,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-flow-024",
@@ -266,7 +289,8 @@
       "technique": "bid_automation",
       "target": "Auction APIs",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-025",
@@ -277,7 +301,8 @@
       "technique": "bulk_purchase_automation",
       "target": "Ticketing APIs",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-026",
@@ -288,7 +313,8 @@
       "technique": "speed_automation",
       "target": "Flash sale APIs",
       "success_rate": 0.7,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-027",
@@ -299,7 +325,8 @@
       "technique": "card_enumeration",
       "target": "Payment APIs",
       "success_rate": 0.3,
-      "severity": "critical"
+      "severity": "critical",
+      "source": "community"
     },
     {
       "id": "api-flow-028",
@@ -310,7 +337,8 @@
       "technique": "code_brute_force",
       "target": "Gift card APIs",
       "success_rate": 0.25,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-029",
@@ -321,7 +349,8 @@
       "technique": "promo_brute_force",
       "target": "Promotion APIs",
       "success_rate": 0.4,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-030",
@@ -332,7 +361,8 @@
       "technique": "social_spam",
       "target": "Social network APIs",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-031",
@@ -343,7 +373,8 @@
       "technique": "messaging_flood",
       "target": "Messaging APIs",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-032",
@@ -354,7 +385,8 @@
       "technique": "data_harvesting",
       "target": "Content APIs",
       "success_rate": 0.7,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "api-flow-033",
@@ -365,7 +397,8 @@
       "technique": "engagement_manipulation",
       "target": "Social media APIs",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-034",
@@ -376,7 +409,8 @@
       "technique": "follower_farming",
       "target": "Social media APIs",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-035",
@@ -387,7 +421,8 @@
       "technique": "survey_stuffing",
       "target": "Survey APIs",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-036",
@@ -398,7 +433,8 @@
       "technique": "entry_farming",
       "target": "Contest APIs",
       "success_rate": 0.4,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-037",
@@ -409,7 +445,8 @@
       "technique": "waitlist_gaming",
       "target": "Waitlist APIs",
       "success_rate": 0.5,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "api-flow-038",
@@ -420,7 +457,8 @@
       "technique": "key_cycling",
       "target": "API management endpoints",
       "success_rate": 0.3,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-039",
@@ -431,7 +469,8 @@
       "technique": "webhook_spam",
       "target": "Webhook APIs",
       "success_rate": 0.4,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-040",
@@ -442,7 +481,8 @@
       "technique": "export_flooding",
       "target": "Export APIs",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-041",
@@ -453,7 +493,8 @@
       "technique": "search_flooding",
       "target": "Search APIs",
       "success_rate": 0.6,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-042",
@@ -464,7 +505,8 @@
       "technique": "notification_flooding",
       "target": "Notification APIs",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-043",
@@ -475,7 +517,8 @@
       "technique": "calendar_flooding",
       "target": "Calendar APIs",
       "success_rate": 0.4,
-      "severity": "low"
+      "severity": "low",
+      "source": "community"
     },
     {
       "id": "api-flow-044",
@@ -486,7 +529,8 @@
       "technique": "storage_flooding",
       "target": "Upload APIs",
       "success_rate": 0.5,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-045",
@@ -497,7 +541,8 @@
       "technique": "version_manipulation",
       "target": "Versioned APIs",
       "success_rate": 0.3,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     },
     {
       "id": "api-flow-046",
@@ -508,7 +553,8 @@
       "technique": "time_manipulation",
       "target": "Time-limited APIs",
       "success_rate": 0.25,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-047",
@@ -519,7 +565,8 @@
       "technique": "geo_spoofing",
       "target": "Geo-restricted APIs",
       "success_rate": 0.4,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-048",
@@ -530,7 +577,8 @@
       "technique": "fingerprint_evasion",
       "target": "Device-tracked APIs",
       "success_rate": 0.35,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-049",
@@ -541,7 +589,8 @@
       "technique": "ua_rotation",
       "target": "Bot-protected APIs",
       "success_rate": 0.5,
-      "severity": "medium"
+      "severity": "medium",
+      "source": "community"
     },
     {
       "id": "api-flow-050",
@@ -552,7 +601,8 @@
       "technique": "cookie_tampering",
       "target": "Cookie-based auth APIs",
       "success_rate": 0.3,
-      "severity": "high"
+      "severity": "high",
+      "source": "community"
     }
   ]
 }

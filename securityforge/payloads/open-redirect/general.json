@@ -11,11 +11,7 @@
       "description": "src\", \"action\", \"formaction\", \"data\", \"xlink:href",
       "technique": "direct_injection",
       "source_file": "waf_round23_chain.py",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "community"
     }
   ]
 }

