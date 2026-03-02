@@ -1,8 +1,8 @@
 # SecurityForge
 
-### ⚔️ *Forge your attack payloads with AI — 4,000+ exploits, 25 WAF detections, works with Claude & ChatGPT*
+### ⚔️ *Open-source WAF security testing — 4,000+ payloads, 25 WAF detections, structured for AI workflows*
 
-**The open-source offensive security toolkit built for the AI era** • 4,025+ Payloads • 25 WAF Fingerprints • Zero-Config • AI-Native
+**The open-source offensive security toolkit** • 4,025+ Payloads • 25 WAF Fingerprints • Zero-Config • AI-Compatible
 
 [![Total Payloads](https://img.shields.io/badge/Total_Payloads-4025+-brightgreen.svg?style=for-the-badge)](https://github.com/dalisecurity/securityforge)
 [![OWASP Coverage](https://img.shields.io/badge/OWASP_Coverage-100%25-success.svg?style=for-the-badge&logo=owasp)](https://github.com/dalisecurity/securityforge)
@@ -16,9 +16,9 @@
 
 ## ⚡ Why SecurityForge?
 
-Most payload collections are just static text files. **SecurityForge is different** — it's an AI-native toolkit that lets you **generate, test, and report** in seconds:
+Most payload collections are just static text files. **SecurityForge is different** — it's a structured toolkit that lets you **detect, test, and report** in seconds:
 
-- 🤖 **Ask AI to build payloads** — works with Claude Code & ChatGPT out of the box
+- 🤖 **AI-compatible** — structured JSON payloads work well with Claude Code & ChatGPT
 - 🔍 **Auto-detect which WAF** you're facing — 25 vendors fingerprinted instantly
 - 📊 **One-command reports** — professional HTML output with vuln analysis
 - 🎯 **4,025+ battle-tested payloads** — XSS, SQLi, SSRF, SSTI, LLM jailbreaks, and more
@@ -28,7 +28,7 @@ Most payload collections are just static text files. **SecurityForge is differen
 
 - **Bug bounty hunters** — ready-made payloads from real-world disclosures + 120 CVEs
 - **Red teamers & pentesters** — WAF detection → payload selection → report, all in one tool
-- **Security researchers** — AI-assisted payload generation and bypass research
+- **Security researchers** — structured payloads for bypass research and analysis
 - **Blue teams** — validate your WAF config against 4,000+ real attack patterns
 - **Students** — learn offensive security with guided AI workflows
 
@@ -136,10 +136,10 @@ securityforge test https://example.com -c xss --max 10
 ### OWASP API Security Top 10 - 520+ Payloads
 - API1-API10: Complete API security coverage (REST, GraphQL, SOAP)
 
-### WordPress CVEs - 450+ Payloads
-- CVE-2026-28515: REST API Bypass (150+)
-- CVE-2026-28516: File Upload (200+)
-- CVE-2026-28517: XML-RPC Attack (100+)
+### WordPress Security - 450+ Payloads
+- REST API auth bypass & user enumeration (150+)
+- File upload bypass & web shell detection (200+)
+- XML-RPC amplification & brute force (100+)
 
 ### Additional Attack Vectors - 490+ Payloads
 - XSS, SQLi, SSRF, Path Traversal, LDAP, XPath, CRLF, and more

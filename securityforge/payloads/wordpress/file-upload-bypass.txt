@@ -1,9 +1,8 @@
-# CVE-2026-28516: WordPress Plugin Upload Arbitrary File Upload
-# Severity: Critical (CVSS 9.9)
-# Affected Versions: WordPress 6.4.0 - 6.4.3
-# Description: Arbitrary file upload vulnerability in WordPress plugin upload 
-# mechanism allowing remote code execution through malicious plugin packages
-# Reference: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-28516
+# WordPress File Upload Security Testing Payloads
+# Category: File Upload Bypass Testing
+# Description: Payloads for testing WordPress plugin/theme upload validation,
+# file extension filtering, and web shell detection in WAF configurations.
+# Use: securityforge test <target> -c wordpress
 
 # Basic Plugin Upload Bypass
 # POST to /wp-admin/update.php?action=upload-plugin

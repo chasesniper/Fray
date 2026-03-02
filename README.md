@@ -1,8 +1,8 @@
 # SecurityForge
 
-### ⚔️ *Forge your attack payloads with AI — 4,000+ exploits, 25 WAF detections, works with Claude & ChatGPT*
+### ⚔️ *Open-source WAF security testing — 4,000+ payloads, 25 WAF detections, structured for AI workflows*
 
-**The open-source offensive security toolkit built for the AI era** • 4,025+ Payloads • 25 WAF Fingerprints • Zero-Config • AI-Native
+**The open-source offensive security toolkit** • 4,025+ Payloads • 25 WAF Fingerprints • Zero-Config • AI-Compatible
 
 [![Total Payloads](https://img.shields.io/badge/Total_Payloads-4025+-brightgreen.svg?style=for-the-badge)](https://github.com/dalisecurity/securityforge)
 [![OWASP Coverage](https://img.shields.io/badge/OWASP_Coverage-100%25-success.svg?style=for-the-badge&logo=owasp)](https://github.com/dalisecurity/securityforge)
@@ -13,7 +13,7 @@
 [![OWASP Mobile](https://img.shields.io/badge/OWASP_Mobile-575+_Payloads-green.svg)](https://github.com/dalisecurity/securityforge)
 [![OWASP LLM](https://img.shields.io/badge/OWASP_LLM-300+_Payloads-blue.svg)](https://github.com/dalisecurity/securityforge)
 [![OWASP API](https://img.shields.io/badge/OWASP_API-520+_Payloads-red.svg)](https://github.com/dalisecurity/securityforge)
-[![WordPress CVEs](https://img.shields.io/badge/WordPress_CVEs-450+_Payloads-blueviolet.svg)](https://github.com/dalisecurity/securityforge)
+[![WordPress Security](https://img.shields.io/badge/WordPress_Security-450+_Payloads-blueviolet.svg)](https://github.com/dalisecurity/securityforge)
 
 [![GitHub stars](https://img.shields.io/github/stars/dalisecurity/securityforge?style=social)](https://github.com/dalisecurity/securityforge/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/dalisecurity/securityforge?style=social)](https://github.com/dalisecurity/securityforge/network/members)
@@ -32,9 +32,9 @@
 
 ## ⚡ Why SecurityForge?
 
-Most payload collections are just static text files. **SecurityForge is different** — it's an AI-native toolkit that lets you **generate, test, and report** in seconds:
+Most payload collections are just static text files. **SecurityForge is different** — it's a structured toolkit that lets you **detect, test, and report** in seconds:
 
-- 🤖 **Ask AI to build payloads** — works with Claude Code & ChatGPT out of the box
+- 🤖 **AI-compatible** — structured JSON payloads work well with Claude Code & ChatGPT
 - 🔍 **Auto-detect which WAF** you're facing — 25 vendors fingerprinted instantly
 - 📊 **One-command reports** — professional HTML output with vuln analysis
 - 🎯 **4,025+ battle-tested payloads** — XSS, SQLi, SSRF, SSTI, LLM jailbreaks, and more
@@ -48,7 +48,7 @@ Most payload collections are just static text files. **SecurityForge is differen
 | **OWASP Mobile Top 10:2024** | 575+ | ✅ 100% | 10/10 |
 | **OWASP LLM Top 10** (AI/ML) | 300+ | ✅ 100% | 10/10 |
 | **OWASP API Security Top 10** | 520+ | ✅ 100% | 10/10 |
-| **WordPress CVEs** | 450+ | ✅ 100% | 3 Critical |
+| **WordPress Security** | 450+ | ✅ 100% | 3 Attack Surfaces |
 | **Additional Payloads** | 490+ | ✅ 100% | XSS, SQLi, XXE, SSTI, etc. |
 | **Total** | **4,025+** | **✅ 100%** | **40+ Categories** |
 
@@ -56,7 +56,7 @@ Most payload collections are just static text files. **SecurityForge is differen
 
 - **Bug bounty hunters** — ready-made payloads from real-world disclosures + 120 CVEs
 - **Red teamers & pentesters** — WAF detection → payload selection → report, all in one tool
-- **Security researchers** — AI-assisted payload generation and bypass research
+- **Security researchers** — structured payloads for bypass research and analysis
 - **Blue teams** — validate your WAF config against 4,000+ real attack patterns
 - **Students** — learn offensive security with guided AI workflows
 
@@ -137,9 +137,9 @@ docker-compose up
 
 ---
 
-## 🤖 AI-Powered Security Testing
+## 🤖 Using SecurityForge with AI Assistants
 
-**Use SecurityForge with AI assistants for enhanced productivity!**
+**SecurityForge's structured JSON payloads work well with AI coding assistants:**
 
 ### 🔵 Claude Code (Windsurf IDE)
 Step-by-step guide to use SecurityForge with Claude AI directly in your IDE:
@@ -816,7 +816,7 @@ Unlike general payload collections (SecLists, PayloadsAllTheThings) or complex s
 
 1. **⚡ Fast**: Start testing in 30 seconds with interactive mode
 2. **🎯 Focused**: 2,155 payloads specifically for WAF testing (not buried in 10,000+ files)
-3. **🤖 AI-Native**: First tool built for Claude Code, ChatGPT, and AI-augmented workflows
+3. **🤖 AI-Compatible**: Structured JSON format works with Claude Code, ChatGPT, and other AI tools
 4. **📦 Team-Ready**: Docker support + documentation = easy sharing
 5. **📊 Organized**: 12 clear categories vs scattered files or wiki pages
 6. **🎓 Educational**: Built for learning, not exploitation

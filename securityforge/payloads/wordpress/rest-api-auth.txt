@@ -1,9 +1,8 @@
-# CVE-2026-28515: WordPress Core Authentication Bypass
-# Severity: Critical (CVSS 9.8)
-# Affected Versions: WordPress 6.4.0 - 6.4.2
-# Description: Authentication bypass vulnerability in WordPress core allowing 
-# unauthorized access to admin panel through crafted REST API requests
-# Reference: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-28515
+# WordPress REST API Security Testing Payloads
+# Category: Authentication & Authorization Testing
+# Description: Payloads for testing WordPress REST API access controls,
+# user enumeration, and privilege escalation via API endpoints.
+# Use: securityforge test <target> -c wordpress
 
 # Basic Authentication Bypass Payloads
 /wp-json/wp/v2/users?context=edit

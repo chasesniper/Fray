@@ -1,9 +1,8 @@
-# CVE-2026-28517: WordPress XML-RPC Amplification Attack
-# Severity: High (CVSS 8.6)
-# Affected Versions: WordPress 6.4.0 - 6.4.3
-# Description: XML-RPC amplification vulnerability allowing DDoS attacks
-# and brute force authentication bypass through system.multicall method
-# Reference: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-28517
+# WordPress XML-RPC Security Testing Payloads
+# Category: XML-RPC Abuse Testing
+# Description: Payloads for testing WordPress XML-RPC endpoint security,
+# including pingback amplification, brute force via multicall, and XXE.
+# Use: securityforge test <target> -c wordpress
 
 # Basic XML-RPC Endpoint Discovery
 /xmlrpc.php
