@@ -13,6 +13,8 @@ Usage:
     fray submit-payload          Submit payload to community (auto GitHub PR)
     fray ci init                 Generate GitHub Actions WAF test workflow
     fray learn xss               Interactive CTF-style security tutorial
+    fray validate <url>          Blue team WAF config validation report
+    fray bounty --platform h1    Bug bounty scope auto-fetch + batch test
     fray version                Show version
 """
 
@@ -159,6 +161,38 @@ def cmd_submit_payload(args):
     )
 
 
+def cmd_validate(args):
+    """Validate WAF configuration and generate report"""
+    from fray.validate import run_validate
+    categories = [c.strip() for c in args.categories.split(",")] if args.categories else None
+    run_validate(
+        target=args.target,
+        waf=args.waf,
+        categories=categories,
+        max_payloads=args.max,
+        output=args.output,
+        timeout=args.timeout,
+        delay=args.delay,
+        verbose=args.verbose,
+    )
+
+
+def cmd_bounty(args):
+    """Run bug bounty scope fetch and batch WAF testing"""
+    from fray.bounty import run_bounty
+    categories = [c.strip() for c in args.categories.split(",")] if args.categories else None
+    run_bounty(
+        platform=args.platform,
+        program=args.program,
+        urls_file=args.urls,
+        categories=categories,
+        max_payloads=args.max,
+        timeout=args.timeout,
+        delay=args.delay,
+        output=args.output,
+    )
+
+
 def cmd_ci(args):
     """Generate GitHub Actions workflow for automated WAF testing"""
     from fray.ci import run_ci
@@ -228,6 +262,10 @@ Examples:
   fray learn
   fray learn xss
   fray learn sqli --level 3
+  fray validate https://example.com
+  fray validate https://example.com --waf cloudflare -v
+  fray bounty --platform hackerone --program github
+  fray bounty --urls targets.txt --categories xss,sqli
   fray payloads
   fray report --output report.html
 
@@ -288,6 +326,30 @@ Documentation: https://github.com/dalisecurity/fray
     p_submit.add_argument("--file", default=None, help="JSON file with payloads for bulk submission")
     p_submit.add_argument("--dry-run", action="store_true", help="Preview without creating PR")
     p_submit.set_defaults(func=cmd_submit_payload)
+
+    # validate
+    p_validate = subparsers.add_parser("validate", help="Validate WAF configuration (blue team report)")
+    p_validate.add_argument("target", help="Target URL to validate")
+    p_validate.add_argument("--waf", default=None, help="Expected WAF vendor (e.g. cloudflare, aws_waf, imperva)")
+    p_validate.add_argument("--categories", default=None, help="Comma-separated payload categories to test")
+    p_validate.add_argument("-m", "--max", type=int, default=10, help="Max payloads per category (default: 10)")
+    p_validate.add_argument("-o", "--output", default=None, help="Save report JSON to file")
+    p_validate.add_argument("-t", "--timeout", type=int, default=8, help="Request timeout (default: 8)")
+    p_validate.add_argument("-d", "--delay", type=float, default=0.3, help="Delay between requests (default: 0.3)")
+    p_validate.add_argument("-v", "--verbose", action="store_true", help="Show detailed header and bypass info")
+    p_validate.set_defaults(func=cmd_validate)
+
+    # bounty
+    p_bounty = subparsers.add_parser("bounty", help="Bug bounty platform integration (HackerOne/Bugcrowd)")
+    p_bounty.add_argument("--platform", default=None, help="Platform: hackerone or bugcrowd")
+    p_bounty.add_argument("--program", default=None, help="Program handle (e.g. github, tesla)")
+    p_bounty.add_argument("--urls", default=None, help="Text file with URLs (one per line)")
+    p_bounty.add_argument("--categories", default=None, help="Comma-separated payload categories (default: xss,sqli)")
+    p_bounty.add_argument("-m", "--max", type=int, default=10, help="Max payloads per category per target (default: 10)")
+    p_bounty.add_argument("-t", "--timeout", type=int, default=8, help="Request timeout (default: 8)")
+    p_bounty.add_argument("-d", "--delay", type=float, default=0.5, help="Delay between requests (default: 0.5)")
+    p_bounty.add_argument("-o", "--output", default=None, help="Save report JSON to file")
+    p_bounty.set_defaults(func=cmd_bounty)
 
     # ci
     p_ci = subparsers.add_parser("ci", help="Generate GitHub Actions workflow for WAF testing on PRs")
