@@ -196,7 +196,102 @@ class BugcrowdPublic:
         return bool(scopes), scopes
 
 
-# ── URL Extraction & Normalization ───────────────────────────────────────────
+# ── Domain Safety & Ownership Validation ─────────────────────────────────────
+
+# Shared platforms: domains owned by major providers, NOT the bounty program.
+# Attacking these means attacking the provider, not the target company.
+SHARED_PLATFORMS = {
+    # Code hosting
+    "github.com", "github.io", "githubusercontent.com", "gitlab.com",
+    "bitbucket.org", "bitbucket.io",
+    # Cloud providers
+    "amazonaws.com", "cloudfront.net", "elasticbeanstalk.com",
+    "s3.amazonaws.com", "execute-api.amazonaws.com",
+    "azurewebsites.net", "azure.com", "blob.core.windows.net",
+    "cloudapp.azure.com", "trafficmanager.net",
+    "googleapis.com", "appspot.com", "firebaseapp.com",
+    "cloudfunctions.net", "run.app", "web.app",
+    # CDN / Hosting
+    "cloudflare.com", "workers.dev", "pages.dev",
+    "herokuapp.com", "herokucdn.com",
+    "vercel.app", "netlify.app", "netlify.com",
+    "surge.sh", "now.sh", "render.com",
+    # SaaS / Third-party
+    "zendesk.com", "freshdesk.com", "intercom.io",
+    "salesforce.com", "force.com",
+    "hubspot.com", "marketo.com", "mailchimp.com",
+    "google.com", "youtube.com", "goo.gl",
+    "facebook.com", "fb.com", "instagram.com",
+    "twitter.com", "x.com", "t.co",
+    "linkedin.com", "apple.com",
+    # Documentation / Wiki
+    "readthedocs.io", "gitbook.io", "notion.so",
+    "confluence.atlassian.net", "atlassian.net",
+    "jira.com", "trello.com",
+    # Container / Registry
+    "docker.io", "docker.com", "gcr.io", "quay.io",
+    # Package registries
+    "npmjs.com", "npmjs.org", "pypi.org", "rubygems.org",
+    "crates.io", "nuget.org", "packagist.org",
+    # Other shared infra
+    "slack.com", "zoom.us", "teams.microsoft.com",
+    "wordpress.com", "wpengine.com", "shopify.com",
+}
+
+# Programs that OWN these domains (handle → set of domains they actually own)
+# github program owns github.com, shopify owns shopify.com, etc.
+_PROGRAM_OWNED_OVERRIDES: Dict[str, set] = {
+    "github": {"github.com", "github.io", "githubusercontent.com", "github.net",
+               "githubapp.com", "npmjs.com", "npmjs.org"},
+    "shopify": {"shopify.com", "shopifycs.com", "shopify.io", "shopifykloud.com"},
+    "gitlab": {"gitlab.com", "gitlab.net", "gitlab.org"},
+    "slack": {"slack.com", "slackb.com", "slack-edge.com", "slack-imgs.com",
+              "slack-files.com", "slack-core.com", "slack-redir.net"},
+    "automattic": {"wordpress.com", "tumblr.com", "gravatar.com"},
+    "cloudflare": {"cloudflare.com", "workers.dev", "pages.dev"},
+    "google": {"google.com", "googleapis.com", "youtube.com"},
+}
+
+
+def is_safe_target(url: str, program_handle: str = "") -> Tuple[bool, str]:
+    """Check if a URL is safe to test (not shared infrastructure).
+
+    Returns (is_safe, reason).
+    """
+    parsed = urllib.parse.urlparse(url)
+    hostname = (parsed.hostname or "").lower()
+    if not hostname:
+        return False, "invalid URL"
+
+    # Check program-owned overrides first
+    program_owned = _PROGRAM_OWNED_OVERRIDES.get(program_handle.lower(), set())
+    for owned_domain in program_owned:
+        if hostname == owned_domain or hostname.endswith("." + owned_domain):
+            return True, "program-owned domain"
+
+    # Check against shared platforms
+    for shared in SHARED_PLATFORMS:
+        if hostname == shared or hostname.endswith("." + shared):
+            return False, f"shared platform ({shared})"
+
+    return True, "ok"
+
+
+def filter_safe_targets(urls: List[str], program_handle: str = "") -> Tuple[List[str], List[Dict]]:
+    """Filter URLs to only safe-to-test targets.
+
+    Returns (safe_urls, skipped_entries).
+    """
+    safe = []
+    skipped = []
+    for url in urls:
+        ok, reason = is_safe_target(url, program_handle)
+        if ok:
+            safe.append(url)
+        else:
+            skipped.append({"url": url, "reason": reason})
+    return safe, skipped
+
 
 def normalize_scope_to_urls(scopes: List[Dict]) -> List[str]:
     """Convert scope entries to testable URLs."""
@@ -383,6 +478,8 @@ def run_bounty(
     timeout: int = 8,
     delay: float = 0.5,
     output: Optional[str] = None,
+    scope_only: bool = False,
+    force: bool = False,
 ):
     """Main entry point for fray bounty."""
     print(f"\n{Colors.BOLD}Fray Bounty v{__version__}{Colors.END}")
@@ -493,6 +590,33 @@ def run_bounty(
 
     if not urls:
         print(f"\n  {Colors.YELLOW}No testable URLs found in scope.{Colors.END}\n")
+        return
+
+    # ── Domain safety check ──────────────────────────────────────────────
+    prog_handle = program or ""
+    safe_urls, skipped = filter_safe_targets(urls, prog_handle)
+
+    if skipped:
+        print(f"\n  {Colors.YELLOW}{Colors.BOLD}Skipped (shared platforms — not owned by {prog_handle}):{Colors.END}")
+        for s in skipped:
+            print(f"    {Colors.DIM}SKIP{Colors.END}  {s['url']:<40} {Colors.DIM}{s['reason']}{Colors.END}")
+
+    if not force:
+        urls = safe_urls
+    else:
+        print(f"  {Colors.YELLOW}--force: testing ALL URLs including shared platforms{Colors.END}")
+
+    if not urls:
+        print(f"\n  {Colors.YELLOW}No safe targets to test after filtering shared platforms.{Colors.END}")
+        print(f"  {Colors.DIM}Use --force to override safety checks.{Colors.END}\n")
+        return
+
+    # ── Scope-only mode ──────────────────────────────────────────────────
+    if scope_only:
+        print(f"\n  {Colors.BOLD}Safe Targets ({len(urls)}):{Colors.END}")
+        for u in urls:
+            print(f"    {Colors.CYAN}{u}{Colors.END}")
+        print(f"\n  {Colors.DIM}Use without --scope-only to run tests.{Colors.END}\n")
         return
 
     print(f"\n  {Colors.BOLD}Testing {len(urls)} target(s) × {len(test_categories)} categories × {max_payloads} payloads{Colors.END}")

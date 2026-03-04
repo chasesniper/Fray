@@ -190,6 +190,8 @@ def cmd_bounty(args):
         timeout=args.timeout,
         delay=args.delay,
         output=args.output,
+        scope_only=args.scope_only,
+        force=args.force,
     )
 
 
@@ -349,6 +351,8 @@ Documentation: https://github.com/dalisecurity/fray
     p_bounty.add_argument("-t", "--timeout", type=int, default=8, help="Request timeout (default: 8)")
     p_bounty.add_argument("-d", "--delay", type=float, default=0.5, help="Delay between requests (default: 0.5)")
     p_bounty.add_argument("-o", "--output", default=None, help="Save report JSON to file")
+    p_bounty.add_argument("--scope-only", action="store_true", help="Show scope URLs only, don't run tests")
+    p_bounty.add_argument("--force", action="store_true", help="Test ALL URLs including shared platforms (dangerous)")
     p_bounty.set_defaults(func=cmd_bounty)
 
     # ci

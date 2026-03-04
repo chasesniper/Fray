@@ -25,8 +25,11 @@ from fray.validate import (
 from fray.bounty import (
     HackerOnePublic,
     BugcrowdPublic,
+    SHARED_PLATFORMS,
     normalize_scope_to_urls,
     load_urls_from_file,
+    is_safe_target,
+    filter_safe_targets,
     scan_target,
     run_bounty,
 )
@@ -405,6 +408,106 @@ class TestBugcrowdPublic(unittest.TestCase):
         api = BugcrowdPublic()
         ok, scopes = api.get_program_scope("nonexistent")
         self.assertFalse(ok)
+
+
+class TestIsSafeTarget(unittest.TestCase):
+
+    def test_normal_domain_safe(self):
+        ok, reason = is_safe_target("https://superbet.ro")
+        self.assertTrue(ok)
+
+    def test_shared_github_blocked(self):
+        ok, reason = is_safe_target("https://github.com")
+        self.assertFalse(ok)
+        self.assertIn("shared", reason)
+
+    def test_shared_subdomain_blocked(self):
+        ok, reason = is_safe_target("https://myapp.herokuapp.com")
+        self.assertFalse(ok)
+
+    def test_shared_s3_blocked(self):
+        ok, reason = is_safe_target("https://mybucket.s3.amazonaws.com")
+        self.assertFalse(ok)
+
+    def test_shared_cloudfront_blocked(self):
+        ok, reason = is_safe_target("https://d123.cloudfront.net")
+        self.assertFalse(ok)
+
+    def test_shared_vercel_blocked(self):
+        ok, reason = is_safe_target("https://myapp.vercel.app")
+        self.assertFalse(ok)
+
+    def test_shared_salesforce_blocked(self):
+        ok, reason = is_safe_target("https://company.salesforce.com")
+        self.assertFalse(ok)
+
+    def test_program_owned_override_github(self):
+        ok, reason = is_safe_target("https://github.com", program_handle="github")
+        self.assertTrue(ok)
+        self.assertIn("program-owned", reason)
+
+    def test_program_owned_subdomain(self):
+        ok, reason = is_safe_target("https://api.github.com", program_handle="github")
+        self.assertTrue(ok)
+
+    def test_program_owned_npmjs(self):
+        ok, reason = is_safe_target("https://npmjs.com", program_handle="github")
+        self.assertTrue(ok)
+
+    def test_program_owned_shopify(self):
+        ok, reason = is_safe_target("https://shopify.com", program_handle="shopify")
+        self.assertTrue(ok)
+
+    def test_program_owned_slack(self):
+        ok, reason = is_safe_target("https://slack.com", program_handle="slack")
+        self.assertTrue(ok)
+
+    def test_github_blocked_for_other_program(self):
+        ok, reason = is_safe_target("https://github.com", program_handle="superbet")
+        self.assertFalse(ok)
+
+    def test_invalid_url(self):
+        ok, reason = is_safe_target("")
+        self.assertFalse(ok)
+
+
+class TestFilterSafeTargets(unittest.TestCase):
+
+    def test_filters_shared(self):
+        urls = [
+            "https://superbet.ro",
+            "https://github.com",
+            "https://superbet.com",
+            "https://myapp.herokuapp.com",
+        ]
+        safe, skipped = filter_safe_targets(urls, "superbet")
+        self.assertEqual(len(safe), 2)
+        self.assertEqual(len(skipped), 2)
+        self.assertIn("https://superbet.ro", safe)
+        self.assertIn("https://superbet.com", safe)
+
+    def test_github_program_keeps_github(self):
+        urls = ["https://github.com", "https://api.github.com", "https://npmjs.com"]
+        safe, skipped = filter_safe_targets(urls, "github")
+        self.assertEqual(len(safe), 3)
+        self.assertEqual(len(skipped), 0)
+
+    def test_all_shared_returns_empty(self):
+        urls = ["https://github.com", "https://herokuapp.com"]
+        safe, skipped = filter_safe_targets(urls, "random_company")
+        self.assertEqual(len(safe), 0)
+        self.assertEqual(len(skipped), 2)
+
+
+class TestSharedPlatformsList(unittest.TestCase):
+
+    def test_has_major_providers(self):
+        for domain in ["github.com", "amazonaws.com", "herokuapp.com",
+                       "vercel.app", "netlify.app", "salesforce.com"]:
+            self.assertIn(domain, SHARED_PLATFORMS)
+
+    def test_is_set(self):
+        self.assertIsInstance(SHARED_PLATFORMS, set)
 
 
 class TestBountyNoArgs(unittest.TestCase):
