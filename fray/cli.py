@@ -112,6 +112,24 @@ def cmd_test(args):
     tester.generate_report(results, output=output)
     print(f"\nResults saved to {output}")
 
+    # Auto-generate formatted report if requested
+    report_fmt = getattr(args, 'report_format', None)
+    if report_fmt:
+        from fray.reporter import SecurityReportGenerator
+        gen = SecurityReportGenerator()
+        # Build full result dict for the reporter
+        report_data = {
+            "target": args.target,
+            "results": results,
+        }
+        if report_fmt == 'markdown':
+            report_file = output.replace('.json', '.md')
+            gen.generate_markdown_report(report_data, report_file)
+        else:
+            report_file = output.replace('.json', '.html')
+            gen.generate_html_report(report_data, report_file)
+        print(f"Report generated: {report_file}")
+
     # Send webhook notification if requested
     if args.webhook:
         from fray.webhook import send_webhook
@@ -136,7 +154,7 @@ def cmd_test(args):
 
 
 def cmd_report(args):
-    """Generate HTML report from results"""
+    """Generate HTML or Markdown report from results"""
     if args.sample:
         from fray.reporter import generate_sample_report
         generate_sample_report()
@@ -149,9 +167,16 @@ def cmd_report(args):
     with open(args.input, "r", encoding="utf-8") as f:
         data = json.load(f)
     generator = SecurityReportGenerator()
-    output = args.output
+    fmt = getattr(args, 'format', 'html') or 'html'
+    if fmt == 'markdown':
+        output = args.output.replace('.html', '.md') if args.output.endswith('.html') else args.output
+    else:
+        output = args.output
     _validate_output_path(output)
-    generator.generate_html_report(data, output)
+    if fmt == 'markdown':
+        generator.generate_markdown_report(data, output)
+    else:
+        generator.generate_html_report(data, output)
     print(f"Report generated: {output}")
 
 
@@ -389,6 +414,8 @@ Documentation: https://github.com/dalisecurity/fray
     p_test.add_argument("-v", "--verbose", action="store_true", help="Show raw HTTP request/response for debugging")
     p_test.add_argument("--no-follow-redirects", action="store_true", help="Do not follow HTTP redirects")
     p_test.add_argument("--redirect-limit", type=int, default=5, help="Max redirects to follow (default: 5, 0 = none)")
+    p_test.add_argument("--report-format", choices=["html", "markdown"], default=None,
+                         help="Auto-generate report in this format after testing")
     p_test.set_defaults(func=cmd_test)
 
     # report
@@ -396,6 +423,7 @@ Documentation: https://github.com/dalisecurity/fray
     p_report.add_argument("-i", "--input", help="Input results JSON file")
     p_report.add_argument("-o", "--output", default="fray_report.html", help="Output HTML file")
     p_report.add_argument("--sample", action="store_true", help="Generate a sample demo report")
+    p_report.add_argument("--format", choices=["html", "markdown"], default="html", help="Report format (default: html)")
     p_report.set_defaults(func=cmd_report)
 
     # payloads
