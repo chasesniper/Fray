@@ -35,6 +35,8 @@ Most payload collections are static text files. Fray is a **complete workflow** 
 | **LLM Top 10** (AI/ML) | 300+ | ✅ 100% |
 | **API Security Top 10** | 520+ | ✅ 100% |
 
+**Built for:** Bug bounty hunters · Red teamers & pentesters · Security researchers · Blue teams validating WAF configs · Students learning offensive security
+
 ---
 
 ## Quick Start
