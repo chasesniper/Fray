@@ -6,8 +6,10 @@ Usage:
     fray detect <url>           Detect WAF vendor
     fray test <url>             Test WAF with payloads
     fray test <url> -c xss      Test specific category
+    fray test <url> --webhook <url>  Notify on completion
     fray report                 Generate HTML report
     fray payloads               List available payload categories
+    fray doctor                 Check environment + auto-fix issues
     fray version                Show version
 """
 
@@ -67,6 +69,28 @@ def cmd_test(args):
     tester.generate_report(results, output=output)
     print(f"\nResults saved to {output}")
 
+    # Send webhook notification if requested
+    if args.webhook:
+        from fray.webhook import send_webhook
+        report = {
+            "target": args.target,
+            "duration": tester.start_time and str(tester.start_time) or "N/A",
+            "summary": {
+                "total": len(results),
+                "blocked": sum(1 for r in results if r.get("blocked")),
+                "passed": sum(1 for r in results if not r.get("blocked")),
+                "block_rate": f"{sum(1 for r in results if r.get('blocked')) / len(results) * 100:.1f}%" if results else "0%",
+            }
+        }
+        # Calculate duration properly
+        if tester.start_time:
+            from datetime import datetime
+            elapsed = datetime.now() - tester.start_time
+            minutes = int(elapsed.total_seconds() // 60)
+            seconds = int(elapsed.total_seconds() % 60)
+            report["duration"] = f"{minutes}m {seconds}s" if minutes > 0 else f"{seconds}s"
+        send_webhook(args.webhook, report)
+
 
 def cmd_report(args):
     """Generate HTML report from results"""
@@ -110,6 +134,12 @@ def cmd_version(args):
     print(f"Fray v{__version__}")
 
 
+def cmd_doctor(args):
+    """Run environment diagnostics and auto-fix issues"""
+    from fray.doctor import run_doctor
+    run_doctor(auto_fix=args.fix, verbose=args.verbose)
+
+
 def cmd_mcp(args):
     """Start MCP server for AI assistant integration"""
     try:
@@ -139,6 +169,9 @@ Examples:
   fray detect https://example.com
   fray test https://example.com --category xss
   fray test https://example.com --all
+  fray test https://example.com --webhook https://hooks.slack.com/xxx
+  fray doctor
+  fray doctor --fix
   fray payloads
   fray report --output report.html
 
@@ -163,6 +196,7 @@ Documentation: https://github.com/dalisecurity/fray
     p_test.add_argument("--all", action="store_true", help="Test all payload categories")
     p_test.add_argument("-m", "--max", type=int, default=None, help="Maximum number of payloads to test")
     p_test.add_argument("-o", "--output", default=None, help="Output results JSON file")
+    p_test.add_argument("--webhook", default=None, help="Webhook URL for notifications (Slack/Discord/Teams)")
     p_test.set_defaults(func=cmd_test)
 
     # report
@@ -179,6 +213,12 @@ Documentation: https://github.com/dalisecurity/fray
     # version
     p_version = subparsers.add_parser("version", help="Show version")
     p_version.set_defaults(func=cmd_version)
+
+    # doctor
+    p_doctor = subparsers.add_parser("doctor", help="Check environment and auto-fix common issues")
+    p_doctor.add_argument("--fix", action="store_true", help="Auto-fix issues where possible")
+    p_doctor.add_argument("-v", "--verbose", action="store_true", help="Show detailed fix suggestions")
+    p_doctor.set_defaults(func=cmd_doctor)
 
     # mcp
     p_mcp = subparsers.add_parser("mcp", help="Start MCP server for AI assistant integration")
