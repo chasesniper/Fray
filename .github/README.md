@@ -23,7 +23,7 @@ Most payload collections are just static text files. **Fray is different** — i
 - 🤖 **AI-compatible** — structured JSON payloads work well with Claude Code & ChatGPT
 - 🔍 **Auto-detect which WAF** you're facing — 25 vendors fingerprinted instantly
 - 📊 **One-command reports** — professional HTML output with vuln analysis
-- 🎯 **4,025+ battle-tested payloads** — XSS, SQLi, SSRF, SSTI, LLM jailbreaks, and more
+- 🎯 **5,500+ battle-tested payloads** — XSS, SQLi, SSRF, SSTI, LLM jailbreaks, and more
 - ⚡ **Zero config** — `pip install fray` and you're testing
 
 ### 🔥 Built For
@@ -31,7 +31,7 @@ Most payload collections are just static text files. **Fray is different** — i
 - **Bug bounty hunters** — ready-made payloads from real-world disclosures + 120 CVEs
 - **Red teamers & pentesters** — WAF detection → payload selection → report, all in one tool
 - **Security researchers** — structured payloads for bypass research and analysis
-- **Blue teams** — validate your WAF config against 4,000+ real attack patterns
+- **Blue teams** — validate your WAF config against 5,500+ real attack patterns
 - **Students** — learn offensive security with guided AI workflows
 
 ### �️ WAF Vendor Detection — 25 Vendors Supported
@@ -176,7 +176,7 @@ fray payloads
 
 ## 📊 Complete OWASP Coverage
 
-**4,025+ total payloads across 40+ categories:**
+**5,500+ total payloads across 40+ categories:**
 
 ### OWASP Top 10:2021 (Web) - 1,690+ Payloads
 - A01: Broken Access Control (150+)
