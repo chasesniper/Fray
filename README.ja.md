@@ -20,15 +20,15 @@
 
 ## なぜ Fray？
 
-多くのペイロードコレクションは静的テキストファイルです。Frayは**完全なワークフロー**を提供します — 偵察 → 検出 → テスト → レポート：
+多くのペイロード集は静的なテキストファイルに過ぎません。Frayなら**一気通貫のワークフロー**で完結します — 偵察 → 検出 → テスト → レポート：
 
 - 🔍 **偵察優先** — 14項目のチェック：TLS、ヘッダー、Cookie、DNS、CORS、公開ファイル、サブドメイン
-- 🎯 **スマートテスト** — WordPressを検出？sqli + xss ペイロードを推奨。Y/Nで選択
+- 🎯 **スマートテスト** — WordPressを検出したら sqli + xss ペイロードを自動推奨。Y/Nで選択
 - 🛡️ **WAF検出** — 25社のベンダーをフィンガープリント（Cloudflare、AWS、Akamai、Imperva等）
-- 🐛 **HackerOne対応** — 構造化JSON出力がHackerOneの脆弱性分類に対応
+- 🐛 **HackerOne対応** — 構造化されたJSON出力がHackerOneの脆弱性分類にそのまま対応
 - 🤖 **AI対応** — Claude Code・ChatGPT連携用MCPサーバー搭載
 - 📊 **ワンコマンドレポート** — HTML・Markdownで脆弱性分析レポートを生成
-- ⚡ **依存関係ゼロ** — Python標準ライブラリのみ、`pip install fray` で即開始
+- ⚡ **依存関係ゼロ** — Python標準ライブラリのみで動作。`pip install fray` ですぐ使える
 
 | OWASPフレームワーク | ペイロード数 | カバレッジ |
 |-------------------|-----------|----------|
@@ -81,8 +81,8 @@ fray recon https://example.com
 | **Cookie** | HttpOnly、Secure、SameSiteフラグ（スコア付き） |
 | **フィンガープリント** | WordPress、Drupal、PHP、Node.js、React、nginx、Apache、Java、.NET等 |
 | **DNS** | A/AAAA/CNAME/MX/TXT/NSレコード、CDN検出、SPF/DMARC |
-| **robots.txt** | 非公開パス、注目エンドポイント（admin、api、login） |
-| **CORS** | ワイルドカードオリジン、リフレクションオリジン、認証情報の設定ミス |
+| **robots.txt** | 制限パス、注目すべきエンドポイント（admin、api、login） |
+| **CORS** | ワイルドカードオリジン、反射型オリジン、認証情報の設定不備 |
 | **公開ファイル** | 28パスをプローブ — `.env`、`.git`、phpinfo、actuator、SQLダンプ |
 | **HTTPメソッド** | 危険なメソッド：PUT、DELETE、TRACE |
 | **エラーページ** | スタックトレース、バージョンリーク、フレームワーク情報の404分析 |
@@ -99,7 +99,7 @@ fray recon https://example.com -o recon.json # ファイルに保存
 
 ## 🎯 スマートモード — `fray test --smart`
 
-偵察を先に実行し、検出結果に基づいてペイロードを推奨：
+偵察を先に実行し、検出結果に基づき最適なペイロードを提案：
 
 ```
 🔍 Running reconnaissance on https://example.com...
@@ -162,7 +162,7 @@ fray detect https://example.com
 
 ## 🐛 バグバウンティ連携
 
-Frayはバグバウンティワークフロー向けに構築 — 偵察からレポート提出まで：
+Frayはバグバウンティのワークフローに最適化されています — 偵察からレポート提出まで：
 
 ```bash
 # フルワークフロー：偵察 → スマートテスト → レポート
@@ -181,7 +181,7 @@ fray report -i results.json -o report.html --format markdown
 ### ワークフロー例
 
 ```
-1. fray recon https://target.com         → 攻撃対象を調査
+1. fray recon https://target.com         → 攻撃対象面を調査
 2. fray detect https://target.com        → WAFの種類を特定
 3. fray test https://target.com --smart  → 優先度付きペイロードでテスト
 4. fray report -i results.json           → 提出用レポートを生成
@@ -294,7 +294,7 @@ fray/
 
 ## 法的事項
 
-**MITライセンス** — [LICENSE](LICENSE) を参照。所有または明示的な許可を得たシステムのみテストしてください。著者は悪用に対して責任を負いません。
+**MITライセンス** — [LICENSE](LICENSE) を参照。所有または明示的な許可を得たシステムのみテストしてください。本ツールの悪用について著者は一切の責任を負いません。
 
 **セキュリティ問題：** soc@dalisec.io · [SECURITY.md](SECURITY.md)
 

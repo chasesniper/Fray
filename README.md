@@ -23,7 +23,7 @@
 Most payload collections are static text files. Fray is a **complete workflow** — recon → detect → test → report:
 
 - 🔍 **Recon first** — 14 checks: TLS, headers, cookies, DNS, CORS, exposed files, subdomains
-- 🎯 **Smart testing** — detects WordPress? Recommends sqli + xss payloads. You pick Y/N
+- 🎯 **Smart testing** — detects WordPress, recommends sqli + xss payloads. You pick Y/N
 - 🛡️ **WAF detection** — fingerprints 25 vendors (Cloudflare, AWS, Akamai, Imperva, etc.)
 - 🐛 **HackerOne ready** — structured JSON output maps to HackerOne severity/weakness taxonomy
 - 🤖 **AI-native** — MCP server for Claude Code & ChatGPT integration
