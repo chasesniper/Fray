@@ -511,23 +511,32 @@ def cmd_explain(args):
         if len(items) > show_count:
             print(f"\n  {dim}... and {len(items) - show_count} more (use --max {len(items)} to see all){reset}")
 
-        # What to test
-        print(f"\n  {bold}What to test:{reset}")
+        # How to run against a target
         cat = first.get("category", "")
+        subcat = first.get("subcategory", "")
+        cve_str = cve_id if cve_id.startswith("CVE") else ""
+
+        print(f"\n  {bold}How to run against a target:{reset}")
         if "rce" in cat.lower() or "rce" in desc.lower() or "command" in desc.lower():
             print(f"    → Test command execution endpoints, check input sanitization")
-            print(f"    → fray test <url> -c {cat} --max 10")
         elif "xss" in cat.lower():
             print(f"    → Test reflected/stored XSS vectors in user input fields")
-            print(f"    → fray test <url> -c xss --max 10")
         elif "sqli" in cat.lower() or "sql" in desc.lower():
             print(f"    → Test SQL injection in query parameters and form fields")
-            print(f"    → fray test <url> -c sqli --max 10")
         elif "ssrf" in cat.lower():
             print(f"    → Test SSRF in URL parameters, redirects, and webhooks")
-            print(f"    → fray test <url> -c ssrf --max 10")
-        else:
-            print(f"    → fray test <url> -c {cat} --max 10")
+
+        print()
+        print(f"    {dim}# Test this CVE's payloads against your target:{reset}")
+        print(f"    fray test https://target.com -c {cat} --max {len(items)}")
+        print()
+        print(f"    {dim}# Smart mode — recon first, then test recommended categories:{reset}")
+        print(f"    fray test https://target.com --smart")
+        print()
+        print(f"    {dim}# Full recon + test workflow:{reset}")
+        print(f"    fray recon https://target.com")
+        print(f"    fray test https://target.com -c {cat} --max {len(items)} -o results.json")
+        print(f"    fray report -i results.json -o report.html")
 
     total = sum(len(v) for v in by_cve.values())
     print(f"\n{'━' * 60}")
