@@ -370,8 +370,8 @@ cat PAYLOAD_DATABASE_COVERAGE.md
 
 - **Issues**: [GitHub Issues](https://github.com/dalisecurity/fray/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/dalisecurity/fray/discussions)
-- **Security**: security@dalisecurity.com
-- **Commercial**: contact@dalisecurity.com
+- **Security**: soc@dalisec.io
+- **Commercial**: soc@dalisec.io
 
 ---
 

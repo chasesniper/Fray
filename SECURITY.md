@@ -10,8 +10,8 @@ We take the security of WAF Payload Arsenal seriously. If you discover a securit
 
 Instead, report security issues privately:
 
-1. **Email**: security@dalisecurity.com
-2. **Subject**: `[SECURITY] WAF Payload Arsenal - [Brief Description]`
+1. **Email**: soc@dalisec.io
+2. **Subject**: `[SECURITY] Fray - [Brief Description]`
 3. **Include**:
    - Description of the vulnerability
    - Steps to reproduce
@@ -118,9 +118,9 @@ We recognize and thank security researchers who help improve this project:
 
 ## 📞 Contact
 
-- **Security Issues**: security@dalisecurity.com
+- **Security Issues**: soc@dalisec.io
 - **General Questions**: GitHub Issues
-- **Commercial Inquiries**: contact@dalisecurity.com
+- **Commercial Inquiries**: soc@dalisec.io
 
 ## 📚 Additional Resources
 
@@ -130,5 +130,5 @@ We recognize and thank security researchers who help improve this project:
 
 ---
 
-**Last Updated**: February 28, 2026  
-**Version**: 1.0.0
+**Last Updated**: March 4, 2026  
+**Version**: 1.1.0

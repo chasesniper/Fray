@@ -36,7 +36,7 @@ Unacceptable:
 
 ## Enforcement
 
-Report issues to: conduct@dalisecurity.com
+Report issues to: soc@dalisec.io
 
 All complaints will be reviewed promptly and fairly.
 
