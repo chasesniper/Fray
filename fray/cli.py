@@ -39,11 +39,19 @@ def cmd_detect(args):
 def cmd_test(args):
     """Run WAF tests against target"""
     from fray.tester import WAFTester
+    # Build custom headers from auth flags
+    custom_headers = {}
+    if getattr(args, 'cookie', None):
+        custom_headers['Cookie'] = args.cookie
+    if getattr(args, 'bearer', None):
+        custom_headers['Authorization'] = f'Bearer {args.bearer}'
     tester = WAFTester(
         target=args.target,
         timeout=args.timeout,
         delay=args.delay,
         verify_ssl=not getattr(args, 'insecure', False),
+        custom_headers=custom_headers or None,
+        verbose=getattr(args, 'verbose', False),
     )
 
     all_payloads = []
@@ -310,6 +318,9 @@ Documentation: https://github.com/dalisecurity/fray
                          help="Adaptive payload evolution: probe WAF, skip redundant payloads, mutate bypasses")
     p_test.add_argument("--webhook", default=None, help="Webhook URL for notifications (Slack/Discord/Teams)")
     p_test.add_argument("--insecure", action="store_true", help="Disable TLS certificate verification")
+    p_test.add_argument("--cookie", default=None, help="Cookie header value for authenticated scanning")
+    p_test.add_argument("--bearer", default=None, help="Bearer token for Authorization header")
+    p_test.add_argument("-v", "--verbose", action="store_true", help="Show raw HTTP request/response for debugging")
     p_test.set_defaults(func=cmd_test)
 
     # report

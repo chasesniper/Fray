@@ -50,7 +50,7 @@ class WAFTester:
     
     def __init__(self, target: str, timeout: int = 8, delay: float = 0.5,
                  custom_headers: Optional[Dict[str, str]] = None,
-                 verify_ssl: bool = True):
+                 verify_ssl: bool = True, verbose: bool = False):
         self.target = target
         self.timeout = timeout
         self.delay = delay
@@ -58,6 +58,7 @@ class WAFTester:
         self.start_time = None
         self.custom_headers = custom_headers or {}
         self.verify_ssl = verify_ssl
+        self.verbose = verbose
         
         # Parse target URL
         if not target.startswith('http'):
@@ -81,18 +82,39 @@ class WAFTester:
             lines += f"{k}: {v}\r\n"
         return lines
 
+    def _resolve_and_check(self, host: str) -> str:
+        """Resolve hostname once and return the IP. Raises ValueError for private IPs."""
+        ip_str = socket.gethostbyname(host)
+        ip = ipaddress.ip_address(ip_str)
+        if ip.is_private or ip.is_loopback or ip.is_link_local:
+            raise ValueError(f"Resolved to private/internal IP: {ip_str}")
+        return ip_str
+
     def _raw_request(self, host: str, port: int, use_ssl: bool,
                      request: str) -> tuple:
         """Send a raw HTTP request and return (status, response_str, headers_dict)."""
+        # DNS rebinding protection: resolve once, pin IP, verify it's not private
+        try:
+            resolved_ip = self._resolve_and_check(host)
+        except (socket.gaierror, ValueError) as e:
+            if isinstance(e, ValueError):
+                raise  # Propagate private-IP block
+            resolved_ip = host  # Fallback for raw IPs or unresolvable hosts
+
         if use_ssl:
             ctx = ssl.create_default_context()
             if not self.verify_ssl:
                 ctx.check_hostname = False
                 ctx.verify_mode = ssl.CERT_NONE
-            sock = socket.create_connection((host, port), timeout=self.timeout)
+            sock = socket.create_connection((resolved_ip, port), timeout=self.timeout)
             conn = ctx.wrap_socket(sock, server_hostname=host)
         else:
-            conn = socket.create_connection((host, port), timeout=self.timeout)
+            conn = socket.create_connection((resolved_ip, port), timeout=self.timeout)
+
+        if self.verbose:
+            print(f"\n{Colors.HEADER}>>> RAW REQUEST >>>{Colors.END}")
+            print(request[:500])
+            print(f"{Colors.HEADER}>>> END REQUEST >>>{Colors.END}")
 
         conn.sendall(request.encode('utf-8', errors='replace'))
 
@@ -120,6 +142,11 @@ class WAFTester:
             if ':' in line:
                 k, v = line.split(':', 1)
                 headers[k.strip().lower()] = v.strip()
+
+        if self.verbose:
+            print(f"\n{Colors.HEADER}<<< RAW RESPONSE (status={status}, {len(resp_str)} bytes) <<<{Colors.END}")
+            print(resp_str[:800])
+            print(f"{Colors.HEADER}<<< END RESPONSE <<<{Colors.END}")
 
         return status, resp_str, headers
 
@@ -180,6 +207,18 @@ class WAFTester:
                         current_path = parsed.path or '/'
                         current_query = parsed.query or ''
                     continue  # Follow the redirect
+
+                # Handle 429 rate-limiting with Retry-After
+                if status == 429 and hop == 0:
+                    retry_after = headers.get('retry-after', '')
+                    try:
+                        wait = min(int(retry_after), 30) if retry_after.isdigit() else 5
+                    except (ValueError, AttributeError):
+                        wait = 5
+                    if self.verbose:
+                        print(f"{Colors.YELLOW}429 rate-limited, retrying after {wait}s{Colors.END}")
+                    time.sleep(wait)
+                    continue  # Retry this hop
 
                 # Final response — determine if blocked
                 error_code = None

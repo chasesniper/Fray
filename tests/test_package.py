@@ -13,6 +13,8 @@ from pathlib import Path
 
 import pytest
 
+from fray.mcp_server import MCP_AVAILABLE
+
 ROOT = Path(__file__).resolve().parent.parent
 PKG = ROOT / "fray"
 PAYLOADS = PKG / "payloads"
@@ -462,102 +464,86 @@ class TestMCPServer:
         assert "cookies" in cf
         assert "cf-ray" in cf["headers"]
 
+    @pytest.mark.skipif(not MCP_AVAILABLE, reason="MCP SDK not installed")
     def test_create_server_registers_10_tools(self):
-        try:
-            from fray.mcp_server import create_server
-            server = create_server()
-            tools = server._tool_manager._tools
-            assert len(tools) == 10
-            expected = {"list_payload_categories", "get_payloads",
-                        "search_payloads", "get_waf_signatures",
-                        "get_cve_details", "suggest_payloads_for_waf",
-                        "analyze_scan_results", "generate_bypass_strategy",
-                        "explain_vulnerability", "create_custom_payload"}
-            assert set(tools.keys()) == expected
-        except ImportError:
-            pytest.skip("MCP SDK not installed")
+        from fray.mcp_server import create_server
+        server = create_server()
+        tools = server._tool_manager._tools
+        assert len(tools) == 10
+        expected = {"list_payload_categories", "get_payloads",
+                    "search_payloads", "get_waf_signatures",
+                    "get_cve_details", "suggest_payloads_for_waf",
+                    "analyze_scan_results", "generate_bypass_strategy",
+                    "explain_vulnerability", "create_custom_payload"}
+        assert set(tools.keys()) == expected
 
+    @pytest.mark.skipif(not MCP_AVAILABLE, reason="MCP SDK not installed")
     def test_tool_list_categories_returns_string(self):
         import asyncio
-        try:
-            from fray.mcp_server import create_server
-            server = create_server()
-            fn = server._tool_manager._tools["list_payload_categories"].fn
-            result = asyncio.run(fn())
-            assert isinstance(result, str)
-            assert "xss" in result
-            assert "iot_rce" in result
-        except ImportError:
-            pytest.skip("MCP SDK not installed")
+        from fray.mcp_server import create_server
+        server = create_server()
+        fn = server._tool_manager._tools["list_payload_categories"].fn
+        result = asyncio.run(fn())
+        assert isinstance(result, str)
+        assert "xss" in result
+        assert "iot_rce" in result
 
+    @pytest.mark.skipif(not MCP_AVAILABLE, reason="MCP SDK not installed")
     def test_tool_get_payloads_xss(self):
         import asyncio
-        try:
-            from fray.mcp_server import create_server
-            server = create_server()
-            fn = server._tool_manager._tools["get_payloads"].fn
-            result = asyncio.run(fn(category="xss", max_results=3))
-            assert isinstance(result, str)
-            assert "xss" in result.lower()
-        except ImportError:
-            pytest.skip("MCP SDK not installed")
+        from fray.mcp_server import create_server
+        server = create_server()
+        fn = server._tool_manager._tools["get_payloads"].fn
+        result = asyncio.run(fn(category="xss", max_results=3))
+        assert isinstance(result, str)
+        assert "xss" in result.lower()
 
+    @pytest.mark.skipif(not MCP_AVAILABLE, reason="MCP SDK not installed")
     def test_tool_get_payloads_bad_category(self):
         import asyncio
-        try:
-            from fray.mcp_server import create_server
-            server = create_server()
-            fn = server._tool_manager._tools["get_payloads"].fn
-            result = asyncio.run(fn(category="nonexistent", max_results=5))
-            assert "not found" in result.lower()
-        except ImportError:
-            pytest.skip("MCP SDK not installed")
+        from fray.mcp_server import create_server
+        server = create_server()
+        fn = server._tool_manager._tools["get_payloads"].fn
+        result = asyncio.run(fn(category="nonexistent", max_results=5))
+        assert "not found" in result.lower()
 
+    @pytest.mark.skipif(not MCP_AVAILABLE, reason="MCP SDK not installed")
     def test_tool_search_payloads(self):
         import asyncio
-        try:
-            from fray.mcp_server import create_server
-            server = create_server()
-            fn = server._tool_manager._tools["search_payloads"].fn
-            result = asyncio.run(fn(query="reverse shell", max_results=3))
-            assert "reverse shell" in result.lower() or "matches" in result.lower()
-        except ImportError:
-            pytest.skip("MCP SDK not installed")
+        from fray.mcp_server import create_server
+        server = create_server()
+        fn = server._tool_manager._tools["search_payloads"].fn
+        result = asyncio.run(fn(query="reverse shell", max_results=3))
+        assert "reverse shell" in result.lower() or "matches" in result.lower()
 
+    @pytest.mark.skipif(not MCP_AVAILABLE, reason="MCP SDK not installed")
     def test_tool_get_cve_details(self):
         import asyncio
-        try:
-            from fray.mcp_server import create_server
-            server = create_server()
-            fn = server._tool_manager._tools["get_cve_details"].fn
-            result = asyncio.run(fn(cve_id="CVE-2026-27509"))
-            assert "CVE-2026-27509" in result
-            assert "Unitree" in result
-        except ImportError:
-            pytest.skip("MCP SDK not installed")
+        from fray.mcp_server import create_server
+        server = create_server()
+        fn = server._tool_manager._tools["get_cve_details"].fn
+        result = asyncio.run(fn(cve_id="CVE-2026-27509"))
+        assert "CVE-2026-27509" in result
+        assert "Unitree" in result
 
+    @pytest.mark.skipif(not MCP_AVAILABLE, reason="MCP SDK not installed")
     def test_tool_get_cve_details_not_found(self):
         import asyncio
-        try:
-            from fray.mcp_server import create_server
-            server = create_server()
-            fn = server._tool_manager._tools["get_cve_details"].fn
-            result = asyncio.run(fn(cve_id="CVE-9999-99999"))
-            assert "no payloads" in result.lower()
-        except ImportError:
-            pytest.skip("MCP SDK not installed")
+        from fray.mcp_server import create_server
+        server = create_server()
+        fn = server._tool_manager._tools["get_cve_details"].fn
+        result = asyncio.run(fn(cve_id="CVE-9999-99999"))
+        assert "no payloads" in result.lower()
 
+    @pytest.mark.skipif(not MCP_AVAILABLE, reason="MCP SDK not installed")
     def test_tool_get_waf_signatures_filtered(self):
         import asyncio
-        try:
-            from fray.mcp_server import create_server
-            server = create_server()
-            fn = server._tool_manager._tools["get_waf_signatures"].fn
-            result = asyncio.run(fn(vendor="Cloudflare"))
-            assert "Cloudflare" in result
-            assert "cf-ray" in result
-        except ImportError:
-            pytest.skip("MCP SDK not installed")
+        from fray.mcp_server import create_server
+        server = create_server()
+        fn = server._tool_manager._tools["get_waf_signatures"].fn
+        result = asyncio.run(fn(vendor="Cloudflare"))
+        assert "Cloudflare" in result
+        assert "cf-ray" in result
 
 
 # ── Payload data quality ───────────────────────────────────────────────
