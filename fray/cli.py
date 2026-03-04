@@ -6,6 +6,7 @@ Usage:
     fray detect <url>           Detect WAF vendor
     fray test <url>             Test WAF with payloads
     fray test <url> -c xss      Test specific category
+    fray test <url> --smart      Adaptive payload evolution (fewer requests, more impact)
     fray test <url> --webhook <url>  Notify on completion
     fray report                 Generate HTML report
     fray payloads               List available payload categories
@@ -67,7 +68,15 @@ def cmd_test(args):
         sys.exit(1)
 
     print(f"\nLoaded {len(all_payloads)} payloads")
-    results = tester.test_payloads(all_payloads, max_payloads=args.max)
+
+    # Adaptive mode: probe → score → test → mutate
+    if args.smart:
+        from fray.evolve import adaptive_test
+        results, stats, profile = adaptive_test(
+            tester, all_payloads, max_payloads=args.max or 50
+        )
+    else:
+        results = tester.test_payloads(all_payloads, max_payloads=args.max)
 
     # Save results
     output = args.output or "fray_results.json"
@@ -251,6 +260,7 @@ def main():
 Examples:
   fray detect https://example.com
   fray test https://example.com --category xss
+  fray test https://example.com --category xss --smart
   fray test https://example.com --all
   fray test https://example.com --webhook https://hooks.slack.com/xxx
   fray doctor
@@ -292,6 +302,8 @@ Documentation: https://github.com/dalisecurity/fray
     p_test.add_argument("--all", action="store_true", help="Test all payload categories")
     p_test.add_argument("-m", "--max", type=int, default=None, help="Maximum number of payloads to test")
     p_test.add_argument("-o", "--output", default=None, help="Output results JSON file")
+    p_test.add_argument("--smart", action="store_true",
+                         help="Adaptive payload evolution: probe WAF, skip redundant payloads, mutate bypasses")
     p_test.add_argument("--webhook", default=None, help="Webhook URL for notifications (Slack/Discord/Teams)")
     p_test.set_defaults(func=cmd_test)
 
