@@ -51,6 +51,21 @@ def cmd_detect(args):
 
 def cmd_test(args):
     """Run WAF tests against target"""
+    # Scope validation — block testing if target is out of scope
+    scope_file = getattr(args, 'scope', None)
+    if scope_file:
+        from fray.scope import parse_scope_file, is_target_in_scope
+        scope = parse_scope_file(scope_file)
+        in_scope, reason = is_target_in_scope(args.target, scope)
+        if not in_scope:
+            print(f"\n  ⛔ Target is OUT OF SCOPE")
+            print(f"  {reason}")
+            print(f"  Scope file: {scope_file}")
+            print(f"\n  Fray will not test targets outside your scope file.")
+            sys.exit(1)
+        else:
+            print(f"  ✅ Target in scope — {reason}")
+
     from fray.tester import WAFTester
     # Build custom headers from auth flags
     custom_headers = {}
@@ -422,6 +437,29 @@ def cmd_mcp(args):
         sys.exit(1)
 
 
+def cmd_scope(args):
+    """Inspect, validate, or check a target against a scope file"""
+    from fray.scope import parse_scope_file, is_target_in_scope, print_scope
+
+    scope = parse_scope_file(args.scope_file)
+
+    if args.check:
+        # Check a specific target against scope
+        in_scope, reason = is_target_in_scope(args.check, scope)
+        if in_scope:
+            print(f"\n  ✅ {args.check} is IN SCOPE")
+            print(f"  {reason}")
+        else:
+            print(f"\n  ⛔ {args.check} is OUT OF SCOPE")
+            print(f"  {reason}")
+        sys.exit(0 if in_scope else 1)
+
+    if args.json:
+        print(json.dumps(scope, indent=2, ensure_ascii=False))
+    else:
+        print_scope(scope, filepath=args.scope_file)
+
+
 def cmd_explain(args):
     """Explain a CVE — show payloads, affected versions, severity, and what to test"""
     import glob
@@ -683,6 +721,8 @@ Documentation: https://github.com/dalisecurity/fray
                          help="Auto-generate report in this format after testing")
     p_test.add_argument("-y", "--yes", action="store_true",
                          help="Skip interactive prompt in --smart mode (auto-accept recommendations)")
+    p_test.add_argument("--scope", default=None,
+                         help="Scope file — only test targets listed in this file (one domain/IP/CIDR per line)")
     p_test.set_defaults(func=cmd_test)
 
     # report
@@ -792,6 +832,13 @@ Documentation: https://github.com/dalisecurity/fray
     p_explain.add_argument("--json", action="store_true", help="Output as JSON")
     p_explain.add_argument("-o", "--output", help="Save JSON output to file")
     p_explain.set_defaults(func=cmd_explain)
+
+    # scope
+    p_scope = subparsers.add_parser("scope", help="Inspect or validate a scope file for bug bounty testing")
+    p_scope.add_argument("scope_file", help="Path to scope file (one domain/IP/CIDR per line)")
+    p_scope.add_argument("--check", default=None, help="Check if a specific URL is in scope")
+    p_scope.add_argument("--json", action="store_true", help="Output parsed scope as JSON")
+    p_scope.set_defaults(func=cmd_scope)
 
     args = parser.parse_args()
 

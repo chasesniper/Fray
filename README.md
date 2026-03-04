@@ -193,13 +193,41 @@ fray report -i results.json -o report.html --format markdown
 | **Intigriti** | Recon → test → report workflow |
 | **YesWeHack** | Severity mapping from recon scores |
 
+### Scope File Support
+
+Bounty hunters always have scope files. Fray reads them natively:
+
+```bash
+# scope.txt (Burp-style)
+example.com
+*.example.com
+10.0.0.0/24
+https://app.example.com/api
+- staging.example.com    # excluded
+! internal.example.com   # excluded
+```
+
+```bash
+# Inspect a scope file
+fray scope scope.txt
+
+# Check if a target is in scope
+fray scope scope.txt --check https://sub.example.com
+
+# Test with scope enforcement — blocks out-of-scope targets
+fray test https://target.com --smart --scope scope.txt
+```
+
+Supports: **domains, wildcards (\*.example.com), IPs, CIDRs, URLs, out-of-scope exclusions**
+
 ### Workflow Example
 
 ```
-1. fray recon https://target.com         → Discover attack surface
-2. fray detect https://target.com        → Know which WAF you're facing
-3. fray test https://target.com --smart  → Test with prioritized payloads
-4. fray report -i results.json           → Generate submission-ready report
+1. fray scope scope.txt                           → Review your scope
+2. fray recon https://target.com                  → Discover attack surface
+3. fray detect https://target.com                 → Know which WAF you're facing
+4. fray test https://target.com --smart --scope scope.txt  → Test (scope-enforced)
+5. fray report -i results.json                    → Generate submission-ready report
 ```
 
 ---

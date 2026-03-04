@@ -181,13 +181,41 @@ fray report -i results.json -o report.html --format markdown
 | **Intigriti** | 情報収集 → テスト → レポートのワークフロー |
 | **YesWeHack** | 情報収集スコアからの重大度マッピング |
 
+### スコープファイル対応
+
+バグバウンティハンターは常にスコープファイルを使います。Frayはそのまま読み込めます：
+
+```bash
+# scope.txt（Burp形式）
+example.com
+*.example.com
+10.0.0.0/24
+https://app.example.com/api
+- staging.example.com    # 除外
+! internal.example.com   # 除外
+```
+
+```bash
+# スコープファイルを確認
+fray scope scope.txt
+
+# ターゲットがスコープ内かチェック
+fray scope scope.txt --check https://sub.example.com
+
+# スコープ強制付きテスト — 範囲外のターゲットをブロック
+fray test https://target.com --smart --scope scope.txt
+```
+
+対応形式: **ドメイン、ワイルドカード（\*.example.com）、IP、CIDR、URL、スコープ外除外**
+
 ### ワークフロー例
 
 ```
-1. fray recon https://target.com         → 攻撃対象面を調査
-2. fray detect https://target.com        → WAFの種類を特定
-3. fray test https://target.com --smart  → 優先度付きペイロードでテスト
-4. fray report -i results.json           → 提出用レポートを生成
+1. fray scope scope.txt                           → スコープを確認
+2. fray recon https://target.com                  → 攻撃対象面を調査
+3. fray detect https://target.com                 → WAFの種類を特定
+4. fray test https://target.com --smart --scope scope.txt  → スコープ強制付きテスト
+5. fray report -i results.json                    → 提出用レポートを生成
 ```
 
 ---
