@@ -36,12 +36,14 @@ class Colors:
 class WAFTester:
     """Main WAF testing class"""
     
-    def __init__(self, target: str, timeout: int = 8, delay: float = 0.5):
+    def __init__(self, target: str, timeout: int = 8, delay: float = 0.5,
+                 custom_headers: Optional[Dict[str, str]] = None):
         self.target = target
         self.timeout = timeout
         self.delay = delay
         self.results = []
         self.start_time = None
+        self.custom_headers = custom_headers or {}
         
         # Parse target URL
         if not target.startswith('http'):
@@ -55,72 +57,139 @@ class WAFTester:
         self.path = parsed.path or '/'
         self.query = parsed.query
     
-    def test_payload(self, payload: str, method: str = 'GET', param: str = 'input') -> Dict:
-        """Test a single payload"""
-        try:
-            if self.use_ssl:
-                ctx = ssl.create_default_context()
-                ctx.check_hostname = False
-                ctx.verify_mode = ssl.CERT_NONE
-                sock = socket.create_connection((self.host, self.port), timeout=self.timeout)
-                ssock = ctx.wrap_socket(sock, server_hostname=self.host)
-                conn = ssock
-            else:
-                conn = socket.create_connection((self.host, self.port), timeout=self.timeout)
-            
-            if method == 'GET':
-                enc = urllib.parse.quote(payload, safe='')
-                query_string = f"{self.query}&{param}={enc}" if self.query else f"{param}={enc}"
-                req = f"GET {self.path}?{query_string} HTTP/1.1\r\nHost: {self.host}\r\nConnection: close\r\n\r\n"
-            else:
-                enc = urllib.parse.quote(payload, safe='')
-                body = f"{param}={enc}"
-                req = f"POST {self.path} HTTP/1.1\r\nHost: {self.host}\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: {len(body)}\r\nConnection: close\r\n\r\n{body}"
-            
-            conn.sendall(req.encode('utf-8', errors='replace'))
-            
-            resp = b""
-            while True:
-                try:
-                    data = conn.recv(4096)
-                    if not data:
-                        break
-                    resp += data
-                    if len(resp) > 100000:
-                        break
-                except:
+    def _build_extra_headers(self) -> str:
+        """Build extra header lines from custom_headers dict."""
+        lines = ""
+        for k, v in self.custom_headers.items():
+            lines += f"{k}: {v}\r\n"
+        return lines
+
+    def _raw_request(self, host: str, port: int, use_ssl: bool,
+                     request: str) -> tuple:
+        """Send a raw HTTP request and return (status, response_str, headers_dict)."""
+        if use_ssl:
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            sock = socket.create_connection((host, port), timeout=self.timeout)
+            conn = ctx.wrap_socket(sock, server_hostname=host)
+        else:
+            conn = socket.create_connection((host, port), timeout=self.timeout)
+
+        conn.sendall(request.encode('utf-8', errors='replace'))
+
+        resp = b""
+        while True:
+            try:
+                data = conn.recv(4096)
+                if not data:
                     break
-            
-            conn.close()
-            
-            resp_str = resp.decode('utf-8', errors='replace')
-            status_match = re.search(r'HTTP/[\d.]+ (\d+)', resp_str)
-            status = int(status_match.group(1)) if status_match else 0
-            
-            error_code = None
-            if 'error code:' in resp_str.lower():
-                error_match = re.search(r'error code:\s*(\d+)', resp_str, re.IGNORECASE)
-                if error_match:
-                    error_code = error_match.group(1)
-            
-            blocked = status in (403, 406, 503)
-            
-            return {
-                'payload': payload,
-                'status': status,
-                'error_code': error_code,
-                'blocked': blocked,
-                'timestamp': datetime.now().isoformat()
-            }
-            
-        except Exception as e:
-            return {
-                'payload': payload,
-                'status': 0,
-                'error': str(e),
-                'blocked': True,
-                'timestamp': datetime.now().isoformat()
-            }
+                resp += data
+                if len(resp) > 100000:
+                    break
+            except:
+                break
+        conn.close()
+
+        resp_str = resp.decode('utf-8', errors='replace')
+        status_match = re.search(r'HTTP/[\d.]+ (\d+)', resp_str)
+        status = int(status_match.group(1)) if status_match else 0
+
+        # Parse Location header for redirects
+        headers = {}
+        header_section = resp_str.split('\r\n\r\n', 1)[0] if '\r\n\r\n' in resp_str else resp_str
+        for line in header_section.split('\r\n')[1:]:
+            if ':' in line:
+                k, v = line.split(':', 1)
+                headers[k.strip().lower()] = v.strip()
+
+        return status, resp_str, headers
+
+    def test_payload(self, payload: str, method: str = 'GET', param: str = 'input') -> Dict:
+        """Test a single payload, following redirects up to 5 hops."""
+        max_redirects = 5
+        current_host = self.host
+        current_port = self.port
+        current_ssl = self.use_ssl
+        current_path = self.path
+        current_query = self.query
+        extra_hdrs = self._build_extra_headers()
+
+        for hop in range(max_redirects + 1):
+            try:
+                enc = urllib.parse.quote(payload, safe='')
+
+                if method == 'GET' or hop > 0:
+                    query_string = f"{current_query}&{param}={enc}" if current_query else f"{param}={enc}"
+                    req = (f"GET {current_path}?{query_string} HTTP/1.1\r\n"
+                           f"Host: {current_host}\r\n"
+                           f"{extra_hdrs}"
+                           f"Connection: close\r\n\r\n")
+                else:
+                    body = f"{param}={enc}"
+                    req = (f"POST {current_path} HTTP/1.1\r\n"
+                           f"Host: {current_host}\r\n"
+                           f"Content-Type: application/x-www-form-urlencoded\r\n"
+                           f"Content-Length: {len(body)}\r\n"
+                           f"{extra_hdrs}"
+                           f"Connection: close\r\n\r\n{body}")
+
+                status, resp_str, headers = self._raw_request(
+                    current_host, current_port, current_ssl, req)
+
+                # Follow redirects
+                if status in (301, 302, 303, 307, 308) and 'location' in headers:
+                    location = headers['location']
+                    if location.startswith('/'):
+                        current_path = location.split('?')[0]
+                        current_query = location.split('?')[1] if '?' in location else ''
+                    elif location.startswith('http'):
+                        parsed = urllib.parse.urlparse(location)
+                        current_host = parsed.hostname or current_host
+                        current_port = parsed.port or (443 if parsed.scheme == 'https' else 80)
+                        current_ssl = parsed.scheme == 'https'
+                        current_path = parsed.path or '/'
+                        current_query = parsed.query or ''
+                    continue  # Follow the redirect
+
+                # Final response — determine if blocked
+                error_code = None
+                if 'error code:' in resp_str.lower():
+                    error_match = re.search(r'error code:\s*(\d+)', resp_str, re.IGNORECASE)
+                    if error_match:
+                        error_code = error_match.group(1)
+
+                blocked = status in (403, 406, 503)
+
+                return {
+                    'payload': payload,
+                    'status': status,
+                    'error_code': error_code,
+                    'blocked': blocked,
+                    'redirects': hop,
+                    'final_url': f"{'https' if current_ssl else 'http'}://{current_host}{current_path}",
+                    'timestamp': datetime.now().isoformat()
+                }
+
+            except Exception as e:
+                return {
+                    'payload': payload,
+                    'status': 0,
+                    'error': str(e),
+                    'blocked': True,
+                    'redirects': hop,
+                    'timestamp': datetime.now().isoformat()
+                }
+
+        # Ran out of redirect hops
+        return {
+            'payload': payload,
+            'status': 0,
+            'error': f'Too many redirects ({max_redirects})',
+            'blocked': True,
+            'redirects': max_redirects,
+            'timestamp': datetime.now().isoformat()
+        }
     
     def load_payloads(self, filepath: str) -> List[Dict]:
         """Load payloads from JSON file"""

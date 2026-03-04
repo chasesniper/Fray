@@ -122,7 +122,7 @@ class HackerOnePublic:
                 "type": asset_type,
                 "identifier": identifier,
                 "bounty": bounty,
-                "instruction": (instruction or "")[:200],
+                "instruction": (instruction or "")[:1000],
                 "eligible": True,
             })
 
@@ -537,8 +537,39 @@ def load_urls_from_file(filepath: str) -> List[str]:
 
 # ── Bounty Testing ───────────────────────────────────────────────────────────
 
+def extract_custom_headers(scopes: List[Dict]) -> Dict[str, str]:
+    """Extract required custom headers from scope instructions.
+
+    Looks for User-Agent requirements like:
+      'User-agent: hackerone'
+      'Add the following User-Agent header ... User-agent: hackerone'
+    """
+    headers: Dict[str, str] = {}
+    for scope in scopes:
+        instruction = scope.get("instruction", "") or ""
+        if not instruction:
+            continue
+        # Look for User-Agent requirement
+        # Matches patterns like:
+        #   'User-agent: hackerone'
+        #   'User-agent: hackerone -'
+        #   'User-Agent header ... User-agent: hackerone'
+        ua_match = re.search(
+            r'[Uu]ser[-\s]?[Aa]gent:\s*([a-zA-Z0-9_./-]+)',
+            instruction
+        )
+        if ua_match:
+            ua_val = ua_match.group(1).strip().rstrip('.-')
+            # Skip generic words that aren't actual UA values
+            if ua_val and ua_val.lower() not in ("header", "the", "your", "when", "string"):
+                headers["User-Agent"] = ua_val
+                break  # Use first found
+    return headers
+
+
 def scan_target(url: str, categories: List[str], max_payloads: int = 10,
-                timeout: int = 8, delay: float = 0.5) -> Dict:
+                timeout: int = 8, delay: float = 0.5,
+                custom_headers: Optional[Dict[str, str]] = None) -> Dict:
     """Run WAF detection and payload tests on a single target."""
     result = {
         "url": url,
@@ -568,7 +599,8 @@ def scan_target(url: str, categories: List[str], max_payloads: int = 10,
         if not cat_dir.exists():
             continue
 
-        tester = WAFTester(target=url, timeout=timeout, delay=delay)
+        tester = WAFTester(target=url, timeout=timeout, delay=delay,
+                           custom_headers=custom_headers)
         all_payloads = []
         for pf in sorted(cat_dir.glob("*.json")):
             all_payloads.extend(tester.load_payloads(str(pf)))
@@ -582,7 +614,12 @@ def scan_target(url: str, categories: List[str], max_payloads: int = 10,
         rate = (blocked / len(results) * 100) if results else 0.0
 
         bypassed = [
-            {"payload": r.get("payload", "")[:80], "status": r.get("status_code", 0)}
+            {
+                "payload": r.get("payload", "")[:80],
+                "status": r.get("status", 0),
+                "final_url": r.get("final_url", ""),
+                "redirects": r.get("redirects", 0),
+            }
             for r in results if not r.get("blocked")
         ]
 
@@ -645,7 +682,8 @@ def print_bounty_report(targets: List[Dict], program: str, platform: str):
                 if cr.get("passed", 0) > 0:
                     print(f"    {Colors.RED}{cat}:{Colors.END} {cr['passed']} bypass(es)")
                     for bp in cr.get("bypassed", [])[:3]:
-                        print(f"      Status {bp.get('status', '?')}: {bp.get('payload', '')[:60]}")
+                        redir = f" (→{bp.get('final_url', '')})" if bp.get("redirects", 0) > 0 else ""
+                        print(f"      Status {bp.get('status', '?')}: {bp.get('payload', '')[:55]}{redir}")
 
     # Summary
     total_tested = sum(t.get("total_tested", 0) for t in targets)
@@ -659,7 +697,83 @@ def print_bounty_report(targets: List[Dict], program: str, platform: str):
     print(f"  Overall block:    {overall_rate:.1f}%")
     print(f"  Total bypasses:   {Colors.RED if total_bypassed > 0 else Colors.GREEN}"
           f"{total_bypassed}{Colors.END}")
-    print(f"\n{Colors.DIM}{'━' * 65}{Colors.END}\n")
+    print(f"\n{Colors.DIM}{'━' * 65}{Colors.END}")
+
+    # HackerOne-style report for findings
+    if interesting_targets:
+        print(f"\n{'=' * 72}")
+        print(f"  {Colors.BOLD}HackerOne Report Format — Copy/Paste Below{Colors.END}")
+        print(f"{'=' * 72}")
+        for idx, t in enumerate(interesting_targets, 1):
+            _print_h1_finding(t, idx, program, platform)
+        print(f"{'=' * 72}\n")
+
+
+def _print_h1_finding(target: Dict, finding_num: int, program: str, platform: str):
+    """Print a single finding in HackerOne-style report format."""
+    url = target["url"]
+    waf = target.get("waf", "None") or "None"
+
+    # Collect all bypasses across categories
+    all_bypasses = []
+    for cat, cr in target.get("categories", {}).items():
+        for bp in cr.get("bypassed", []):
+            all_bypasses.append({**bp, "category": cat})
+
+    if not all_bypasses:
+        return
+
+    # Determine severity based on category
+    severity_map = {"xss": "Medium", "sqli": "High", "ssti": "High",
+                    "cmdi": "Critical", "ssrf": "High", "xxe": "High",
+                    "lfi": "High", "rce": "Critical"}
+    top_cat = all_bypasses[0].get("category", "xss")
+    severity = severity_map.get(top_cat, "Medium")
+
+    print(f"""
+## Finding #{finding_num}: WAF Bypass — {top_cat.upper()} payloads not blocked on {url}
+
+**Title:** WAF bypass allows unfiltered {top_cat.upper()} payloads on {url}
+
+**Severity:** {severity}
+
+**Asset:** {url}
+**Program:** {program} ({platform})
+**WAF Detected:** {waf}
+
+### Summary
+The web application firewall (WAF) on `{url}` fails to block {len(all_bypasses)} out of {target.get('total_tested', 0)} tested {top_cat.upper()} payloads, resulting in a {100 - target.get('block_rate', 0):.1f}% bypass rate. An attacker could leverage these unfiltered payloads to exploit {top_cat.upper()} vulnerabilities on the target.
+
+### Steps to Reproduce
+1. Navigate to `{url}`
+2. Inject the following payload in any user-controlled input parameter:""")
+
+    for i, bp in enumerate(all_bypasses[:5], 1):
+        print(f"   ```")
+        print(f"   {bp.get('payload', '')}")
+        print(f"   ```")
+        redir_note = f" (followed redirect → `{bp.get('final_url', '')}`)" if bp.get("redirects", 0) > 0 else ""
+        print(f"   **Response:** HTTP {bp.get('status', '?')}{redir_note} — payload was NOT blocked by WAF")
+        if i < min(len(all_bypasses), 5):
+            print()
+
+    print(f"""
+### Impact
+{"- Reflected XSS can steal session cookies, redirect users, or deface the page" if top_cat == "xss" else ""}{"- SQL Injection can leak database contents, bypass authentication, or modify data" if top_cat == "sqli" else ""}{"- Server-Side Template Injection can lead to Remote Code Execution" if top_cat == "ssti" else ""}{"- Command Injection can lead to full server compromise" if top_cat == "cmdi" else ""}{"- SSRF can access internal services or cloud metadata" if top_cat == "ssrf" else ""}
+- The WAF ({waf if waf != "None" else "no WAF detected"}) does not block these payloads
+- Block rate: {target.get('block_rate', 0):.1f}% — {len(all_bypasses)} payload(s) bypassed
+
+### Recommended Fix
+- Review and update WAF rules to block the above payload patterns
+- Implement server-side input validation and output encoding
+- Enable strict Content-Security-Policy headers
+- Consider adding rate limiting on user input endpoints
+
+### Environment
+- **Tool:** Fray v{__version__}
+- **Date:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}
+- **Categories tested:** {', '.join(target.get('categories', {}).keys())}
+- **Total payloads:** {target.get('total_tested', 0)}""")
 
 
 # ── Entry Point ──────────────────────────────────────────────────────────────
@@ -789,6 +903,19 @@ def run_bounty(
         print(f"\n  {Colors.YELLOW}No testable URLs found in scope.{Colors.END}\n")
         return
 
+    # ── Extract required headers from scope instructions ───────────────
+    scope_headers: Dict[str, str] = {}
+    if 'scopes' in dir():
+        pass  # scopes might not exist for --urls mode
+    try:
+        scope_headers = extract_custom_headers(scopes)
+    except NameError:
+        pass
+    if scope_headers:
+        print(f"\n  {Colors.CYAN}{Colors.BOLD}Required Headers (from program instructions):{Colors.END}")
+        for k, v in scope_headers.items():
+            print(f"    {k}: {v}")
+
     # ── Domain safety check ──────────────────────────────────────────────
     prog_handle = program or ""
     safe_urls, skipped = filter_safe_targets(urls, prog_handle)
@@ -824,7 +951,8 @@ def run_bounty(
     for i, url in enumerate(urls, 1):
         print(f"  {Colors.DIM}[{i}/{len(urls)}]{Colors.END} {Colors.CYAN}{url}{Colors.END}")
         result = scan_target(url, test_categories, max_payloads=max_payloads,
-                             timeout=timeout, delay=delay)
+                             timeout=timeout, delay=delay,
+                             custom_headers=scope_headers or None)
         all_results.append(result)
 
         waf = result.get("waf", "None") or "None"
