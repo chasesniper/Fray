@@ -581,6 +581,497 @@ def recommend_categories(fingerprint: Dict[str, Any]) -> List[str]:
     return [cat for cat, _ in ranked if cat in available]
 
 
+# ── Extended recon checks ────────────────────────────────────────────────
+
+def check_robots_sitemap(host: str, port: int, use_ssl: bool,
+                         timeout: int = 8) -> Dict[str, Any]:
+    """Parse robots.txt and sitemap.xml for hidden paths."""
+    result: Dict[str, Any] = {
+        "robots_txt": False,
+        "disallowed_paths": [],
+        "sitemaps": [],
+        "interesting_paths": [],
+    }
+
+    # robots.txt
+    status, _, body = _http_get(host, port, "/robots.txt", use_ssl, timeout=timeout)
+    if status == 200 and body and "disallow" in body.lower():
+        result["robots_txt"] = True
+        interesting_keywords = ("admin", "api", "backup", "config", "dashboard",
+                                "debug", "internal", "login", "manage", "panel",
+                                "private", "secret", "staging", "test", "upload",
+                                "wp-admin", "cgi-bin", ".env", "xmlrpc")
+        for line in body.splitlines():
+            line = line.strip()
+            if line.lower().startswith("disallow:"):
+                path = line.split(":", 1)[1].strip()
+                if path and path != "/":
+                    result["disallowed_paths"].append(path)
+                    if any(kw in path.lower() for kw in interesting_keywords):
+                        result["interesting_paths"].append(path)
+            elif line.lower().startswith("sitemap:"):
+                sm = line.split(":", 1)[1].strip()
+                result["sitemaps"].append(sm)
+
+    # sitemap.xml (if no sitemaps found in robots.txt)
+    if not result["sitemaps"]:
+        status, _, body = _http_get(host, port, "/sitemap.xml", use_ssl, timeout=timeout)
+        if status == 200 and body and "<urlset" in body.lower():
+            result["sitemaps"].append(f"{'https' if use_ssl else 'http'}://{host}/sitemap.xml")
+
+    return result
+
+
+def check_dns(host: str) -> Dict[str, Any]:
+    """Lookup DNS records for the host."""
+    result: Dict[str, Any] = {
+        "a": [],
+        "aaaa": [],
+        "cname": [],
+        "mx": [],
+        "txt": [],
+        "ns": [],
+        "cdn_detected": None,
+    }
+
+    import subprocess
+
+    # A records
+    for rtype in ["A", "AAAA", "CNAME", "MX", "TXT", "NS"]:
+        try:
+            out = subprocess.run(
+                ["dig", "+short", rtype, host],
+                capture_output=True, text=True, timeout=5
+            )
+            lines = [l.strip().rstrip(".") for l in out.stdout.strip().splitlines() if l.strip()]
+            result[rtype.lower()] = lines
+        except Exception:
+            pass
+
+    # CDN detection from CNAME / NS / A
+    cdn_indicators = {
+        "cloudflare": ["cloudflare", "cf-"],
+        "cloudfront": ["cloudfront.net"],
+        "akamai": ["akamai", "edgesuite", "edgekey"],
+        "fastly": ["fastly"],
+        "incapsula": ["incapsula", "imperva"],
+        "sucuri": ["sucuri"],
+        "stackpath": ["stackpath", "highwinds"],
+        "azure_cdn": ["azureedge", "azure", "msecnd"],
+        "google_cdn": ["googleusercontent", "googlevideo"],
+    }
+    all_dns_values = " ".join(
+        result.get("cname", []) + result.get("ns", []) + result.get("a", [])
+    ).lower()
+    for cdn_name, patterns in cdn_indicators.items():
+        if any(p in all_dns_values for p in patterns):
+            result["cdn_detected"] = cdn_name
+            break
+
+    # SPF/DMARC from TXT records
+    txt_joined = " ".join(result.get("txt", [])).lower()
+    result["has_spf"] = "v=spf1" in txt_joined
+    result["has_dmarc"] = False
+    # DMARC is at _dmarc subdomain
+    try:
+        out = subprocess.run(
+            ["dig", "+short", "TXT", f"_dmarc.{host}"],
+            capture_output=True, text=True, timeout=5
+        )
+        if "v=dmarc1" in out.stdout.lower():
+            result["has_dmarc"] = True
+    except Exception:
+        pass
+
+    return result
+
+
+def check_subdomains_crt(host: str, timeout: int = 10) -> Dict[str, Any]:
+    """Enumerate subdomains via crt.sh certificate transparency logs."""
+    result: Dict[str, Any] = {
+        "subdomains": [],
+        "count": 0,
+        "error": None,
+    }
+
+    # Strip www. prefix for broader search
+    search_domain = host.lstrip("www.")
+
+    try:
+        status, body = _follow_redirect(
+            "crt.sh", f"/?q=%25.{search_domain}&output=json",
+            timeout=timeout
+        )
+        if status == 200 and body:
+            import json as _json
+            entries = _json.loads(body.decode("utf-8", errors="replace"))
+            subs = set()
+            for entry in entries:
+                name = entry.get("name_value", "")
+                for line in name.split("\n"):
+                    line = line.strip().lower()
+                    if line and "*" not in line and line.endswith(search_domain):
+                        subs.add(line)
+            result["subdomains"] = sorted(subs)[:100]  # Cap at 100
+            result["count"] = len(subs)
+    except Exception as e:
+        result["error"] = str(e)
+
+    return result
+
+
+def _follow_redirect(host: str, path: str, timeout: int = 10,
+                     max_hops: int = 3) -> Tuple[int, bytes]:
+    """Follow HTTPS redirects, return (status, body_bytes)."""
+    for _ in range(max_hops + 1):
+        try:
+            ctx = _make_ssl_context(verify=True)
+        except Exception:
+            ctx = _make_ssl_context(verify=False)
+        try:
+            conn = http.client.HTTPSConnection(host, context=ctx, timeout=timeout)
+            conn.request("GET", path, headers={"User-Agent": f"Fray/{__version__}"})
+            resp = conn.getresponse()
+            status = resp.status
+            body = resp.read()
+            hdrs = {k.lower(): v for k, v in resp.getheaders()}
+            conn.close()
+            if status in (301, 302, 303, 307, 308):
+                loc = hdrs.get("location", "")
+                if loc.startswith("https://"):
+                    parsed = urllib.parse.urlparse(loc)
+                    host = parsed.hostname or host
+                    path = parsed.path + (f"?{parsed.query}" if parsed.query else "")
+                    continue
+            return status, body
+        except Exception:
+            return 0, b""
+    return 0, b""
+
+
+def check_cors(host: str, port: int, use_ssl: bool,
+               timeout: int = 8) -> Dict[str, Any]:
+    """Check for CORS misconfiguration."""
+    result: Dict[str, Any] = {
+        "cors_enabled": False,
+        "allow_origin": None,
+        "allow_credentials": False,
+        "misconfigured": False,
+        "issues": [],
+    }
+
+    scheme = "https" if use_ssl else "http"
+    evil_origin = "https://evil.attacker.com"
+
+    try:
+        if use_ssl:
+            try:
+                ctx = _make_ssl_context(verify=True)
+                conn = http.client.HTTPSConnection(host, port, context=ctx, timeout=timeout)
+            except Exception:
+                ctx = _make_ssl_context(verify=False)
+                conn = http.client.HTTPSConnection(host, port, context=ctx, timeout=timeout)
+        else:
+            conn = http.client.HTTPConnection(host, port, timeout=timeout)
+
+        conn.request("GET", "/", headers={
+            "Host": host,
+            "Origin": evil_origin,
+            "User-Agent": f"Fray/{__version__} Recon",
+        })
+        resp = conn.getresponse()
+        resp.read()
+        headers = {k.lower(): v for k, v in resp.getheaders()}
+        conn.close()
+
+        acao = headers.get("access-control-allow-origin", "")
+        acac = headers.get("access-control-allow-credentials", "").lower()
+
+        if acao:
+            result["cors_enabled"] = True
+            result["allow_origin"] = acao
+
+            if acac == "true":
+                result["allow_credentials"] = True
+
+            # Check for dangerous configs
+            if acao == "*":
+                result["misconfigured"] = True
+                result["issues"].append({
+                    "issue": "Wildcard Access-Control-Allow-Origin",
+                    "severity": "medium",
+                    "risk": "Any website can read responses from this origin",
+                })
+            if acao == evil_origin:
+                result["misconfigured"] = True
+                result["issues"].append({
+                    "issue": "Origin reflected without validation",
+                    "severity": "high",
+                    "risk": "Attacker-controlled origin is trusted — data theft possible",
+                })
+            if acao == evil_origin and acac == "true":
+                result["issues"].append({
+                    "issue": "Reflected origin + credentials allowed",
+                    "severity": "critical",
+                    "risk": "Full account takeover possible — attacker can read authenticated responses",
+                })
+            if acao == "null":
+                result["misconfigured"] = True
+                result["issues"].append({
+                    "issue": "Access-Control-Allow-Origin: null",
+                    "severity": "medium",
+                    "risk": "Sandboxed iframes can exploit null origin",
+                })
+    except Exception:
+        pass
+
+    return result
+
+
+def check_exposed_files(host: str, port: int, use_ssl: bool,
+                        timeout: int = 5) -> Dict[str, Any]:
+    """Probe for commonly exposed sensitive files."""
+    result: Dict[str, Any] = {
+        "exposed": [],
+        "checked": 0,
+    }
+
+    probes = [
+        ("/.env", "Environment variables (credentials, API keys)"),
+        ("/.git/HEAD", "Git repository (source code exposure)"),
+        ("/.git/config", "Git config (repo URL, credentials)"),
+        ("/.svn/entries", "SVN repository metadata"),
+        ("/wp-config.php.bak", "WordPress config backup (DB creds)"),
+        ("/web.config", ".NET configuration file"),
+        ("/.htaccess", "Apache configuration (may leak paths)"),
+        ("/.htpasswd", "Apache password file"),
+        ("/server-status", "Apache server status page"),
+        ("/server-info", "Apache server info page"),
+        ("/phpinfo.php", "PHP info page (full server details)"),
+        ("/info.php", "PHP info page"),
+        ("/debug", "Debug endpoint"),
+        ("/actuator", "Spring Boot actuator (Java)"),
+        ("/actuator/env", "Spring Boot environment variables"),
+        ("/elmah.axd", ".NET error log"),
+        ("/trace.axd", ".NET trace log"),
+        ("/.well-known/security.txt", "Security contact info"),
+        ("/crossdomain.xml", "Flash cross-domain policy"),
+        ("/sitemap.xml.gz", "Compressed sitemap"),
+        ("/backup.sql", "Database backup"),
+        ("/dump.sql", "Database dump"),
+        ("/db.sql", "Database file"),
+        ("/.DS_Store", "macOS directory metadata"),
+        ("/composer.json", "PHP dependency file (versions exposed)"),
+        ("/package.json", "Node.js dependency file"),
+        ("/Gemfile", "Ruby dependency file"),
+        ("/requirements.txt", "Python dependency file"),
+    ]
+
+    for probe_path, description in probes:
+        result["checked"] += 1
+        try:
+            status, headers, body = _http_get(
+                host, port, probe_path, use_ssl, timeout=timeout, max_redirects=0
+            )
+            if status == 200 and len(body) > 0:
+                # Verify it's not a generic 200 page (soft 404)
+                is_real = False
+                if probe_path == "/.git/HEAD" and body.strip().startswith("ref:"):
+                    is_real = True
+                elif probe_path == "/.git/config" and "[core]" in body:
+                    is_real = True
+                elif probe_path == "/.env" and "=" in body and len(body) < 50000:
+                    is_real = True
+                elif probe_path.endswith(".sql") and ("CREATE TABLE" in body or "INSERT INTO" in body):
+                    is_real = True
+                elif probe_path == "/phpinfo.php" and "phpinfo()" in body:
+                    is_real = True
+                elif probe_path == "/info.php" and "phpinfo()" in body:
+                    is_real = True
+                elif probe_path == "/actuator" and len(body) < 10000 and ('"_links"' in body or '"status"' in body):
+                    is_real = True
+                elif probe_path == "/actuator/env" and len(body) < 50000 and "propertySources" in body:
+                    is_real = True
+                elif probe_path == "/server-status" and "Apache Server Status" in body:
+                    is_real = True
+                elif probe_path == "/server-info" and "Apache Server Information" in body:
+                    is_real = True
+                elif probe_path == "/debug" and len(body) < 5000 and ("debug" in body.lower()[:200]):
+                    is_real = True
+                elif probe_path == "/.well-known/security.txt" and ("contact:" in body.lower() or "policy:" in body.lower()):
+                    is_real = True
+                elif probe_path == "/composer.json" and '"require"' in body:
+                    is_real = True
+                elif probe_path == "/package.json" and '"dependencies"' in body:
+                    is_real = True
+                elif probe_path == "/requirements.txt" and "==" in body:
+                    is_real = True
+                elif probe_path == "/Gemfile" and "gem " in body:
+                    is_real = True
+                # For other probes, be more cautious — skip if body is too large (likely custom 404)
+                elif len(body) < 5000 and status == 200:
+                    is_real = True
+
+                if is_real:
+                    severity = "critical"
+                    if probe_path in ("/.well-known/security.txt", "/crossdomain.xml",
+                                      "/sitemap.xml.gz"):
+                        severity = "info"
+                    elif probe_path in ("/composer.json", "/package.json",
+                                        "/requirements.txt", "/Gemfile"):
+                        severity = "medium"
+                    result["exposed"].append({
+                        "path": probe_path,
+                        "description": description,
+                        "status": status,
+                        "size": len(body),
+                        "severity": severity,
+                    })
+        except Exception:
+            pass
+
+    return result
+
+
+def check_http_methods(host: str, port: int, use_ssl: bool,
+                       timeout: int = 5) -> Dict[str, Any]:
+    """Check allowed HTTP methods via OPTIONS request."""
+    result: Dict[str, Any] = {
+        "allowed_methods": [],
+        "dangerous_methods": [],
+        "issues": [],
+    }
+
+    try:
+        if use_ssl:
+            try:
+                ctx = _make_ssl_context(verify=True)
+                conn = http.client.HTTPSConnection(host, port, context=ctx, timeout=timeout)
+            except Exception:
+                ctx = _make_ssl_context(verify=False)
+                conn = http.client.HTTPSConnection(host, port, context=ctx, timeout=timeout)
+        else:
+            conn = http.client.HTTPConnection(host, port, timeout=timeout)
+
+        conn.request("OPTIONS", "/", headers={
+            "Host": host,
+            "User-Agent": f"Fray/{__version__} Recon",
+        })
+        resp = conn.getresponse()
+        resp.read()
+        headers = {k.lower(): v for k, v in resp.getheaders()}
+        conn.close()
+
+        allow = headers.get("allow", headers.get("access-control-allow-methods", ""))
+        if allow:
+            methods = [m.strip().upper() for m in allow.split(",")]
+            result["allowed_methods"] = methods
+
+            dangerous = {"PUT", "DELETE", "TRACE", "CONNECT", "PATCH"}
+            found_dangerous = [m for m in methods if m in dangerous]
+            result["dangerous_methods"] = found_dangerous
+
+            if "TRACE" in found_dangerous:
+                result["issues"].append({
+                    "method": "TRACE",
+                    "severity": "high",
+                    "risk": "Cross-Site Tracing (XST) — can steal credentials via XSS",
+                })
+            if "PUT" in found_dangerous:
+                result["issues"].append({
+                    "method": "PUT",
+                    "severity": "medium",
+                    "risk": "File upload via PUT — may allow arbitrary file writes",
+                })
+            if "DELETE" in found_dangerous:
+                result["issues"].append({
+                    "method": "DELETE",
+                    "severity": "medium",
+                    "risk": "Resource deletion — may allow unauthorized deletions",
+                })
+    except Exception:
+        pass
+
+    return result
+
+
+def check_error_page(host: str, port: int, use_ssl: bool,
+                     timeout: int = 5) -> Dict[str, Any]:
+    """Fetch a 404 page to fingerprint framework/version from error output."""
+    result: Dict[str, Any] = {
+        "status": 0,
+        "server_header": None,
+        "framework_hints": [],
+        "version_leaks": [],
+        "stack_trace": False,
+    }
+
+    random_path = f"/fray-recon-{int(datetime.now().timestamp())}-404"
+    status, headers, body = _http_get(host, port, random_path, use_ssl, timeout=timeout)
+    result["status"] = status
+    result["server_header"] = headers.get("server")
+
+    if not body:
+        return result
+
+    # Stack trace detection
+    stack_patterns = [
+        r"Traceback \(most recent call last\)",  # Python
+        r"at\s+[\w.$]+\([\w.]+\.java:\d+\)",     # Java
+        r"#\d+\s+[\w\\/:]+\.php\(\d+\)",          # PHP
+        r"at\s+[\w.]+\s+in\s+[\w\\/:.]+:\d+",     # .NET
+        r"Error:.*\n\s+at\s+",                     # Node.js
+    ]
+    for pat in stack_patterns:
+        if re.search(pat, body):
+            result["stack_trace"] = True
+            break
+
+    # Version leaks
+    version_patterns = [
+        (r"Apache/([\d.]+)", "Apache"),
+        (r"nginx/([\d.]+)", "nginx"),
+        (r"Microsoft-IIS/([\d.]+)", "IIS"),
+        (r"PHP/([\d.]+)", "PHP"),
+        (r"X-Powered-By:\s*Express", "Express.js"),
+        (r"Django.*?([\d.]+)", "Django"),
+        (r"Laravel.*?([\d.]+)", "Laravel"),
+        (r"Rails.*?([\d.]+)", "Rails"),
+        (r"WordPress\s+([\d.]+)", "WordPress"),
+        (r"Drupal\s+([\d.]+)", "Drupal"),
+        (r"ASP\.NET\s+Version:([\d.]+)", "ASP.NET"),
+        (r"Tomcat/([\d.]+)", "Tomcat"),
+        (r"Jetty\(([\d.]+)", "Jetty"),
+    ]
+    combined = body + " " + " ".join(f"{k}: {v}" for k, v in headers.items())
+    for pat, name in version_patterns:
+        m = re.search(pat, combined, re.IGNORECASE)
+        if m:
+            version = m.group(1) if m.lastindex else "detected"
+            result["version_leaks"].append({"software": name, "version": version})
+
+    # Framework hints from error page content
+    hint_patterns = [
+        (r"Whitelabel Error Page", "Spring Boot"),
+        (r"Django Debug", "Django (DEBUG=True)"),
+        (r"Laravel", "Laravel"),
+        (r"Symfony\\Component", "Symfony"),
+        (r"CakePHP", "CakePHP"),
+        (r"CodeIgniter", "CodeIgniter"),
+        (r"Werkzeug Debugger", "Flask/Werkzeug (debug mode)"),
+        (r"Express</title>", "Express.js"),
+        (r"<address>Apache", "Apache"),
+        (r"<address>nginx", "nginx"),
+        (r"IIS Windows Server", "IIS"),
+        (r"Powered by.*WordPress", "WordPress"),
+    ]
+    for pat, name in hint_patterns:
+        if re.search(pat, body, re.IGNORECASE):
+            result["framework_hints"].append(name)
+
+    return result
+
+
 # ── Full recon pipeline ──────────────────────────────────────────────────
 
 def run_recon(url: str, timeout: int = 8) -> Dict[str, Any]:
@@ -596,6 +1087,13 @@ def run_recon(url: str, timeout: int = 8) -> Dict[str, Any]:
         "headers": {},
         "cookies": {},
         "fingerprint": {},
+        "dns": {},
+        "robots": {},
+        "cors": {},
+        "exposed_files": {},
+        "http_methods": {},
+        "error_page": {},
+        "subdomains": {},
         "recommended_categories": [],
     }
 
@@ -619,7 +1117,28 @@ def run_recon(url: str, timeout: int = 8) -> Dict[str, Any]:
     # 6. App fingerprinting
     result["fingerprint"] = fingerprint_app(headers, body)
 
-    # 7. Smart payload recommendation
+    # 7. DNS records + CDN detection
+    result["dns"] = check_dns(host)
+
+    # 8. robots.txt + sitemap.xml
+    result["robots"] = check_robots_sitemap(host, port, use_ssl, timeout=timeout)
+
+    # 9. CORS check
+    result["cors"] = check_cors(host, port, use_ssl, timeout=timeout)
+
+    # 10. Exposed files
+    result["exposed_files"] = check_exposed_files(host, port, use_ssl, timeout=timeout)
+
+    # 11. HTTP methods
+    result["http_methods"] = check_http_methods(host, port, use_ssl, timeout=timeout)
+
+    # 12. Error page fingerprinting
+    result["error_page"] = check_error_page(host, port, use_ssl, timeout=timeout)
+
+    # 13. Subdomain enumeration (crt.sh — can be slow)
+    result["subdomains"] = check_subdomains_crt(host, timeout=timeout)
+
+    # 14. Smart payload recommendation
     result["recommended_categories"] = recommend_categories(result["fingerprint"])
 
     return result
@@ -736,6 +1255,119 @@ def print_recon(result: Dict[str, Any]) -> None:
     else:
         print(f"  {Colors.BOLD}Detected Technologies{Colors.END}")
         print(f"    {Colors.DIM}No technologies identified{Colors.END}")
+        print()
+
+    # DNS
+    dns = result.get("dns", {})
+    if dns and (dns.get("a") or dns.get("cname") or dns.get("ns")):
+        print(f"  {Colors.BOLD}DNS{Colors.END}")
+        if dns.get("a"):
+            print(f"    A:     {', '.join(dns['a'][:5])}")
+        if dns.get("aaaa"):
+            print(f"    AAAA:  {', '.join(dns['aaaa'][:3])}")
+        if dns.get("cname"):
+            print(f"    CNAME: {', '.join(dns['cname'][:3])}")
+        if dns.get("ns"):
+            print(f"    NS:    {', '.join(dns['ns'][:4])}")
+        if dns.get("mx"):
+            print(f"    MX:    {', '.join(dns['mx'][:3])}")
+        cdn = dns.get("cdn_detected")
+        if cdn:
+            print(f"    CDN:   {Colors.CYAN}{cdn}{Colors.END}")
+        spf = dns.get("has_spf", False)
+        dmarc = dns.get("has_dmarc", False)
+        spf_icon = f"{Colors.GREEN}✅{Colors.END}" if spf else f"{Colors.RED}❌{Colors.END}"
+        dmarc_icon = f"{Colors.GREEN}✅{Colors.END}" if dmarc else f"{Colors.RED}❌{Colors.END}"
+        print(f"    SPF:   {spf_icon}  DMARC: {dmarc_icon}")
+        print()
+
+    # robots.txt
+    robots = result.get("robots", {})
+    if robots.get("robots_txt"):
+        disallowed = robots.get("disallowed_paths", [])
+        interesting = robots.get("interesting_paths", [])
+        sitemaps = robots.get("sitemaps", [])
+        print(f"  {Colors.BOLD}robots.txt{Colors.END} ({len(disallowed)} disallowed paths)")
+        if interesting:
+            print(f"    {Colors.YELLOW}Interesting paths:{Colors.END}")
+            for p in interesting[:10]:
+                print(f"      {Colors.YELLOW}{p}{Colors.END}")
+        if sitemaps:
+            print(f"    Sitemaps: {', '.join(sitemaps[:3])}")
+        print()
+
+    # CORS
+    cors = result.get("cors", {})
+    if cors.get("cors_enabled"):
+        misc = cors.get("misconfigured", False)
+        color = Colors.RED if misc else Colors.GREEN
+        print(f"  {Colors.BOLD}CORS{Colors.END} ({color}{'MISCONFIGURED' if misc else 'OK'}{Colors.END})")
+        print(f"    Allow-Origin: {cors.get('allow_origin', '?')}")
+        if cors.get("allow_credentials"):
+            print(f"    {Colors.YELLOW}Credentials: allowed{Colors.END}")
+        for iss in cors.get("issues", []):
+            sev_color = Colors.RED if iss["severity"] in ("high", "critical") else Colors.YELLOW
+            print(f"    {sev_color}⚠ {iss['issue']}{Colors.END}")
+            print(f"      {Colors.DIM}{iss['risk']}{Colors.END}")
+        print()
+
+    # Exposed files
+    exposed = result.get("exposed_files", {})
+    exposed_list = exposed.get("exposed", [])
+    if exposed_list:
+        crit_count = sum(1 for e in exposed_list if e["severity"] == "critical")
+        color = Colors.RED if crit_count else Colors.YELLOW
+        print(f"  {Colors.BOLD}Exposed Files{Colors.END} ({color}{len(exposed_list)} found{Colors.END}, {exposed.get('checked', 0)} checked)")
+        for ef in exposed_list:
+            sev = ef["severity"]
+            sev_color = Colors.RED if sev == "critical" else (Colors.YELLOW if sev == "medium" else Colors.DIM)
+            print(f"    {sev_color}{'🚨' if sev == 'critical' else '⚠️'} {ef['path']}{Colors.END} — {ef['description']} ({ef['size']}b)")
+        print()
+
+    # HTTP methods
+    methods = result.get("http_methods", {})
+    allowed = methods.get("allowed_methods", [])
+    dangerous = methods.get("dangerous_methods", [])
+    if allowed:
+        print(f"  {Colors.BOLD}HTTP Methods{Colors.END}")
+        safe = [m for m in allowed if m not in {"PUT", "DELETE", "TRACE", "CONNECT", "PATCH"}]
+        print(f"    Allowed: {Colors.GREEN}{', '.join(safe)}{Colors.END}", end="")
+        if dangerous:
+            print(f" {Colors.RED}{', '.join(dangerous)}{Colors.END}")
+        else:
+            print()
+        for iss in methods.get("issues", []):
+            sev_color = Colors.RED if iss["severity"] == "high" else Colors.YELLOW
+            print(f"    {sev_color}⚠ {iss['method']}: {iss['risk']}{Colors.END}")
+        print()
+
+    # Error page
+    err = result.get("error_page", {})
+    hints = err.get("framework_hints", [])
+    leaks = err.get("version_leaks", [])
+    has_trace = err.get("stack_trace", False)
+    if hints or leaks or has_trace:
+        print(f"  {Colors.BOLD}Error Page Analysis{Colors.END} (404)")
+        if has_trace:
+            print(f"    {Colors.RED}🚨 Stack trace exposed in error page!{Colors.END}")
+        for leak in leaks:
+            print(f"    {Colors.YELLOW}⚠ Version leak: {leak['software']} {leak['version']}{Colors.END}")
+        for hint in hints:
+            print(f"    Framework: {Colors.CYAN}{hint}{Colors.END}")
+        if err.get("server_header"):
+            print(f"    Server: {Colors.DIM}{err['server_header']}{Colors.END}")
+        print()
+
+    # Subdomains
+    subs = result.get("subdomains", {})
+    sub_list = subs.get("subdomains", [])
+    sub_count = subs.get("count", 0)
+    if sub_list:
+        print(f"  {Colors.BOLD}Subdomains{Colors.END} ({Colors.CYAN}{sub_count} found{Colors.END} via crt.sh)")
+        for s in sub_list[:15]:
+            print(f"    {Colors.DIM}{s}{Colors.END}")
+        if sub_count > 15:
+            print(f"    {Colors.DIM}... and {sub_count - 15} more{Colors.END}")
         print()
 
     # Recommended categories
