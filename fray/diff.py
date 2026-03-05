@@ -92,6 +92,7 @@ def _normalize_report(data: dict) -> dict:
                 "evasion_score": bp.get("evasion_score", 0),
                 "technique": bp.get("technique", ""),
                 "reflected": bp.get("reflected", False),
+                "category": bp.get("category", ""),
             }
 
         return {
@@ -131,6 +132,7 @@ def _normalize_report(data: dict) -> dict:
             "evasion_score": 0.0,
             "technique": "",
             "reflected": r.get("reflected", False),
+            "category": r.get("category", ""),
         }
 
     return {
@@ -214,6 +216,7 @@ def run_diff(before_path: str, after_path: str) -> DiffResult:
                     "evasion_score": after_info.get("evasion_score", 0),
                     "technique": after_info.get("technique", ""),
                     "reflected": after_info.get("reflected", False),
+                    "category": after_info.get("category", ""),
                 })
             # Improvement: was bypass → now blocked
             elif not before_info["blocked"] and after_info["blocked"]:
@@ -221,6 +224,7 @@ def run_diff(before_path: str, after_path: str) -> DiffResult:
                     "payload": payload[:80],
                     "before_status": before_info["status"],
                     "after_status": after_info["status"],
+                    "category": after_info.get("category", before_info.get("category", "")),
                 })
         else:
             # New bypass not in before scan
@@ -230,6 +234,7 @@ def run_diff(before_path: str, after_path: str) -> DiffResult:
                     "status": after_info["status"],
                     "evasion_score": after_info.get("evasion_score", 0),
                     "technique": after_info.get("technique", ""),
+                    "category": after_info.get("category", ""),
                 })
 
     # Verdict
@@ -338,49 +343,73 @@ def print_diff(diff: DiffResult) -> None:
         if diff.removed_blocked_keywords:
             console.print(f"    [red]- No longer blocking keywords:[/red] {', '.join(diff.removed_blocked_keywords)}")
 
-    # ── Regressions table ──
-    if diff.regressions:
-        reg_table = Table(title=f"⚠ Regressions ({len(diff.regressions)} payloads now bypass)",
-                          show_lines=False, box=None, pad_edge=False,
-                          title_style="bold red")
-        reg_table.add_column("#", style="dim", width=3, justify="right")
-        reg_table.add_column("Status", width=12)
-        reg_table.add_column("Payload", min_width=40)
+    # ── Category-level breakdown ──
+    if diff.regressions or diff.improvements or diff.new_bypasses:
+        cat_reg = {}
+        cat_imp = {}
+        cat_new = {}
+        for r in diff.regressions:
+            c = r.get("category", "unknown")
+            cat_reg[c] = cat_reg.get(c, 0) + 1
+        for r in diff.improvements:
+            c = r.get("category", "unknown")
+            cat_imp[c] = cat_imp.get(c, 0) + 1
+        for r in diff.new_bypasses:
+            c = r.get("category", "unknown")
+            cat_new[c] = cat_new.get(c, 0) + 1
 
-        for i, reg in enumerate(diff.regressions[:10], 1):
-            reflected = " [yellow]REFLECTED[/yellow]" if reg.get("reflected") else ""
-            technique = f" [dim][{reg['technique']}][/dim]" if reg.get("technique") else ""
-            reg_table.add_row(
-                str(i),
-                f"{reg['before_status']} → {reg['after_status']}",
-                f"[dim]{reg['payload']}[/dim]{technique}{reflected}",
-            )
-        if len(diff.regressions) > 10:
-            reg_table.add_row("", "", f"[dim]... and {len(diff.regressions) - 10} more[/dim]")
+        all_cats = sorted(set(list(cat_reg) + list(cat_imp) + list(cat_new)))
+        if all_cats and all_cats != ["unknown"]:
+            cat_table = Table(title="Category Breakdown",
+                              show_lines=False, box=None, pad_edge=False,
+                              title_style="bold cyan")
+            cat_table.add_column("Category", min_width=20)
+            cat_table.add_column("Regressions", justify="right", width=12)
+            cat_table.add_column("Improvements", justify="right", width=12)
+            cat_table.add_column("New Bypasses", justify="right", width=12)
 
+            for cat in all_cats:
+                reg_n = cat_reg.get(cat, 0)
+                imp_n = cat_imp.get(cat, 0)
+                new_n = cat_new.get(cat, 0)
+                reg_s = f"[bold red]{reg_n}[/bold red]" if reg_n else "[dim]0[/dim]"
+                imp_s = f"[bold green]{imp_n}[/bold green]" if imp_n else "[dim]0[/dim]"
+                new_s = f"[bold yellow]{new_n}[/bold yellow]" if new_n else "[dim]0[/dim]"
+                cat_table.add_row(cat, reg_s, imp_s, new_s)
+
+            console.print()
+            console.print(Panel(cat_table, border_style="cyan", expand=False))
+
+    # ── Visual diff: git-style per-payload lines ──
+    if diff.regressions or diff.improvements:
         console.print()
-        console.print(Panel(reg_table, border_style="red", expand=False))
+        console.print("  [bold]Visual Diff[/bold] [dim](- before, + after)[/dim]")
+        console.print()
 
-    # ── Improvements table ──
-    if diff.improvements:
-        imp_table = Table(title=f"✓ Improvements ({len(diff.improvements)} payloads now blocked)",
-                          show_lines=False, box=None, pad_edge=False,
-                          title_style="bold green")
-        imp_table.add_column("#", style="dim", width=3, justify="right")
-        imp_table.add_column("Status", width=12)
-        imp_table.add_column("Payload", min_width=40)
+        # Show regressions first (worse)
+        for reg in diff.regressions[:15]:
+            payload_short = reg["payload"][:70]
+            reflected = " [bold magenta]↩ REFLECTED[/bold magenta]" if reg.get("reflected") else ""
+            cat_tag = f" [dim]({reg.get('category', '')})[/dim]" if reg.get("category") else ""
+            console.print(f"    [red]- BLOCKED  {reg['before_status']}[/red] │ [dim]{payload_short}[/dim]{cat_tag}")
+            console.print(f"    [red bold]+ BYPASS   {reg['after_status']}[/red bold] │ [red]{payload_short}[/red]{reflected}{cat_tag}")
+            console.print()
 
-        for i, imp in enumerate(diff.improvements[:10], 1):
-            imp_table.add_row(
-                str(i),
-                f"{imp['before_status']} → {imp['after_status']}",
-                f"[dim]{imp['payload']}[/dim]",
-            )
+        if len(diff.regressions) > 15:
+            console.print(f"    [dim]... {len(diff.regressions) - 15} more regressions[/dim]")
+            console.print()
+
+        # Then improvements (better)
+        for imp in diff.improvements[:10]:
+            payload_short = imp["payload"][:70]
+            cat_tag = f" [dim]({imp.get('category', '')})[/dim]" if imp.get("category") else ""
+            console.print(f"    [yellow]- BYPASS   {imp['before_status']}[/yellow] │ [dim]{payload_short}[/dim]{cat_tag}")
+            console.print(f"    [green bold]+ BLOCKED  {imp['after_status']}[/green bold] │ [green]{payload_short}[/green]{cat_tag}")
+            console.print()
+
         if len(diff.improvements) > 10:
-            imp_table.add_row("", "", f"[dim]... and {len(diff.improvements) - 10} more[/dim]")
-
-        console.print()
-        console.print(Panel(imp_table, border_style="green", expand=False))
+            console.print(f"    [dim]... {len(diff.improvements) - 10} more improvements[/dim]")
+            console.print()
 
     # ── New bypasses ──
     if diff.new_bypasses:
@@ -388,14 +417,24 @@ def print_diff(diff: DiffResult) -> None:
         console.print(f"  [bold yellow]New bypasses ({len(diff.new_bypasses)} not in baseline):[/bold yellow]")
         for i, nb in enumerate(diff.new_bypasses[:5], 1):
             technique = f" [dim][{nb['technique']}][/dim]" if nb.get("technique") else ""
-            console.print(f"    {i}. status {nb['status']}{technique}")
-            console.print(f"       [dim]{nb['payload']}[/dim]")
+            cat_tag = f" [dim]({nb.get('category', '')})[/dim]" if nb.get("category") else ""
+            console.print(f"    [yellow bold]+ NEW      {nb['status']}[/yellow bold] │ [yellow]{nb['payload'][:70]}[/yellow]{technique}{cat_tag}")
         if len(diff.new_bypasses) > 5:
             console.print(f"    [dim]... and {len(diff.new_bypasses) - 5} more[/dim]")
 
     if not diff.regressions and not diff.improvements and not diff.new_bypasses:
         console.print()
-        console.print("  [green]No payload-level changes detected.[/green]")
+        console.print("  [green bold]✓ No payload-level changes detected. WAF config is stable.[/green bold]")
 
+    # ── CI summary line ──
+    console.print()
+    total_reg = len(diff.regressions) + len(diff.new_bypasses)
+    total_imp = len(diff.improvements)
+    verdict_style = {"REGRESSED": "bold red", "IMPROVED": "bold green",
+                     "MIXED": "bold yellow", "PASS": "bold green"}.get(diff.verdict, "bold")
+    console.print(f"  [{verdict_style}]{diff.verdict}[/{verdict_style}] — "
+                  f"[red]{total_reg} regression(s)[/red], "
+                  f"[green]{total_imp} improvement(s)[/green], "
+                  f"bypass rate {diff.before_bypass_rate}% → {diff.after_bypass_rate}%")
     console.print()
     console.rule(style="dim")

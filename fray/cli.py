@@ -254,6 +254,150 @@ def _build_ai_output(target: str, results: list = None, recon: dict = None,
     return out
 
 
+def _build_sarif_output(target: str, results: list, tool_version: str = "") -> dict:
+    """Build SARIF 2.1.0 output for GitHub Security tab / CodeQL integration.
+
+    Usage:
+        fray scan target.com --sarif -o results.sarif
+        fray test target.com -c xss --sarif -o results.sarif
+
+    Upload to GitHub:
+        gh code-scanning upload-sarif --sarif results.sarif
+    """
+    from datetime import datetime as _dt
+
+    if not tool_version:
+        tool_version = __version__
+
+    cwe_map = {
+        "xss": {"id": "CWE-79", "name": "Cross-Site Scripting (XSS)"},
+        "sqli": {"id": "CWE-89", "name": "SQL Injection"},
+        "ssrf": {"id": "CWE-918", "name": "Server-Side Request Forgery"},
+        "ssti": {"id": "CWE-1336", "name": "Server-Side Template Injection"},
+        "command_injection": {"id": "CWE-78", "name": "OS Command Injection"},
+        "xxe": {"id": "CWE-611", "name": "XML External Entity"},
+        "path_traversal": {"id": "CWE-22", "name": "Path Traversal"},
+        "open-redirect": {"id": "CWE-601", "name": "Open Redirect"},
+        "crlf_injection": {"id": "CWE-113", "name": "CRLF Injection"},
+        "prototype_pollution": {"id": "CWE-1321", "name": "Prototype Pollution"},
+        "host_header_injection": {"id": "CWE-644", "name": "Host Header Injection"},
+        "ldap_injection": {"id": "CWE-90", "name": "LDAP Injection"},
+        "xpath_injection": {"id": "CWE-643", "name": "XPath Injection"},
+    }
+
+    severity_map = {
+        "xss": "error", "sqli": "error", "command_injection": "error",
+        "ssti": "error", "xxe": "error", "ssrf": "error",
+        "path_traversal": "error", "prototype_pollution": "warning",
+        "host_header_injection": "warning", "open-redirect": "warning",
+        "crlf_injection": "warning", "ldap_injection": "error",
+        "xpath_injection": "error",
+    }
+
+    # Collect unique rules from results
+    rules_seen = {}
+    sarif_results = []
+
+    for r in results:
+        if r.get("blocked"):
+            continue  # Only report bypasses and reflected
+
+        cat = r.get("category", "unknown")
+        payload = r.get("payload", "")
+        status = r.get("status", 0)
+        reflected = r.get("reflected", False)
+        param = r.get("param", "input")
+        endpoint = r.get("url", r.get("endpoint", target))
+
+        cwe = cwe_map.get(cat, {"id": "CWE-20", "name": "Improper Input Validation"})
+        rule_id = f"fray/{cat}"
+
+        if rule_id not in rules_seen:
+            rules_seen[rule_id] = {
+                "id": rule_id,
+                "name": cwe["name"],
+                "shortDescription": {"text": cwe["name"]},
+                "fullDescription": {
+                    "text": f"Fray detected a potential {cwe['name']} vulnerability. "
+                            f"A payload bypassed the WAF and {'was reflected in the response (confirmed exploitable)' if reflected else 'was not blocked'}."
+                },
+                "helpUri": f"https://cwe.mitre.org/data/definitions/{cwe['id'].split('-')[1]}.html",
+                "properties": {
+                    "tags": ["security", cat, cwe["id"]],
+                },
+                "defaultConfiguration": {
+                    "level": severity_map.get(cat, "warning"),
+                },
+            }
+
+        # Determine level
+        level = "error" if reflected else severity_map.get(cat, "warning")
+
+        message_text = (
+            f"{'Confirmed reflected ' if reflected else 'Potential '}"
+            f"{cwe['name']} on {endpoint}"
+            f"{' (parameter: ' + param + ')' if param else ''}"
+            f". Payload: {payload[:100]}"
+            f"{' — payload appeared in response (exploitable)' if reflected else ' — payload bypassed WAF'}"
+        )
+
+        result_entry = {
+            "ruleId": rule_id,
+            "level": level,
+            "message": {"text": message_text},
+            "locations": [{
+                "physicalLocation": {
+                    "artifactLocation": {
+                        "uri": endpoint,
+                        "uriBaseId": "TARGET",
+                    },
+                },
+                "logicalLocations": [{
+                    "name": param or "request",
+                    "kind": "parameter",
+                }],
+            }],
+            "properties": {
+                "payload": payload[:200],
+                "httpStatus": status,
+                "reflected": reflected,
+                "category": cat,
+                "cwe": cwe["id"],
+            },
+        }
+        sarif_results.append(result_entry)
+
+    # Build SARIF envelope
+    sarif = {
+        "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [{
+            "tool": {
+                "driver": {
+                    "name": "Fray",
+                    "version": tool_version,
+                    "informationUri": "https://github.com/dalisecurity/fray",
+                    "semanticVersion": tool_version,
+                    "rules": list(rules_seen.values()),
+                },
+            },
+            "results": sarif_results,
+            "invocations": [{
+                "executionSuccessful": True,
+                "endTimeUtc": _dt.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "toolExecutionNotifications": [],
+            }],
+            "originalUriBaseIds": {
+                "TARGET": {
+                    "uri": target if target.endswith("/") else target + "/",
+                },
+            },
+        }],
+    }
+
+    return sarif
+
+
 def _validate_output_path(output: str) -> None:
     """Ensure output path is within the current working directory subtree."""
     resolved = Path(output).resolve()
@@ -573,6 +717,22 @@ def cmd_test(args):
         'results': results,
     }
 
+    # SARIF output (GitHub Security tab / CodeQL compatible)
+    if getattr(args, 'sarif', False):
+        sarif = _build_sarif_output(target=args.target, results=results)
+        sarif_str = json.dumps(sarif, indent=2, ensure_ascii=False)
+        output_file = args.output or "fray_results.sarif"
+        _validate_output_path(output_file)
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(sarif_str)
+        findings = len(sarif["runs"][0]["results"])
+        rules = len(sarif["runs"][0]["tool"]["driver"]["rules"])
+        print(f"\n  SARIF 2.1.0 report generated: {output_file}")
+        print(f"  {findings} finding(s) across {rules} rule(s)")
+        print(f"\n  Upload to GitHub:")
+        print(f"    gh code-scanning upload-sarif --sarif {output_file}")
+        return
+
     # AI-optimized output
     ai_mode = getattr(args, 'ai', False)
     if ai_mode:
@@ -713,6 +873,24 @@ def cmd_scan(args):
         scope_file=getattr(args, 'scope', None),
         workers=getattr(args, 'workers', 1),
     )
+
+    # SARIF output (GitHub Security tab / CodeQL compatible)
+    if getattr(args, 'sarif', False):
+        scan_dict = scan.to_dict()
+        test_results = scan_dict.get("test_results", [])
+        sarif = _build_sarif_output(target=args.target, results=test_results)
+        sarif_str = json.dumps(sarif, indent=2, ensure_ascii=False)
+        output_file = getattr(args, 'output', None) or "fray_scan.sarif"
+        _validate_output_path(output_file)
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(sarif_str)
+        findings = len(sarif["runs"][0]["results"])
+        rules = len(sarif["runs"][0]["tool"]["driver"]["rules"])
+        print(f"\n  SARIF 2.1.0 report generated: {output_file}")
+        print(f"  {findings} finding(s) across {rules} rule(s)")
+        print(f"\n  Upload to GitHub:")
+        print(f"    gh code-scanning upload-sarif --sarif {output_file}")
+        return
 
     ai_mode = getattr(args, 'ai', False)
 
@@ -1748,6 +1926,7 @@ def cmd_help(args):
   fray scan <url> -c sqli       Scan with specific payload category
   fray scan <url> --depth 5     Control crawl depth and scope
   fray scan <url> --ai          AI-ready JSON output for LLMs (pipe to Claude, GPT, etc.)
+  fray scan <url> --sarif        SARIF 2.1.0 output for GitHub Security tab / CodeQL
 
   ⚡ TEST — Payload injection
   ─────────────────────────────
@@ -1755,6 +1934,7 @@ def cmd_help(args):
   fray test <url> --all         Test ALL 24 payload categories
   fray test <url> --smart       Adaptive mode: probe WAF first, skip redundant payloads
   fray test <url> --ai          AI-ready JSON output for LLMs
+  fray test <url> --sarif        SARIF 2.1.0 output for GitHub Security tab
 
   🔓 BYPASS — WAF evasion scoring
   ─────────────────────────────
@@ -1952,6 +2132,7 @@ Documentation: https://github.com/dalisecurity/fray
                          help="Max requests per second (e.g. --rate-limit 2 = max 2 req/s)")
     p_test.add_argument("--json", action="store_true", help="Output results as JSON to stdout")
     p_test.add_argument("--ai", action="store_true", help="AI-ready structured JSON output for LLM consumption")
+    p_test.add_argument("--sarif", action="store_true", help="Output SARIF 2.1.0 for GitHub Security tab / CodeQL")
     p_test.set_defaults(func=cmd_test)
 
     # bypass
@@ -2045,6 +2226,8 @@ Documentation: https://github.com/dalisecurity/fray
                          help="Output results as JSON to stdout")
     p_scan.add_argument("--ai", action="store_true",
                          help="AI-ready structured JSON output for LLM consumption")
+    p_scan.add_argument("--sarif", action="store_true",
+                         help="Output SARIF 2.1.0 for GitHub Security tab / CodeQL")
     p_scan.add_argument("--insecure", action="store_true",
                          help="Skip SSL certificate verification")
     p_scan.add_argument("--cookie", default=None,

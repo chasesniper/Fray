@@ -249,6 +249,27 @@ fray scan target.com --ai | ai analyze
 
 出力：技術スタック、脆弱性（CWEタグ付き、信頼度スコア）、セキュリティ体制、推奨アクション — LLM直接消費用の構造化JSON。
 
+## SARIF出力 — GitHubセキュリティタブ
+
+```bash
+fray scan target.com --sarif -o results.sarif    # スキャンからSARIF 2.1.0出力
+fray test target.com -c xss --sarif -o results.sarif  # テストからSARIF出力
+
+# GitHubにアップロード：
+gh code-scanning upload-sarif --sarif results.sarif
+```
+
+Frayの検出結果がGitHubの**Security**タブにCodeQL・Semgrepと並んで表示されます。CWEタグ、重要度、ペイロード詳細付き。
+
+## Diff — ビジュアル回帰テスト
+
+```bash
+fray diff before.json after.json        # 色分けビジュアルdiff
+fray diff before.json after.json --json # 機械可読diff
+```
+
+Git風ビジュアル出力：回帰は**赤**（`- BLOCKED → + BYPASS`）、改善は**緑**（`- BYPASS → + BLOCKED`）、カテゴリ別内訳テーブル付き。回帰時は終了コード1 — CI/CDゲートに最適。
+
 ## MCPサーバー — AI連携
 
 ```bash

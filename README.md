@@ -249,6 +249,27 @@ fray scan target.com --ai | ai analyze
 
 Output: structured JSON with technologies, vulnerabilities (CWE-tagged, confidence-scored), security posture, and suggested next actions — ready for direct LLM consumption.
 
+## SARIF Output — GitHub Security Tab
+
+```bash
+fray scan target.com --sarif -o results.sarif    # SARIF 2.1.0 from scan
+fray test target.com -c xss --sarif -o results.sarif  # SARIF from test
+
+# Upload to GitHub:
+gh code-scanning upload-sarif --sarif results.sarif
+```
+
+Fray findings appear directly in GitHub's **Security** tab alongside CodeQL and Semgrep. Each finding includes CWE tags, severity levels, and payload details.
+
+## Diff — Visual Regression Testing
+
+```bash
+fray diff before.json after.json        # Color-coded visual diff
+fray diff before.json after.json --json # Machine-readable diff
+```
+
+Git-style visual output: regressions in **red** (`- BLOCKED → + BYPASS`), improvements in **green** (`- BYPASS → + BLOCKED`), with per-category breakdown table. Exit code 1 on regressions — perfect for CI/CD gates.
+
 ## MCP Server — AI Integration
 
 ```bash
