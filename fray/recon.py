@@ -2981,13 +2981,14 @@ def check_differential_responses(host: str, port: int, use_ssl: bool,
     }
 
     # ── Phase 2: Signature-triggering payloads ──
-    # Classic payloads that should trigger signature-based WAFs
+    # URL-encoded payloads so they pass edge HTTP parsers and reach actual WAF rules.
+    # Raw chars (<, ', ;) get 400'd by Cloudflare/CDN edge before the WAF sees them.
     signature_payloads = [
-        ("XSS", "?input=<script>alert(1)</script>"),
-        ("SQLi", "?input=' OR 1=1--"),
+        ("XSS", "?input=%3Cscript%3Ealert(1)%3C%2Fscript%3E"),
+        ("SQLi", "?input=%27%20OR%201%3D1--"),
         ("Path Traversal", "?input=../../etc/passwd"),
-        ("Command Injection", "?input=;cat /etc/passwd"),
-        ("SSTI", "?input={{7*7}}"),
+        ("Command Injection", "?input=%3Bcat%20%2Fetc%2Fpasswd"),
+        ("SSTI", "?input=%7B%7B7*7%7D%7D"),
     ]
 
     blocked_statuses = []
@@ -3143,6 +3144,61 @@ def check_differential_responses(host: str, port: int, use_ssl: bool,
             result["detection_mode"] = "anomaly"
         else:
             result["detection_mode"] = "none"
+
+        # ── Phase 5: WAF intel lookup — recommend bypass techniques ──
+        try:
+            from fray import load_waf_intel
+            intel = load_waf_intel()
+            vendors_db = intel.get("vendors", {})
+            technique_matrix = intel.get("technique_matrix", {})
+
+            # Identify WAF vendor from block page signatures + headers
+            detected_vendor = None
+            block_sigs = result.get("block_page_signatures", [])
+            extra_hdrs = result.get("extra_headers_on_block", [])
+
+            vendor_hints = {
+                "cloudflare": (["Cloudflare", "Cloudflare Ray", "CAPTCHA"], ["cf-mitigated", "cf-ray"]),
+                "aws_waf": (["AWS WAF"], ["x-amzn-waf-action"]),
+                "azure_waf": ([], ["x-azure-ref", "x-msedge-ref"]),
+                "akamai": (["Akamai"], []),
+                "imperva": (["Imperva"], ["x-iinfo"]),
+                "f5_bigip": (["F5 BIG-IP"], []),
+                "modsecurity": (["ModSecurity"], []),
+                "sucuri": (["Sucuri"], ["x-sucuri-id"]),
+                "fastly": ([], ["x-sigsci-requestid", "fastly-io-info"]),
+            }
+
+            for vkey, (sig_names, hdr_names) in vendor_hints.items():
+                if any(s in block_sigs for s in sig_names):
+                    detected_vendor = vkey
+                    break
+                if any(h in extra_hdrs for h in hdr_names):
+                    detected_vendor = vkey
+                    break
+
+            if detected_vendor and detected_vendor in vendors_db:
+                vdata = vendors_db[detected_vendor]
+                effective = vdata.get("bypass_techniques", {}).get("effective", [])
+                ineffective = vdata.get("bypass_techniques", {}).get("ineffective", [])
+                gaps = vdata.get("detection_gaps", {})
+                rec_cats = vdata.get("recommended_categories", [])
+
+                result["waf_vendor"] = vdata.get("display_name", detected_vendor)
+                result["recommended_bypasses"] = [
+                    {"technique": t["technique"], "confidence": t.get("confidence", "?"),
+                     "description": t["description"]}
+                    for t in effective[:5]
+                ]
+                result["ineffective_techniques"] = [t["technique"] for t in ineffective]
+                result["detection_gaps"] = {
+                    "signature_misses": gaps.get("signature", {}).get("misses", []),
+                    "anomaly_misses": gaps.get("anomaly", {}).get("misses", []),
+                }
+                result["recommended_categories"] = rec_cats
+                result["recommended_delay"] = vdata.get("recommended_delay", 0.5)
+        except Exception:
+            pass  # Intel lookup is best-effort
     else:
         result["detection_mode"] = "none"
         result["blocked_fingerprint"] = {}
@@ -3891,6 +3947,27 @@ def print_recon(result: Dict[str, Any]) -> None:
                 console.print(f"      [yellow]SIG[/yellow]  {s['label']}: {s['status']} · {s['response_time_ms']}ms · {s['body_length']}B")
             for a in diff.get("anomaly_detection", []):
                 console.print(f"      [red]ANOM[/red] {a['label']}: {a['status']} · {a['response_time_ms']}ms · {a['body_length']}B")
+
+        # WAF intel-based recommendations
+        if diff.get("waf_vendor"):
+            console.print()
+            console.print(f"  [bold]WAF Intel — {diff['waf_vendor']}[/bold]")
+            for bp in diff.get("recommended_bypasses", [])[:5]:
+                conf_style = {"high": "green", "medium": "yellow", "low": "red"}.get(bp["confidence"], "dim")
+                console.print(f"    [{conf_style}]{bp['confidence'].upper():6s}[/{conf_style}] {bp['technique']}: {bp['description']}")
+            ineff = diff.get("ineffective_techniques", [])
+            if ineff:
+                console.print(f"    [dim]Skip: {', '.join(ineff)}[/dim]")
+            gaps = diff.get("detection_gaps", {})
+            sig_misses = gaps.get("signature_misses", [])
+            anom_misses = gaps.get("anomaly_misses", [])
+            if sig_misses:
+                console.print(f"    [green]Sig gaps:[/green]  {', '.join(sig_misses)}")
+            if anom_misses:
+                console.print(f"    [green]Anom gaps:[/green] {', '.join(anom_misses)}")
+            rec_cats = diff.get("recommended_categories", [])
+            if rec_cats:
+                console.print(f"    [cyan]Try:[/cyan]       fray test <url> -c {rec_cats[0]} --smart")
         console.print()
 
     # ── Recommended Categories ──

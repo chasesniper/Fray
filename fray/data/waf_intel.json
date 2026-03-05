@@ -1,0 +1,697 @@
+{
+  "_meta": {
+    "description": "WAF vendor intelligence — bypass strategies, detection gaps, and behavioral fingerprints collected from live testing. Used by fray to select optimal bypass techniques based on detected WAF vendor.",
+    "version": "1.0.0",
+    "last_updated": "2026-03-06",
+    "sources": ["live_testing", "fray_differential_analysis", "public_research"]
+  },
+  "vendors": {
+    "cloudflare": {
+      "display_name": "Cloudflare",
+      "detection_mode": "hybrid",
+      "block_behavior": {
+        "status_codes": [400, 403, 503],
+        "block_patterns": ["400 empty body (edge HTTP parser)", "403 with cf-ray + block page", "503 challenge page"],
+        "challenge_types": ["js_challenge", "turnstile_captcha", "managed_challenge"],
+        "timing_signature": "blocked responses 30-50ms faster than normal (edge short-circuit)"
+      },
+      "bypass_techniques": {
+        "effective": [
+          {
+            "technique": "double_encoding",
+            "payload_example": "%253Cscript%253E",
+            "description": "Double URL encoding bypasses signature matching on decoded values",
+            "confidence": "medium",
+            "tested_date": "2026-03-06",
+            "tested_on": ["shopify.com (Cloudflare)"]
+          },
+          {
+            "technique": "unicode_normalization",
+            "payload_example": "%ef%bc%9cscript%ef%bc%9e (fullwidth chars)",
+            "description": "Fullwidth Unicode equivalents of < and > bypass ASCII signature rules",
+            "confidence": "low",
+            "tested_date": "2026-03-06",
+            "notes": "Blocked by Cloudflare on shopify.com but NOT by GitHub/Stripe"
+          },
+          {
+            "technique": "http1_via_biso",
+            "payload_example": "URL-encoded XSS via HTTP/1.1 raw socket",
+            "description": "Cloudflare Browser Isolation (BISO) proxy may not apply WAF rules on HTTP/1.1 requests",
+            "confidence": "high",
+            "tested_date": "2026-03-06",
+            "tested_on": ["dalisec.io"],
+            "notes": "HTTP/2 (curl) gets 403, HTTP/1.1 (raw socket) gets 200. BISO-specific bypass."
+          },
+          {
+            "technique": "content_type_confusion",
+            "payload_example": "POST with Content-Type: text/plain containing XSS",
+            "description": "Some Cloudflare rules only inspect application/x-www-form-urlencoded and application/json",
+            "confidence": "medium"
+          },
+          {
+            "technique": "chunked_transfer",
+            "payload_example": "Transfer-Encoding: chunked with split payload across chunks",
+            "description": "Splitting payload across HTTP chunks can evade single-pass signature matching",
+            "confidence": "medium"
+          },
+          {
+            "technique": "case_variation",
+            "payload_example": "<ScRiPt>alert(1)</ScRiPt>",
+            "description": "Mixed case can bypass case-sensitive signature rules",
+            "confidence": "low",
+            "notes": "Cloudflare normalizes case in most managed rules now"
+          }
+        ],
+        "ineffective": [
+          {
+            "technique": "null_byte_injection",
+            "payload_example": "%00<script>",
+            "description": "Cloudflare strips null bytes before rule evaluation",
+            "tested_date": "2026-03-06"
+          },
+          {
+            "technique": "raw_unencoded_chars",
+            "payload_example": "<script>alert(1)</script> in URL",
+            "description": "Edge HTTP parser returns 400 before WAF evaluation",
+            "tested_date": "2026-03-06"
+          }
+        ]
+      },
+      "detection_gaps": {
+        "signature": {
+          "blocks": ["XSS (encoded)", "SQLi (encoded)", "Command Injection (encoded)", "Log4Shell", "Path Traversal"],
+          "misses": [],
+          "notes": "Comprehensive signature coverage on managed ruleset"
+        },
+        "anomaly": {
+          "blocks": ["double_encoding"],
+          "misses": ["long_parameter (2000 chars)", "null_bytes", "unicode_abuse"],
+          "notes": "Anomaly detection is selective — double encoding triggers but other anomalies pass"
+        }
+      },
+      "rate_limiting": {
+        "default_threshold": null,
+        "headers_exposed": false,
+        "notes": "No X-RateLimit-* headers by default. Rate limiting is configured per-zone via dashboard rules."
+      },
+      "recommended_categories": ["modern_bypasses", "csp_bypass", "prototype_pollution", "ssti"],
+      "recommended_delay": 0.5
+    },
+
+    "aws_waf": {
+      "display_name": "AWS WAF",
+      "detection_mode": "signature",
+      "block_behavior": {
+        "status_codes": [403, 429],
+        "block_patterns": ["403 with 'Request blocked' body", "403 with x-amzn-waf-action header"],
+        "challenge_types": ["captcha (if configured)"],
+        "timing_signature": "minimal timing difference — WAF is inline with ALB/CloudFront"
+      },
+      "bypass_techniques": {
+        "effective": [
+          {
+            "technique": "double_encoding",
+            "payload_example": "%253Cscript%253E",
+            "description": "AWS WAF Core Rule Set does not recursively decode by default",
+            "confidence": "high",
+            "notes": "Unless 'URL decode' transformation is applied twice in rule config"
+          },
+          {
+            "technique": "unicode_normalization",
+            "payload_example": "%ef%bc%9cscript%ef%bc%9e",
+            "description": "AWS WAF managed rules primarily match ASCII patterns",
+            "confidence": "high"
+          },
+          {
+            "technique": "json_body_bypass",
+            "payload_example": "{\"input\": \"<script>alert(1)</script>\"}",
+            "description": "AWS WAF may not inspect JSON body unless JsonBody field match is configured",
+            "confidence": "high",
+            "notes": "Many deployments only inspect URI/QueryString/Headers"
+          },
+          {
+            "technique": "header_injection",
+            "payload_example": "X-Custom-Header: <script>alert(1)</script>",
+            "description": "WAF rules often only inspect common headers, not arbitrary custom headers",
+            "confidence": "medium"
+          },
+          {
+            "technique": "size_constraint_bypass",
+            "payload_example": "8KB+ body (exceeds default inspection limit)",
+            "description": "AWS WAF inspects first 8KB of body by default (16KB on newer rules)",
+            "confidence": "high",
+            "notes": "Place payload after 8KB of padding in POST body"
+          },
+          {
+            "technique": "content_type_confusion",
+            "payload_example": "Content-Type: text/xml with XSS payload",
+            "description": "AWS WAF rules may only trigger on specific content types",
+            "confidence": "medium"
+          }
+        ],
+        "ineffective": [
+          {
+            "technique": "case_variation",
+            "description": "AWS managed rules use lowercase transformation by default"
+          }
+        ]
+      },
+      "detection_gaps": {
+        "signature": {
+          "blocks": ["XSS", "SQLi", "Command Injection", "Path Traversal", "Log4Shell"],
+          "misses": ["SSTI (depends on rule group)", "Prototype Pollution"],
+          "notes": "Coverage depends on which managed rule groups are enabled"
+        },
+        "anomaly": {
+          "blocks": [],
+          "misses": ["long_parameter", "null_bytes", "unicode_abuse", "double_encoding"],
+          "notes": "No built-in anomaly scoring — purely signature-based unless custom rules added"
+        }
+      },
+      "rate_limiting": {
+        "default_threshold": null,
+        "headers_exposed": false,
+        "notes": "Rate-based rules must be explicitly configured. Threshold minimum is 100 requests per 5-minute window."
+      },
+      "recommended_categories": ["modern_bypasses", "sqli", "command_injection", "ssti", "prototype_pollution"],
+      "recommended_delay": 0.3
+    },
+
+    "azure_waf": {
+      "display_name": "Microsoft Azure WAF",
+      "detection_mode": "hybrid",
+      "block_behavior": {
+        "status_codes": [403],
+        "block_patterns": ["403 with small error page", "403 with x-azure-ref header"],
+        "challenge_types": [],
+        "timing_signature": "minimal timing delta (-8ms observed)"
+      },
+      "bypass_techniques": {
+        "effective": [
+          {
+            "technique": "content_type_confusion",
+            "payload_example": "multipart/form-data with payload in boundary",
+            "description": "Azure WAF OWASP ruleset may not fully parse multipart boundaries",
+            "confidence": "medium"
+          },
+          {
+            "technique": "json_body_bypass",
+            "payload_example": "Nested JSON: {\"a\":{\"b\":\"<script>\"}}",
+            "description": "Deep JSON nesting may exceed parsing depth",
+            "confidence": "medium"
+          },
+          {
+            "technique": "request_smuggling",
+            "payload_example": "CL.TE or TE.CL desync",
+            "description": "Front Door + origin desync potential",
+            "confidence": "low",
+            "notes": "Requires specific backend configuration"
+          }
+        ],
+        "ineffective": [
+          {
+            "technique": "double_encoding",
+            "description": "Azure WAF (OWASP 3.2+) performs recursive decoding and catches double encoding",
+            "tested_date": "2026-03-06",
+            "tested_on": ["microsoft.com"]
+          },
+          {
+            "technique": "unicode_normalization",
+            "description": "Azure WAF catches Unicode abuse — detected in anomaly testing",
+            "tested_date": "2026-03-06",
+            "tested_on": ["microsoft.com"]
+          },
+          {
+            "technique": "null_bytes",
+            "description": "Handled by OWASP CRS rules"
+          }
+        ]
+      },
+      "detection_gaps": {
+        "signature": {
+          "blocks": ["XSS", "SQLi", "Path Traversal", "Command Injection", "SSTI"],
+          "misses": [],
+          "notes": "Blocks ALL 5 signature probes — most aggressive signature coverage tested"
+        },
+        "anomaly": {
+          "blocks": ["unicode_abuse", "double_encoding"],
+          "misses": ["long_parameter", "null_bytes"],
+          "notes": "Anomaly scoring from OWASP CRS catches encoding tricks"
+        }
+      },
+      "rate_limiting": {
+        "default_threshold": null,
+        "headers_exposed": false,
+        "notes": "Rate limiting via Azure Front Door custom rules"
+      },
+      "recommended_categories": ["modern_bypasses", "prototype_pollution", "ssrf", "ssti"],
+      "recommended_delay": 0.5
+    },
+
+    "akamai": {
+      "display_name": "Akamai (Kona/App & API Protector)",
+      "detection_mode": "hybrid",
+      "block_behavior": {
+        "status_codes": [403, 503],
+        "block_patterns": ["403 with 'Reference #' in body", "Custom error page with Akamai reference"],
+        "challenge_types": ["bot_manager_challenge"],
+        "timing_signature": "blocked responses slightly faster due to edge evaluation"
+      },
+      "bypass_techniques": {
+        "effective": [
+          {
+            "technique": "request_smuggling",
+            "payload_example": "CL.TE desync between Akamai edge and origin",
+            "description": "Akamai edge and backend may disagree on request boundaries",
+            "confidence": "medium"
+          },
+          {
+            "technique": "http_method_override",
+            "payload_example": "POST with X-HTTP-Method-Override: PUT",
+            "description": "Some Akamai configs only inspect GET/POST, method override bypasses",
+            "confidence": "medium"
+          },
+          {
+            "technique": "parameter_pollution",
+            "payload_example": "?input=safe&input=<script>alert(1)</script>",
+            "description": "HPP — Akamai may only inspect first or last param value",
+            "confidence": "medium"
+          },
+          {
+            "technique": "path_normalization",
+            "payload_example": "/./admin/../?input=payload",
+            "description": "Path traversal sequences before normalization",
+            "confidence": "low"
+          }
+        ],
+        "ineffective": []
+      },
+      "detection_gaps": {
+        "signature": {
+          "blocks": ["XSS", "SQLi", "Command Injection", "Log4Shell"],
+          "misses": [],
+          "notes": "Comprehensive Kona Rule Set coverage"
+        },
+        "anomaly": {
+          "blocks": [],
+          "misses": [],
+          "notes": "Akamai uses adaptive security engine — behavior varies by config"
+        }
+      },
+      "rate_limiting": {
+        "default_threshold": null,
+        "headers_exposed": false,
+        "notes": "Rate controls configured via Security Policies"
+      },
+      "recommended_categories": ["modern_bypasses", "ssrf", "api_security", "prototype_pollution"],
+      "recommended_delay": 0.5
+    },
+
+    "imperva": {
+      "display_name": "Imperva (Incapsula)",
+      "detection_mode": "hybrid",
+      "block_behavior": {
+        "status_codes": [403],
+        "block_patterns": ["403 with 'Incident ID' in body", "403 with 'Support ID'"],
+        "challenge_types": ["js_challenge", "captcha"],
+        "timing_signature": "variable — depends on cloud scrubbing center proximity"
+      },
+      "bypass_techniques": {
+        "effective": [
+          {
+            "technique": "origin_ip_bypass",
+            "payload_example": "Direct request to origin IP, bypassing Imperva proxy",
+            "description": "If origin IP is exposed, requests bypass WAF entirely",
+            "confidence": "high",
+            "notes": "Use fray recon DNS + historical records to find origin IP"
+          },
+          {
+            "technique": "double_encoding",
+            "payload_example": "%253Cscript%253E",
+            "description": "Imperva SecureSphere may not recursively decode",
+            "confidence": "medium"
+          },
+          {
+            "technique": "content_type_confusion",
+            "payload_example": "Content-Type: application/octet-stream",
+            "description": "Binary content type may skip body inspection",
+            "confidence": "medium"
+          },
+          {
+            "technique": "websocket_bypass",
+            "payload_example": "Upgrade: websocket with payload in ws frames",
+            "description": "Imperva may not inspect WebSocket frame contents",
+            "confidence": "medium"
+          }
+        ],
+        "ineffective": []
+      },
+      "detection_gaps": {
+        "signature": {
+          "blocks": ["XSS", "SQLi", "Command Injection"],
+          "misses": ["SSTI (limited coverage)", "Prototype Pollution"],
+          "notes": "Strong on OWASP Top 10 signatures"
+        },
+        "anomaly": {
+          "blocks": [],
+          "misses": [],
+          "notes": "Anomaly detection via reputation-based scoring"
+        }
+      },
+      "rate_limiting": {
+        "default_threshold": null,
+        "headers_exposed": false,
+        "notes": "DDoS protection + rate limiting via traffic management rules"
+      },
+      "recommended_categories": ["modern_bypasses", "ssti", "prototype_pollution", "ssrf"],
+      "recommended_delay": 0.5
+    },
+
+    "f5_bigip": {
+      "display_name": "F5 BIG-IP ASM",
+      "detection_mode": "signature",
+      "block_behavior": {
+        "status_codes": [403],
+        "block_patterns": ["'The requested URL was rejected' page", "Support ID in error page"],
+        "challenge_types": [],
+        "timing_signature": "inline — no significant timing difference"
+      },
+      "bypass_techniques": {
+        "effective": [
+          {
+            "technique": "parameter_pollution",
+            "payload_example": "?input=safe&input=<script>",
+            "description": "F5 may only inspect first parameter value in HPP scenarios",
+            "confidence": "medium"
+          },
+          {
+            "technique": "json_body_bypass",
+            "payload_example": "JSON body with payload in deeply nested keys",
+            "description": "ASM JSON profile may have limited parsing depth",
+            "confidence": "medium"
+          },
+          {
+            "technique": "multipart_boundary",
+            "payload_example": "Malformed multipart boundary with payload",
+            "description": "Complex multipart parsing edge cases",
+            "confidence": "low"
+          }
+        ],
+        "ineffective": []
+      },
+      "detection_gaps": {
+        "signature": {
+          "blocks": ["XSS", "SQLi", "Command Injection", "Path Traversal"],
+          "misses": ["SSTI", "Prototype Pollution"],
+          "notes": "Relies on attack signature sets — coverage depends on updates"
+        },
+        "anomaly": {
+          "blocks": [],
+          "misses": ["double_encoding", "unicode_abuse"],
+          "notes": "Anomaly scoring available but often not enabled in production"
+        }
+      },
+      "rate_limiting": {
+        "default_threshold": null,
+        "headers_exposed": false,
+        "notes": "Rate limiting via iRules or DoS profiles"
+      },
+      "recommended_categories": ["modern_bypasses", "ssti", "prototype_pollution", "ssrf"],
+      "recommended_delay": 0.3
+    },
+
+    "fastly": {
+      "display_name": "Fastly (Signal Sciences / Next-Gen WAF)",
+      "detection_mode": "hybrid",
+      "block_behavior": {
+        "status_codes": [403, 406],
+        "block_patterns": ["406 Not Acceptable", "Signal Sciences block page"],
+        "challenge_types": [],
+        "timing_signature": "edge-evaluated — fast block responses"
+      },
+      "bypass_techniques": {
+        "effective": [
+          {
+            "technique": "double_encoding",
+            "payload_example": "%253Cscript%253E",
+            "description": "Signal Sciences SmartParse may not recursively decode",
+            "confidence": "medium"
+          },
+          {
+            "technique": "graphql_injection",
+            "payload_example": "GraphQL query with inline XSS in variables",
+            "description": "GraphQL body inspection may be limited",
+            "confidence": "medium"
+          }
+        ],
+        "ineffective": []
+      },
+      "detection_gaps": {
+        "signature": {
+          "blocks": ["XSS", "SQLi", "Command Injection"],
+          "misses": [],
+          "notes": "SmartParse uses context-aware detection"
+        },
+        "anomaly": {
+          "blocks": [],
+          "misses": [],
+          "notes": "Signal Sciences uses agent-based anomaly detection"
+        }
+      },
+      "rate_limiting": {
+        "default_threshold": null,
+        "headers_exposed": false,
+        "notes": "Rate limiting via Edge Rate Limiting or Signal Sciences thresholds"
+      },
+      "recommended_categories": ["modern_bypasses", "api_security", "prototype_pollution"],
+      "recommended_delay": 0.3
+    },
+
+    "modsecurity": {
+      "display_name": "ModSecurity (OWASP CRS)",
+      "detection_mode": "hybrid",
+      "block_behavior": {
+        "status_codes": [403, 406],
+        "block_patterns": ["403 with ModSecurity error", "Apache/nginx error page"],
+        "challenge_types": [],
+        "timing_signature": "inline — origin-level WAF"
+      },
+      "bypass_techniques": {
+        "effective": [
+          {
+            "technique": "double_encoding",
+            "payload_example": "%253Cscript%253E",
+            "description": "CRS v3.x default paranoia level 1 does not decode twice",
+            "confidence": "high",
+            "notes": "Paranoia level 2+ adds recursive decoding"
+          },
+          {
+            "technique": "unicode_normalization",
+            "payload_example": "%C0%BC (overlong UTF-8 for <)",
+            "description": "Overlong UTF-8 sequences bypass ASCII pattern matching",
+            "confidence": "high",
+            "notes": "CRS 4.x addresses this; older versions vulnerable"
+          },
+          {
+            "technique": "comment_injection",
+            "payload_example": "SELECT/**/1/**/FROM/**/users",
+            "description": "SQL comments break up signatures",
+            "confidence": "medium"
+          },
+          {
+            "technique": "content_type_confusion",
+            "payload_example": "Content-Type: text/plain with XSS in body",
+            "description": "CRS may not inspect body for unexpected content types",
+            "confidence": "medium"
+          },
+          {
+            "technique": "anomaly_threshold_gaming",
+            "payload_example": "Split attack across multiple low-score rules",
+            "description": "Stay below anomaly threshold (default: 5) by using partial patterns",
+            "confidence": "high",
+            "notes": "Each rule adds 2-5 to anomaly score; stay under inbound_anomaly_score_threshold"
+          }
+        ],
+        "ineffective": [
+          {
+            "technique": "case_variation",
+            "description": "CRS uses t:lowercase transformation"
+          }
+        ]
+      },
+      "detection_gaps": {
+        "signature": {
+          "blocks": ["XSS", "SQLi", "Command Injection", "Path Traversal"],
+          "misses": ["Prototype Pollution", "SSTI (limited at PL1)"],
+          "notes": "Coverage scales with paranoia level (1-4)"
+        },
+        "anomaly": {
+          "blocks": ["depends on paranoia level"],
+          "misses": ["at PL1: double_encoding, unicode_abuse, long_params"],
+          "notes": "PL1 = minimal anomaly, PL4 = catches almost everything but high false positives"
+        }
+      },
+      "rate_limiting": {
+        "default_threshold": null,
+        "headers_exposed": false,
+        "notes": "Rate limiting via DOS protection rules or external module (e.g., mod_evasive)"
+      },
+      "recommended_categories": ["modern_bypasses", "sqli", "ssti", "prototype_pollution"],
+      "recommended_delay": 0.2
+    },
+
+    "google_cloud_armor": {
+      "display_name": "Google Cloud Armor",
+      "detection_mode": "signature",
+      "block_behavior": {
+        "status_codes": [403],
+        "block_patterns": ["403 with 'does not have permission'", "JSON error body"],
+        "challenge_types": ["recaptcha_enterprise"],
+        "timing_signature": "edge-evaluated — fast rejection"
+      },
+      "bypass_techniques": {
+        "effective": [
+          {
+            "technique": "double_encoding",
+            "payload_example": "%253Cscript%253E",
+            "description": "Cloud Armor preconfigured rules may not recursively decode",
+            "confidence": "medium"
+          },
+          {
+            "technique": "json_body_bypass",
+            "payload_example": "JSON body with payload (if only URI rules configured)",
+            "description": "Cloud Armor rules are often configured for URI/headers only",
+            "confidence": "high"
+          },
+          {
+            "technique": "regional_bypass",
+            "payload_example": "Route through non-inspected region",
+            "description": "Cloud Armor policies may only apply to specific backend services",
+            "confidence": "low"
+          }
+        ],
+        "ineffective": []
+      },
+      "detection_gaps": {
+        "signature": {
+          "blocks": ["XSS", "SQLi", "Command Injection"],
+          "misses": ["SSTI", "Prototype Pollution"],
+          "notes": "Preconfigured WAF rules based on OWASP ModSecurity CRS"
+        },
+        "anomaly": {
+          "blocks": [],
+          "misses": ["double_encoding", "unicode_abuse"],
+          "notes": "No built-in anomaly scoring — signature-only by default"
+        }
+      },
+      "rate_limiting": {
+        "default_threshold": null,
+        "headers_exposed": false,
+        "notes": "Throttle action available with configurable threshold per security policy"
+      },
+      "recommended_categories": ["modern_bypasses", "ssti", "prototype_pollution", "api_security"],
+      "recommended_delay": 0.3
+    },
+
+    "sucuri": {
+      "display_name": "Sucuri WAF",
+      "detection_mode": "signature",
+      "block_behavior": {
+        "status_codes": [403],
+        "block_patterns": ["403 with Sucuri block page", "Firewall block notification"],
+        "challenge_types": ["js_challenge"],
+        "timing_signature": "proxy-based — moderate latency"
+      },
+      "bypass_techniques": {
+        "effective": [
+          {
+            "technique": "origin_ip_bypass",
+            "payload_example": "Direct to origin IP via DNS history",
+            "description": "Sucuri is a reverse proxy — origin IP bypass skips WAF",
+            "confidence": "high"
+          },
+          {
+            "technique": "double_encoding",
+            "payload_example": "%253Cscript%253E",
+            "description": "Sucuri may not recursively decode URL parameters",
+            "confidence": "medium"
+          }
+        ],
+        "ineffective": []
+      },
+      "detection_gaps": {
+        "signature": {
+          "blocks": ["XSS", "SQLi", "Command Injection"],
+          "misses": ["SSTI", "Prototype Pollution", "GraphQL injection"],
+          "notes": "Focus on WordPress and common CMS attack patterns"
+        },
+        "anomaly": {
+          "blocks": [],
+          "misses": ["double_encoding", "unicode_abuse", "long_parameter"],
+          "notes": "Minimal anomaly detection"
+        }
+      },
+      "rate_limiting": {
+        "default_threshold": null,
+        "headers_exposed": false,
+        "notes": "Built-in brute force protection and rate limiting"
+      },
+      "recommended_categories": ["modern_bypasses", "wordpress", "ssti", "file_upload"],
+      "recommended_delay": 0.3
+    }
+  },
+
+  "technique_matrix": {
+    "_description": "Quick lookup: which vendors are vulnerable to which bypass technique",
+    "double_encoding": {
+      "effective_against": ["aws_waf", "modsecurity", "fastly", "sucuri", "google_cloud_armor", "imperva"],
+      "blocked_by": ["azure_waf", "cloudflare"],
+      "notes": "Most common bypass — works against vendors that don't recursively URL-decode"
+    },
+    "unicode_normalization": {
+      "effective_against": ["aws_waf", "modsecurity", "f5_bigip"],
+      "blocked_by": ["azure_waf", "cloudflare"],
+      "notes": "Fullwidth Unicode, overlong UTF-8, or homoglyph substitution"
+    },
+    "content_type_confusion": {
+      "effective_against": ["cloudflare", "aws_waf", "azure_waf", "modsecurity", "imperva"],
+      "blocked_by": [],
+      "notes": "Send payload in unexpected Content-Type (text/plain, text/xml, multipart)"
+    },
+    "json_body_bypass": {
+      "effective_against": ["aws_waf", "azure_waf", "google_cloud_armor", "f5_bigip"],
+      "blocked_by": [],
+      "notes": "Payload in JSON body when WAF only inspects URI/headers"
+    },
+    "size_constraint_bypass": {
+      "effective_against": ["aws_waf"],
+      "blocked_by": ["cloudflare", "azure_waf"],
+      "notes": "AWS WAF default body inspection limit is 8KB — pad before payload"
+    },
+    "parameter_pollution": {
+      "effective_against": ["akamai", "f5_bigip"],
+      "blocked_by": [],
+      "notes": "HTTP Parameter Pollution — duplicate params with different values"
+    },
+    "origin_ip_bypass": {
+      "effective_against": ["imperva", "sucuri", "cloudflare"],
+      "blocked_by": [],
+      "notes": "Only works if origin IP is exposed — use DNS history, crt.sh, Shodan"
+    },
+    "http1_protocol_bypass": {
+      "effective_against": ["cloudflare"],
+      "blocked_by": [],
+      "notes": "BISO-proxied zones may not apply WAF on HTTP/1.1 vs HTTP/2"
+    },
+    "request_smuggling": {
+      "effective_against": ["akamai", "azure_waf"],
+      "blocked_by": [],
+      "notes": "CL.TE or TE.CL desync between CDN edge and origin"
+    },
+    "anomaly_threshold_gaming": {
+      "effective_against": ["modsecurity"],
+      "blocked_by": [],
+      "notes": "Split attack across multiple rules, each below anomaly score threshold"
+    }
+  }
+}

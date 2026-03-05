@@ -312,26 +312,106 @@ def _generate_bypass_strategy(waf_vendor: str, blocked_payload: str) -> str:
 
     lines.append("## WAF-Specific Notes")
     vendor_lower = vendor.lower()
-    if "cloudflare" in vendor_lower:
-        lines.append("- Cloudflare uses ML + regex rules. Mixed-case and Unicode escapes often work.")
-        lines.append("- `<svg>` and `<math>` tags are less monitored than `<script>`.")
-        lines.append("- Template literals (backticks) can bypass parenthesis detection.")
-        lines.append("- Try: `fray test <url> -c xss --smart --max 100`")
-    elif "akamai" in vendor_lower:
-        lines.append("- Akamai Kona has aggressive regex rules. Double-encoding helps.")
-        lines.append("- Null bytes in tags can confuse the parser.")
-        lines.append("- Try less common event handlers: `ontoggle`, `onanimationend`.")
-    elif "aws" in vendor_lower:
-        lines.append("- AWS WAF rules are often custom. Test each rule group separately.")
-        lines.append("- JSON payloads in body may bypass query-string-only rules.")
-        lines.append("- Try both GET and POST with same payload.")
-    elif "imperva" in vendor_lower or "incapsula" in vendor_lower:
-        lines.append("- Incapsula/Imperva blocks most common payloads aggressively.")
-        lines.append("- Comment injection and null bytes are effective.")
-        lines.append("- Try polyglot payloads that confuse the parser type detection.")
+
+    # Load WAF intelligence knowledge base
+    from fray import load_waf_intel
+    intel = load_waf_intel()
+    vendors_db = intel.get("vendors", {})
+    technique_matrix = intel.get("technique_matrix", {})
+
+    # Match vendor to intel key
+    vendor_key = None
+    for key in vendors_db:
+        if key.replace("_", " ") in vendor_lower or vendor_lower in key.replace("_", " "):
+            vendor_key = key
+            break
+    # Fuzzy fallback
+    if not vendor_key:
+        for key, data in vendors_db.items():
+            if vendor_lower in data.get("display_name", "").lower():
+                vendor_key = key
+                break
+
+    if vendor_key and vendor_key in vendors_db:
+        vdata = vendors_db[vendor_key]
+        lines.append(f"### {vdata['display_name']} — Intelligence from WAF Knowledge Base")
+        lines.append(f"- Detection mode: **{vdata.get('detection_mode', 'unknown')}**")
+        lines.append("")
+
+        # Effective techniques
+        effective = vdata.get("bypass_techniques", {}).get("effective", [])
+        if effective:
+            lines.append("**Effective bypass techniques:**")
+            for t in effective:
+                conf = t.get("confidence", "?")
+                lines.append(f"- **{t['technique']}** (confidence: {conf}): {t['description']}")
+                if t.get("payload_example"):
+                    lines.append(f"  - Example: `{t['payload_example'][:100]}`")
+            lines.append("")
+
+        # Ineffective techniques (avoid wasting time)
+        ineffective = vdata.get("bypass_techniques", {}).get("ineffective", [])
+        if ineffective:
+            lines.append("**Known ineffective (skip these):**")
+            for t in ineffective:
+                lines.append(f"- ~~{t['technique']}~~ — {t.get('description', '')}")
+            lines.append("")
+
+        # Detection gaps
+        gaps = vdata.get("detection_gaps", {})
+        sig_misses = gaps.get("signature", {}).get("misses", [])
+        anom_misses = gaps.get("anomaly", {}).get("misses", [])
+        if sig_misses or anom_misses:
+            lines.append("**Detection gaps:**")
+            if sig_misses:
+                lines.append(f"- Signature misses: {', '.join(sig_misses)}")
+            if anom_misses:
+                lines.append(f"- Anomaly misses: {', '.join(anom_misses)}")
+            lines.append("")
+
+        # Recommended categories
+        rec_cats = vdata.get("recommended_categories", [])
+        if rec_cats:
+            lines.append(f"**Recommended payload categories:** {', '.join(rec_cats)}")
+            lines.append(f"- Try: `fray test <url> -c {rec_cats[0]} --smart --max 100`")
+
+        # Recommended delay
+        delay = vdata.get("recommended_delay")
+        if delay:
+            lines.append(f"- Safe testing delay: **{delay}s** between requests")
     else:
-        lines.append(f"- No specific notes for {vendor}. Try encoding and tag substitution.")
-        lines.append("- Run adaptive mode: `fray test <url> -c xss --smart --max 100`")
+        # Fallback to hardcoded notes
+        if "cloudflare" in vendor_lower:
+            lines.append("- Cloudflare uses ML + regex rules. Mixed-case and Unicode escapes often work.")
+            lines.append("- `<svg>` and `<math>` tags are less monitored than `<script>`.")
+            lines.append("- Template literals (backticks) can bypass parenthesis detection.")
+            lines.append("- Try: `fray test <url> -c xss --smart --max 100`")
+        elif "akamai" in vendor_lower:
+            lines.append("- Akamai Kona has aggressive regex rules. Double-encoding helps.")
+            lines.append("- Try less common event handlers: `ontoggle`, `onanimationend`.")
+        elif "aws" in vendor_lower:
+            lines.append("- AWS WAF rules are often custom. Test each rule group separately.")
+            lines.append("- JSON payloads in body may bypass query-string-only rules.")
+        elif "imperva" in vendor_lower or "incapsula" in vendor_lower:
+            lines.append("- Incapsula/Imperva blocks most common payloads aggressively.")
+            lines.append("- Comment injection and null bytes are effective.")
+        else:
+            lines.append(f"- No specific intel for {vendor}. Try encoding and tag substitution.")
+            lines.append("- Run adaptive mode: `fray test <url> -c xss --smart --max 100`")
+
+    # Cross-vendor technique matrix
+    if technique_matrix:
+        lines.append("")
+        lines.append("## Cross-Vendor Technique Matrix")
+        for tech_name, tech_data in technique_matrix.items():
+            if not isinstance(tech_data, dict):
+                continue
+            effective_against = tech_data.get("effective_against", [])
+            blocked_by = tech_data.get("blocked_by", [])
+            if vendor_key and vendor_key in effective_against:
+                lines.append(f"- ✅ **{tech_name}** — effective against this vendor")
+            elif vendor_key and vendor_key in blocked_by:
+                lines.append(f"- ❌ **{tech_name}** — blocked by this vendor")
 
     lines.append("")
     lines.append(f"**Total mutations suggested: {mutation_count} strategies**")

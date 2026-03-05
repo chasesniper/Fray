@@ -18,3 +18,13 @@ from pathlib import Path
 
 PACKAGE_DIR = Path(__file__).parent
 PAYLOADS_DIR = PACKAGE_DIR / "payloads"
+DATA_DIR = PACKAGE_DIR / "data"
+
+
+def load_waf_intel() -> dict:
+    """Load WAF vendor intelligence knowledge base."""
+    import json
+    intel_path = DATA_DIR / "waf_intel.json"
+    if intel_path.exists():
+        return json.loads(intel_path.read_text(encoding="utf-8"))
+    return {"vendors": {}, "technique_matrix": {}}
