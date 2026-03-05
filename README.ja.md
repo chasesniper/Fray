@@ -38,6 +38,7 @@ pip install fray
 ```
 
 ```bash
+fray demo                                        # 今すぐ試す — WAF検出 + XSSスキャン
 fray scan https://example.com                    # 自動スキャン（クロール + 注入）
 fray recon https://example.com                   # 情報収集
 fray test https://example.com --smart            # スマートペイロードテスト
@@ -50,7 +51,7 @@ fray report -i results.json -o report.html       # レポート生成
 
 ## デモ
 
-`fray scan` がクロール、パラメータ発見、XSSペイロード注入を実行。`↩ REFLECTED` = レスポンス本文でペイロード確認。**14秒で2件のXSSバイパスを発見。**
+`fray demo` がWAF検出、クロール、XSSペイロード注入を実行。`↩ REFLECTED` = レスポンス本文でペイロード確認。**28秒で9件のXSSバイパスを発見。**
 
 ![fray demo](docs/demo.gif)
 

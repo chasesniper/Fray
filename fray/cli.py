@@ -22,6 +22,7 @@ Usage:
     fray validate <url>          Blue team WAF config validation report
     fray bounty --platform h1    Bug bounty scope auto-fetch + batch test
     fray explain <CVE-ID>       Explain a CVE — payloads, severity, what to test
+    fray demo [url]             Quick showcase: detect WAF + XSS scan (great for GIFs)
     fray version                Show version
 """
 
@@ -970,6 +971,67 @@ def cmd_explain(args):
             print(json.dumps(output, indent=2, ensure_ascii=False))
 
 
+def cmd_demo(args):
+    """Quick showcase: detect WAF + XSS scan on a target (great for GIFs/READMEs)."""
+    import time
+    from fray.detector import WAFDetector
+    from fray.scanner import run_scan, print_scan_result
+
+    DEFAULT_TARGET = "http://testphp.vulnweb.com"
+    target = getattr(args, 'target', None) or DEFAULT_TARGET
+
+    print(f"\n  ⚔️  Fray v{__version__} — Demo Mode")
+    print(f"  {'─' * 50}")
+    print(f"  Target: {target}\n")
+
+    # Phase 1: WAF Detection
+    print(f"  [1/2] Detecting WAF...")
+    detector = WAFDetector()
+    try:
+        waf = detector.detect_waf(target, verify_ssl=False)
+        if waf.get('waf_detected'):
+            vendor = waf['waf_vendor']
+            conf = waf['confidence']
+            print(f"  ✓ WAF Detected: {vendor} ({conf}% confidence)")
+            sigs = waf.get('signatures_found', [])
+            for sig in sigs[:3]:
+                print(f"    • {sig}")
+        else:
+            print(f"  ✓ WAF: None detected")
+    except Exception as e:
+        print(f"  ⚠ WAF detection failed: {e}")
+
+    # Phase 2: Quick XSS Scan
+    print(f"\n  [2/2] Scanning for XSS bypasses...")
+    print()
+
+    scan = run_scan(
+        target=target,
+        category='xss',
+        max_payloads=3,
+        max_depth=2,
+        max_pages=8,
+        delay=0.2,
+        timeout=8,
+        verify_ssl=False,
+        quiet=False,
+    )
+    print_scan_result(scan)
+
+    # One-line verdict
+    r = scan.total_reflected if hasattr(scan, 'total_reflected') else 0
+    b = scan.total_blocked if hasattr(scan, 'total_blocked') else 0
+    t = scan.total_tested if hasattr(scan, 'total_tested') else 0
+    if r > 0:
+        print(f"\n  🎯 Found {r} confirmed XSS bypass{'es' if r != 1 else ''} ({b}/{t} blocked)")
+    elif b > 0:
+        print(f"\n  🛡️  WAF blocked {b}/{t} payloads — no bypasses found")
+    else:
+        print(f"\n  ✓ Scan complete — {t} payloads tested")
+
+    print(f"\n  Run 'fray scan {target}' for a full assessment.\n")
+
+
 def cmd_update(args):
     """Update payloads from GitHub"""
     from fray.update import run_update
@@ -1336,6 +1398,13 @@ Documentation: https://github.com/dalisecurity/fray
     p_scope.add_argument("--check", default=None, help="Check if a specific URL is in scope")
     p_scope.add_argument("--json", action="store_true", help="Output parsed scope as JSON")
     p_scope.set_defaults(func=cmd_scope)
+
+    # demo
+    p_demo = subparsers.add_parser("demo",
+        help="Quick showcase: detect WAF + XSS scan (great for GIFs)")
+    p_demo.add_argument("target", nargs="?", default=None,
+                         help="Target URL (default: http://testphp.vulnweb.com)")
+    p_demo.set_defaults(func=cmd_demo)
 
     args = parser.parse_args()
 

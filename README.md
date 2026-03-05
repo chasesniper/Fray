@@ -38,6 +38,7 @@ pip install fray
 ```
 
 ```bash
+fray demo                                        # Try it now — WAF detect + XSS scan
 fray scan https://example.com                    # Auto scan (crawl + inject)
 fray recon https://example.com                   # Reconnaissance
 fray test https://example.com --smart            # Smart payload testing
@@ -50,7 +51,7 @@ fray report -i results.json -o report.html       # Generate report
 
 ## Demo
 
-`fray scan` crawls, discovers parameters, and injects XSS payloads. `↩ REFLECTED` = payload confirmed in response body. **Found 2 XSS bypasses in 14 seconds.**
+`fray demo` detects the WAF, crawls the target, and injects XSS payloads. `↩ REFLECTED` = payload confirmed in response body. **Found 9 XSS bypasses in 28 seconds.**
 
 ![fray demo](docs/demo.gif)
 
