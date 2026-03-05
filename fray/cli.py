@@ -15,6 +15,7 @@ Usage:
     fray submit-payload          Submit payload to community (auto GitHub PR)
     fray ci init                 Generate GitHub Actions WAF test workflow
     fray learn xss               Interactive CTF-style security tutorial
+    fray scan <url>              Auto crawl → param discovery → payload injection
     fray bypass <url> --waf cloudflare -c xss   WAF bypass scoring with evasion scorecard
     fray diff before.json after.json              Compare scans — surface regressions
     fray smuggle <url>           HTTP request smuggling detection (CL.TE / TE.CL)
@@ -451,6 +452,42 @@ def cmd_payloads(args):
     print("-" * 70)
     print(f"  {'TOTAL':<28} {total_files}")
     print(f"\nUsage: fray test <url> -c <category>")
+
+
+def cmd_scan(args):
+    """Auto scan: crawl → param discovery → payload injection."""
+    from fray.scanner import run_scan, print_scan_result
+
+    custom_headers = build_auth_headers(args)
+    json_mode = getattr(args, 'json', False)
+
+    scan = run_scan(
+        target=args.target,
+        category=getattr(args, 'category', None) or 'xss',
+        max_payloads=args.max,
+        max_depth=args.depth,
+        max_pages=args.max_pages,
+        delay=args.delay,
+        timeout=args.timeout,
+        verify_ssl=not getattr(args, 'insecure', False),
+        custom_headers=custom_headers or None,
+        quiet=json_mode,
+        jitter=getattr(args, 'jitter', 0.0),
+        stealth=getattr(args, 'stealth', False),
+        rate_limit=getattr(args, 'rate_limit', 0.0),
+    )
+
+    if json_mode:
+        print(json.dumps(scan.to_dict(), indent=2, ensure_ascii=False))
+    else:
+        print_scan_result(scan)
+
+    if getattr(args, 'output', None):
+        _validate_output_path(args.output)
+        with open(args.output, 'w', encoding='utf-8') as f:
+            json.dump(scan.to_dict(), f, indent=2, ensure_ascii=False)
+        if not json_mode:
+            print(f"\n  Results saved to {args.output}")
 
 
 def cmd_stats(args):
@@ -1149,6 +1186,42 @@ Documentation: https://github.com/dalisecurity/fray
     # payloads
     p_payloads = subparsers.add_parser("payloads", help="List available payload categories")
     p_payloads.set_defaults(func=cmd_payloads)
+
+    # scan
+    p_scan = subparsers.add_parser("scan",
+        help="Auto scan: crawl → param discovery → payload injection")
+    p_scan.add_argument("target", help="Target URL to scan")
+    p_scan.add_argument("-c", "--category", default="xss",
+                         help="Payload category for injection (default: xss)")
+    p_scan.add_argument("-m", "--max", type=int, default=5,
+                         help="Max payloads per injection point (default: 5)")
+    p_scan.add_argument("--depth", type=int, default=3,
+                         help="Max crawl depth (default: 3)")
+    p_scan.add_argument("--max-pages", type=int, default=30,
+                         help="Max pages to crawl (default: 30)")
+    p_scan.add_argument("-t", "--timeout", type=int, default=8,
+                         help="Request timeout (default: 8)")
+    p_scan.add_argument("-d", "--delay", type=float, default=0.3,
+                         help="Delay between requests (default: 0.3)")
+    p_scan.add_argument("-o", "--output", default=None,
+                         help="Save scan results JSON to file")
+    p_scan.add_argument("--json", action="store_true",
+                         help="Output results as JSON to stdout")
+    p_scan.add_argument("--insecure", action="store_true",
+                         help="Skip SSL certificate verification")
+    p_scan.add_argument("--cookie", default=None,
+                         help="Cookie header for authenticated scanning")
+    p_scan.add_argument("--bearer", default=None,
+                         help="Bearer token for Authorization header")
+    p_scan.add_argument("-H", "--header", action="append",
+                         help="Custom header (repeatable, format: 'Name: Value')")
+    p_scan.add_argument("--jitter", type=float, default=0.0,
+                         help="Random delay variance (default: 0)")
+    p_scan.add_argument("--stealth", action="store_true",
+                         help="Stealth mode: randomize UA, add jitter, throttle")
+    p_scan.add_argument("--rate-limit", type=float, default=0.0,
+                         help="Max requests per second (default: unlimited)")
+    p_scan.set_defaults(func=cmd_scan)
 
     # stats
     p_stats = subparsers.add_parser("stats", help="Show payload database statistics")
