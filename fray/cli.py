@@ -10,6 +10,7 @@ Usage:
     fray test <url> --webhook <url>  Notify on completion
     fray report                 Generate HTML report
     fray payloads               List available payload categories
+    fray stats                  Show payload database statistics
     fray doctor                 Check environment + auto-fix issues
     fray submit-payload          Submit payload to community (auto GitHub PR)
     fray ci init                 Generate GitHub Actions WAF test workflow
@@ -412,6 +413,16 @@ def cmd_payloads(args):
     print("-" * 70)
     print(f"  {'TOTAL':<28} {total_files}")
     print(f"\nUsage: fray test <url> -c <category>")
+
+
+def cmd_stats(args):
+    """Show payload database statistics"""
+    from fray.stats import collect_stats, print_stats
+    stats = collect_stats()
+    if args.json:
+        print(json.dumps(stats.to_dict(), indent=2))
+    else:
+        print_stats(stats)
 
 
 def cmd_version(args):
@@ -1099,6 +1110,11 @@ Documentation: https://github.com/dalisecurity/fray
     # payloads
     p_payloads = subparsers.add_parser("payloads", help="List available payload categories")
     p_payloads.set_defaults(func=cmd_payloads)
+
+    # stats
+    p_stats = subparsers.add_parser("stats", help="Show payload database statistics")
+    p_stats.add_argument("--json", action="store_true", help="Output as JSON")
+    p_stats.set_defaults(func=cmd_stats)
 
     # version
     p_version = subparsers.add_parser("version", help="Show version")
