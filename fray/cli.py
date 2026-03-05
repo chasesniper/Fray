@@ -309,10 +309,12 @@ def cmd_test(args):
                     all_payloads.extend(tester.load_payloads(str(pf)))
 
     if not all_payloads:
-        print("No payloads loaded. Check category name or payload file path.")
+        print("No payloads loaded. Check category name or payload file path.", file=sys.stderr)
         sys.exit(1)
 
-    print(f"\nLoaded {len(all_payloads)} payloads")
+    json_mode = getattr(args, 'json', False)
+    if not json_mode:
+        print(f"\nLoaded {len(all_payloads)} payloads")
 
     # Adaptive mode: probe → score → test → mutate
     if args.smart:
@@ -321,7 +323,6 @@ def cmd_test(args):
             tester, all_payloads, max_payloads=args.max or 50
         )
     else:
-        json_mode = getattr(args, 'json', False)
         results = tester.test_payloads(all_payloads, max_payloads=args.max,
                                        quiet=json_mode)
 
