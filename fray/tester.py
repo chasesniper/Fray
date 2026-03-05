@@ -525,31 +525,39 @@ class WAFTester:
     def test_payloads(self, payloads: List[Dict], method: str = 'GET', param: str = 'input', 
                      max_payloads: Optional[int] = None) -> List[Dict]:
         """Test multiple payloads"""
+        from fray.output import console, blocked_text, passed_text, make_progress
+
         results = []
         total = min(len(payloads), max_payloads) if max_payloads else len(payloads)
         
         self.start_time = datetime.now()
-        print(f"\n{Colors.HEADER}Testing {total} payloads against {self.target}{Colors.END}\n")
-        
-        for idx, payload_data in enumerate(payloads[:total], 1):
-            payload = payload_data.get('payload', payload_data) if isinstance(payload_data, dict) else payload_data
-            desc = payload_data.get('description', '') if isinstance(payload_data, dict) else ''
-            category = payload_data.get('category', 'unknown') if isinstance(payload_data, dict) else 'unknown'
-            
-            result = self.test_payload(payload, method, param)
-            result['category'] = category
-            result['description'] = desc
-            results.append(result)
-            
-            # Print result
-            status_color = Colors.RED if result['blocked'] else Colors.GREEN
-            status_text = "BLOCKED" if result['blocked'] else "PASSED"
-            
-            print(f"[{idx}/{total}] {status_color}{status_text:8}{Colors.END} | "
-                  f"Status: {result['status']} | "
-                  f"{desc[:40] if desc else payload[:40]}")
-            
-            self._stealth_delay()
+        console.print()
+        console.rule(f"[bold]Testing {total} payloads against [cyan]{self.target}[/cyan][/bold]")
+        console.print()
+
+        with make_progress() as progress:
+            task = progress.add_task("Testing", total=total)
+            for idx, payload_data in enumerate(payloads[:total], 1):
+                payload = payload_data.get('payload', payload_data) if isinstance(payload_data, dict) else payload_data
+                desc = payload_data.get('description', '') if isinstance(payload_data, dict) else ''
+                category = payload_data.get('category', 'unknown') if isinstance(payload_data, dict) else 'unknown'
+                
+                result = self.test_payload(payload, method, param)
+                result['category'] = category
+                result['description'] = desc
+                results.append(result)
+                
+                # Print result with rich badge
+                badge = blocked_text() if result['blocked'] else passed_text()
+                label = desc[:45] if desc else payload[:45]
+                progress.console.print(
+                    f"  [{idx:>{len(str(total))}}/{total}] ",
+                    badge,
+                    f" {result['status']} │ {label}",
+                    highlight=False,
+                )
+                progress.advance(task)
+                self._stealth_delay()
         
         return results
     
@@ -595,18 +603,22 @@ class WAFTester:
             except Exception as e:
                 print(f"\n{Colors.YELLOW}⚠️  HTML report generation failed: {e}{Colors.END}")
         
-        # Print summary
-        print(f"\n{Colors.HEADER}{'='*60}{Colors.END}")
-        print(f"{Colors.BOLD}Test Summary{Colors.END}")
-        print(f"{Colors.HEADER}{'='*60}{Colors.END}")
-        print(f"Target:      {self.target}")
-        print(f"Duration:    {duration}")
-        print(f"Total:       {total}")
-        print(f"Blocked:     {Colors.RED}{blocked}{Colors.END}")
-        print(f"Passed:      {Colors.GREEN}{passed}{Colors.END}")
-        print(f"Block Rate:  {report['summary']['block_rate']}")
-        print(f"\nReport saved to: {output}")
-        print(f"{Colors.HEADER}{'='*60}{Colors.END}\n")
+        # Print summary with rich
+        from fray.output import console, make_summary_table
+        from rich.panel import Panel
+        from rich.text import Text
+
+        tbl = make_summary_table()
+        tbl.add_row("Target", self.target)
+        tbl.add_row("Duration", duration)
+        tbl.add_row("Total", str(total))
+        tbl.add_row("Blocked", Text(str(blocked), style="bold red"))
+        tbl.add_row("Passed", Text(str(passed), style="bold green"))
+        tbl.add_row("Block Rate", Text(report['summary']['block_rate'], style="bold"))
+        tbl.add_row("Report", output)
+
+        console.print()
+        console.print(Panel(tbl, title="[bold]Test Summary[/bold]", border_style="bright_cyan", expand=False))
 
 def interactive_mode():
     """Interactive mode for easy testing"""

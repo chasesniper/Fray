@@ -1169,262 +1169,279 @@ def run_recon(url: str, timeout: int = 8,
 
 
 def print_recon(result: Dict[str, Any]) -> None:
-    """Pretty-print recon results to terminal."""
-    print(f"\n{Colors.BOLD}Fray Recon — Target Reconnaissance{Colors.END}")
-    print(f"{Colors.DIM}{'━' * 60}{Colors.END}")
-    print(f"  Target: {Colors.CYAN}{result['target']}{Colors.END}")
-    print(f"  Host:   {result['host']}")
-    print()
+    """Pretty-print recon results to terminal with rich formatting."""
+    from fray.output import console, print_header, severity_style
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.text import Text
 
-    # HTTP
+    def _score_color(score, max_val=100):
+        pct = score / max_val * 100 if max_val else 0
+        if pct >= 70: return "green"
+        if pct >= 40: return "yellow"
+        return "red"
+
+    print_header("Fray Recon — Target Reconnaissance", target=result['target'])
+    console.print(f"  Host: {result['host']}")
+    console.print()
+
+    # ── HTTP ──
     http = result.get("http", {})
     port80 = http.get("port_80_open", False)
     redir = http.get("redirects_to_https", False)
-    p80_icon = f"{Colors.YELLOW}⚠️  OPEN{Colors.END}" if port80 else f"{Colors.DIM}closed{Colors.END}"
-    redir_icon = f"{Colors.GREEN}✅{Colors.END}" if redir else (f"{Colors.RED}❌{Colors.END}" if port80 else f"{Colors.DIM}N/A{Colors.END}")
-    print(f"  {Colors.BOLD}HTTP{Colors.END}")
-    print(f"    Port 80:           {p80_icon}")
-    print(f"    Redirects to HTTPS: {redir_icon}")
+    console.print("  [bold]HTTP[/bold]")
+    p80 = "[yellow]⚠ OPEN[/yellow]" if port80 else "[dim]closed[/dim]"
+    redir_s = "[green]✅[/green]" if redir else ("[red]❌[/red]" if port80 else "[dim]N/A[/dim]")
+    console.print(f"    Port 80:            {p80}")
+    console.print(f"    Redirects to HTTPS: {redir_s}")
     if port80 and not redir:
-        print(f"    {Colors.RED}⚠️  HTTP traffic is not redirected to HTTPS!{Colors.END}")
-    print()
+        console.print("    [red]⚠ HTTP traffic is not redirected to HTTPS![/red]")
+    console.print()
 
-    # TLS
+    # ── TLS ──
     tls = result.get("tls", {})
     if tls and not tls.get("error"):
-        version = tls.get("tls_version", "?")
-        version_color = Colors.GREEN if "1.3" in str(version) else (Colors.YELLOW if "1.2" in str(version) else Colors.RED)
-        print(f"  {Colors.BOLD}TLS{Colors.END}")
-        print(f"    Version:    {version_color}{version}{Colors.END}")
-        print(f"    Cipher:     {tls.get('cipher', '?')} ({tls.get('cipher_bits', '?')} bits)")
-        print(f"    Subject:    {tls.get('cert_subject', '?')}")
-        print(f"    Issuer:     {tls.get('cert_issuer', '?')}")
+        v = str(tls.get("tls_version", "?"))
+        vc = "green" if "1.3" in v else ("yellow" if "1.2" in v else "red")
+        console.print("  [bold]TLS[/bold]")
+        console.print(f"    Version:  [{vc}]{v}[/{vc}]")
+        console.print(f"    Cipher:   {tls.get('cipher', '?')} ({tls.get('cipher_bits', '?')} bits)")
+        console.print(f"    Subject:  {tls.get('cert_subject', '?')}")
+        console.print(f"    Issuer:   {tls.get('cert_issuer', '?')}")
         days = tls.get("cert_days_remaining")
         if days is not None:
             if days < 0:
-                print(f"    Expiry:     {Colors.RED}EXPIRED ({abs(days)} days ago){Colors.END}")
+                console.print(f"    Expiry:   [red]EXPIRED ({abs(days)} days ago)[/red]")
             elif days < 30:
-                print(f"    Expiry:     {Colors.YELLOW}{days} days remaining{Colors.END}")
+                console.print(f"    Expiry:   [yellow]{days} days remaining[/yellow]")
             else:
-                print(f"    Expiry:     {Colors.GREEN}{days} days remaining{Colors.END}")
+                console.print(f"    Expiry:   [green]{days} days remaining[/green]")
         if tls.get("supports_tls_1_0"):
-            print(f"    {Colors.RED}⚠️  TLS 1.0 supported (insecure, should be disabled){Colors.END}")
+            console.print("    [red]⚠ TLS 1.0 supported (insecure)[/red]")
         if tls.get("supports_tls_1_1"):
-            print(f"    {Colors.RED}⚠️  TLS 1.1 supported (deprecated, should be disabled){Colors.END}")
-        print()
+            console.print("    [red]⚠ TLS 1.1 supported (deprecated)[/red]")
+        console.print()
     elif tls and tls.get("error"):
-        print(f"  {Colors.BOLD}TLS{Colors.END}")
-        print(f"    {Colors.RED}Error: {tls['error']}{Colors.END}")
-        print()
+        console.print("  [bold]TLS[/bold]")
+        console.print(f"    [red]Error: {tls['error']}[/red]")
+        console.print()
 
-    # Security headers
+    # ── Security Headers ──
     hdr = result.get("headers", {})
     score = hdr.get("score", 0)
-    score_color = Colors.GREEN if score >= 70 else (Colors.YELLOW if score >= 40 else Colors.RED)
-    print(f"  {Colors.BOLD}Security Headers{Colors.END} ({score_color}{score}%{Colors.END})")
+    sc = _score_color(score)
+    console.print(f"  [bold]Security Headers[/bold] ([{sc}]{score}%[/{sc}])")
+
+    hdr_table = Table(show_header=False, box=None, pad_edge=False, padding=(0, 1))
+    hdr_table.add_column("Icon", width=4)
+    hdr_table.add_column("Header", min_width=30)
+    hdr_table.add_column("Detail", min_width=20)
+
     for name, info in hdr.get("present", {}).items():
-        print(f"    {Colors.GREEN}✅{Colors.END} {name}: {Colors.DIM}{info['value'][:60]}{Colors.END}")
+        hdr_table.add_row("[green]✅[/green]", name, f"[dim]{info['value'][:55]}[/dim]")
     for name, info in hdr.get("missing", {}).items():
         sev = info.get("severity", "low")
-        sev_color = Colors.RED if sev == "high" else (Colors.YELLOW if sev == "medium" else Colors.DIM)
-        print(f"    {Colors.RED}❌{Colors.END} {name} {sev_color}({sev}){Colors.END}")
-    print()
+        hdr_table.add_row("[red]❌[/red]", name, f"[{severity_style(sev)}]({sev})[/{severity_style(sev)}]")
 
-    # CSP Analysis
+    console.print(hdr_table)
+    console.print()
+
+    # ── CSP Analysis ──
     csp = result.get("csp", {})
     if csp:
         csp_score = csp.get("score", 0)
-        csp_color = Colors.GREEN if csp_score >= 70 else (Colors.YELLOW if csp_score >= 40 else Colors.RED)
-        csp_label = "CSP Analysis"
+        cc = _score_color(csp_score)
+        label = "CSP Analysis"
         if csp.get("report_only"):
-            csp_label += f" {Colors.YELLOW}(report-only — NOT enforced){Colors.END}"
-        print(f"  {Colors.BOLD}{csp_label}{Colors.END} ({csp_color}{csp_score}/100{Colors.END})")
+            label += " [yellow](report-only — NOT enforced)[/yellow]"
+        console.print(f"  [bold]{label}[/bold] ([{cc}]{csp_score}/100[/{cc}])")
         if not csp.get("present"):
-            print(f"    {Colors.RED}❌ No Content-Security-Policy header{Colors.END}")
+            console.print("    [red]❌ No Content-Security-Policy header[/red]")
         else:
             for w in csp.get("weaknesses", []):
                 sev = w.get("severity", "low")
-                sev_color = Colors.RED if sev in ("critical", "high") else (Colors.YELLOW if sev == "medium" else Colors.DIM)
-                print(f"    {sev_color}⚠ [{w['directive']}] {w['description']}{Colors.END}")
+                ss = severity_style(sev)
+                console.print(f"    [{ss}]⚠ \\[{w['directive']}] {w['description']}[/{ss}]")
             if csp.get("bypass_techniques"):
-                print(f"    {Colors.CYAN}Testable bypass techniques: {', '.join(csp['bypass_techniques'])}{Colors.END}")
+                console.print(f"    [cyan]Testable bypass techniques: {', '.join(csp['bypass_techniques'])}[/cyan]")
             for rec in csp.get("recommendations", []):
-                print(f"    {Colors.DIM}💡 {rec}{Colors.END}")
-        print()
+                console.print(f"    [dim]💡 {rec}[/dim]")
+        console.print()
 
-    # Cookies
+    # ── Cookies ──
     ck = result.get("cookies", {})
     cookies = ck.get("cookies", [])
     issues = ck.get("issues", [])
     if cookies:
         ck_score = ck.get("score", 100)
-        ck_color = Colors.GREEN if ck_score >= 80 else (Colors.YELLOW if ck_score >= 50 else Colors.RED)
-        print(f"  {Colors.BOLD}Cookies{Colors.END} ({ck_color}{ck_score}%{Colors.END})")
+        ckc = _score_color(ck_score)
+        console.print(f"  [bold]Cookies[/bold] ([{ckc}]{ck_score}%[/{ckc}])")
+
+        cookie_table = Table(show_header=False, box=None, pad_edge=False, padding=(0, 1))
+        cookie_table.add_column("Name", min_width=25)
+        cookie_table.add_column("Flags", min_width=30)
+
         for c in cookies:
             flags = []
-            if c.get("httponly"):
-                flags.append(f"{Colors.GREEN}HttpOnly{Colors.END}")
-            else:
-                flags.append(f"{Colors.RED}HttpOnly{Colors.END}")
-            if c.get("secure"):
-                flags.append(f"{Colors.GREEN}Secure{Colors.END}")
-            else:
-                flags.append(f"{Colors.RED}Secure{Colors.END}")
+            flags.append(f"[green]HttpOnly[/green]" if c.get("httponly") else f"[red]HttpOnly[/red]")
+            flags.append(f"[green]Secure[/green]" if c.get("secure") else f"[red]Secure[/red]")
             ss = c.get("samesite")
             if ss and ss is not True:
-                flags.append(f"{Colors.GREEN}SameSite={ss}{Colors.END}")
+                flags.append(f"[green]SameSite={ss}[/green]")
             elif ss is True:
-                flags.append(f"{Colors.GREEN}SameSite{Colors.END}")
+                flags.append(f"[green]SameSite[/green]")
             else:
-                flags.append(f"{Colors.RED}SameSite{Colors.END}")
-            print(f"    {c['name']:<30} {' | '.join(flags)}")
+                flags.append(f"[red]SameSite[/red]")
+            cookie_table.add_row(f"    {c['name']}", " │ ".join(flags))
+
+        console.print(cookie_table)
         if issues:
-            print()
+            console.print()
             for iss in issues:
                 sev = iss["severity"]
-                sev_color = Colors.RED if sev == "high" else Colors.YELLOW
-                print(f"    {sev_color}⚠ {iss['cookie']}: {iss['issue']}{Colors.END}")
-                print(f"      {Colors.DIM}{iss['risk']}{Colors.END}")
-        print()
+                ss = severity_style(sev)
+                console.print(f"    [{ss}]⚠ {iss['cookie']}: {iss['issue']}[/{ss}]")
+                console.print(f"      [dim]{iss['risk']}[/dim]")
+        console.print()
 
-    # Fingerprint
+    # ── Fingerprint ──
     fp = result.get("fingerprint", {})
     techs = fp.get("technologies", {})
+    console.print("  [bold]Detected Technologies[/bold]")
     if techs:
-        print(f"  {Colors.BOLD}Detected Technologies{Colors.END}")
+        from rich.progress_bar import ProgressBar
         for tech, conf in techs.items():
             bar_len = int(conf * 20)
             bar = "█" * bar_len + "░" * (20 - bar_len)
-            conf_color = Colors.GREEN if conf >= 0.7 else (Colors.YELLOW if conf >= 0.4 else Colors.DIM)
-            print(f"    {tech:<16} {conf_color}{bar} {conf:.0%}{Colors.END}")
-        print()
+            bc = "green" if conf >= 0.7 else ("yellow" if conf >= 0.4 else "dim")
+            console.print(f"    {tech:<16} [{bc}]{bar} {conf:.0%}[/{bc}]")
     else:
-        print(f"  {Colors.BOLD}Detected Technologies{Colors.END}")
-        print(f"    {Colors.DIM}No technologies identified{Colors.END}")
-        print()
+        console.print("    [dim]No technologies identified[/dim]")
+    console.print()
 
-    # DNS
+    # ── DNS ──
     dns = result.get("dns", {})
     if dns and (dns.get("a") or dns.get("cname") or dns.get("ns")):
-        print(f"  {Colors.BOLD}DNS{Colors.END}")
+        console.print("  [bold]DNS[/bold]")
         if dns.get("a"):
-            print(f"    A:     {', '.join(dns['a'][:5])}")
+            console.print(f"    A:     {', '.join(dns['a'][:5])}")
         if dns.get("aaaa"):
-            print(f"    AAAA:  {', '.join(dns['aaaa'][:3])}")
+            console.print(f"    AAAA:  {', '.join(dns['aaaa'][:3])}")
         if dns.get("cname"):
-            print(f"    CNAME: {', '.join(dns['cname'][:3])}")
+            console.print(f"    CNAME: {', '.join(dns['cname'][:3])}")
         if dns.get("ns"):
-            print(f"    NS:    {', '.join(dns['ns'][:4])}")
+            console.print(f"    NS:    {', '.join(dns['ns'][:4])}")
         if dns.get("mx"):
-            print(f"    MX:    {', '.join(dns['mx'][:3])}")
+            console.print(f"    MX:    {', '.join(dns['mx'][:3])}")
         cdn = dns.get("cdn_detected")
         if cdn:
-            print(f"    CDN:   {Colors.CYAN}{cdn}{Colors.END}")
+            console.print(f"    CDN:   [cyan]{cdn}[/cyan]")
         spf = dns.get("has_spf", False)
         dmarc = dns.get("has_dmarc", False)
-        spf_icon = f"{Colors.GREEN}✅{Colors.END}" if spf else f"{Colors.RED}❌{Colors.END}"
-        dmarc_icon = f"{Colors.GREEN}✅{Colors.END}" if dmarc else f"{Colors.RED}❌{Colors.END}"
-        print(f"    SPF:   {spf_icon}  DMARC: {dmarc_icon}")
-        print()
+        spf_i = "[green]✅[/green]" if spf else "[red]❌[/red]"
+        dmarc_i = "[green]✅[/green]" if dmarc else "[red]❌[/red]"
+        console.print(f"    SPF:   {spf_i}  DMARC: {dmarc_i}")
+        console.print()
 
-    # robots.txt
+    # ── robots.txt ──
     robots = result.get("robots", {})
     if robots.get("robots_txt"):
         disallowed = robots.get("disallowed_paths", [])
         interesting = robots.get("interesting_paths", [])
         sitemaps = robots.get("sitemaps", [])
-        print(f"  {Colors.BOLD}robots.txt{Colors.END} ({len(disallowed)} disallowed paths)")
+        console.print(f"  [bold]robots.txt[/bold] ({len(disallowed)} disallowed paths)")
         if interesting:
-            print(f"    {Colors.YELLOW}Interesting paths:{Colors.END}")
+            console.print("    [yellow]Interesting paths:[/yellow]")
             for p in interesting[:10]:
-                print(f"      {Colors.YELLOW}{p}{Colors.END}")
+                console.print(f"      [yellow]{p}[/yellow]")
         if sitemaps:
-            print(f"    Sitemaps: {', '.join(sitemaps[:3])}")
-        print()
+            console.print(f"    Sitemaps: {', '.join(sitemaps[:3])}")
+        console.print()
 
-    # CORS
+    # ── CORS ──
     cors = result.get("cors", {})
     if cors.get("cors_enabled"):
         misc = cors.get("misconfigured", False)
-        color = Colors.RED if misc else Colors.GREEN
-        print(f"  {Colors.BOLD}CORS{Colors.END} ({color}{'MISCONFIGURED' if misc else 'OK'}{Colors.END})")
-        print(f"    Allow-Origin: {cors.get('allow_origin', '?')}")
+        mc = "red" if misc else "green"
+        ml = "MISCONFIGURED" if misc else "OK"
+        console.print(f"  [bold]CORS[/bold] ([{mc}]{ml}[/{mc}])")
+        console.print(f"    Allow-Origin: {cors.get('allow_origin', '?')}")
         if cors.get("allow_credentials"):
-            print(f"    {Colors.YELLOW}Credentials: allowed{Colors.END}")
+            console.print("    [yellow]Credentials: allowed[/yellow]")
         for iss in cors.get("issues", []):
-            sev_color = Colors.RED if iss["severity"] in ("high", "critical") else Colors.YELLOW
-            print(f"    {sev_color}⚠ {iss['issue']}{Colors.END}")
-            print(f"      {Colors.DIM}{iss['risk']}{Colors.END}")
-        print()
+            ss = severity_style(iss["severity"])
+            console.print(f"    [{ss}]⚠ {iss['issue']}[/{ss}]")
+            console.print(f"      [dim]{iss['risk']}[/dim]")
+        console.print()
 
-    # Exposed files
+    # ── Exposed Files ──
     exposed = result.get("exposed_files", {})
     exposed_list = exposed.get("exposed", [])
     if exposed_list:
         crit_count = sum(1 for e in exposed_list if e["severity"] == "critical")
-        color = Colors.RED if crit_count else Colors.YELLOW
-        print(f"  {Colors.BOLD}Exposed Files{Colors.END} ({color}{len(exposed_list)} found{Colors.END}, {exposed.get('checked', 0)} checked)")
+        ec = "red" if crit_count else "yellow"
+        console.print(f"  [bold]Exposed Files[/bold] ([{ec}]{len(exposed_list)} found[/{ec}], {exposed.get('checked', 0)} checked)")
         for ef in exposed_list:
             sev = ef["severity"]
-            sev_color = Colors.RED if sev == "critical" else (Colors.YELLOW if sev == "medium" else Colors.DIM)
-            print(f"    {sev_color}{'🚨' if sev == 'critical' else '⚠️'} {ef['path']}{Colors.END} — {ef['description']} ({ef['size']}b)")
-        print()
+            ss = severity_style(sev)
+            icon = "🚨" if sev == "critical" else "⚠"
+            console.print(f"    [{ss}]{icon} {ef['path']}[/{ss}] — {ef['description']} ({ef['size']}b)")
+        console.print()
 
-    # HTTP methods
+    # ── HTTP Methods ──
     methods = result.get("http_methods", {})
     allowed = methods.get("allowed_methods", [])
     dangerous = methods.get("dangerous_methods", [])
     if allowed:
-        print(f"  {Colors.BOLD}HTTP Methods{Colors.END}")
-        safe = [m for m in allowed if m not in {"PUT", "DELETE", "TRACE", "CONNECT", "PATCH"}]
-        print(f"    Allowed: {Colors.GREEN}{', '.join(safe)}{Colors.END}", end="")
+        console.print("  [bold]HTTP Methods[/bold]")
+        safe_m = [m for m in allowed if m not in {"PUT", "DELETE", "TRACE", "CONNECT", "PATCH"}]
+        line = f"    Allowed: [green]{', '.join(safe_m)}[/green]"
         if dangerous:
-            print(f" {Colors.RED}{', '.join(dangerous)}{Colors.END}")
-        else:
-            print()
+            line += f" [red]{', '.join(dangerous)}[/red]"
+        console.print(line)
         for iss in methods.get("issues", []):
-            sev_color = Colors.RED if iss["severity"] == "high" else Colors.YELLOW
-            print(f"    {sev_color}⚠ {iss['method']}: {iss['risk']}{Colors.END}")
-        print()
+            ss = severity_style(iss["severity"])
+            console.print(f"    [{ss}]⚠ {iss['method']}: {iss['risk']}[/{ss}]")
+        console.print()
 
-    # Error page
+    # ── Error Page ──
     err = result.get("error_page", {})
     hints = err.get("framework_hints", [])
     leaks = err.get("version_leaks", [])
     has_trace = err.get("stack_trace", False)
     if hints or leaks or has_trace:
-        print(f"  {Colors.BOLD}Error Page Analysis{Colors.END} (404)")
+        console.print("  [bold]Error Page Analysis[/bold] (404)")
         if has_trace:
-            print(f"    {Colors.RED}🚨 Stack trace exposed in error page!{Colors.END}")
+            console.print("    [red]🚨 Stack trace exposed in error page![/red]")
         for leak in leaks:
-            print(f"    {Colors.YELLOW}⚠ Version leak: {leak['software']} {leak['version']}{Colors.END}")
+            console.print(f"    [yellow]⚠ Version leak: {leak['software']} {leak['version']}[/yellow]")
         for hint in hints:
-            print(f"    Framework: {Colors.CYAN}{hint}{Colors.END}")
+            console.print(f"    Framework: [cyan]{hint}[/cyan]")
         if err.get("server_header"):
-            print(f"    Server: {Colors.DIM}{err['server_header']}{Colors.END}")
-        print()
+            console.print(f"    Server: [dim]{err['server_header']}[/dim]")
+        console.print()
 
-    # Subdomains
+    # ── Subdomains ──
     subs = result.get("subdomains", {})
     sub_list = subs.get("subdomains", [])
     sub_count = subs.get("count", 0)
     if sub_list:
-        print(f"  {Colors.BOLD}Subdomains{Colors.END} ({Colors.CYAN}{sub_count} found{Colors.END} via crt.sh)")
+        console.print(f"  [bold]Subdomains[/bold] ([cyan]{sub_count} found[/cyan] via crt.sh)")
         for s in sub_list[:15]:
-            print(f"    {Colors.DIM}{s}{Colors.END}")
+            console.print(f"    [dim]{s}[/dim]")
         if sub_count > 15:
-            print(f"    {Colors.DIM}... and {sub_count - 15} more{Colors.END}")
-        print()
+            console.print(f"    [dim]... and {sub_count - 15} more[/dim]")
+        console.print()
 
-    # Recommended categories
+    # ── Recommended Categories ──
     cats = result.get("recommended_categories", [])
     if cats:
-        print(f"  {Colors.BOLD}Recommended Payload Categories{Colors.END} (priority order)")
+        console.print("  [bold]Recommended Payload Categories[/bold] (priority order)")
         for i, cat in enumerate(cats, 1):
-            print(f"    {i}. {Colors.CYAN}{cat}{Colors.END}")
-        print()
-        print(f"  {Colors.DIM}Usage: fray test <target> -c {cats[0]} --smart{Colors.END}")
+            console.print(f"    {i}. [cyan]{cat}[/cyan]")
+        console.print()
+        console.print(f"  [dim]Usage: fray test <target> -c {cats[0]} --smart[/dim]")
     else:
-        print(f"  {Colors.BOLD}Recommended Payload Categories{Colors.END}")
-        print(f"    {Colors.DIM}No specific recommendations — use --smart for adaptive testing{Colors.END}")
-    print()
+        console.print("  [bold]Recommended Payload Categories[/bold]")
+        console.print("    [dim]No specific recommendations — use --smart for adaptive testing[/dim]")
+    console.print()

@@ -385,32 +385,32 @@ def run_bypass(
     waf_label = hints.get("label", waf_name or "Unknown")
 
     if verbose:
-        print(f"\n{Colors.BOLD}{'━' * 60}{Colors.END}")
-        print(f"{Colors.BOLD}  Fray Bypass — WAF Evasion Scorer v{__version__}{Colors.END}")
-        print(f"{Colors.BOLD}{'━' * 60}{Colors.END}")
-        print(f"  Target:   {tester.target}")
-        print(f"  WAF:      {waf_label}")
-        print(f"  Category: {len(payloads)} payloads loaded")
+        from fray.output import console, print_header, print_phase
+        print_header(f"Fray Bypass — WAF Evasion Scorer v{__version__}",
+                     target=tester.target)
+        console.print(f"  WAF:      [bold]{waf_label}[/bold]")
+        console.print(f"  Category: {len(payloads)} payloads loaded")
 
     # ── Phase 1: Probe WAF ────────────────────────────────────────────────
     if verbose:
-        print(f"\n{Colors.CYAN}  Phase 1: Probing WAF behavior ({len(DIAGNOSTIC_PROBES)} requests)...{Colors.END}")
+        console.print()
+        print_phase(1, f"Probing WAF behavior ({len(DIAGNOSTIC_PROBES)} requests)...")
 
     profile = run_probes(tester, param=param)
     if waf_key:
         profile.waf_vendor = waf_label
 
     if verbose:
-        print(f"    Strictness: {Colors.BOLD}{profile.strictness}{Colors.END} "
-              f"({profile.block_rate:.0f}% probe block rate)")
+        console.print(f"    Strictness: [bold]{profile.strictness}[/bold] "
+                      f"({profile.block_rate:.0f}% probe block rate)")
         if profile.blocked_tags:
-            print(f"    Blocked tags:    {', '.join(sorted(profile.blocked_tags))}")
+            console.print(f"    Blocked tags:    {', '.join(sorted(profile.blocked_tags))}")
         if profile.allowed_tags:
-            print(f"    Allowed tags:    {Colors.GREEN}{', '.join(sorted(profile.allowed_tags))}{Colors.END}")
+            console.print(f"    Allowed tags:    [green]{', '.join(sorted(profile.allowed_tags))}[/green]")
         if profile.blocked_events:
-            print(f"    Blocked events:  {', '.join(sorted(profile.blocked_events))}")
+            console.print(f"    Blocked events:  {', '.join(sorted(profile.blocked_events))}")
         if profile.blocked_keywords:
-            print(f"    Blocked keywords: {', '.join(sorted(profile.blocked_keywords))}")
+            console.print(f"    Blocked keywords: {', '.join(sorted(profile.blocked_keywords))}")
 
     # ── Baseline: send a clean request to capture normal response ────────
     baseline_result = tester.test_payload("hello", param=param)
@@ -419,12 +419,13 @@ def run_bypass(
         "response_length": baseline_result.get("response_length", 0),
     }
     if verbose:
-        print(f"\n    Baseline: status={baseline['status']}, "
-              f"length={baseline['response_length']}")
+        console.print(f"\n    Baseline: status={baseline['status']}, "
+                      f"length={baseline['response_length']}")
 
     # ── Phase 2: Score & rank with WAF-specific weighting ─────────────────
     if verbose:
-        print(f"\n{Colors.CYAN}  Phase 2: Scoring {len(payloads)} payloads for evasion potential...{Colors.END}")
+        console.print()
+        print_phase(2, f"Scoring {len(payloads)} payloads for evasion potential...")
 
     threshold_map = {"strict": 0.25, "moderate": 0.15, "permissive": 0.1, "minimal": 0.0}
     threshold = threshold_map.get(profile.strictness, 0.15)
@@ -432,12 +433,13 @@ def run_bypass(
 
     if verbose:
         skipped = len(payloads) - len(ranked)
-        print(f"    Ranked: {len(ranked)} candidates (skipped {skipped} low-probability)")
+        console.print(f"    Ranked: {len(ranked)} candidates (skipped {skipped} low-probability)")
 
     # ── Phase 3: Test top-ranked payloads ─────────────────────────────────
     test_count = min(len(ranked), max_payloads)
     if verbose:
-        print(f"\n{Colors.CYAN}  Phase 3: Testing top {test_count} evasion candidates...{Colors.END}")
+        console.print()
+        print_phase(3, f"Testing top {test_count} evasion candidates...")
 
     all_results = []
     bypass_results: List[BypassResult] = []
@@ -473,17 +475,14 @@ def run_bypass(
             bypass_results.append(br)
 
         if verbose:
+            from fray.output import blocked_text, bypass_text
             if br.blocked:
-                soft_tag = f" {Colors.DIM}(soft block: {result.get('response_length', 0)}b vs {baseline.get('response_length', 0)}b baseline){Colors.END}" if soft_block and not result.get("blocked") else ""
-                print(f"    [{i+1}/{test_count}] {Colors.RED}BLOCKED{Colors.END} "
-                      f"| {result.get('status', 0)} | {desc[:40] or payload_str[:40]}{soft_tag}")
+                soft_tag = f" [dim](soft block: {result.get('response_length', 0)}b vs {baseline.get('response_length', 0)}b baseline)[/dim]" if soft_block and not result.get("blocked") else ""
+                console.print(f"    [{i+1}/{test_count}] ", blocked_text(), f" {result.get('status', 0)} │ {desc[:40] or payload_str[:40]}{soft_tag}")
             else:
-                reflected_tag = f" {Colors.YELLOW}REFLECTED{Colors.END}" if br.reflected else ""
-                bl_tag = f" {Colors.DIM}(baseline){Colors.END}" if bl_match else ""
-                print(f"    [{i+1}/{test_count}] {Colors.GREEN}BYPASS{Colors.END}  "
-                      f"| Score: {Colors.BOLD}{ev_score}{Colors.END} "
-                      f"| {result.get('status', 0)} "
-                      f"| {desc[:35] or payload_str[:35]}{reflected_tag}{bl_tag}")
+                reflected_tag = " [yellow]REFLECTED[/yellow]" if br.reflected else ""
+                bl_tag = " [dim](baseline)[/dim]" if bl_match else ""
+                console.print(f"    [{i+1}/{test_count}] ", bypass_text(), f" Score: [bold]{ev_score}[/bold] │ {result.get('status', 0)} │ {desc[:35] or payload_str[:35]}{reflected_tag}{bl_tag}")
 
         tester._stealth_delay()
 
@@ -519,9 +518,10 @@ def run_bypass(
 
     if mut_remaining > 0 and (blocked_payloads or bypass_payloads):
         if verbose:
-            print(f"\n{Colors.CYAN}  Phase 4: Evasion feedback loop "
-                  f"({len(blocked_payloads)} blocked + {len(bypass_payloads)} bypasses, "
-                  f"budget: {mutation_budget}, depth: {max_retry_depth})...{Colors.END}")
+            console.print()
+            print_phase(4, f"Evasion feedback loop "
+                        f"({len(blocked_payloads)} blocked + {len(bypass_payloads)} bypasses, "
+                        f"budget: {mutation_budget}, depth: {max_retry_depth})...")
 
         # --- 4a: Mutate BLOCKED payloads → try to turn blocks into bypasses ---
         for payload_str in blocked_payloads:
@@ -571,17 +571,15 @@ def run_bypass(
                         )
 
                         if verbose:
+                            from fray.output import blocked_text, bypass_text
                             depth_tag = f"d{depth}" if depth > 0 else "MUT"
                             if mbr.blocked:
-                                soft_tag = f" {Colors.DIM}(soft block){Colors.END}" if soft_block and not result.get("blocked") else ""
-                                print(f"    {depth_tag} {Colors.RED}BLOCKED{Colors.END} "
-                                      f"[{mut['mutation']}] | {result.get('status', 0)}{soft_tag}")
+                                soft_tag = " [dim](soft block)[/dim]" if soft_block and not result.get("blocked") else ""
+                                console.print(f"    {depth_tag} ", blocked_text(), f" [{mut['mutation']}] │ {result.get('status', 0)}{soft_tag}")
                             else:
-                                reflected_tag = f" {Colors.YELLOW}REFLECTED{Colors.END}" if mbr.reflected else ""
-                                bl_tag = f" {Colors.DIM}(baseline){Colors.END}" if bl_match else ""
-                                print(f"    {depth_tag} {Colors.GREEN}BYPASS{Colors.END}  "
-                                      f"[{mut['mutation']}] | Score: {Colors.BOLD}{ev_score}{Colors.END} "
-                                      f"| {result.get('status', 0)}{reflected_tag}{bl_tag}")
+                                reflected_tag = " [yellow]REFLECTED[/yellow]" if mbr.reflected else ""
+                                bl_tag = " [dim](baseline)[/dim]" if bl_match else ""
+                                console.print(f"    {depth_tag} ", bypass_text(), f" [{mut['mutation']}] │ Score: [bold]{ev_score}[/bold] │ {result.get('status', 0)}{reflected_tag}{bl_tag}")
 
                         if not mbr.blocked:
                             mutation_bypasses.append(mbr)
@@ -599,7 +597,7 @@ def run_bypass(
         # --- 4b: Amplify bypasses — find more variants of what already works ---
         if mut_remaining > 0 and bypass_payloads:
             if verbose:
-                print(f"\n    {Colors.DIM}Amplifying {len(bypass_payloads)} bypass(es)...{Colors.END}")
+                console.print(f"\n    [dim]Amplifying {len(bypass_payloads)} bypass(es)...[/dim]")
             for payload_str in bypass_payloads:
                 if mut_remaining <= 0:
                     break
@@ -636,19 +634,17 @@ def run_bypass(
                     if not mbr.blocked:
                         mutation_bypasses.append(mbr)
                     if verbose:
+                        from fray.output import blocked_text, bypass_text
                         if mbr.blocked:
-                            soft_tag = f" {Colors.DIM}(soft block){Colors.END}" if soft_block and not result.get("blocked") else ""
-                            print(f"    AMP {Colors.RED}BLOCKED{Colors.END} "
-                                  f"[{mut['mutation']}] | {result.get('status', 0)}{soft_tag}")
+                            soft_tag = " [dim](soft block)[/dim]" if soft_block and not result.get("blocked") else ""
+                            console.print(f"    AMP ", blocked_text(), f" [{mut['mutation']}] │ {result.get('status', 0)}{soft_tag}")
                         else:
-                            reflected_tag = f" {Colors.YELLOW}REFLECTED{Colors.END}" if mbr.reflected else ""
-                            bl_tag = f" {Colors.DIM}(baseline){Colors.END}" if bl_match else ""
-                            print(f"    AMP {Colors.GREEN}BYPASS{Colors.END}  "
-                                  f"[{mut['mutation']}] | Score: {Colors.BOLD}{ev_score}{Colors.END} "
-                                  f"| {result.get('status', 0)}{reflected_tag}{bl_tag}")
+                            reflected_tag = " [yellow]REFLECTED[/yellow]" if mbr.reflected else ""
+                            bl_tag = " [dim](baseline)[/dim]" if bl_match else ""
+                            console.print(f"    AMP ", bypass_text(), f" [{mut['mutation']}] │ Score: [bold]{ev_score}[/bold] │ {result.get('status', 0)}{reflected_tag}{bl_tag}")
                     tester._stealth_delay()
     elif verbose:
-        print(f"\n{Colors.DIM}  Phase 4: Skipped — no payloads to mutate{Colors.END}")
+        console.print(f"\n  [dim]Phase 4: Skipped — no payloads to mutate[/dim]")
 
     # ── Build Scorecard ───────────────────────────────────────────────────
     all_bypasses = bypass_results + mutation_bypasses
@@ -716,79 +712,98 @@ def run_bypass(
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(asdict(scorecard), f, indent=2, ensure_ascii=False)
         if verbose and not json_output:
-            print(f"\n  {Colors.DIM}Results saved to: {output_file}{Colors.END}")
+            console.print(f"\n  [dim]Results saved to: {output_file}[/dim]")
 
     return scorecard
 
 
 def _print_scorecard(sc: BypassScorecard):
-    """Print the bypass scorecard to terminal."""
-    C = Colors
+    """Print the bypass scorecard to terminal with rich formatting."""
+    from fray.output import (console, score_style, grade_label,
+                              make_summary_table, blocked_text, bypass_text)
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.text import Text
+    from rich.columns import Columns
 
-    # Overall score with color
     score = sc.overall_evasion_score
-    if score >= 7.0:
-        score_color = C.RED
-        grade = "CRITICAL"
-    elif score >= 5.0:
-        score_color = C.YELLOW
-        grade = "HIGH"
-    elif score >= 3.0:
-        score_color = C.BLUE
-        grade = "MEDIUM"
-    elif score > 0:
-        score_color = C.GREEN
-        grade = "LOW"
-    else:
-        score_color = C.DIM
-        grade = "NONE"
+    grade = grade_label(score)
+    style = score_style(score)
 
-    print(f"\n{C.BOLD}{'━' * 60}{C.END}")
-    print(f"{C.BOLD}  WAF Bypass Scorecard{C.END}")
-    print(f"{C.BOLD}{'━' * 60}{C.END}")
-    print(f"  Target:     {sc.target}")
-    print(f"  WAF:        {sc.waf_vendor} ({sc.waf_strictness})")
-    print(f"  Duration:   {sc.duration}")
-    print()
-    print(f"  {C.BOLD}Evasion Score: {score_color}{score}/10.0 ({grade}){C.END}")
-    print()
-    print(f"  {'─' * 45}")
-    print(f"  Payloads tested:   {sc.total_tested}")
-    print(f"  Blocked:           {C.RED}{sc.total_blocked}{C.END}")
-    print(f"  Bypassed:          {C.GREEN}{sc.total_bypassed}{C.END}")
+    # ── Score badge ──
+    score_badge = Text()
+    score_badge.append(f" {score}/10.0 ", style=f"bold white on {'red' if score >= 7 else 'yellow' if score >= 5 else 'blue' if score >= 3 else 'green' if score > 0 else 'white'}")
+    score_badge.append(f" {grade}", style=style)
+
+    # ── Summary table ──
+    tbl = make_summary_table()
+    tbl.add_row("Target", sc.target)
+    tbl.add_row("WAF", f"{sc.waf_vendor} ({sc.waf_strictness})")
+    tbl.add_row("Duration", sc.duration)
+    tbl.add_row("Evasion Score", score_badge)
+    tbl.add_row("", "")
+    tbl.add_row("Payloads tested", str(sc.total_tested))
+    tbl.add_row("Blocked", Text(str(sc.total_blocked), style="bold red"))
+    tbl.add_row("Bypassed", Text(str(sc.total_bypassed), style="bold green"))
     if sc.mutations_tested > 0:
-        print(f"  Mutations tested:  {sc.mutations_tested}")
-        print(f"  Mutations bypassed: {C.GREEN}{sc.mutations_bypassed}{C.END}")
+        tbl.add_row("Mutations tested", str(sc.mutations_tested))
+        tbl.add_row("Mutations bypassed", Text(str(sc.mutations_bypassed), style="bold green"))
 
     total_bypass = sc.total_bypassed + sc.mutations_bypassed
     total_all = sc.total_tested + sc.mutations_tested
     if total_all > 0:
         rate = total_bypass / total_all * 100
-        print(f"  Bypass rate:       {C.BOLD}{rate:.1f}%{C.END}")
+        tbl.add_row("Bypass rate", Text(f"{rate:.1f}%", style="bold"))
 
-    # Top bypasses
+    console.print()
+    console.print(Panel(tbl, title="[bold]WAF Bypass Scorecard[/bold]",
+                        border_style="bright_cyan", expand=False))
+
+    # ── Top Bypasses table ──
     if sc.bypasses:
-        print(f"\n  {C.BOLD}Top Bypasses:{C.END}")
-        for i, b in enumerate(sc.bypasses[:10], 1):
-            reflected = f" {C.YELLOW}[REFLECTED]{C.END}" if b.get("reflected") else ""
-            technique = f" [{b['technique']}]" if b.get("technique") else ""
-            print(f"    {i}. Score {C.BOLD}{b['evasion_score']}{C.END}"
-                  f"{technique}{reflected}")
-            payload_preview = b["payload"][:70]
-            print(f"       {C.DIM}{payload_preview}{C.END}")
+        bp_table = Table(title="Top Bypasses", show_lines=False, pad_edge=False,
+                         box=None, title_style="bold")
+        bp_table.add_column("#", style="dim", width=3, justify="right")
+        bp_table.add_column("Score", width=6, justify="center")
+        bp_table.add_column("Technique", width=20)
+        bp_table.add_column("Payload", min_width=40)
 
-    # Top techniques
+        for i, b in enumerate(sc.bypasses[:10], 1):
+            score_txt = Text(str(b["evasion_score"]), style=score_style(b["evasion_score"]))
+            technique = b.get("technique") or "-"
+            payload_preview = b["payload"][:65]
+            ref_tag = " [yellow]REFLECTED[/yellow]" if b.get("reflected") else ""
+            bp_table.add_row(str(i), score_txt, technique,
+                             f"[dim]{payload_preview}[/dim]{ref_tag}")
+
+        console.print()
+        console.print(Panel(bp_table, border_style="dim", expand=False))
+
+    # ── Techniques table ──
     if sc.top_techniques:
-        print(f"\n  {C.BOLD}Evasion Techniques:{C.END}")
+        tech_table = Table(title="Evasion Techniques", show_lines=False,
+                           box=None, title_style="bold", pad_edge=False)
+        tech_table.add_column("Technique", min_width=25)
+        tech_table.add_column("Bypassed", width=10, justify="center")
+        tech_table.add_column("Tested", width=8, justify="center")
+
         for t in sc.top_techniques[:5]:
             if t["bypassed"] > 0:
-                print(f"    • {t['technique']}: "
-                      f"{C.GREEN}{t['bypassed']}/{t['tested']} bypassed{C.END}")
+                tech_table.add_row(
+                    t["technique"],
+                    Text(str(t["bypassed"]), style="bold green"),
+                    str(t["tested"]),
+                )
+        if tech_table.row_count > 0:
+            console.print()
+            console.print(tech_table)
 
-    # Tips
+    # ── Tips ──
     if sc.tips:
-        print(f"\n  {C.BOLD}WAF-Specific Tips:{C.END}")
+        console.print()
+        console.print("  [bold]WAF-Specific Tips:[/bold]")
         for tip in sc.tips[:4]:
-            print(f"    💡 {tip}")
+            console.print(f"    [dim]💡 {tip}[/dim]")
 
-    print(f"\n{C.BOLD}{'━' * 60}{C.END}")
+    console.print()
+    console.rule(style="dim")

@@ -264,105 +264,138 @@ class _Colors:
     CYAN = '\033[96m'
 
 
-def _verdict_color(verdict: str) -> str:
-    if verdict == "REGRESSED":
-        return f"{_Colors.RED}{_Colors.BOLD}{verdict}{_Colors.END}"
-    elif verdict == "IMPROVED":
-        return f"{_Colors.GREEN}{_Colors.BOLD}{verdict}{_Colors.END}"
-    elif verdict == "MIXED":
-        return f"{_Colors.YELLOW}{_Colors.BOLD}{verdict}{_Colors.END}"
-    else:
-        return f"{_Colors.GREEN}{_Colors.BOLD}{verdict}{_Colors.END}"
+def _verdict_badge(verdict: str):
+    """Create a rich Text badge for the verdict."""
+    from rich.text import Text
+    style_map = {
+        "REGRESSED": "bold white on red",
+        "IMPROVED": "bold white on green",
+        "MIXED": "bold white on yellow",
+        "PASS": "bold white on green",
+    }
+    return Text(f" {verdict} ", style=style_map.get(verdict, "bold"))
 
 
-def _delta_str(val: float, suffix: str = "", higher_is_worse: bool = True) -> str:
-    """Format a delta value with color (green=better, red=worse)."""
+def _delta_rich(val: float, suffix: str = "", higher_is_worse: bool = True) -> str:
+    """Format a delta value with rich markup (green=better, red=worse)."""
     if val == 0:
-        return f"{_Colors.DIM}±0{suffix}{_Colors.END}"
+        return "[dim]±0" + suffix + "[/dim]"
     sign = "+" if val > 0 else ""
-    color = _Colors.RED if (val > 0 and higher_is_worse) or (val < 0 and not higher_is_worse) else _Colors.GREEN
-    return f"{color}{sign}{val}{suffix}{_Colors.END}"
+    color = "red" if (val > 0 and higher_is_worse) or (val < 0 and not higher_is_worse) else "green"
+    return f"[{color}]{sign}{val}{suffix}[/{color}]"
 
 
 def print_diff(diff: DiffResult) -> None:
-    """Print a formatted diff report to stdout."""
-    C = _Colors
+    """Print a formatted diff report with rich output."""
+    from fray.output import console, print_header, make_summary_table
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.text import Text
 
-    print(f"\n{C.BOLD}{'━' * 60}{C.END}")
-    print(f"{C.BOLD}  Fray Diff — Scan Comparison{C.END}")
-    print(f"{C.BOLD}{'━' * 60}{C.END}")
-    print(f"  Target:  {diff.target}")
-    print(f"  Before:  {diff.before_file}")
-    print(f"  After:   {diff.after_file}")
-    print(f"  Verdict: {_verdict_color(diff.verdict)}")
+    print_header("Fray Diff — Scan Comparison", target=diff.target)
 
-    # Score & rate changes
-    print(f"\n  {'─' * 45}")
+    # ── Summary panel ──
+    tbl = make_summary_table()
+    tbl.add_row("Before", diff.before_file)
+    tbl.add_row("After", diff.after_file)
+    tbl.add_row("Verdict", _verdict_badge(diff.verdict))
+
     if diff.before_score or diff.after_score:
-        print(f"  Evasion Score:  {diff.before_score} → {diff.after_score}  "
-              f"{_delta_str(diff.score_delta)}")
-    print(f"  Bypass Rate:    {diff.before_bypass_rate}% → {diff.after_bypass_rate}%  "
-          f"{_delta_str(diff.bypass_rate_delta, '%')}")
-    print(f"  Tested:         {diff.before_total_tested} → {diff.after_total_tested}")
-    print(f"  Blocked:        {diff.before_total_blocked} → {diff.after_total_blocked}  "
-          f"{_delta_str(diff.after_total_blocked - diff.before_total_blocked, '', higher_is_worse=False)}")
-    print(f"  Bypassed:       {diff.before_total_bypassed} → {diff.after_total_bypassed}  "
-          f"{_delta_str(diff.after_total_bypassed - diff.before_total_bypassed, '')}")
+        tbl.add_row("Evasion Score",
+                     f"{diff.before_score} → {diff.after_score}  {_delta_rich(diff.score_delta)}")
+    tbl.add_row("Bypass Rate",
+                 f"{diff.before_bypass_rate}% → {diff.after_bypass_rate}%  {_delta_rich(diff.bypass_rate_delta, '%')}")
+    tbl.add_row("Tested", f"{diff.before_total_tested} → {diff.after_total_tested}")
+    blocked_delta = diff.after_total_blocked - diff.before_total_blocked
+    tbl.add_row("Blocked",
+                 f"{diff.before_total_blocked} → {diff.after_total_blocked}  {_delta_rich(blocked_delta, '', higher_is_worse=False)}")
+    bypassed_delta = diff.after_total_bypassed - diff.before_total_bypassed
+    tbl.add_row("Bypassed",
+                 f"{diff.before_total_bypassed} → {diff.after_total_bypassed}  {_delta_rich(bypassed_delta, '')}")
 
-    # Strictness change
     if diff.before_strictness and diff.after_strictness and diff.before_strictness != diff.after_strictness:
-        print(f"\n  Strictness:     {diff.before_strictness} → {diff.after_strictness}")
+        tbl.add_row("Strictness", f"{diff.before_strictness} → {diff.after_strictness}")
 
-    # WAF profile changes
+    console.print(Panel(tbl, border_style="bright_cyan", expand=False))
+
+    # ── WAF profile changes ──
     profile_changes = (diff.new_blocked_tags or diff.removed_blocked_tags or
                        diff.new_blocked_events or diff.removed_blocked_events or
                        diff.new_blocked_keywords or diff.removed_blocked_keywords)
     if profile_changes:
-        print(f"\n  {C.CYAN}WAF Profile Changes:{C.END}")
+        console.print()
+        console.print("  [bold cyan]WAF Profile Changes:[/bold cyan]")
         if diff.new_blocked_tags:
-            print(f"    {C.GREEN}+ Now blocking tags:{C.END} {', '.join(diff.new_blocked_tags)}")
+            console.print(f"    [green]+ Now blocking tags:[/green] {', '.join(diff.new_blocked_tags)}")
         if diff.removed_blocked_tags:
-            print(f"    {C.RED}- No longer blocking tags:{C.END} {', '.join(diff.removed_blocked_tags)}")
+            console.print(f"    [red]- No longer blocking tags:[/red] {', '.join(diff.removed_blocked_tags)}")
         if diff.new_blocked_events:
-            print(f"    {C.GREEN}+ Now blocking events:{C.END} {', '.join(diff.new_blocked_events)}")
+            console.print(f"    [green]+ Now blocking events:[/green] {', '.join(diff.new_blocked_events)}")
         if diff.removed_blocked_events:
-            print(f"    {C.RED}- No longer blocking events:{C.END} {', '.join(diff.removed_blocked_events)}")
+            console.print(f"    [red]- No longer blocking events:[/red] {', '.join(diff.removed_blocked_events)}")
         if diff.new_blocked_keywords:
-            print(f"    {C.GREEN}+ Now blocking keywords:{C.END} {', '.join(diff.new_blocked_keywords)}")
+            console.print(f"    [green]+ Now blocking keywords:[/green] {', '.join(diff.new_blocked_keywords)}")
         if diff.removed_blocked_keywords:
-            print(f"    {C.RED}- No longer blocking keywords:{C.END} {', '.join(diff.removed_blocked_keywords)}")
+            console.print(f"    [red]- No longer blocking keywords:[/red] {', '.join(diff.removed_blocked_keywords)}")
 
-    # Regressions
+    # ── Regressions table ──
     if diff.regressions:
-        print(f"\n  {C.RED}{C.BOLD}⚠ Regressions ({len(diff.regressions)} payloads now bypass):{C.END}")
+        reg_table = Table(title=f"⚠ Regressions ({len(diff.regressions)} payloads now bypass)",
+                          show_lines=False, box=None, pad_edge=False,
+                          title_style="bold red")
+        reg_table.add_column("#", style="dim", width=3, justify="right")
+        reg_table.add_column("Status", width=12)
+        reg_table.add_column("Payload", min_width=40)
+
         for i, reg in enumerate(diff.regressions[:10], 1):
-            reflected = f" {C.YELLOW}REFLECTED{C.END}" if reg.get("reflected") else ""
-            technique = f" [{reg['technique']}]" if reg.get("technique") else ""
-            print(f"    {i}. {reg['before_status']} → {reg['after_status']}{technique}{reflected}")
-            print(f"       {C.DIM}{reg['payload']}{C.END}")
+            reflected = " [yellow]REFLECTED[/yellow]" if reg.get("reflected") else ""
+            technique = f" [dim][{reg['technique']}][/dim]" if reg.get("technique") else ""
+            reg_table.add_row(
+                str(i),
+                f"{reg['before_status']} → {reg['after_status']}",
+                f"[dim]{reg['payload']}[/dim]{technique}{reflected}",
+            )
         if len(diff.regressions) > 10:
-            print(f"    {C.DIM}... and {len(diff.regressions) - 10} more{C.END}")
+            reg_table.add_row("", "", f"[dim]... and {len(diff.regressions) - 10} more[/dim]")
 
-    # Improvements
+        console.print()
+        console.print(Panel(reg_table, border_style="red", expand=False))
+
+    # ── Improvements table ──
     if diff.improvements:
-        print(f"\n  {C.GREEN}{C.BOLD}✓ Improvements ({len(diff.improvements)} payloads now blocked):{C.END}")
-        for i, imp in enumerate(diff.improvements[:10], 1):
-            print(f"    {i}. {imp['before_status']} → {imp['after_status']}")
-            print(f"       {C.DIM}{imp['payload']}{C.END}")
-        if len(diff.improvements) > 10:
-            print(f"    {C.DIM}... and {len(diff.improvements) - 10} more{C.END}")
+        imp_table = Table(title=f"✓ Improvements ({len(diff.improvements)} payloads now blocked)",
+                          show_lines=False, box=None, pad_edge=False,
+                          title_style="bold green")
+        imp_table.add_column("#", style="dim", width=3, justify="right")
+        imp_table.add_column("Status", width=12)
+        imp_table.add_column("Payload", min_width=40)
 
-    # New bypasses
+        for i, imp in enumerate(diff.improvements[:10], 1):
+            imp_table.add_row(
+                str(i),
+                f"{imp['before_status']} → {imp['after_status']}",
+                f"[dim]{imp['payload']}[/dim]",
+            )
+        if len(diff.improvements) > 10:
+            imp_table.add_row("", "", f"[dim]... and {len(diff.improvements) - 10} more[/dim]")
+
+        console.print()
+        console.print(Panel(imp_table, border_style="green", expand=False))
+
+    # ── New bypasses ──
     if diff.new_bypasses:
-        print(f"\n  {C.YELLOW}New bypasses ({len(diff.new_bypasses)} not in baseline):{C.END}")
+        console.print()
+        console.print(f"  [bold yellow]New bypasses ({len(diff.new_bypasses)} not in baseline):[/bold yellow]")
         for i, nb in enumerate(diff.new_bypasses[:5], 1):
-            technique = f" [{nb['technique']}]" if nb.get("technique") else ""
-            print(f"    {i}. status {nb['status']}{technique}")
-            print(f"       {C.DIM}{nb['payload']}{C.END}")
+            technique = f" [dim][{nb['technique']}][/dim]" if nb.get("technique") else ""
+            console.print(f"    {i}. status {nb['status']}{technique}")
+            console.print(f"       [dim]{nb['payload']}[/dim]")
         if len(diff.new_bypasses) > 5:
-            print(f"    {C.DIM}... and {len(diff.new_bypasses) - 5} more{C.END}")
+            console.print(f"    [dim]... and {len(diff.new_bypasses) - 5} more[/dim]")
 
     if not diff.regressions and not diff.improvements and not diff.new_bypasses:
-        print(f"\n  {C.GREEN}No payload-level changes detected.{C.END}")
+        console.print()
+        console.print("  [green]No payload-level changes detected.[/green]")
 
-    print(f"\n{C.BOLD}{'━' * 60}{C.END}")
+    console.print()
+    console.rule(style="dim")

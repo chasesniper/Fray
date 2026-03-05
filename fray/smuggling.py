@@ -524,45 +524,66 @@ def run_smuggling_detection(target: str, timeout: int = 10, delay: float = 1.0,
 
 
 def print_smuggle_report(report: SmuggleReport) -> None:
-    """Print formatted smuggling detection report."""
-    C = _Colors
+    """Print formatted smuggling detection report with rich output."""
+    from fray.output import (console, print_header, print_verdict,
+                              make_summary_table, vuln_text, safe_text)
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.text import Text
 
-    print(f"\n{C.BOLD}{'━' * 60}{C.END}")
-    print(f"{C.BOLD}  Fray Smuggling — Detection Report{C.END}")
-    print(f"{C.BOLD}{'━' * 60}{C.END}")
-    print(f"  Target:   {report.target}")
-    print(f"  Duration: {report.duration}")
-    print(f"  Baseline: {report.baseline_time}s avg response time")
+    print_header("Fray Smuggling — Detection Report", target=report.target)
 
-    # Verdict
+    # ── Summary ──
+    tbl = make_summary_table()
+    tbl.add_row("Duration", report.duration)
+    tbl.add_row("Baseline", f"{report.baseline_time}s avg response time")
+
     if report.vulnerable:
-        conf_color = C.RED if report.confidence == "high" else C.YELLOW
-        print(f"\n  {C.RED}{C.BOLD}⚠ VULNERABLE — HTTP Request Smuggling Detected{C.END}")
-        print(f"  Confidence: {conf_color}{C.BOLD}{report.confidence.upper()}{C.END}")
-        print(f"  Desync types: {', '.join(report.desync_types)}")
+        conf_style = "bold red" if report.confidence == "high" else "bold yellow"
+        verdict_badge = Text()
+        verdict_badge.append(" ⚠ VULNERABLE ", style="bold white on red")
+        verdict_badge.append(f"  Confidence: ", style="dim")
+        verdict_badge.append(report.confidence.upper(), style=conf_style)
+        tbl.add_row("Verdict", verdict_badge)
+        tbl.add_row("Desync types", ", ".join(report.desync_types))
     else:
-        print(f"\n  {C.GREEN}{C.BOLD}✓ NOT VULNERABLE{C.END}")
-        print(f"  Server properly handles CL/TE header ambiguity")
+        verdict_badge = Text()
+        verdict_badge.append(" ✓ NOT VULNERABLE ", style="bold white on green")
+        tbl.add_row("Verdict", verdict_badge)
 
-    # Probe results
-    print(f"\n  {'─' * 45}")
-    print(f"  {C.CYAN}Probe Results:{C.END}")
+    console.print(Panel(tbl, border_style="bright_cyan", expand=False))
+
+    # ── Probe Results table ──
+    probe_table = Table(title="Probe Results", show_lines=False, pad_edge=False,
+                        box=None, title_style="bold")
+    probe_table.add_column("Status", width=12, justify="center")
+    probe_table.add_column("Type", width=7)
+    probe_table.add_column("Variant", width=14)
+    probe_table.add_column("Detail", min_width=30)
+
     for p in report.probes:
         if p["desync_detected"]:
             timeout_tag = " TIMEOUT" if p["timed_out"] else ""
-            print(f"    {C.RED}⚠ DESYNC{C.END}  [{p['probe_type']}] {p['variant']} | "
-                  f"{p['response_time']}s | confidence: {p['confidence']}{timeout_tag}")
+            status = Text(" DESYNC ", style="bold white on red")
+            detail = f"{p['response_time']}s │ confidence: {p['confidence']}{timeout_tag}"
         elif p["status"] in (400, 501):
-            print(f"    {C.GREEN}SAFE{C.END}     [{p['probe_type']}] {p['variant']} | "
-                  f"status {p['status']} — rejects ambiguous request")
+            status = Text("  SAFE  ", style="bold white on green")
+            detail = f"status {p['status']} — rejects ambiguous request"
         else:
-            print(f"    {C.DIM}OK{C.END}       [{p['probe_type']}] {p['variant']} | "
-                  f"status {p['status']}, {p['response_time']}s")
+            status = Text("   OK   ", style="dim")
+            detail = f"status {p['status']}, {p['response_time']}s"
 
-    # Tips
+        probe_table.add_row(status, p["probe_type"], p["variant"], detail)
+
+    console.print()
+    console.print(Panel(probe_table, border_style="dim", expand=False))
+
+    # ── Tips ──
     if report.tips:
-        print(f"\n  {C.CYAN}Analysis:{C.END}")
+        console.print()
+        console.print("  [bold]Analysis:[/bold]")
         for tip in report.tips:
-            print(f"    💡 {tip}")
+            console.print(f"    [dim]💡 {tip}[/dim]")
 
-    print(f"\n{C.BOLD}{'━' * 60}{C.END}")
+    console.print()
+    console.rule(style="dim")
