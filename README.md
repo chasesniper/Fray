@@ -50,7 +50,7 @@ fray report -i results.json -o report.html       # Generate report
 
 ## Demo
 
-Run a full WAF evaluation in seconds.
+Crawls a target, discovers injection points, and tests 3 XSS payloads per parameter with 4 concurrent workers. Blocked payloads show `403`, passed payloads show `200`, and `↩ REFLECTED` confirms the payload appeared in the response body.
 
 ![fray demo](docs/demo.gif)
 
