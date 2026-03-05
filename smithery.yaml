@@ -1,0 +1,183 @@
+# Smithery.ai registry manifest for Fray MCP Server
+# https://smithery.ai/docs/publishing
+
+name: fray
+displayName: Fray — WAF Security Testing
+description: >
+  Open-source WAF security testing toolkit with 5,500+ attack payloads,
+  25 WAF fingerprints, and 10 MCP tools. Search payloads, get bypass strategies,
+  analyze scan results, explain vulnerabilities, and generate custom payloads —
+  all from your AI assistant.
+
+version: 3.0.1
+author: DALI Security
+license: MIT
+homepage: https://github.com/dalisecurity/fray
+repository: https://github.com/dalisecurity/fray
+documentation: https://github.com/dalisecurity/fray/tree/hugo/docs
+
+# How to start the MCP server
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+    required: []
+  commandFunction: |-
+    (config) => ({
+      command: "python",
+      args: ["-m", "fray.mcp_server"]
+    })
+
+# Installation
+install:
+  type: pip
+  package: "fray[mcp]"
+
+# Categories for Smithery registry
+categories:
+  - security
+  - penetration-testing
+  - web-security
+
+tags:
+  - waf
+  - xss
+  - sqli
+  - ssrf
+  - payloads
+  - owasp
+  - bypass
+  - vulnerability
+  - cybersecurity
+  - cve
+
+# Tool definitions
+tools:
+  - name: list_payload_categories
+    description: List all 24 payload categories with file counts
+    inputSchema:
+      type: object
+      properties: {}
+
+  - name: get_payloads
+    description: Retrieve payloads from a category (xss, sqli, ssrf, ssti, etc.)
+    inputSchema:
+      type: object
+      properties:
+        category:
+          type: string
+          description: "Category name (e.g. xss, sqli, ssrf)"
+        max_results:
+          type: integer
+          default: 20
+      required:
+        - category
+
+  - name: search_payloads
+    description: Search across all categories for a pattern or keyword
+    inputSchema:
+      type: object
+      properties:
+        query:
+          type: string
+          description: "Search term (e.g. 'log4j', 'reverse shell')"
+        max_results:
+          type: integer
+          default: 20
+      required:
+        - query
+
+  - name: get_waf_signatures
+    description: Get WAF detection signatures for 25 vendors
+    inputSchema:
+      type: object
+      properties:
+        vendor:
+          type: string
+          description: "Optional vendor filter (e.g. 'Cloudflare')"
+
+  - name: get_cve_details
+    description: Look up a CVE with payloads, severity, and references
+    inputSchema:
+      type: object
+      properties:
+        cve_id:
+          type: string
+          description: "CVE identifier (e.g. 'CVE-2021-44228')"
+      required:
+        - cve_id
+
+  - name: suggest_payloads_for_waf
+    description: Suggest best bypass payloads for a specific WAF vendor
+    inputSchema:
+      type: object
+      properties:
+        waf_vendor:
+          type: string
+          description: "WAF vendor (e.g. 'Cloudflare', 'AWS WAF')"
+        attack_type:
+          type: string
+          default: xss
+        max_results:
+          type: integer
+          default: 10
+      required:
+        - waf_vendor
+
+  - name: analyze_scan_results
+    description: Analyze scan/test results JSON — risk assessment + next steps
+    inputSchema:
+      type: object
+      properties:
+        results_json:
+          type: string
+          description: "Raw JSON from fray test/scan output"
+      required:
+        - results_json
+
+  - name: generate_bypass_strategy
+    description: Generate bypass mutations for a blocked payload + WAF
+    inputSchema:
+      type: object
+      properties:
+        waf_vendor:
+          type: string
+          description: "WAF that blocked the payload"
+        blocked_payload:
+          type: string
+          description: "The payload that was blocked"
+      required:
+        - waf_vendor
+        - blocked_payload
+
+  - name: explain_vulnerability
+    description: Explain why a payload is dangerous (beginner-friendly, CWE/OWASP tagged)
+    inputSchema:
+      type: object
+      properties:
+        payload:
+          type: string
+          description: "Payload to explain"
+        category:
+          type: string
+          default: ""
+      required:
+        - payload
+
+  - name: create_custom_payload
+    description: Generate payloads from natural language description
+    inputSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          description: "What to test (e.g. 'XSS bypassing Cloudflare with SVG')"
+        category:
+          type: string
+          default: xss
+        target_waf:
+          type: string
+          default: ""
+      required:
+        - description

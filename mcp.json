@@ -1,0 +1,232 @@
+{
+  "name": "fray",
+  "version": "3.0.1",
+  "description": "Fray — open-source WAF security testing toolkit. 5,500+ attack payloads, 25 WAF fingerprints, 10 MCP tools for AI-powered security workflows.",
+  "homepage": "https://github.com/dalisecurity/fray",
+  "author": "DALI Security",
+  "license": "MIT",
+  "transport": "stdio",
+  "command": {
+    "exec": "python",
+    "args": ["-m", "fray.mcp_server"]
+  },
+  "install": {
+    "pip": "pip install 'fray[mcp]'"
+  },
+  "tools": [
+    {
+      "name": "list_payload_categories",
+      "description": "List all available payload categories in Fray with file counts. Use this to discover attack types before retrieving payloads.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "string",
+        "description": "Formatted list of categories with file counts"
+      }
+    },
+    {
+      "name": "get_payloads",
+      "description": "Retrieve payloads from a specific category (xss, sqli, ssrf, ssti, command_injection, xxe, path_traversal, etc.)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Category name (e.g. xss, sqli, ssrf, ssti, iot_rce, command_injection, ai_prompt_injection)"
+          },
+          "max_results": {
+            "type": "integer",
+            "description": "Maximum payloads to return (default 20, max 100)",
+            "default": 20
+          }
+        },
+        "required": ["category"]
+      },
+      "outputSchema": {
+        "type": "string",
+        "description": "Formatted list of payloads with IDs and descriptions"
+      }
+    },
+    {
+      "name": "search_payloads",
+      "description": "Search across all 24 payload categories for a pattern or keyword (e.g. 'log4j', 'reverse shell', 'base64', 'xmlrpc')",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search term or pattern"
+          },
+          "max_results": {
+            "type": "integer",
+            "description": "Maximum results (default 20, max 50)",
+            "default": 20
+          }
+        },
+        "required": ["query"]
+      },
+      "outputSchema": {
+        "type": "string",
+        "description": "Matching payloads with category, ID, and description"
+      }
+    },
+    {
+      "name": "get_waf_signatures",
+      "description": "Get WAF detection signatures for fingerprinting. Returns headers, cookies, server strings, and response codes for 25 WAF vendors.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vendor": {
+            "type": "string",
+            "description": "Optional vendor filter (e.g. 'Cloudflare', 'AWS'). Omit for all 25 vendors."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "string",
+        "description": "WAF signatures organized by vendor"
+      }
+    },
+    {
+      "name": "get_cve_details",
+      "description": "Look up a specific CVE across all Fray payload files. Returns title, severity, CWE, affected versions, and associated payloads.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cve_id": {
+            "type": "string",
+            "description": "CVE identifier (e.g. 'CVE-2021-44228', 'CVE-2026-27509')"
+          }
+        },
+        "required": ["cve_id"]
+      },
+      "outputSchema": {
+        "type": "string",
+        "description": "CVE details with payloads, severity, and references"
+      }
+    },
+    {
+      "name": "suggest_payloads_for_waf",
+      "description": "Suggest the best payloads to test against a specific WAF vendor. Ranks payloads by bypass potential using WAF knowledge + evasion scoring.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "waf_vendor": {
+            "type": "string",
+            "description": "WAF vendor (e.g. 'Cloudflare', 'AWS WAF', 'Akamai', 'Imperva')"
+          },
+          "attack_type": {
+            "type": "string",
+            "description": "Attack category (e.g. 'xss', 'sqli', 'ssrf', 'command_injection')",
+            "default": "xss"
+          },
+          "max_results": {
+            "type": "integer",
+            "description": "Number of payloads to suggest (default 10)",
+            "default": 10
+          }
+        },
+        "required": ["waf_vendor"]
+      },
+      "outputSchema": {
+        "type": "string",
+        "description": "Ranked payloads with bypass scores and descriptions"
+      }
+    },
+    {
+      "name": "analyze_scan_results",
+      "description": "Analyze Fray scan/test results JSON and propose next steps. Returns risk assessment, bypass summary, and recommended follow-up commands.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "results_json": {
+            "type": "string",
+            "description": "Raw JSON string from fray test/scan output (contents of the -o output file)"
+          }
+        },
+        "required": ["results_json"]
+      },
+      "outputSchema": {
+        "type": "string",
+        "description": "Markdown analysis with findings, risk levels, and next steps"
+      }
+    },
+    {
+      "name": "generate_bypass_strategy",
+      "description": "Generate bypass strategies for a payload blocked by a specific WAF. Identifies block triggers and suggests mutation strategies with concrete examples.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "waf_vendor": {
+            "type": "string",
+            "description": "WAF that blocked the payload (e.g. 'Cloudflare', 'AWS WAF')"
+          },
+          "blocked_payload": {
+            "type": "string",
+            "description": "The exact payload string that was blocked"
+          }
+        },
+        "required": ["waf_vendor", "blocked_payload"]
+      },
+      "outputSchema": {
+        "type": "string",
+        "description": "Markdown report with block triggers, mutation strategies, and WAF-specific notes"
+      }
+    },
+    {
+      "name": "explain_vulnerability",
+      "description": "Explain why a payload is dangerous in beginner-friendly terms. Covers attack type, step-by-step flow, damage potential, defenses, CWE, and OWASP references.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "payload": {
+            "type": "string",
+            "description": "The payload string to explain (e.g. '<script>alert(1)</script>')"
+          },
+          "category": {
+            "type": "string",
+            "description": "Optional category hint (e.g. 'xss', 'sqli', 'ssrf')",
+            "default": ""
+          }
+        },
+        "required": ["payload"]
+      },
+      "outputSchema": {
+        "type": "string",
+        "description": "Markdown explanation with attack flow, damage, defenses, and CWE/OWASP refs"
+      }
+    },
+    {
+      "name": "create_custom_payload",
+      "description": "Generate payloads from a natural language description. Searches Fray's 5,500+ payload database for the best matches and suggests mutations.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Natural language description (e.g. 'XSS that bypasses Cloudflare using SVG tags')"
+          },
+          "category": {
+            "type": "string",
+            "description": "Payload category (xss, sqli, ssrf, ssti, command_injection)",
+            "default": "xss"
+          },
+          "target_waf": {
+            "type": "string",
+            "description": "Optional WAF to optimize for (e.g. 'Cloudflare')",
+            "default": ""
+          }
+        },
+        "required": ["description"]
+      },
+      "outputSchema": {
+        "type": "string",
+        "description": "Ranked payloads with relevance scores and suggested mutations"
+      }
+    }
+  ]
+}

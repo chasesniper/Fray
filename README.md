@@ -273,13 +273,42 @@ Git-style visual output: regressions in **red** (`- BLOCKED → + BYPASS`), impr
 ## MCP Server — AI Integration
 
 ```bash
-pip install fray[mcp]
-fray mcp
+pip install 'fray[mcp]'
 ```
 
-Ask Claude: *"What XSS payloads bypass Cloudflare?"* → calls Fray's MCP tools directly.
+### Claude Desktop — One-Liner Setup
 
-[Claude Code guide →](docs/claude-code-guide.md) · [ChatGPT guide →](docs/chatgpt-guide.md)
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "fray": {
+      "command": "python",
+      "args": ["-m", "fray.mcp_server"]
+    }
+  }
+}
+```
+
+Restart Claude Desktop. Ask: *"What XSS payloads bypass Cloudflare?"* → Fray's 10 MCP tools are called directly.
+
+### 10 MCP Tools
+
+| Tool | What it does |
+|------|-------------|
+| `list_payload_categories` | List all 24 attack categories |
+| `get_payloads` | Retrieve payloads by category |
+| `search_payloads` | Full-text search across 5,500+ payloads |
+| `get_waf_signatures` | WAF fingerprints for 25 vendors |
+| `get_cve_details` | CVE lookup with payloads and severity |
+| `suggest_payloads_for_waf` | Best bypass payloads for a specific WAF |
+| `analyze_scan_results` | Risk assessment from scan/test JSON |
+| `generate_bypass_strategy` | Mutation strategies for blocked payloads |
+| `explain_vulnerability` | Beginner-friendly payload explanation |
+| `create_custom_payload` | Generate payloads from natural language |
+
+[Claude Code guide →](docs/claude-code-guide.md) · [ChatGPT guide →](docs/chatgpt-guide.md) · [mcp.json →](mcp.json)
 
 ---
 
@@ -298,6 +327,8 @@ fray/
 │   └── payloads/            # 5,500+ payloads (22 categories)
 ├── tests/                   # 624 tests
 ├── docs/                    # 30 guides
+├── mcp.json                 # MCP manifest (tools, inputs, outputs)
+├── smithery.yaml            # Smithery.ai registry manifest
 └── pyproject.toml           # pip install fray
 ```
 
