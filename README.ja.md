@@ -149,6 +149,8 @@ fray recon https://example.com --params   # パラメータブルートフォー
 | **フィンガープリント** | WordPress、PHP、Node.js、nginx、Apache、Java、.NET |
 | **DNS** | A/CNAME/MX/TXT、CDN検出、SPF/DMARC |
 | **CORS** | ワイルドカード、反射型オリジン、認証情報の設定不備 |
+| **レート制限フィンガープリント** | 閾値マッピング（429前のreq/s）、バースト制限、ロックアウト時間、安全な遅延 |
+| **WAF検出モード** | シグネチャ vs 異常検知 vs ハイブリッド — ボディ差分、タイミング差分、ヘッダー差分 |
 
 その他：28件の公開ファイルプローブ（`.env`、`.git`、phpinfo、actuator）· crt.sh経由のサブドメイン列挙
 

@@ -2674,6 +2674,458 @@ def print_js_endpoints(target: str, result: Dict[str, Any]) -> None:
     console.print()
 
 
+# ── Rate Limit Fingerprinting ────────────────────────────────────────────
+
+def check_rate_limits(host: str, port: int, use_ssl: bool,
+                      timeout: int = 8,
+                      extra_headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """Fingerprint the rate limit threshold — requests/second before 429.
+
+    Sends escalating bursts of benign requests to map the exact threshold
+    where the WAF/server starts returning 429 or block responses.
+
+    Returns:
+        Dict with threshold (req/s), burst_limit, retry_after policy,
+        rate_limit_headers, and recommended_delay for safe testing.
+    """
+    result: Dict[str, Any] = {
+        "threshold_rps": None,         # requests/sec before 429
+        "burst_limit": None,           # max burst before first 429
+        "retry_after_policy": None,    # value of Retry-After header
+        "rate_limit_headers": {},      # X-RateLimit-* headers
+        "lockout_duration": None,      # seconds until unlocked
+        "recommended_delay": 0.5,      # safe delay for testing
+        "detection_type": None,        # "fixed-window", "sliding-window", "token-bucket", "none"
+        "error": None,
+    }
+
+    path = "/"
+    req_headers = {
+        "Host": host,
+        "User-Agent": f"Fray/{__version__} Recon",
+        "Accept": "text/html,*/*",
+        "Connection": "close",
+    }
+    if extra_headers:
+        req_headers.update(extra_headers)
+
+    def _send_one() -> Tuple[int, Dict[str, str], float]:
+        """Send a single benign GET and return (status, headers, elapsed)."""
+        try:
+            start = time.monotonic()
+            if use_ssl:
+                try:
+                    ctx = _make_ssl_context(verify=True)
+                    conn = http.client.HTTPSConnection(host, port, context=ctx, timeout=timeout)
+                    conn.request("GET", path, headers=req_headers)
+                    resp = conn.getresponse()
+                except ssl.SSLError:
+                    ctx = _make_ssl_context(verify=False)
+                    conn = http.client.HTTPSConnection(host, port, context=ctx, timeout=timeout)
+                    conn.request("GET", path, headers=req_headers)
+                    resp = conn.getresponse()
+            else:
+                conn = http.client.HTTPConnection(host, port, timeout=timeout)
+                conn.request("GET", path, headers=req_headers)
+                resp = conn.getresponse()
+
+            elapsed = time.monotonic() - start
+            status = resp.status
+            headers = {k.lower(): v for k, v in resp.getheaders()}
+            resp.read(1024)  # Drain
+            conn.close()
+            return status, headers, elapsed
+        except Exception:
+            return 0, {}, 0.0
+
+    # Phase 1: Baseline — single request to capture rate limit headers
+    status, headers, _ = _send_one()
+    if status == 0:
+        result["error"] = "Target unreachable"
+        return result
+
+    # Capture any rate limit headers from the first response
+    rl_headers = {}
+    for key in ("x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset",
+                "ratelimit-limit", "ratelimit-remaining", "ratelimit-reset",
+                "x-rate-limit-limit", "x-rate-limit-remaining", "x-rate-limit-reset",
+                "retry-after"):
+        if key in headers:
+            rl_headers[key] = headers[key]
+    result["rate_limit_headers"] = rl_headers
+
+    # If we already see rate limit headers, extract the declared limit
+    declared_limit = None
+    for key in ("x-ratelimit-limit", "ratelimit-limit", "x-rate-limit-limit"):
+        if key in rl_headers:
+            try:
+                declared_limit = int(rl_headers[key])
+                break
+            except (ValueError, TypeError):
+                pass
+
+    # Phase 2: Escalating burst test — find the actual threshold
+    # Start with small bursts, double each round: 2, 4, 8, 16, 32
+    burst_sizes = [2, 4, 8, 16, 32]
+    first_429_at = None
+
+    for burst_size in burst_sizes:
+        blocked_count = 0
+        for _ in range(burst_size):
+            s, h, _ = _send_one()
+            if s in (429, 503) or s == 0:
+                blocked_count += 1
+                if first_429_at is None:
+                    first_429_at = burst_size
+                # Capture retry-after from the 429 response
+                if "retry-after" in h and result["retry_after_policy"] is None:
+                    result["retry_after_policy"] = h["retry-after"]
+                    try:
+                        result["lockout_duration"] = int(h["retry-after"])
+                    except (ValueError, TypeError):
+                        pass
+                break  # Stop this burst on first 429
+
+        if blocked_count > 0:
+            break
+
+        # Small cooldown between bursts to avoid false positives
+        time.sleep(0.3)
+
+    # Phase 3: If we hit 429, do a binary search for the exact threshold
+    if first_429_at is not None:
+        result["burst_limit"] = first_429_at
+
+        # Wait for lockout to expire before probing further
+        lockout_wait = result["lockout_duration"] or 5
+        time.sleep(min(lockout_wait, 10))
+
+        # Binary search: probe between burst_size/2 and burst_size
+        lo = max(1, first_429_at // 2)
+        hi = first_429_at
+        for _ in range(4):  # Max 4 iterations of binary search
+            mid = (lo + hi) // 2
+            if mid == lo:
+                break
+            time.sleep(min(lockout_wait, 5))  # Cooldown between probes
+            hit_429 = False
+            for _ in range(mid):
+                s, _, _ = _send_one()
+                if s in (429, 503):
+                    hit_429 = True
+                    break
+            if hit_429:
+                hi = mid
+            else:
+                lo = mid
+        result["burst_limit"] = lo
+
+        # Estimate RPS threshold: burst_limit / time_window (assume 1s window)
+        result["threshold_rps"] = lo
+
+        # Classify detection type
+        if declared_limit:
+            result["detection_type"] = "fixed-window"
+            result["threshold_rps"] = declared_limit
+        else:
+            # Heuristic: if burst_limit is small (<5), likely token-bucket
+            if lo <= 5:
+                result["detection_type"] = "token-bucket"
+            else:
+                result["detection_type"] = "sliding-window"
+
+        # Recommend a safe delay
+        if result["threshold_rps"] and result["threshold_rps"] > 0:
+            result["recommended_delay"] = round(1.0 / (result["threshold_rps"] * 0.6), 2)
+        else:
+            result["recommended_delay"] = 2.0
+    else:
+        # No rate limiting detected
+        result["detection_type"] = "none"
+        result["threshold_rps"] = None
+        result["burst_limit"] = None
+        result["recommended_delay"] = 0.2  # Fast testing is safe
+        if declared_limit:
+            result["threshold_rps"] = declared_limit
+            result["detection_type"] = "declared-only"
+            result["recommended_delay"] = round(1.0 / (declared_limit * 0.6), 2)
+
+    return result
+
+
+# ── Differential Response Analysis ──────────────────────────────────────
+
+def check_differential_responses(host: str, port: int, use_ssl: bool,
+                                  timeout: int = 8,
+                                  extra_headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """Compare responses between benign and malicious requests to fingerprint WAF detection mode.
+
+    Sends a benign request, then known-blocked payloads, and measures:
+    - Status code differences
+    - Response body length differences
+    - Response time differences (timing side-channel)
+    - Header differences (new headers added by WAF)
+    - Body content differences (block page signatures)
+
+    Determines if WAF uses signature-based or anomaly-based detection.
+    """
+    result: Dict[str, Any] = {
+        "detection_mode": None,         # "signature", "anomaly", "hybrid", "none"
+        "baseline": {},                 # benign response fingerprint
+        "blocked_fingerprint": {},      # blocked response fingerprint
+        "timing_delta_ms": None,        # avg blocked - avg benign (ms)
+        "body_length_delta": None,      # blocked body len - benign body len
+        "status_code_pattern": None,    # e.g. "200→403" or "200→200 (soft block)"
+        "extra_headers_on_block": [],   # headers only present on blocked responses
+        "block_page_signatures": [],    # WAF block page indicators found
+        "signature_detection": [],      # payloads that triggered signature blocks
+        "anomaly_detection": [],        # payloads that triggered anomaly blocks
+        "error": None,
+    }
+
+    path = "/"
+    req_template = (
+        "{method} {path} HTTP/1.1\r\n"
+        "Host: {host}\r\n"
+        "User-Agent: Fray/{version} Recon\r\n"
+        "Accept: text/html,*/*\r\n"
+        "{extra}"
+        "Connection: close\r\n\r\n{body}"
+    )
+    extra_hdr_str = ""
+    if extra_headers:
+        extra_hdr_str = "".join(f"{k}: {v}\r\n" for k, v in extra_headers.items())
+
+    def _send_raw(method: str, req_path: str, body: str = "") -> Tuple[int, Dict[str, str], str, float]:
+        """Send raw request, return (status, headers, body, elapsed_ms)."""
+        try:
+            req = req_template.format(
+                method=method, path=req_path, host=host,
+                version=__version__, extra=extra_hdr_str, body=body,
+            )
+            start = time.monotonic()
+            if use_ssl:
+                try:
+                    ctx = _make_ssl_context(verify=True)
+                    sock = socket.create_connection((host, port), timeout=timeout)
+                    conn = ctx.wrap_socket(sock, server_hostname=host)
+                except ssl.SSLError:
+                    ctx = _make_ssl_context(verify=False)
+                    sock = socket.create_connection((host, port), timeout=timeout)
+                    conn = ctx.wrap_socket(sock, server_hostname=host)
+            else:
+                conn = socket.create_connection((host, port), timeout=timeout)
+
+            conn.sendall(req.encode("utf-8", errors="replace"))
+            resp = b""
+            while True:
+                try:
+                    data = conn.recv(4096)
+                    if not data:
+                        break
+                    resp += data
+                    if len(resp) > 50000:
+                        break
+                except (socket.error, socket.timeout, OSError):
+                    break
+            conn.close()
+            elapsed_ms = (time.monotonic() - start) * 1000
+
+            resp_str = resp.decode("utf-8", errors="replace")
+            status_match = re.search(r"HTTP/[\d.]+ (\d+)", resp_str)
+            status = int(status_match.group(1)) if status_match else 0
+
+            headers = {}
+            body_str = ""
+            if "\r\n\r\n" in resp_str:
+                header_section, body_str = resp_str.split("\r\n\r\n", 1)
+                for line in header_section.split("\r\n")[1:]:
+                    if ":" in line:
+                        k, v = line.split(":", 1)
+                        headers[k.strip().lower()] = v.strip()
+
+            return status, headers, body_str, elapsed_ms
+        except Exception as e:
+            return 0, {}, str(e), 0.0
+
+    # ── Phase 1: Baseline (benign requests) ──
+    benign_statuses = []
+    benign_lengths = []
+    benign_times = []
+    benign_headers_set = set()
+
+    for _ in range(3):
+        s, h, b, t = _send_raw("GET", path)
+        if s == 0:
+            continue
+        benign_statuses.append(s)
+        benign_lengths.append(len(b))
+        benign_times.append(t)
+        benign_headers_set.update(h.keys())
+        time.sleep(0.2)
+
+    if not benign_statuses:
+        result["error"] = "Target unreachable for baseline"
+        return result
+
+    avg_benign_status = max(set(benign_statuses), key=benign_statuses.count)
+    avg_benign_len = sum(benign_lengths) // len(benign_lengths) if benign_lengths else 0
+    avg_benign_time = sum(benign_times) / len(benign_times) if benign_times else 0
+
+    result["baseline"] = {
+        "status": avg_benign_status,
+        "body_length": avg_benign_len,
+        "response_time_ms": round(avg_benign_time, 1),
+        "headers": sorted(benign_headers_set),
+    }
+
+    # ── Phase 2: Signature-triggering payloads ──
+    # Classic payloads that should trigger signature-based WAFs
+    signature_payloads = [
+        ("XSS", "?input=<script>alert(1)</script>"),
+        ("SQLi", "?input=' OR 1=1--"),
+        ("Path Traversal", "?input=../../etc/passwd"),
+        ("Command Injection", "?input=;cat /etc/passwd"),
+        ("SSTI", "?input={{7*7}}"),
+    ]
+
+    blocked_statuses = []
+    blocked_lengths = []
+    blocked_times = []
+    blocked_headers_set = set()
+    block_bodies = []
+
+    for label, payload_path in signature_payloads:
+        s, h, b, t = _send_raw("GET", path + payload_path)
+        if s == 0:
+            continue
+
+        is_blocked = s in (403, 406, 429, 500, 503)
+        if not is_blocked and b:
+            b_lower = b.lower()
+            if any(sig in b_lower for sig in (
+                "access denied", "blocked", "forbidden", "web application firewall",
+                "captcha", "challenge", "error code:", "request blocked",
+                "mod_security", "modsecurity", "attention required",
+            )):
+                is_blocked = True
+
+        if is_blocked:
+            result["signature_detection"].append({
+                "label": label,
+                "payload": payload_path,
+                "status": s,
+                "response_time_ms": round(t, 1),
+                "body_length": len(b),
+            })
+            blocked_statuses.append(s)
+            blocked_lengths.append(len(b))
+            blocked_times.append(t)
+            blocked_headers_set.update(h.keys())
+            block_bodies.append(b)
+        time.sleep(0.3)
+
+    # ── Phase 3: Anomaly-triggering payloads ──
+    # These are syntactically valid but unusual — anomaly-based WAFs may flag them
+    anomaly_payloads = [
+        ("Long param", "?input=" + "A" * 2000),
+        ("Unusual encoding", "?input=%00%0d%0a"),
+        ("Unicode abuse", "?input=%ef%bc%9cscript%ef%bc%9e"),
+        ("Double encoding", "?input=%253Cscript%253E"),
+    ]
+
+    for label, payload_path in anomaly_payloads:
+        s, h, b, t = _send_raw("GET", path + payload_path)
+        if s == 0:
+            continue
+
+        is_blocked = s in (403, 406, 429, 500, 503)
+        if not is_blocked and b:
+            b_lower = b.lower()
+            if any(sig in b_lower for sig in (
+                "access denied", "blocked", "forbidden", "web application firewall",
+                "captcha", "challenge",
+            )):
+                is_blocked = True
+
+        if is_blocked:
+            result["anomaly_detection"].append({
+                "label": label,
+                "payload": payload_path,
+                "status": s,
+                "response_time_ms": round(t, 1),
+                "body_length": len(b),
+            })
+            blocked_statuses.append(s)
+            blocked_lengths.append(len(b))
+            blocked_times.append(t)
+            blocked_headers_set.update(h.keys())
+            block_bodies.append(b)
+        time.sleep(0.3)
+
+    # ── Phase 4: Analyze differences ──
+    if blocked_statuses:
+        avg_blocked_status = max(set(blocked_statuses), key=blocked_statuses.count)
+        avg_blocked_len = sum(blocked_lengths) // len(blocked_lengths)
+        avg_blocked_time = sum(blocked_times) / len(blocked_times)
+
+        result["blocked_fingerprint"] = {
+            "status": avg_blocked_status,
+            "body_length": avg_blocked_len,
+            "response_time_ms": round(avg_blocked_time, 1),
+            "headers": sorted(blocked_headers_set),
+        }
+
+        result["timing_delta_ms"] = round(avg_blocked_time - avg_benign_time, 1)
+        result["body_length_delta"] = avg_blocked_len - avg_benign_len
+
+        # Status code pattern
+        if avg_blocked_status != avg_benign_status:
+            result["status_code_pattern"] = f"{avg_benign_status}→{avg_blocked_status}"
+        else:
+            result["status_code_pattern"] = f"{avg_benign_status}→{avg_blocked_status} (soft block)"
+
+        # Extra headers on block
+        extra_on_block = blocked_headers_set - benign_headers_set
+        result["extra_headers_on_block"] = sorted(extra_on_block)
+
+        # Block page signatures
+        for body in block_bodies:
+            b_lower = body.lower()
+            for sig_name, sig_pattern in [
+                ("Cloudflare", "cf-error-details"),
+                ("Cloudflare Ray", "ray id:"),
+                ("Akamai", "reference #"),
+                ("Imperva", "incident id"),
+                ("AWS WAF", "request blocked"),
+                ("ModSecurity", "modsecurity"),
+                ("F5 BIG-IP", "the requested url was rejected"),
+                ("Sucuri", "sucuri"),
+                ("Generic WAF", "web application firewall"),
+                ("CAPTCHA", "captcha"),
+            ]:
+                if sig_pattern in b_lower and sig_name not in result["block_page_signatures"]:
+                    result["block_page_signatures"].append(sig_name)
+
+        # Determine detection mode
+        has_sig = len(result["signature_detection"]) > 0
+        has_anomaly = len(result["anomaly_detection"]) > 0
+
+        if has_sig and has_anomaly:
+            result["detection_mode"] = "hybrid"
+        elif has_sig:
+            result["detection_mode"] = "signature"
+        elif has_anomaly:
+            result["detection_mode"] = "anomaly"
+        else:
+            result["detection_mode"] = "none"
+    else:
+        result["detection_mode"] = "none"
+        result["blocked_fingerprint"] = {}
+
+    return result
+
+
 # ── Parameter Discovery ──────────────────────────────────────────────────
 
 def discover_params(url: str, max_depth: int = 2, max_pages: int = 10,
@@ -2919,6 +3371,16 @@ def run_recon(url: str, timeout: int = 8,
     result["admin_panels"] = check_admin_panels(host, port, use_ssl,
                                                  timeout=timeout,
                                                  extra_headers=headers)
+
+    # 22. Rate limit fingerprinting
+    result["rate_limits"] = check_rate_limits(host, port, use_ssl,
+                                               timeout=timeout,
+                                               extra_headers=headers)
+
+    # 23. Differential response analysis (WAF detection mode)
+    result["differential"] = check_differential_responses(host, port, use_ssl,
+                                                           timeout=timeout,
+                                                           extra_headers=headers)
 
     # Add prototype_pollution to recommendations if Node.js detected
     fp_techs = result.get("fingerprint", {}).get("technologies", {})
@@ -3341,6 +3803,70 @@ def print_recon(result: Dict[str, Any]) -> None:
                 console.print(f"    [green]→[/green] {path} — {status} → {p['redirect']} [dim]({cat})[/dim]")
             else:
                 console.print(f"    [green]→[/green] {path} — {status} [dim]({cat})[/dim]")
+        console.print()
+
+    # ── Rate Limits ──
+    rl = result.get("rate_limits", {})
+    if rl and not rl.get("error"):
+        console.print("  [bold]Rate Limit Fingerprint[/bold]")
+        det_type = rl.get("detection_type", "unknown")
+        if det_type == "none":
+            console.print("    [green]No rate limiting detected[/green] — fast testing safe")
+        else:
+            type_style = {"fixed-window": "yellow", "sliding-window": "yellow",
+                          "token-bucket": "red", "declared-only": "cyan"}.get(det_type, "yellow")
+            console.print(f"    Type:            [{type_style}]{det_type}[/{type_style}]")
+            if rl.get("threshold_rps"):
+                console.print(f"    Threshold:       [bold]{rl['threshold_rps']} req/s[/bold]")
+            if rl.get("burst_limit"):
+                console.print(f"    Burst limit:     {rl['burst_limit']} requests")
+            if rl.get("lockout_duration"):
+                console.print(f"    Lockout:         {rl['lockout_duration']}s")
+            if rl.get("retry_after_policy"):
+                console.print(f"    Retry-After:     {rl['retry_after_policy']}")
+            console.print(f"    Safe delay:      [green]{rl['recommended_delay']}s[/green] between requests")
+        if rl.get("rate_limit_headers"):
+            hdrs = ", ".join(f"{k}={v}" for k, v in rl["rate_limit_headers"].items())
+            console.print(f"    Headers:         [dim]{hdrs}[/dim]")
+        console.print()
+
+    # ── Differential Response Analysis ──
+    diff = result.get("differential", {})
+    if diff and not diff.get("error"):
+        console.print("  [bold]WAF Detection Mode[/bold]")
+        mode = diff.get("detection_mode", "unknown")
+        mode_styles = {"signature": "yellow", "anomaly": "red", "hybrid": "bold red", "none": "green"}
+        ms = mode_styles.get(mode, "dim")
+        console.print(f"    Mode:            [{ms}]{mode}[/{ms}]")
+
+        baseline = diff.get("baseline", {})
+        blocked = diff.get("blocked_fingerprint", {})
+        if baseline:
+            console.print(f"    Baseline:        {baseline.get('status', '?')} · {baseline.get('body_length', '?')} bytes · {baseline.get('response_time_ms', '?')}ms")
+        if blocked:
+            console.print(f"    Blocked:         {blocked.get('status', '?')} · {blocked.get('body_length', '?')} bytes · {blocked.get('response_time_ms', '?')}ms")
+
+        if diff.get("status_code_pattern"):
+            console.print(f"    Status pattern:  {diff['status_code_pattern']}")
+        if diff.get("timing_delta_ms") is not None:
+            delta = diff["timing_delta_ms"]
+            t_style = "red" if abs(delta) > 100 else "yellow" if abs(delta) > 30 else "dim"
+            console.print(f"    Timing delta:    [{t_style}]{delta:+.1f}ms[/{t_style}]")
+        if diff.get("body_length_delta") is not None:
+            console.print(f"    Body Δ:          {diff['body_length_delta']:+d} bytes")
+        if diff.get("extra_headers_on_block"):
+            console.print(f"    Extra headers:   {', '.join(diff['extra_headers_on_block'])}")
+        if diff.get("block_page_signatures"):
+            console.print(f"    Block sigs:      {', '.join(diff['block_page_signatures'])}")
+
+        sig_count = len(diff.get("signature_detection", []))
+        anom_count = len(diff.get("anomaly_detection", []))
+        if sig_count or anom_count:
+            console.print(f"    Triggered:       {sig_count} signature · {anom_count} anomaly")
+            for s in diff.get("signature_detection", []):
+                console.print(f"      [yellow]SIG[/yellow]  {s['label']}: {s['status']} · {s['response_time_ms']}ms · {s['body_length']}B")
+            for a in diff.get("anomaly_detection", []):
+                console.print(f"      [red]ANOM[/red] {a['label']}: {a['status']} · {a['response_time_ms']}ms · {a['body_length']}B")
         console.print()
 
     # ── Recommended Categories ──

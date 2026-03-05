@@ -1950,7 +1950,8 @@ def cmd_help(args):
   🔍 RECON — Know your target
   ─────────────────────────────
   fray recon <url>              Full recon: TLS, headers, DNS, cookies, fingerprint,
-                                GraphQL, API discovery, Host injection, admin panels (21 checks)
+                                GraphQL, API discovery, Host injection, admin panels,
+                                rate limit fingerprinting, WAF detection mode (23 checks)
   fray recon <url> --js         LinkFinder-style JS extraction: endpoints, hostnames,
                                 cloud buckets (S3/GCS/Azure), API keys, secrets
   fray recon <url> --history    Discover old URLs via Wayback Machine / sitemap / robots
