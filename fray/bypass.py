@@ -405,6 +405,7 @@ def run_bypass(
     mutator = PayloadMutator(profile)
     mut_remaining = mutation_budget
     max_retry_depth = 2  # How many times to re-mutate a blocked mutation
+    seen_payloads: set = set()  # Dedup: skip mutations we've already tested
 
     # Collect blocked payloads from Phase 3 (top candidates by score)
     blocked_results = [r for r in all_results if r.get("blocked")]
@@ -447,6 +448,9 @@ def run_bypass(
                     for mut in mutations:
                         if mut_remaining <= 0:
                             break
+                        if mut["payload"] in seen_payloads:
+                            continue
+                        seen_payloads.add(mut["payload"])
                         result = tester.test_payload(mut["payload"], param=param)
                         mutation_count += 1
                         mut_remaining -= 1
@@ -499,6 +503,9 @@ def run_bypass(
                 for mut in mutations:
                     if mut_remaining <= 0:
                         break
+                    if mut["payload"] in seen_payloads:
+                        continue
+                    seen_payloads.add(mut["payload"])
                     result = tester.test_payload(mut["payload"], param=param)
                     mutation_count += 1
                     mut_remaining -= 1
