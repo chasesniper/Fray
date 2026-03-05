@@ -19,6 +19,7 @@ import json
 import re
 import socket
 import ssl
+import time
 import urllib.parse
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
@@ -2995,20 +2996,44 @@ def check_differential_responses(host: str, port: int, use_ssl: bool,
     blocked_headers_set = set()
     block_bodies = []
 
+    def _is_blocked(s: int, b: str, sigs: tuple) -> bool:
+        """Determine if a response indicates a WAF block vs normal page."""
+        # Hard block: unambiguous status codes
+        if s in (403, 406, 429, 500, 503):
+            return True
+        # Soft block: body must contain WAF signature AND differ
+        # significantly from baseline (>20% body length delta)
+        if s == avg_benign_status and b:
+            body_len_ratio = abs(len(b) - avg_benign_len) / max(avg_benign_len, 1)
+            if body_len_ratio < 0.2:
+                # Response is same size as baseline — same page, not blocked
+                return False
+            b_lower = b.lower()
+            if any(sig in b_lower for sig in sigs):
+                return True
+        elif b:
+            # Different status code — check for block page content
+            b_lower = b.lower()
+            if any(sig in b_lower for sig in sigs):
+                return True
+        return False
+
+    _sig_block_sigs = (
+        "access denied", "blocked", "forbidden", "web application firewall",
+        "captcha", "challenge", "error code:", "request blocked",
+        "mod_security", "modsecurity", "attention required",
+    )
+    _anom_block_sigs = (
+        "access denied", "blocked", "forbidden", "web application firewall",
+        "captcha", "challenge",
+    )
+
     for label, payload_path in signature_payloads:
         s, h, b, t = _send_raw("GET", path + payload_path)
         if s == 0:
             continue
 
-        is_blocked = s in (403, 406, 429, 500, 503)
-        if not is_blocked and b:
-            b_lower = b.lower()
-            if any(sig in b_lower for sig in (
-                "access denied", "blocked", "forbidden", "web application firewall",
-                "captcha", "challenge", "error code:", "request blocked",
-                "mod_security", "modsecurity", "attention required",
-            )):
-                is_blocked = True
+        is_blocked = _is_blocked(s, b, _sig_block_sigs)
 
         if is_blocked:
             result["signature_detection"].append({
@@ -3039,14 +3064,7 @@ def check_differential_responses(host: str, port: int, use_ssl: bool,
         if s == 0:
             continue
 
-        is_blocked = s in (403, 406, 429, 500, 503)
-        if not is_blocked and b:
-            b_lower = b.lower()
-            if any(sig in b_lower for sig in (
-                "access denied", "blocked", "forbidden", "web application firewall",
-                "captcha", "challenge",
-            )):
-                is_blocked = True
+        is_blocked = _is_blocked(s, b, _anom_block_sigs)
 
         if is_blocked:
             result["anomaly_detection"].append({
