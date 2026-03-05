@@ -225,6 +225,43 @@ def _is_baseline_match(result: dict, baseline: Optional[dict]) -> bool:
     return False
 
 
+def _is_soft_block(result: dict, baseline: Optional[dict]) -> bool:
+    """Detect WAF soft blocks: status 200 but body diverges from baseline.
+
+    Modern WAFs and secure apps return 200 for everything — the real signal
+    is body content. If baseline is 95K and payload response is 3K at the
+    same status code, the WAF replaced the real page with a block/challenge
+    page. This catches:
+    - Cloudflare JS challenges (200 with tiny challenge body)
+    - AWS WAF custom error pages at 200
+    - App-level security (login-style "200 but denied" patterns)
+    - CAPTCHA interstitials served at 200
+    """
+    if not baseline:
+        return False
+    bl_status = baseline.get("status", 0)
+    bl_length = baseline.get("response_length", 0)
+    r_status = result.get("status", 0)
+    r_length = result.get("response_length", 0)
+
+    # Only applies when status matches baseline (both 200)
+    if r_status != bl_status:
+        return False
+
+    # If baseline is substantial (>1K) and response shrunk dramatically
+    # (under 40% of baseline), it's likely a block/error page
+    if bl_length > 1000 and r_length > 0:
+        ratio = r_length / bl_length
+        if ratio < 0.40:
+            return True
+
+    # If baseline has content but response is empty/tiny
+    if bl_length > 1000 and r_length < 500:
+        return True
+
+    return False
+
+
 def _compute_evasion_score(result: dict, profile: WAFProfile, is_mutation: bool,
                            baseline: Optional[dict] = None) -> float:
     """Compute an evasion score (0.0–10.0) for a bypass.
@@ -273,6 +310,10 @@ def _compute_evasion_score(result: dict, profile: WAFProfile, is_mutation: bool,
     # Penalty: response matches clean baseline → likely false positive
     if _is_baseline_match(result, baseline):
         score *= 0.3  # Heavy penalty — probably not a real bypass
+    # Penalty: soft block — status 200 but body drastically smaller than baseline
+    # (WAF replaced real page with block/challenge page)
+    elif _is_soft_block(result, baseline):
+        score *= 0.1  # Near-zero — almost certainly a WAF block at 200
 
     return round(min(score, 10.0), 1)
 
@@ -409,11 +450,15 @@ def run_bypass(
         all_results.append(result)
 
         bl_match = _is_baseline_match(result, baseline)
+        soft_block = _is_soft_block(result, baseline)
         ev_score = _compute_evasion_score(result, profile, is_mutation=False, baseline=baseline)
+
+        # Soft block: WAF returned 200 but body diverged — treat as blocked
+        effective_blocked = result.get("blocked", True) or soft_block
 
         br = BypassResult(
             payload=payload_str,
-            blocked=result.get("blocked", True),
+            blocked=effective_blocked,
             status=result.get("status", 0),
             evasion_score=ev_score,
             reflected=result.get("reflected", False),
@@ -428,8 +473,9 @@ def run_bypass(
 
         if verbose:
             if br.blocked:
+                soft_tag = f" {Colors.DIM}(soft block: {result.get('response_length', 0)}b vs {baseline.get('response_length', 0)}b baseline){Colors.END}" if soft_block and not result.get("blocked") else ""
                 print(f"    [{i+1}/{test_count}] {Colors.RED}BLOCKED{Colors.END} "
-                      f"| {result.get('status', 0)} | {desc[:40] or payload_str[:40]}")
+                      f"| {result.get('status', 0)} | {desc[:40] or payload_str[:40]}{soft_tag}")
             else:
                 reflected_tag = f" {Colors.YELLOW}REFLECTED{Colors.END}" if br.reflected else ""
                 bl_tag = f" {Colors.DIM}(baseline){Colors.END}" if bl_match else ""
@@ -501,11 +547,13 @@ def run_bypass(
                         mutation_count += 1
                         mut_remaining -= 1
                         bl_match = _is_baseline_match(result, baseline)
+                        soft_block = _is_soft_block(result, baseline)
                         ev_score = _compute_evasion_score(result, profile, is_mutation=True, baseline=baseline)
+                        effective_blocked = result.get("blocked", True) or soft_block
 
                         mbr = BypassResult(
                             payload=mut["payload"],
-                            blocked=result.get("blocked", True),
+                            blocked=effective_blocked,
                             status=result.get("status", 0),
                             technique=mut["mutation"],
                             parent=mut["parent"],
@@ -518,8 +566,9 @@ def run_bypass(
                         if verbose:
                             depth_tag = f"d{depth}" if depth > 0 else "MUT"
                             if mbr.blocked:
+                                soft_tag = f" {Colors.DIM}(soft block){Colors.END}" if soft_block and not result.get("blocked") else ""
                                 print(f"    {depth_tag} {Colors.RED}BLOCKED{Colors.END} "
-                                      f"[{mut['mutation']}] | {result.get('status', 0)}")
+                                      f"[{mut['mutation']}] | {result.get('status', 0)}{soft_tag}")
                             else:
                                 reflected_tag = f" {Colors.YELLOW}REFLECTED{Colors.END}" if mbr.reflected else ""
                                 bl_tag = f" {Colors.DIM}(baseline){Colors.END}" if bl_match else ""
@@ -558,10 +607,12 @@ def run_bypass(
                     mutation_count += 1
                     mut_remaining -= 1
                     bl_match = _is_baseline_match(result, baseline)
+                    soft_block = _is_soft_block(result, baseline)
                     ev_score = _compute_evasion_score(result, profile, is_mutation=True, baseline=baseline)
+                    effective_blocked = result.get("blocked", True) or soft_block
                     mbr = BypassResult(
                         payload=mut["payload"],
-                        blocked=result.get("blocked", True),
+                        blocked=effective_blocked,
                         status=result.get("status", 0),
                         technique=mut["mutation"],
                         parent=mut["parent"],
@@ -574,8 +625,9 @@ def run_bypass(
                         mutation_bypasses.append(mbr)
                     if verbose:
                         if mbr.blocked:
+                            soft_tag = f" {Colors.DIM}(soft block){Colors.END}" if soft_block and not result.get("blocked") else ""
                             print(f"    AMP {Colors.RED}BLOCKED{Colors.END} "
-                                  f"[{mut['mutation']}] | {result.get('status', 0)}")
+                                  f"[{mut['mutation']}] | {result.get('status', 0)}{soft_tag}")
                         else:
                             reflected_tag = f" {Colors.YELLOW}REFLECTED{Colors.END}" if mbr.reflected else ""
                             bl_tag = f" {Colors.DIM}(baseline){Colors.END}" if bl_match else ""

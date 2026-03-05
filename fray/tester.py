@@ -302,30 +302,90 @@ class WAFTester:
                 blocked = status in (403, 406, 429, 503)
 
                 # Enhanced block detection: WAF body signatures
+                # Modern WAFs and secure apps often return 200 with a block
+                # page, challenge, CAPTCHA, or JSON error instead of 403.
                 if not blocked and resp_str:
                     resp_lower = resp_str.lower()
-                    # Cloudflare challenge / block pages
-                    if 'attention required' in resp_lower or 'cf-error-details' in resp_lower:
+
+                    # --- Vendor-specific block pages (even at 200) ---
+
+                    # Cloudflare: challenge pages, turnstile, JS challenge
+                    if any(sig in resp_lower for sig in (
+                        'attention required', 'cf-error-details',
+                        'cf-challenge-platform', 'cf-turnstile',
+                        'just a moment', 'checking your browser',
+                        'cf-chl-bypass', 'ray id:',
+                    )):
                         blocked = True
-                    # Akamai block page
-                    elif 'reference #' in resp_lower and 'akamai' in resp_lower:
+                    # Akamai: block page with reference number
+                    elif 'reference #' in resp_lower and ('akamai' in resp_lower or 'access denied' in resp_lower):
                         blocked = True
-                    # Imperva / Incapsula block
-                    elif 'incident id' in resp_lower and ('incapsula' in resp_lower or 'imperva' in resp_lower):
+                    # Imperva / Incapsula: incident ID block
+                    elif ('incident id' in resp_lower or 'support id' in resp_lower) and (
+                        'incapsula' in resp_lower or 'imperva' in resp_lower
+                    ):
                         blocked = True
-                    # F5 BIG-IP block
+                    # F5 BIG-IP: URL rejection
                     elif 'the requested url was rejected' in resp_lower:
                         blocked = True
-                    # AWS WAF block
-                    elif 'request blocked' in resp_lower and ('security policy' in resp_lower or 'aws' in resp_lower):
+                    # AWS WAF: request blocked by policy
+                    elif 'request blocked' in resp_lower and (
+                        'security policy' in resp_lower or 'aws' in resp_lower or 'waf' in resp_lower
+                    ):
                         blocked = True
-                    # ModSecurity block
+                    # ModSecurity
                     elif 'mod_security' in resp_lower or 'modsecurity' in resp_lower:
                         blocked = True
-                    # Generic WAF signatures
+                    # Sucuri WAF
+                    elif 'sucuri' in resp_lower and ('blocked' in resp_lower or 'firewall' in resp_lower):
+                        blocked = True
+                    # Barracuda WAF
+                    elif 'barracuda' in resp_lower and 'blocked' in resp_lower:
+                        blocked = True
+
+                    # --- Generic soft-block indicators (any WAF / secure app) ---
+
                     elif 'web application firewall' in resp_lower:
                         blocked = True
                     elif 'access denied' in resp_lower and status in (200, 403, 406):
+                        blocked = True
+                    # CAPTCHA / challenge interstitials at 200
+                    elif any(sig in resp_lower for sig in (
+                        'captcha', 'recaptcha', 'hcaptcha',
+                        'please verify you are human',
+                        'bot detection', 'are you a robot',
+                        'browser verification',
+                    )):
+                        blocked = True
+                    # JSON error responses (REST APIs returning 200 with error body)
+                    elif status == 200 and any(sig in resp_lower for sig in (
+                        '"error":', '"blocked":', '"denied"',
+                        '"status":"forbidden"', '"status":"denied"',
+                        '"message":"forbidden"', '"message":"access denied"',
+                        '"code":403', '"code":"403"',
+                    )):
+                        blocked = True
+                    # Meta-refresh redirect to block/challenge page
+                    elif 'meta http-equiv="refresh"' in resp_lower and (
+                        'blocked' in resp_lower or 'denied' in resp_lower or 'challenge' in resp_lower
+                    ):
+                        blocked = True
+                    # Forbidden / request denied in title or heading
+                    elif status == 200 and any(sig in resp_lower for sig in (
+                        '<title>403', '<title>forbidden',
+                        '<title>access denied', '<title>blocked',
+                        '<title>error', '<title>not acceptable',
+                        '<h1>403', '<h1>forbidden', '<h1>access denied',
+                        '<h1>blocked', '<h1>error</h1>',
+                    )):
+                        blocked = True
+                    # Suspicious action / security violation
+                    elif any(sig in resp_lower for sig in (
+                        'suspicious activity', 'security violation',
+                        'request has been blocked', 'this request was blocked',
+                        'your request has been denied',
+                        'automated request', 'bot detected',
+                    )):
                         blocked = True
 
                 # Extract response body for reflection analysis
