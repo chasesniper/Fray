@@ -249,6 +249,38 @@ fray scan target.com --ai | ai analyze
 
 出力：技術スタック、脆弱性（CWEタグ付き、信頼度スコア）、セキュリティ体制、推奨アクション — LLM直接消費用の構造化JSON。
 
+## 攻撃サーフェスグラフ
+
+```bash
+fray graph example.com          # 攻撃サーフェス全体のビジュアルツリー
+fray graph example.com --deep   # + JSエンドポイント + Wayback履歴URL
+fray graph example.com --json   # 機械可読グラフ
+```
+
+出力：
+```
+🌐 example.com
+├── 📂 Subdomains (8)
+│   ├── 🔗 api.example.com
+│   ├── 🔗 admin.example.com
+│   └── 🔗 cdn.example.com
+├── 🛡️ WAF: Cloudflare
+├── 📂 Technologies
+│   ├── ⚙️ nginx (95%)
+│   └── ⚙️ wordpress (70%)
+├── 📂 Admin Panels (2)
+│   └── 📍 /admin/ [200] OPEN
+├── 📍 GraphQL: /graphql (introspection OPEN)
+├── 📂 Exposed Files (3)
+│   ├── 📄 .env
+│   └── 📄 .git/config
+└── 📂 Recommended Attacks
+    ├── ⚔️ xss
+    └── ⚔️ sqli
+```
+
+21項目のreconチェックをツリー表示に集約 — サブドメイン（crt.sh）、DNS、WAF/CDN、技術スタック、管理パネル、APIエンドポイント、GraphQL、露出ファイル、CORS問題、パラメータ、推奨攻撃カテゴリ。
+
 ## SARIF出力 — GitHubセキュリティタブ
 
 ```bash

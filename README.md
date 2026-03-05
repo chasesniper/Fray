@@ -249,6 +249,38 @@ fray scan target.com --ai | ai analyze
 
 Output: structured JSON with technologies, vulnerabilities (CWE-tagged, confidence-scored), security posture, and suggested next actions — ready for direct LLM consumption.
 
+## Attack Surface Graph
+
+```bash
+fray graph example.com          # Visual tree of the entire attack surface
+fray graph example.com --deep   # + JS endpoints + Wayback historical URLs
+fray graph example.com --json   # Machine-readable graph
+```
+
+Output:
+```
+🌐 example.com
+├── 📂 Subdomains (8)
+│   ├── 🔗 api.example.com
+│   ├── 🔗 admin.example.com
+│   └── 🔗 cdn.example.com
+├── 🛡️ WAF: Cloudflare
+├── 📂 Technologies
+│   ├── ⚙️ nginx (95%)
+│   └── ⚙️ wordpress (70%)
+├── 📂 Admin Panels (2)
+│   └── 📍 /admin/ [200] OPEN
+├── 📍 GraphQL: /graphql (introspection OPEN)
+├── 📂 Exposed Files (3)
+│   ├── 📄 .env
+│   └── 📄 .git/config
+└── 📂 Recommended Attacks
+    ├── ⚔️ xss
+    └── ⚔️ sqli
+```
+
+Aggregates all 21 recon checks into a single tree view — subdomains (crt.sh), DNS, WAF/CDN, technologies, admin panels, API endpoints, GraphQL, exposed files, CORS issues, parameters, and recommended attack categories.
+
 ## SARIF Output — GitHub Security Tab
 
 ```bash

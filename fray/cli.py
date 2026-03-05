@@ -981,6 +981,46 @@ def cmd_validate(args):
     )
 
 
+def cmd_graph(args):
+    """Visualize the attack surface of a target."""
+    from fray.recon import run_recon
+    from fray.graph import build_graph, print_graph
+
+    custom_headers = build_auth_headers(args)
+
+    # Run full recon
+    recon = run_recon(args.target, timeout=getattr(args, 'timeout', 8),
+                      headers=custom_headers or None)
+
+    # Optional deep mode: also fetch JS endpoints + historical URLs
+    js_endpoints = None
+    historical = None
+    if getattr(args, 'deep', False):
+        from fray.recon import discover_js_endpoints, discover_historical_urls
+        js_endpoints = discover_js_endpoints(args.target,
+                                              timeout=getattr(args, 'timeout', 8),
+                                              extra_headers=custom_headers or None)
+        historical = discover_historical_urls(args.target,
+                                              timeout=getattr(args, 'timeout', 8),
+                                              extra_headers=custom_headers or None)
+
+    graph = build_graph(args.target, recon,
+                        js_endpoints=js_endpoints,
+                        historical=historical)
+
+    if getattr(args, 'json', False):
+        print(json.dumps(graph.to_dict(), indent=2, ensure_ascii=False))
+    else:
+        print_graph(graph)
+
+    if getattr(args, 'output', None):
+        _validate_output_path(args.output)
+        with open(args.output, 'w', encoding='utf-8') as f:
+            json.dump(graph.to_dict(), f, indent=2, ensure_ascii=False)
+        if not getattr(args, 'json', False):
+            print(f"  Graph saved to {args.output}")
+
+
 def cmd_bounty(args):
     """Run bug bounty scope fetch and batch WAF testing"""
     if args.output:
@@ -1916,6 +1956,12 @@ def cmd_help(args):
   fray recon <url> --params     Brute-force 136 common parameter names (?id= ?file= ?redirect=)
   fray recon <url> --ai         AI-ready JSON output for LLMs
 
+  🗺️  GRAPH — Attack surface visualization
+  ─────────────────────────────
+  fray graph <url>              Visual tree: subdomains, DNS, tech, endpoints, files
+  fray graph <url> --deep       Deep mode: + JS endpoints + Wayback historical URLs
+  fray graph <url> --json       Output graph as JSON
+
   🛡️  DETECT — Identify the WAF
   ─────────────────────────────
   fray detect <url>             Fingerprint WAF vendor (Cloudflare, AWS, Akamai, etc.)
@@ -2247,6 +2293,28 @@ Documentation: https://github.com/dalisecurity/fray
     p_scan.add_argument("-w", "--workers", type=int, default=1,
                          help="Concurrent workers for crawl + injection (default: 1)")
     p_scan.set_defaults(func=cmd_scan)
+
+    # graph
+    p_graph = subparsers.add_parser("graph",
+        help="Visualize attack surface: subdomains, DNS, tech, endpoints, exposed files")
+    p_graph.add_argument("target", help="Target URL or domain (e.g. https://example.com)")
+    p_graph.add_argument("--deep", action="store_true",
+                          help="Deep mode: also discover JS endpoints + historical URLs")
+    p_graph.add_argument("-t", "--timeout", type=int, default=8,
+                          help="Request timeout (default: 8)")
+    p_graph.add_argument("--json", action="store_true",
+                          help="Output graph as JSON")
+    p_graph.add_argument("-o", "--output", default=None,
+                          help="Save graph JSON to file")
+    p_graph.add_argument("--cookie", default=None,
+                          help="Cookie header for authenticated scanning")
+    p_graph.add_argument("--bearer", default=None,
+                          help="Bearer token for Authorization header")
+    p_graph.add_argument("-H", "--header", action="append",
+                          help="Custom header (repeatable, format: 'Name: Value')")
+    p_graph.add_argument("--login-flow", default=None,
+                          help="Form login: 'URL,field=value,field=value'")
+    p_graph.set_defaults(func=cmd_graph)
 
     # stats
     p_stats = subparsers.add_parser("stats", help="Show payload database statistics")
