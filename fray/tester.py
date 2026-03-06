@@ -92,6 +92,8 @@ class WAFTester:
         self.max_redirects = max_redirects
         self._last_request_time = 0.0
         self._baseline = None  # Cached baseline for confidence scoring
+        self._consecutive_429s = 0  # Adaptive throttle: consecutive 429 counter
+        self._backoff_until = 0.0   # Adaptive throttle: don't send before this time
 
         # Stealth mode defaults: if --stealth is on, apply sane defaults
         if self.stealth:
@@ -116,6 +118,13 @@ class WAFTester:
     
     def _stealth_delay(self):
         """Apply delay + jitter + rate limit between requests."""
+        # Adaptive backoff: respect 429 cooldown
+        if self._backoff_until > 0:
+            remaining = self._backoff_until - time.time()
+            if remaining > 0:
+                time.sleep(remaining)
+            self._backoff_until = 0.0
+
         # Rate limit: enforce minimum interval between requests
         if self.rate_limit > 0:
             min_interval = 1.0 / self.rate_limit
@@ -419,17 +428,30 @@ class WAFTester:
                         current_query = parsed.query or ''
                     continue  # Follow the redirect
 
-                # Handle 429 rate-limiting with Retry-After
+                # Handle 429 rate-limiting with adaptive backoff
                 if status == 429 and hop == 0:
+                    self._consecutive_429s += 1
                     retry_after = headers.get('retry-after', '')
                     try:
-                        wait = min(int(retry_after), 30) if retry_after.isdigit() else 5
+                        base_wait = min(int(retry_after), 60) if retry_after.isdigit() else 5
                     except (ValueError, AttributeError):
-                        wait = 5
-                    if self.verbose:
-                        print(f"{Colors.YELLOW}429 rate-limited, retrying after {wait}s{Colors.END}")
+                        base_wait = 5
+                    # Exponential backoff: 5s, 10s, 20s, 40s (capped at 60s)
+                    wait = min(base_wait * (2 ** (self._consecutive_429s - 1)), 60)
+                    # Dynamically reduce rate limit to avoid future 429s
+                    if self.rate_limit > 0:
+                        self.rate_limit = max(0.5, self.rate_limit * 0.5)
+                    elif self._consecutive_429s >= 2:
+                        self.rate_limit = 1.0  # Auto-enable rate limiting
+                    self._backoff_until = time.time() + wait
+                    if not getattr(self, '_quiet_429', False):
+                        sys.stderr.write(
+                            f"  \033[33m429 rate-limited (×{self._consecutive_429s}), "
+                            f"backing off {wait:.0f}s, rate→{self.rate_limit:.1f} req/s\033[0m\n")
                     time.sleep(wait)
                     continue  # Retry this hop
+                elif status != 429:
+                    self._consecutive_429s = 0  # Reset on success
 
                 # Final response — determine if blocked
                 error_code = None
