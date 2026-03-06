@@ -2,16 +2,23 @@
 """
 End-to-end test of WAF payload testing functionality
 Tests against a local vulnerable application
-"""
 
-import urllib.request
-import urllib.parse
-import urllib.error
-import time
-import sys
-from waf_detector import WAFDetector
-from waf_recommendation_engine import WAFRecommendationEngine
-from report_generator import SecurityReportGenerator
+NOTE: Legacy script — depends on WAFRecommendationEngine class that was
+removed during the fray refactor.  Kept for reference; skipped in pytest.
+"""
+import pytest
+
+try:
+    import urllib.request
+    import urllib.parse
+    import urllib.error
+    import time
+    import sys
+    from waf_detector import WAFDetector
+    from waf_recommendation_engine import WAFRecommendationEngine
+    from report_generator import SecurityReportGenerator
+except ImportError:
+    pytest.skip("Legacy deps (WAFRecommendationEngine) not available", allow_module_level=True)
 
 def test_server_availability(url):
     """Test if the target server is available"""

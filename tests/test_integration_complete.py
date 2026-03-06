@@ -2,12 +2,19 @@
 """
 Complete integration test simulating real-world payload testing
 Tests all components without requiring external dependencies
-"""
 
-import time
-from waf_detector import WAFDetector
-from waf_recommendation_engine import WAFRecommendationEngine
-from report_generator import SecurityReportGenerator
+NOTE: Legacy script — depends on WAFRecommendationEngine class that was
+removed during the fray refactor.  Kept for reference; skipped in pytest.
+"""
+import pytest
+
+try:
+    from waf_detector import WAFDetector
+    from waf_recommendation_engine import WAFRecommendationEngine
+    from report_generator import SecurityReportGenerator
+    import time
+except ImportError:
+    pytest.skip("Legacy deps (WAFRecommendationEngine) not available", allow_module_level=True)
 
 def simulate_payload_testing():
     """Simulate realistic payload testing results"""

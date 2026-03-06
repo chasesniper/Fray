@@ -94,7 +94,7 @@ def generate_workflow(
                 '',
                 `| Metric | Value |`,
                 `|--------|-------|`,
-                `| Target | \`${data.target || 'N/A'}\` |`,
+                `| Target | \\`${data.target || 'N/A'}\\` |`,
                 `| Total Payloads | ${s.total || 0} |`,
                 `| Blocked | ${s.blocked || 0} |`,
                 `| Bypassed | ${s.passed || 0} |`,
