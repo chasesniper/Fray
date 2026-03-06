@@ -983,6 +983,192 @@ class SecurityReportGenerator:
                 .replace("'", '&#39;'))
 
 
+    def generate_recon_html_report(self, recon_data, output_file='recon_report.html'):
+        """Generate a branded HTML report from fray recon JSON results."""
+        import html as html_mod
+
+        host = recon_data.get('host', 'Unknown')
+        ts = recon_data.get('timestamp', '')
+        atk = recon_data.get('attack_surface', {})
+        risk_score = atk.get('risk_score', 0)
+        risk_level = atk.get('risk_level', '?')
+        findings = atk.get('findings', [])
+
+        # Risk color
+        if risk_score >= 60:
+            risk_color = '#dc2626'
+        elif risk_score >= 40:
+            risk_color = '#ea580c'
+        elif risk_score >= 20:
+            risk_color = '#d97706'
+        else:
+            risk_color = '#16a34a'
+
+        # Build findings HTML
+        findings_html = ''
+        for f in findings:
+            sev = f.get('severity', 'info')
+            sev_cls = sev if sev in ('critical', 'high', 'medium', 'low') else 'low'
+            findings_html += f'''
+            <div class="vulnerability-item {sev_cls}">
+                <span class="severity-{sev_cls}" style="text-transform:uppercase;font-size:0.85em;">{html_mod.escape(sev)}</span>
+                <span style="margin-left:12px;">{html_mod.escape(f.get("finding", ""))}</span>
+            </div>'''
+
+        # Technologies
+        fp = recon_data.get('fingerprint', {})
+        techs = fp.get('technologies', {})
+        tech_rows = ''
+        for name, ver in sorted(techs.items()):
+            v = ver if isinstance(ver, str) else str(ver) if ver else '—'
+            tech_rows += f'<tr><td>{html_mod.escape(name)}</td><td>{html_mod.escape(v)}</td></tr>'
+
+        # Security headers
+        hdrs = recon_data.get('headers', {})
+        hdr_score = hdrs.get('score', 0)
+        present = hdrs.get('present', [])
+        missing = hdrs.get('missing', [])
+        present_html = ''.join(f'<span style="background:#dcfce7;color:#166534;padding:3px 8px;border-radius:4px;margin:2px;display:inline-block;font-size:0.85em;">{html_mod.escape(h)}</span>' for h in present)
+        missing_html = ''.join(f'<span style="background:#fee2e2;color:#991b1b;padding:3px 8px;border-radius:4px;margin:2px;display:inline-block;font-size:0.85em;">{html_mod.escape(h)}</span>' for h in missing)
+
+        # TLS
+        tls = recon_data.get('tls', {})
+        tls_ver = tls.get('tls_version', '—')
+        cert_days = tls.get('cert_days_left', '—')
+        cert_issuer = tls.get('issuer', '—')
+
+        # DNS
+        dns = recon_data.get('dns', {})
+        a_records = ', '.join(dns.get('a', [])) or '—'
+        cdn = dns.get('cdn_detected', '—') or '—'
+
+        # Subdomains
+        subs = recon_data.get('subdomains', {})
+        sub_list = subs.get('subdomains', [])
+        n_subs = len(sub_list) if isinstance(sub_list, list) else 0
+
+        # Frontend libs
+        fl = recon_data.get('frontend_libs', {})
+        n_vuln_libs = fl.get('vulnerable_libs', 0)
+        fl_vulns = fl.get('vulnerabilities', [])
+
+        cve_rows = ''
+        for v in fl_vulns[:20]:
+            cve_rows += f'''<tr>
+                <td><span class="severity-{v.get("severity","info")}">{html_mod.escape(v.get("id",""))}</span></td>
+                <td>{html_mod.escape(v.get("library",""))}</td>
+                <td>{html_mod.escape(v.get("severity",""))}</td>
+                <td>{html_mod.escape(v.get("description","")[:100])}</td>
+            </tr>'''
+
+        # WAF
+        gap = recon_data.get('gap_analysis', {})
+        waf_vendor = gap.get('waf_vendor') or atk.get('waf_vendor') or '—'
+
+        report_html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recon Report — {html_mod.escape(host)} — Fray by DALI Security</title>
+    <style>
+        * {{ margin:0; padding:0; box-sizing:border-box; }}
+        body {{ font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; line-height:1.6; color:#1a202c; background:linear-gradient(135deg,#f5f7fa 0%,#e8edf2 100%); min-height:100vh; }}
+        .container {{ max-width:1100px; margin:0 auto; padding:40px 20px; }}
+        .header {{ background:linear-gradient(135deg,#1e3a8a 0%,#3730a3 50%,#5b21b6 100%); color:#fff; padding:35px 45px; border-radius:16px; margin-bottom:35px; box-shadow:0 20px 60px rgba(30,58,138,0.25); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px; }}
+        .header h1 {{ font-size:2em; font-weight:700; letter-spacing:-0.5px; }}
+        .header .subtitle {{ font-size:0.95em; opacity:0.85; margin-top:4px; }}
+        .risk-badge {{ background:rgba(255,255,255,0.15); padding:18px 30px; border-radius:12px; text-align:center; }}
+        .risk-score {{ font-size:2.8em; font-weight:800; color:{risk_color}; text-shadow:0 0 20px rgba(0,0,0,0.1); }}
+        .risk-label {{ font-size:0.85em; opacity:0.9; margin-top:4px; text-transform:uppercase; letter-spacing:1px; }}
+        .meta-info {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-bottom:30px; }}
+        .meta-card {{ background:#fff; padding:22px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.05); }}
+        .meta-card .label {{ font-size:0.8em; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; font-weight:600; margin-bottom:6px; }}
+        .meta-card .value {{ font-size:1.4em; font-weight:700; color:#1e293b; }}
+        .section {{ background:#fff; padding:35px; border-radius:16px; margin-bottom:25px; box-shadow:0 4px 20px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.05); }}
+        .section h2 {{ font-size:1.5em; margin-bottom:20px; color:#1e293b; border-bottom:3px solid #3730a3; padding-bottom:10px; font-weight:700; }}
+        table {{ width:100%; border-collapse:collapse; margin:10px 0; }}
+        th {{ background:#f1f5f9; padding:10px 14px; text-align:left; font-size:0.85em; color:#475569; text-transform:uppercase; letter-spacing:0.5px; }}
+        td {{ padding:10px 14px; border-bottom:1px solid #e2e8f0; font-size:0.95em; }}
+        tr:hover td {{ background:#f8fafc; }}
+        .severity-critical {{ color:#dc2626; font-weight:700; }}
+        .severity-high {{ color:#ea580c; font-weight:700; }}
+        .severity-medium {{ color:#d97706; font-weight:700; }}
+        .severity-low {{ color:#16a34a; font-weight:700; }}
+        .severity-info {{ color:#64748b; }}
+        .vulnerability-item {{ background:#f7fafc; padding:14px 18px; border-radius:8px; margin-bottom:10px; border-left:4px solid; display:flex; align-items:center; }}
+        .vulnerability-item.critical {{ border-color:#dc2626; }}
+        .vulnerability-item.high {{ border-color:#ea580c; }}
+        .vulnerability-item.medium {{ border-color:#d97706; }}
+        .vulnerability-item.low {{ border-color:#16a34a; }}
+        .footer {{ text-align:center; padding:30px; color:#94a3b8; font-size:0.85em; }}
+        .footer a {{ color:#6366f1; text-decoration:none; }}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div>
+            {self.dali_logo_html}
+            <h1>Reconnaissance Report</h1>
+            <div class="subtitle">{html_mod.escape(host)} — {html_mod.escape(ts[:19] if ts else '—')}</div>
+        </div>
+        <div class="risk-badge">
+            <div class="risk-score">{risk_score}</div>
+            <div class="risk-label">{html_mod.escape(risk_level)} Risk</div>
+        </div>
+    </div>
+
+    <div class="meta-info">
+        <div class="meta-card"><div class="label">WAF Vendor</div><div class="value">{html_mod.escape(str(waf_vendor))}</div></div>
+        <div class="meta-card"><div class="label">CDN</div><div class="value">{html_mod.escape(str(cdn))}</div></div>
+        <div class="meta-card"><div class="label">TLS</div><div class="value">{html_mod.escape(str(tls_ver))}</div></div>
+        <div class="meta-card"><div class="label">Cert Expires</div><div class="value">{cert_days} days</div></div>
+        <div class="meta-card"><div class="label">Subdomains</div><div class="value">{n_subs}</div></div>
+        <div class="meta-card"><div class="label">Header Score</div><div class="value">{hdr_score}/100</div></div>
+    </div>
+
+    <div class="section">
+        <h2>Findings ({len(findings)})</h2>
+        {findings_html if findings_html else '<p style="color:#64748b;">No findings detected.</p>'}
+    </div>
+
+    <div class="section">
+        <h2>Security Headers</h2>
+        <p style="margin-bottom:12px;"><strong>Present:</strong> {present_html or '<span style="color:#94a3b8;">None</span>'}</p>
+        <p><strong>Missing:</strong> {missing_html or '<span style="color:#16a34a;">None — all headers present</span>'}</p>
+    </div>
+
+    <div class="section">
+        <h2>Technologies</h2>
+        {"<table><tr><th>Technology</th><th>Version</th></tr>" + tech_rows + "</table>" if tech_rows else '<p style="color:#64748b;">No technologies detected.</p>'}
+    </div>
+
+    {"<div class='section'><h2>Frontend CVEs (" + str(len(fl_vulns)) + ")</h2><table><tr><th>CVE</th><th>Library</th><th>Severity</th><th>Description</th></tr>" + cve_rows + "</table></div>" if cve_rows else ""}
+
+    <div class="section">
+        <h2>Infrastructure</h2>
+        <table>
+            <tr><td><strong>A Records</strong></td><td>{html_mod.escape(a_records)}</td></tr>
+            <tr><td><strong>CDN</strong></td><td>{html_mod.escape(str(cdn))}</td></tr>
+            <tr><td><strong>TLS Version</strong></td><td>{html_mod.escape(str(tls_ver))}</td></tr>
+            <tr><td><strong>Certificate Issuer</strong></td><td>{html_mod.escape(str(cert_issuer))}</td></tr>
+            <tr><td><strong>Certificate Days Left</strong></td><td>{cert_days}</td></tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        Generated by <a href="https://dalisec.io">DALI Security</a> — Fray Reconnaissance Engine
+    </div>
+</div>
+</body>
+</html>'''
+
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(report_html)
+        return output_file
+
+
 def generate_sample_report():
     """Generate a sample report for demonstration"""
     sample_data = {

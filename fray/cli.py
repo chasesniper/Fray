@@ -1333,9 +1333,16 @@ def cmd_recon(args):
         # Save output if requested
         if getattr(args, 'output', None):
             _validate_output_path(args.output)
-            with open(args.output, "w", encoding="utf-8") as f:
-                json.dump(result, f, indent=2, ensure_ascii=False)
-            print(f"  Recon saved to {args.output}")
+            out = args.output
+            if out.endswith('.html') or out.endswith('.htm'):
+                from fray.reporter import SecurityReportGenerator
+                gen = SecurityReportGenerator()
+                gen.generate_recon_html_report(result, out)
+                print(f"  Recon HTML report saved to {out}")
+            else:
+                with open(out, "w", encoding="utf-8") as f:
+                    json.dump(result, f, indent=2, ensure_ascii=False)
+                print(f"  Recon saved to {out}")
 
     # Multi-target summary
     if multi and all_results:
