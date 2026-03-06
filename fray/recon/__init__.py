@@ -23,23 +23,23 @@ from fray.recon.fingerprint import (  # noqa: F401
     fingerprint_app,
     recommend_categories,
 )
-
-# ── Remaining (from monolith, being incrementally extracted) ──
-from fray.recon._monolith import (  # noqa: F401
-    Colors,
-    _follow_redirect,
-    _post_json,
-    _fetch_url,
-    # Supply chain
+from fray.recon.supply_chain import (  # noqa: F401
     _parse_version,
     check_frontend_libs,
     fetch_retirejs_db,
-    # DNS
+)
+from fray.recon.history import (  # noqa: F401
+    _load_previous_recon,
+    diff_recon,
+    print_recon_diff,
+)
+from fray.recon.dns import (  # noqa: F401
     check_dns,
     check_subdomains_crt,
     check_subdomains_bruteforce,
     discover_origin_ip,
-    # Extended checks
+)
+from fray.recon.checks import (  # noqa: F401
     check_robots_sitemap,
     check_cors,
     check_exposed_files,
@@ -50,24 +50,27 @@ from fray.recon._monolith import (  # noqa: F401
     check_host_header_injection,
     check_admin_panels,
     check_rate_limits,
-    # WAF analysis
     check_differential_responses,
     waf_gap_analysis,
-    # Historical URLs
+)
+from fray.recon.discovery import (  # noqa: F401
     discover_historical_urls,
     print_historical_urls,
-    # Parameter mining
-    discover_params,
     mine_params,
     print_mined_params,
-    # JS endpoint extraction
     discover_js_endpoints,
     print_js_endpoints,
-    # Comparison / history
-    _load_previous_recon,
-    diff_recon,
-    print_recon_diff,
-    # Pipeline
+    discover_params,
+)
+from fray.recon.pipeline import (  # noqa: F401
     run_recon,
     print_recon,
+)
+
+# ── Remaining (from monolith, being incrementally extracted) ──
+from fray.recon._monolith import (  # noqa: F401
+    Colors,
+    _follow_redirect,
+    _post_json,
+    _fetch_url,
 )
