@@ -3752,7 +3752,193 @@ def run_recon(url: str, timeout: int = 8,
         if "prototype_pollution" not in result["recommended_categories"]:
             result["recommended_categories"].append("prototype_pollution")
 
+    # 25. Attack surface summary
+    result["attack_surface"] = _build_attack_surface_summary(result)
+
     return result
+
+
+def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
+    """Aggregate all recon findings into a compact attack surface overview."""
+    host = r.get("host", "")
+
+    # ── Subdomains ──
+    subs = r.get("subdomains", {})
+    subdomain_list = subs.get("subdomains", [])
+    n_subdomains = len(subdomain_list) if isinstance(subdomain_list, list) else 0
+
+    # Detect staging / dev / internal environments
+    staging_keywords = ("dev", "staging", "stage", "test", "qa", "uat", "sandbox",
+                        "beta", "alpha", "preprod", "pre-prod", "demo", "internal",
+                        "admin", "debug", "canary", "preview")
+    staging_envs = []
+    for sub in subdomain_list:
+        name = sub if isinstance(sub, str) else sub.get("name", "") if isinstance(sub, dict) else ""
+        name_lower = name.lower()
+        for kw in staging_keywords:
+            if kw in name_lower:
+                staging_envs.append(name)
+                break
+
+    # ── Admin panels ──
+    panels = r.get("admin_panels", {})
+    panel_list = panels.get("panels", []) if isinstance(panels, dict) else []
+    n_panels = len(panel_list)
+    open_panels = [p for p in panel_list if isinstance(p, dict) and p.get("protected") is False]
+
+    # ── GraphQL ──
+    gql = r.get("graphql", {})
+    gql_endpoints = gql.get("endpoints_found", [])
+    gql_introspection = gql.get("introspection_enabled", False)
+
+    # ── API endpoints ──
+    api = r.get("api_discovery", {})
+    api_specs = api.get("specs_found", []) if isinstance(api, dict) else []
+    api_endpoints = api.get("endpoints_found", []) if isinstance(api, dict) else []
+
+    # ── Exposed files ──
+    exposed = r.get("exposed_files", {})
+    exposed_list = exposed.get("found", []) if isinstance(exposed, dict) else []
+    n_exposed = len(exposed_list)
+
+    # ── Parameters ──
+    params = r.get("params", {})
+    param_list = params.get("params", []) if isinstance(params, dict) else []
+    n_params = len(param_list)
+    high_risk_params = [p for p in param_list if isinstance(p, dict) and p.get("risk") == "HIGH"]
+
+    # ── Historical URLs ──
+    hist = r.get("historical_urls", {})
+    hist_urls = hist.get("urls", []) if isinstance(hist, dict) else []
+    n_historical = len(hist_urls)
+    interesting_hist = [u for u in hist_urls if isinstance(u, dict) and u.get("interesting")]
+
+    # ── Technologies ──
+    fp = r.get("fingerprint", {})
+    techs = fp.get("technologies", {}) if isinstance(fp, dict) else {}
+    tech_names = sorted(techs.keys()) if techs else []
+
+    # ── WAF ──
+    gap = r.get("gap_analysis", {})
+    waf_vendor = gap.get("waf_vendor") if isinstance(gap, dict) else None
+    diff = r.get("differential", {})
+    detection_mode = diff.get("detection_mode") if isinstance(diff, dict) else None
+
+    # ── DNS / CDN ──
+    dns_info = r.get("dns", {})
+    cdn = dns_info.get("cdn_detected") if isinstance(dns_info, dict) else None
+
+    # ── TLS ──
+    tls = r.get("tls", {})
+    tls_version = tls.get("tls_version") if isinstance(tls, dict) else None
+    cert_days = tls.get("cert_days_left") if isinstance(tls, dict) else None
+
+    # ── Security headers score ──
+    hdrs = r.get("headers", {})
+    hdr_score = hdrs.get("score") if isinstance(hdrs, dict) else None
+
+    # ── CSP ──
+    csp = r.get("csp", {})
+    csp_present = csp.get("present", False) if isinstance(csp, dict) else False
+    csp_score = csp.get("score") if isinstance(csp, dict) else None
+
+    # ── CORS ──
+    cors = r.get("cors", {})
+    cors_vuln = cors.get("vulnerable", False) if isinstance(cors, dict) else False
+
+    # ── Host header injection ──
+    hhi = r.get("host_header_injection", {})
+    hhi_vuln = hhi.get("vulnerable", False) if isinstance(hhi, dict) else False
+
+    # ── Robots interesting paths ──
+    robots = r.get("robots", {})
+    interesting_paths = robots.get("interesting_paths", []) if isinstance(robots, dict) else []
+
+    # ── HTTP methods ──
+    methods = r.get("http_methods", {})
+    dangerous_methods = methods.get("dangerous", []) if isinstance(methods, dict) else []
+
+    # ── Build findings list (for quick scan) ──
+    findings = []
+    if open_panels:
+        findings.append({"severity": "critical", "finding": f"{len(open_panels)} admin panel(s) OPEN (no auth)"})
+    if hhi_vuln:
+        findings.append({"severity": "high", "finding": "Host header injection detected"})
+    if cors_vuln:
+        findings.append({"severity": "high", "finding": "CORS misconfiguration"})
+    if gql_introspection:
+        findings.append({"severity": "high", "finding": "GraphQL introspection enabled"})
+    if dangerous_methods:
+        findings.append({"severity": "medium", "finding": f"Dangerous HTTP methods: {', '.join(dangerous_methods)}"})
+    if n_exposed > 0:
+        findings.append({"severity": "medium", "finding": f"{n_exposed} exposed sensitive file(s)"})
+    if high_risk_params:
+        findings.append({"severity": "medium", "finding": f"{len(high_risk_params)} HIGH-risk injectable parameter(s)"})
+    if staging_envs:
+        findings.append({"severity": "medium", "finding": f"Staging/dev environment(s): {', '.join(staging_envs[:5])}"})
+    if not csp_present:
+        findings.append({"severity": "low", "finding": "No Content-Security-Policy header"})
+    if cert_days is not None and cert_days < 30:
+        findings.append({"severity": "medium", "finding": f"TLS certificate expires in {cert_days} days"})
+    if interesting_paths:
+        findings.append({"severity": "low", "finding": f"{len(interesting_paths)} interesting paths in robots.txt"})
+
+    # ── Risk score (0-100) ──
+    risk_score = 0
+    for f in findings:
+        if f["severity"] == "critical": risk_score += 25
+        elif f["severity"] == "high": risk_score += 15
+        elif f["severity"] == "medium": risk_score += 8
+        elif f["severity"] == "low": risk_score += 3
+    risk_score = min(risk_score, 100)
+
+    # Factor in WAF presence
+    if waf_vendor:
+        risk_score = max(0, risk_score - 10)
+    else:
+        risk_score = min(100, risk_score + 15)
+
+    # Risk level
+    if risk_score >= 60:
+        risk_level = "CRITICAL"
+    elif risk_score >= 40:
+        risk_level = "HIGH"
+    elif risk_score >= 20:
+        risk_level = "MEDIUM"
+    else:
+        risk_level = "LOW"
+
+    return {
+        "risk_score": risk_score,
+        "risk_level": risk_level,
+        "subdomains": n_subdomains,
+        "staging_envs": staging_envs,
+        "admin_panels": n_panels,
+        "open_admin_panels": len(open_panels),
+        "graphql_endpoints": len(gql_endpoints),
+        "graphql_introspection": gql_introspection,
+        "api_specs": len(api_specs),
+        "api_endpoints": len(api_endpoints),
+        "exposed_files": n_exposed,
+        "injectable_params": n_params,
+        "high_risk_params": len(high_risk_params),
+        "historical_urls": n_historical,
+        "interesting_historical": len(interesting_hist),
+        "technologies": tech_names,
+        "waf_vendor": waf_vendor,
+        "waf_detection_mode": detection_mode,
+        "cdn": cdn,
+        "tls_version": tls_version,
+        "cert_days_left": cert_days,
+        "security_headers_score": hdr_score,
+        "csp_present": csp_present,
+        "csp_score": csp_score,
+        "cors_vulnerable": cors_vuln,
+        "host_header_injection": hhi_vuln,
+        "dangerous_http_methods": dangerous_methods,
+        "robots_interesting_paths": len(interesting_paths),
+        "findings": findings,
+    }
 
 
 def print_recon(result: Dict[str, Any]) -> None:
@@ -3771,6 +3957,94 @@ def print_recon(result: Dict[str, Any]) -> None:
     print_header("Fray Recon — Target Reconnaissance", target=result['target'])
     console.print(f"  Host: {result['host']}")
     console.print()
+
+    # ── Attack Surface Summary ──
+    atk = result.get("attack_surface", {})
+    if atk:
+        risk_level = atk.get("risk_level", "?")
+        risk_score = atk.get("risk_score", 0)
+        risk_colors = {"CRITICAL": "bold red", "HIGH": "red", "MEDIUM": "yellow", "LOW": "green"}
+        rc = risk_colors.get(risk_level, "dim")
+
+        console.print(f"  [bold]Attack Surface Summary[/bold]  [{rc}]{risk_level} ({risk_score}/100)[/{rc}]")
+        console.print()
+
+        # Row 1: Infrastructure
+        waf = atk.get("waf_vendor")
+        cdn = atk.get("cdn")
+        tls_v = atk.get("tls_version", "?")
+        waf_s = f"[green]{waf}[/green]" if waf else "[red]None[/red]"
+        cdn_s = f"[cyan]{cdn}[/cyan]" if cdn else "[dim]none[/dim]"
+        console.print(f"    WAF: {waf_s}    CDN: {cdn_s}    TLS: {tls_v}")
+
+        # Row 2: Technologies
+        techs = atk.get("technologies", [])
+        if techs:
+            console.print(f"    Stack: [dim]{', '.join(techs[:8])}{'...' if len(techs) > 8 else ''}[/dim]")
+
+        console.print()
+
+        # Row 3: Surface area counts (table-style)
+        counts = []
+        n_subs = atk.get("subdomains", 0)
+        if n_subs:
+            counts.append(f"[cyan]{n_subs}[/cyan] subdomains")
+        n_panels = atk.get("admin_panels", 0)
+        n_open = atk.get("open_admin_panels", 0)
+        if n_panels:
+            panel_s = f"[red]{n_panels} ({n_open} OPEN)[/red]" if n_open else f"[cyan]{n_panels}[/cyan]"
+            counts.append(f"{panel_s} admin panels")
+        n_gql = atk.get("graphql_endpoints", 0)
+        if n_gql:
+            intro = " [red](introspection ON)[/red]" if atk.get("graphql_introspection") else ""
+            counts.append(f"[cyan]{n_gql}[/cyan] GraphQL endpoints{intro}")
+        n_api_specs = atk.get("api_specs", 0)
+        n_api_ep = atk.get("api_endpoints", 0)
+        if n_api_specs or n_api_ep:
+            counts.append(f"[cyan]{n_api_specs}[/cyan] API specs · [cyan]{n_api_ep}[/cyan] endpoints")
+        n_exposed = atk.get("exposed_files", 0)
+        if n_exposed:
+            counts.append(f"[yellow]{n_exposed}[/yellow] exposed files")
+        n_params = atk.get("injectable_params", 0)
+        n_hi = atk.get("high_risk_params", 0)
+        if n_params:
+            param_s = f"[red]{n_params} ({n_hi} HIGH)[/red]" if n_hi else f"[cyan]{n_params}[/cyan]"
+            counts.append(f"{param_s} injectable params")
+        n_hist = atk.get("historical_urls", 0)
+        n_int = atk.get("interesting_historical", 0)
+        if n_hist:
+            counts.append(f"[dim]{n_hist}[/dim] historical URLs ({n_int} interesting)")
+
+        if counts:
+            for c in counts:
+                console.print(f"    {c}")
+            console.print()
+
+        # Row 4: Staging / dev environments
+        staging = atk.get("staging_envs", [])
+        if staging:
+            console.print(f"    [yellow]Staging/dev environments:[/yellow]")
+            for s in staging[:10]:
+                console.print(f"      [yellow]→ {s}[/yellow]")
+            if len(staging) > 10:
+                console.print(f"      [dim]... and {len(staging) - 10} more[/dim]")
+            console.print()
+
+        # Row 5: Key findings (severity-ordered)
+        findings = atk.get("findings", [])
+        if findings:
+            console.print("    [bold]Key Findings[/bold]")
+            sev_icons = {"critical": "[bold red]⊘ CRITICAL[/bold red]",
+                         "high": "[red]▲ HIGH[/red]",
+                         "medium": "[yellow]● MEDIUM[/yellow]",
+                         "low": "[dim]○ LOW[/dim]"}
+            for f in findings:
+                icon = sev_icons.get(f["severity"], "[dim]?[/dim]")
+                console.print(f"      {icon}  {f['finding']}")
+            console.print()
+
+        console.print("  " + "─" * 60)
+        console.print()
 
     # ── HTTP ──
     http = result.get("http", {})
