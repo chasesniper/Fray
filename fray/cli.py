@@ -398,6 +398,127 @@ def _build_sarif_output(target: str, results: list, tool_version: str = "") -> d
     return sarif
 
 
+def _build_recon_sarif_output(target: str, recon_result: dict, tool_version: str = "") -> dict:
+    """Build SARIF 2.1.0 output from recon findings for GitHub/GitLab Security tab.
+
+    Usage:
+        fray recon target.com --sarif -o recon.sarif
+        gh code-scanning upload-sarif --sarif recon.sarif
+    """
+    from datetime import datetime as _dt
+
+    if not tool_version:
+        tool_version = __version__
+
+    atk = recon_result.get("attack_surface", {})
+    findings = atk.get("findings", [])
+
+    severity_to_level = {
+        "critical": "error",
+        "high": "error",
+        "medium": "warning",
+        "low": "note",
+    }
+
+    cwe_map = {
+        "origin ip": "CWE-200",
+        "cors": "CWE-942",
+        "admin panel": "CWE-306",
+        "host header": "CWE-644",
+        "graphql": "CWE-200",
+        "http method": "CWE-749",
+        "cve": "CWE-1395",
+        "takeover": "CWE-672",
+        "bypass": "CWE-693",
+        "exposed": "CWE-538",
+        "injectable": "CWE-20",
+        "staging": "CWE-489",
+        "csp": "CWE-1021",
+        "tls": "CWE-295",
+        "sri": "CWE-353",
+        "robots": "CWE-538",
+    }
+
+    rules_seen = {}
+    sarif_results = []
+
+    for f in findings:
+        sev = f.get("severity", "medium")
+        finding_text = f.get("finding", "")
+        level = severity_to_level.get(sev, "warning")
+
+        # Derive rule ID from finding text
+        rule_id = "fray/recon-finding"
+        cwe_id = "CWE-200"
+        for keyword, cwe in cwe_map.items():
+            if keyword in finding_text.lower():
+                rule_id = f"fray/recon-{keyword.replace(' ', '-')}"
+                cwe_id = cwe
+                break
+
+        if rule_id not in rules_seen:
+            rules_seen[rule_id] = {
+                "id": rule_id,
+                "name": finding_text[:80],
+                "shortDescription": {"text": finding_text[:120]},
+                "fullDescription": {
+                    "text": f"Fray recon detected: {finding_text}"
+                },
+                "helpUri": f"https://cwe.mitre.org/data/definitions/{cwe_id.split('-')[1]}.html",
+                "properties": {"tags": ["security", "recon", sev, cwe_id]},
+                "defaultConfiguration": {"level": level},
+            }
+
+        sarif_results.append({
+            "ruleId": rule_id,
+            "level": level,
+            "message": {"text": finding_text},
+            "locations": [{
+                "physicalLocation": {
+                    "artifactLocation": {
+                        "uri": target,
+                        "uriBaseId": "TARGET",
+                    },
+                },
+            }],
+            "properties": {
+                "severity": sev,
+                "riskScore": atk.get("risk_score", 0),
+                "riskLevel": atk.get("risk_level", "?"),
+                "cwe": cwe_id,
+            },
+        })
+
+    sarif = {
+        "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [{
+            "tool": {
+                "driver": {
+                    "name": "Fray",
+                    "version": tool_version,
+                    "informationUri": "https://github.com/dalisecurity/fray",
+                    "semanticVersion": tool_version,
+                    "rules": list(rules_seen.values()),
+                },
+            },
+            "results": sarif_results,
+            "invocations": [{
+                "executionSuccessful": True,
+                "endTimeUtc": _dt.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "toolExecutionNotifications": [],
+            }],
+            "originalUriBaseIds": {
+                "TARGET": {
+                    "uri": target if target.endswith("/") else target + "/",
+                },
+            },
+        }],
+    }
+
+    return sarif
+
+
 def _validate_output_path(output: str) -> None:
     """Ensure output path is within the current working directory subtree."""
     resolved = Path(output).resolve()
@@ -1320,6 +1441,22 @@ def cmd_recon(args):
         result = run_recon(target, timeout=getattr(args, 'timeout', 8),
                            headers=auth_headers, mode=scan_mode,
                            stealth=stealth, retirejs=retirejs)
+
+        # SARIF output for recon
+        if getattr(args, 'sarif', False):
+            sarif = _build_recon_sarif_output(target=target, recon_result=result)
+            sarif_str = json.dumps(sarif, indent=2, ensure_ascii=False)
+            output_file = getattr(args, 'output', None) or "fray_recon.sarif"
+            _validate_output_path(output_file)
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(sarif_str)
+            findings = len(sarif["runs"][0]["results"])
+            rules = len(sarif["runs"][0]["tool"]["driver"]["rules"])
+            print(f"\n  SARIF 2.1.0 recon report generated: {output_file}")
+            print(f"  {findings} finding(s) across {rules} rule(s)")
+            print(f"\n  Upload to GitHub:")
+            print(f"    gh code-scanning upload-sarif --sarif {output_file}")
+            return
 
         if multi:
             # Pipe mode: compact one-line JSONL per target (attack surface summary)
@@ -2442,6 +2579,8 @@ Documentation: https://github.com/dalisecurity/fray
                           help="Historical URL discovery: Wayback Machine, sitemap.xml, robots.txt")
     p_recon.add_argument("--params", action="store_true",
                           help="Parameter mining: brute-force hidden URL parameters (not dir fuzzing)")
+    p_recon.add_argument("--sarif", action="store_true",
+                          help="Output SARIF 2.1.0 for GitHub/GitLab Security tab")
     p_recon.add_argument("--ci", action="store_true",
                           help="CI/CD mode: minimal output, JSON to stdout, non-zero exit on findings")
     p_recon.add_argument("--fail-on", dest="fail_on", default=None,
