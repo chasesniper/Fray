@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fray"
-version = "3.2.0"
+version = "3.3.0"
 description = "Open-source WAF Security Testing Platform — 5,500+ attack payloads, 25 WAF fingerprints, beautiful CLI output"
 readme = "README.md"
 license = {text = "MIT"}
@@ -55,7 +55,7 @@ fray = "fray.cli:main"
 include = ["fray*"]
 
 [tool.setuptools.package-data]
-fray = ["payloads/**/*.json", "payloads/**/*.txt", "payloads/**/*.md"]
+fray = ["payloads/**/*.json", "payloads/**/*.txt", "payloads/**/*.md", "data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
