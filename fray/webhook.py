@@ -182,6 +182,187 @@ def _build_generic_payload(report: Dict) -> Dict:
     }
 
 
+def _build_slack_recon_payload(data: Dict) -> Dict:
+    """Build Slack Block Kit message for recon diff notifications."""
+    target = data.get("target", "unknown")
+    risk_level = data.get("risk_level", "?")
+    risk_score = data.get("risk_score", 0)
+    diff = data.get("diff", {})
+    changes = diff.get("changes", [])
+    n_high = diff.get("high_severity_changes", 0)
+    findings = data.get("findings", [])
+
+    # Emoji based on severity
+    if n_high > 0:
+        emoji = ":rotating_light:"
+    elif changes:
+        emoji = ":warning:"
+    else:
+        emoji = ":white_check_mark:"
+
+    blocks = [
+        {
+            "type": "header",
+            "text": {"type": "plain_text", "text": f"{emoji} Fray Recon Alert — {target}"}
+        },
+        {
+            "type": "section",
+            "fields": [
+                {"type": "mrkdwn", "text": f"*Risk:* {risk_level} ({risk_score}/100)"},
+                {"type": "mrkdwn", "text": f"*Changes:* {len(changes)} ({n_high} critical/high)"},
+            ]
+        },
+    ]
+
+    # List high/critical changes
+    critical_changes = [c for c in changes if c.get("severity") in ("critical", "high")]
+    if critical_changes:
+        change_lines = []
+        for c in critical_changes[:5]:
+            field = c.get("field", "?")
+            old_v = str(c.get("old", "—"))[:40]
+            new_v = str(c.get("new", "—"))[:40]
+            change_lines.append(f":red_circle: *{field}*: `{old_v}` → `{new_v}`")
+        blocks.append({
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "\n".join(change_lines)}
+        })
+
+    # List current findings
+    if findings:
+        finding_lines = []
+        for f in findings[:5]:
+            sev = f.get("severity", "?")
+            sev_emoji = {
+                "critical": ":red_circle:",
+                "high": ":large_orange_circle:",
+                "medium": ":large_yellow_circle:",
+                "low": ":white_circle:",
+            }.get(sev, ":black_circle:")
+            finding_lines.append(f"{sev_emoji} [{sev.upper()}] {f.get('finding', '?')}")
+        blocks.append({
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "*Current Findings:*\n" + "\n".join(finding_lines)}
+        })
+
+    blocks.append({
+        "type": "context",
+        "elements": [
+            {"type": "mrkdwn",
+             "text": f"_Fray Recon • {data.get('timestamp', '')} • <https://github.com/dalisecurity/fray|dalisec.io>_"}
+        ]
+    })
+
+    return {"blocks": blocks}
+
+
+def _build_generic_recon_payload(data: Dict) -> Dict:
+    """Build a generic JSON payload for recon notifications."""
+    return {
+        "text": (
+            f"Fray Recon Alert: {data.get('target', '?')} — "
+            f"Risk {data.get('risk_level', '?')} ({data.get('risk_score', 0)}/100), "
+            f"{data.get('diff', {}).get('total_changes', 0)} change(s), "
+            f"{data.get('diff', {}).get('high_severity_changes', 0)} critical/high"
+        ),
+        "data": data,
+    }
+
+
+def send_recon_notification(webhook_url: str, target: str,
+                             recon_result: Dict,
+                             diff: Optional[Dict] = None,
+                             verbose: bool = False) -> bool:
+    """Send recon results (optionally with diff) to a webhook.
+
+    Args:
+        webhook_url: Slack/Discord/Teams/generic webhook URL.
+        target: Target URL that was scanned.
+        recon_result: Full recon result dict.
+        diff: Optional diff from diff_recon() (for --compare + --notify).
+        verbose: Print debug info.
+
+    Returns:
+        True if sent successfully.
+    """
+    atk = recon_result.get("attack_surface", {})
+    data = {
+        "target": target,
+        "risk_score": atk.get("risk_score", 0),
+        "risk_level": atk.get("risk_level", "?"),
+        "findings": atk.get("findings", []),
+        "diff": diff or {"changes": [], "total_changes": 0, "high_severity_changes": 0},
+        "timestamp": recon_result.get("timestamp", ""),
+    }
+
+    platform = detect_platform(webhook_url)
+    if platform == "slack":
+        payload = _build_slack_recon_payload(data)
+    else:
+        payload = _build_generic_recon_payload(data)
+
+    # Reuse the same HTTP sending logic
+    return _send_payload(webhook_url, payload, platform, verbose)
+
+
+def _send_payload(webhook_url: str, payload: Dict, platform: str, verbose: bool = False) -> bool:
+    """Low-level: POST a JSON payload to a webhook URL."""
+    parsed = urllib.parse.urlparse(webhook_url)
+    host = parsed.hostname
+    port = parsed.port
+    path = parsed.path
+    if parsed.query:
+        path = f"{path}?{parsed.query}"
+
+    use_ssl = parsed.scheme == "https"
+    if port is None:
+        port = 443 if use_ssl else 80
+
+    # SSRF prevention
+    if host:
+        try:
+            ip = ipaddress.ip_address(socket.gethostbyname(host))
+            if ip.is_private or ip.is_loopback or ip.is_link_local:
+                print(f"  {Colors.RED}Webhook blocked{Colors.END}: destination resolves to private/internal IP ({ip})")
+                return False
+        except (socket.gaierror, ValueError):
+            pass
+
+    body = json.dumps(payload).encode("utf-8")
+
+    if verbose:
+        print(f"{Colors.DIM}Webhook platform: {platform}{Colors.END}")
+        print(f"{Colors.DIM}Payload: {json.dumps(payload, indent=2)[:500]}{Colors.END}")
+
+    try:
+        if use_ssl:
+            ctx = ssl.create_default_context()
+            conn = http.client.HTTPSConnection(host, port, context=ctx, timeout=10)
+        else:
+            conn = http.client.HTTPConnection(host, port, timeout=10)
+
+        conn.request("POST", path, body=body, headers={
+            "Content-Type": "application/json",
+            "Content-Length": str(len(body)),
+            "User-Agent": "Fray/3.0 (+https://github.com/dalisecurity/fray)",
+        })
+
+        resp = conn.getresponse()
+        conn.close()
+
+        if resp.status in (200, 201, 204):
+            print(f"  {Colors.GREEN}Notification sent{Colors.END} ({platform}) — HTTP {resp.status}")
+            return True
+        else:
+            resp_body = resp.read().decode("utf-8", errors="replace")[:200]
+            print(f"  {Colors.RED}Notification failed{Colors.END} ({platform}) — HTTP {resp.status}: {resp_body}")
+            return False
+
+    except Exception as e:
+        print(f"  {Colors.RED}Notification error{Colors.END}: {e}")
+        return False
+
+
 def send_webhook(webhook_url: str, report: Dict, verbose: bool = False) -> bool:
     """
     Send scan results to a webhook URL.

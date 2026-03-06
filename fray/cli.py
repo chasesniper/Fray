@@ -1539,6 +1539,7 @@ def cmd_recon(args):
             print_recon(result)
 
         # --compare: diff against previous scan
+        recon_diff = None
         compare = getattr(args, 'compare', None)
         if compare:
             from fray.recon import _load_previous_recon, diff_recon, print_recon_diff
@@ -1552,13 +1553,19 @@ def cmd_recon(args):
                     print(f"  Error loading compare file: {e}")
                     previous = None
             if previous and previous.get("timestamp") != result.get("timestamp"):
-                diff = diff_recon(result, previous)
+                recon_diff = diff_recon(result, previous)
                 if getattr(args, 'json', False):
-                    print(json.dumps({"diff": diff}, indent=2, ensure_ascii=False))
+                    print(json.dumps({"diff": recon_diff}, indent=2, ensure_ascii=False))
                 else:
-                    print_recon_diff(diff)
+                    print_recon_diff(recon_diff)
             elif not previous:
                 print("  No previous scan found for this host. Run recon again to compare.")
+
+        # --notify: send Slack/Discord/Teams notification
+        notify_url = getattr(args, 'notify', None)
+        if notify_url:
+            from fray.webhook import send_recon_notification
+            send_recon_notification(notify_url, target, result, diff=recon_diff)
 
         # Save output if requested
         if getattr(args, 'output', None):
@@ -2581,6 +2588,8 @@ Documentation: https://github.com/dalisecurity/fray
                           help="Parameter mining: brute-force hidden URL parameters (not dir fuzzing)")
     p_recon.add_argument("--sarif", action="store_true",
                           help="Output SARIF 2.1.0 for GitHub/GitLab Security tab")
+    p_recon.add_argument("--notify", default=None, metavar="WEBHOOK_URL",
+                          help="Send Slack/Discord/Teams notification (e.g. https://hooks.slack.com/...)")
     p_recon.add_argument("--ci", action="store_true",
                           help="CI/CD mode: minimal output, JSON to stdout, non-zero exit on findings")
     p_recon.add_argument("--fail-on", dest="fail_on", default=None,
