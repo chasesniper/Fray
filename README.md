@@ -65,6 +65,10 @@ fray detect https://example.com                  # WAF detection
 fray explain CVE-2021-44228                      # CVE intelligence
 ```
 
+<p align="center">
+  <img src="docs/demo.gif" alt="Fray demo — WAF detection and XSS bypass" width="720">
+</p>
+
 ---
 
 ## Command Summary
@@ -94,90 +98,19 @@ fray auto https://example.com --skip-recon       # Skip recon, run scan + bypass
 fray auto https://example.com --json -o report.json
 ```
 
-```
-───── Phase 1: Reconnaissance ─────
-  Risk: HIGH (56/100)  WAF: Cloudflare  Subdomains: 186
-  → Recommended: fray test target -c csp_bypass
-
-───── Phase 2: WAF Scan ─────
-  [1/20] BLOCKED  403 │ Async/await exfiltration
-  [2/20] BLOCKED  403 │ Promise-based XSS
-  → 100% blocked: AI bypass will try adaptive mutations
-
-───── Phase 3: AI Bypass ─────
-  BLOCKED  403 │ local:url_encode
-  BLOCKED  403 │ local:double_url_encode
-  SKIP     400 │ Transfer-Encoding: chunked (not a real bypass)
-
-───── Pipeline Complete ─────
-╭── Pipeline Summary ──╮
-│ Recon Risk   HIGH    │
-│ WAF          CF      │
-│ Scan         0/20    │
-│ AI Bypass    0/8     │
-│ Header       0       │
-╰──────────────────────╯
-  Next steps:
-    fray test target -c csp_bypass --max 50
-    fray bypass target -c xss --mutation-budget 50
-    fray harden target
-```
+Runs **recon → scan → ai-bypass** end-to-end with recommendations between each phase. Outputs a pipeline summary with next steps.
 
 ---
 
 ## `fray scan` — Automated Attack Surface Mapping
 
-One command: crawl your target, discover injection points, test payloads, report results.
-
 ```bash
 fray scan https://example.com -c xss -m 3 -w 4
+fray scan https://target.com --scope scope.txt --stealth   # Bug bounty
+fray scan https://target.com --json -o results.json        # CI/CD
 ```
 
-```
-──────────────────── Crawling https://example.com ────────────────────
-  [  1] https://example.com
-  [  2] https://example.com/search
-  [  3] https://example.com/guestbook.php
-  ✓ Crawled 10 pages, found 7 injection points (3 forms, 1 JS endpoints)
-
-──────────────────────── Payload Injection ───────────────────────────
-  [1/7] POST /guestbook.php ?name= (form)
-      BLOCKED   403 │ <script>alert(1)</script>
-      PASSED    200 │ <img src=x onerror=alert(1)>    ↩ REFLECTED
-  [2/7] GET  /search ?q= (form)
-      BLOCKED   403 │ <script>alert(1)</script>
-      PASSED    200 │ <img src=x onerror=alert(1)>    ↩ REFLECTED
-
-╭──────────── Scan Summary ────────────╮
-│ Total Tested      21                 │
-│ Blocked           15  (71.4%)        │
-│ Passed             6                 │
-│ Reflected          4  ← confirmed    │
-╰──────────────────────────────────────╯
-```
-
-Reflected payloads are highlighted with `↩ REFLECTED` — confirmed injection where the payload appears verbatim in the response body.
-
-**What it does:**
-1. **Crawls** — BFS spider, follows same-origin links, seeds from `robots.txt` + `sitemap.xml`
-2. **Discovers** — Extracts params from URLs, HTML forms, and JavaScript API calls
-3. **Injects** — Tests each parameter with payloads from your chosen category
-4. **Detects reflection** — Confirms when payloads appear verbatim in the response body
-5. **Auto-backoff** — Handles 429 rate limits with exponential backoff
-
-```bash
-# Scope-restricted scan (bug bounty)
-fray scan https://target.com --scope scope.txt -w 4
-
-# Authenticated scan with stealth
-fray scan https://app.target.com --cookie "session=abc" --stealth
-
-# Deep scan with SQLi payloads
-fray scan https://target.com -c sqli --depth 5 --max-pages 100
-
-# JSON output for CI pipelines
-fray scan https://target.com --json -o results.json
-```
+Crawls → discovers injection points (forms, URL params, JS APIs) → tests payloads → detects reflection (`↩ REFLECTED`). Auto-backoff on 429 rate limits.
 
 [Full scan options + examples →](docs/scanning-guide.md)
 
@@ -187,44 +120,24 @@ fray scan https://target.com --json -o results.json
 
 ```bash
 fray recon https://example.com
-fray recon https://example.com --js       # JS endpoint extraction
-fray recon https://example.com --history  # Historical URL discovery
-fray recon https://example.com --params   # Parameter brute-force mining
+fray recon https://example.com --js --history --params   # Full depth
 ```
 
 | Check | What It Finds |
 |-------|---------------|
 | **Parameter Discovery** | Query strings, form inputs, JS API endpoints |
-| **Parameter Mining** | Brute-force 136 common param names, detect hidden `?id=`, `?file=`, `?redirect=` |
-| **JS Endpoint Extraction** | LinkFinder-style: hidden APIs, hostnames, cloud buckets (S3/GCS/Azure), API keys, secrets |
-| **Historical URLs** | Old endpoints via Wayback Machine, sitemap.xml, robots.txt |
-| **GraphQL Introspection** | Probe 10 common endpoints, detect exposed schema (types, fields, mutations) |
-| **API Discovery** | Swagger/OpenAPI specs, `/api/v1/`, `/api-docs`, health endpoints — exposes every route & param |
-| **Host Header Injection** | Password reset poisoning, cache poisoning, SSRF via `Host:` / `X-Forwarded-Host` manipulation |
-| **Admin Panel Discovery** | 70 paths: `/admin`, `/wp-admin`, `/phpmyadmin`, `/actuator`, `/console`, debug tools |
-| **TLS** | Version, cipher, cert expiry |
-| **Security Headers** | HSTS, CSP, X-Frame-Options (scored) |
-| **Cookies** | HttpOnly, Secure, SameSite flags |
-| **Fingerprinting** | WordPress, PHP, Node.js, nginx, Apache, Java, .NET |
-| **DNS** | A/CNAME/MX/TXT, CDN detection, SPF/DMARC |
-| **CORS** | Wildcard, reflected origin, credentials misconfig |
-| **Rate Limit Fingerprint** | Map threshold (req/s before 429), burst limit, lockout duration, safe delay |
-| **WAF Detection Mode** | Signature vs anomaly vs hybrid — body diff, timing diff, header diff |
-| **WAF Rule Gap Analysis** | Cross-reference vendor against known bypasses, detection gaps, technique matrix |
+| **Parameter Mining** | Brute-force 136 common param names |
+| **JS Endpoint Extraction** | LinkFinder-style: hidden APIs, cloud buckets, leaked secrets |
+| **Historical URLs** | Wayback Machine, sitemap.xml, robots.txt |
+| **GraphQL Introspection** | 10 common paths, exposed schema |
+| **API Discovery** | Swagger/OpenAPI specs, versioned API roots |
+| **Host Header Injection** | Password reset / cache poisoning via `Host:` manipulation |
+| **Admin Panel Discovery** | 70 paths: `/admin`, `/wp-admin`, `/phpmyadmin`, `/actuator` |
+| **TLS / Headers / Cookies** | Cert, HSTS, CSP, HttpOnly, SameSite |
+| **DNS / CORS / Fingerprint** | CDN detection, CORS misconfig, tech stack |
+| **WAF Mode + Gap Analysis** | Signature vs anomaly vs hybrid, known bypass matrix |
 
-Plus: 28 exposed file probes (`.env`, `.git`, phpinfo, actuator) · subdomains via crt.sh
-
-`--js` parses inline and external JavaScript files — LinkFinder-style extraction of `fetch()`, `axios`, `XMLHttpRequest` calls, full absolute URLs, internal hostnames/subdomains, cloud storage buckets (AWS S3, GCS, Azure Blob, Firebase, DO Spaces), and leaked secrets (AWS keys, Google API keys, GitHub tokens, Stripe keys, Slack webhooks, JWTs, Bearer tokens, generic API keys).
-
-`--history` queries Wayback Machine CDX API, sitemap.xml, and robots.txt Disallow paths. Old endpoints often have weaker WAF rules.
-
-`--params` brute-forces 136 common parameter names against discovered endpoints. Detects hidden params by response diff (status, size, reflection). Risk-rated: HIGH (SSRF/LFI/injection), MEDIUM (XSS/IDOR).
-
-GraphQL introspection runs automatically during full recon. Probes `/graphql`, `/api/graphql`, `/v1/graphql`, `/graphiql`, `/playground`, etc.
-
-API discovery probes 30+ common paths: `swagger.json`, `openapi.json`, `/api-docs`, `/swagger-ui/`, versioned API roots. Parses specs to extract every endpoint, method, and auth scheme.
-
-**New to Fray?** Run `fray help` for a friendly guide to every command.
+Plus: 28 exposed file probes (`.env`, `.git`, phpinfo) · subdomains via crt.sh · rate limit fingerprinting
 
 [Recon guide →](docs/quickstart.md)
 
@@ -303,71 +216,14 @@ fray payloads             # List all 24 payload categories
 
 ---
 
-## AI-Ready Output — `--ai` Flag
+## More Commands
 
 ```bash
+fray graph example.com --deep       # Visual attack surface tree (27 checks)
 fray scan target.com --ai           # LLM-optimized JSON for AI agents
-fray test target.com -c xss --ai    # Pipe into any AI workflow
-fray recon target.com --ai           # Structured recon for Claude, GPT, etc.
-
-# Example pipeline:
-fray scan target.com --ai | ai analyze
+fray scan target.com --sarif -o r.sarif  # SARIF → GitHub Security tab
+fray diff before.json after.json    # Regression testing (exit 1 on bypass)
 ```
-
-Output: structured JSON with technologies, vulnerabilities (CWE-tagged, confidence-scored), security posture, and suggested next actions — ready for direct LLM consumption.
-
-## Attack Surface Graph
-
-```bash
-fray graph example.com          # Visual tree of the entire attack surface
-fray graph example.com --deep   # + JS endpoints + Wayback historical URLs
-fray graph example.com --json   # Machine-readable graph
-```
-
-Output:
-```
-🌐 example.com
-├── 📂 Subdomains (8)
-│   ├── 🔗 api.example.com
-│   ├── 🔗 admin.example.com
-│   └── 🔗 cdn.example.com
-├── 🛡️ WAF: Cloudflare
-├── 📂 Technologies
-│   ├── ⚙️ nginx (95%)
-│   └── ⚙️ wordpress (70%)
-├── 📂 Admin Panels (2)
-│   └── 📍 /admin/ [200] OPEN
-├── 📍 GraphQL: /graphql (introspection OPEN)
-├── 📂 Exposed Files (3)
-│   ├── 📄 .env
-│   └── 📄 .git/config
-└── 📂 Recommended Attacks
-    ├── ⚔️ xss
-    └── ⚔️ sqli
-```
-
-Aggregates all 27 recon checks into a single tree view — subdomains (crt.sh), DNS, WAF/CDN, technologies, admin panels, API endpoints, GraphQL, exposed files, CORS issues, parameters, and recommended attack categories.
-
-## SARIF Output — GitHub Security Tab
-
-```bash
-fray scan target.com --sarif -o results.sarif    # SARIF 2.1.0 from scan
-fray test target.com -c xss --sarif -o results.sarif  # SARIF from test
-
-# Upload to GitHub:
-gh code-scanning upload-sarif --sarif results.sarif
-```
-
-Fray findings appear directly in GitHub's **Security** tab alongside CodeQL and Semgrep. Each finding includes CWE tags, severity levels, and payload details.
-
-## Diff — Visual Regression Testing
-
-```bash
-fray diff before.json after.json        # Color-coded visual diff
-fray diff before.json after.json --json # Machine-readable diff
-```
-
-Git-style visual output: regressions in **red** (`- BLOCKED → + BYPASS`), improvements in **green** (`- BYPASS → + BLOCKED`), with per-category breakdown table. Exit code 1 on regressions — perfect for CI/CD gates.
 
 ## MCP Server — AI Agent Integration
 
@@ -376,8 +232,6 @@ Fray exposes 14 tools via the [Model Context Protocol (MCP)](https://modelcontex
 ```bash
 pip install 'fray[mcp]'
 ```
-
-### Claude Desktop — One-Liner Setup
 
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
@@ -392,9 +246,10 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-Restart Claude Desktop. Ask: *"What XSS payloads bypass Cloudflare?"* → Fray's 14 MCP tools are called directly.
+Ask: *"What XSS payloads bypass Cloudflare?"* → Fray's 14 MCP tools are called directly.
 
-### 14 MCP Tools
+<details>
+<summary><b>14 MCP Tools</b></summary>
 
 | Tool | What it does |
 |------|-------------|
@@ -413,35 +268,14 @@ Restart Claude Desktop. Ask: *"What XSS payloads bypass Cloudflare?"* → Fray's
 | `hardening_check` | Security headers audit with grade + rate-limit check |
 | `owasp_misconfig_check` | OWASP A01/A02/A03/A05/A06/A07 checks |
 
+</details>
+
 [Claude Code guide →](docs/claude-code-guide.md) · [ChatGPT guide →](docs/chatgpt-guide.md) · [mcp.json →](mcp.json)
 
 ---
 
-## Project Structure
-
-```
-fray/
-├── fray/
-│   ├── cli.py              # CLI entry point (auto, scan, recon, bypass, harden, ...)
-│   ├── scanner.py           # Auto scan: crawl → inject
-│   ├── ai_bypass.py         # AI-assisted adaptive bypass engine
-│   ├── bypass.py            # 5-phase WAF evasion scorer
-│   ├── mutator.py           # 20-strategy payload mutation engine
-│   ├── recon/               # 27-check reconnaissance pipeline
-│   ├── detector.py          # WAF detection (25 vendors)
-│   ├── tester.py            # Payload testing + adaptive throttle
-│   ├── reporter.py          # HTML + Markdown reports
-│   ├── mcp_server.py        # MCP server (14 tools)
-│   └── payloads/            # 6,300+ payloads (24 categories)
-├── tests/                   # 846 tests
-├── docs/                    # 30 guides
-├── mcp.json                 # MCP manifest
-└── pyproject.toml           # pip install fray
-```
-
----
-
-## Roadmap
+<details>
+<summary><b>Roadmap</b></summary>
 
 - [x] Full pipeline: `fray auto` (recon → scan → ai-bypass)
 - [x] AI-assisted bypass with LLM integration (OpenAI/Anthropic)
@@ -453,6 +287,8 @@ fray/
 - [x] 14 MCP tools, HTML/Markdown reports, SARIF output
 - [ ] HackerOne API integration (auto-submit findings)
 - [ ] Web-based report dashboard
+
+</details>
 
 ---
 
