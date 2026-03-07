@@ -1225,6 +1225,31 @@ def cmd_scan(args):
             if not json_mode:
                 print(f"\n  Results saved to {out}")
 
+    # Interop exports: Burp / ZAP / Nuclei
+    scan_dict = scan.to_dict()
+    test_results = scan_dict.get("test_results", [])
+
+    if getattr(args, 'burp', None):
+        from fray.interop import export_burp_xml
+        _validate_output_path(args.burp)
+        export_burp_xml(test_results, args.target, args.burp)
+        print(f"\n  Burp Suite XML exported: {args.burp}")
+
+    if getattr(args, 'zap', None):
+        from fray.interop import export_zap_json
+        _validate_output_path(args.zap)
+        export_zap_json(test_results, args.target, args.zap)
+        print(f"\n  ZAP alerts JSON exported: {args.zap}")
+
+    if getattr(args, 'nuclei_export', None):
+        from fray.interop import export_nuclei_templates
+        templates = export_nuclei_templates(test_results, args.target, args.nuclei_export)
+        if templates:
+            print(f"\n  Nuclei templates exported: {len(templates)} template(s) → {args.nuclei_export}/")
+            print(f"  Run: nuclei -t {args.nuclei_export}/ -u {args.target}")
+        else:
+            print(f"\n  No bypasses found — no Nuclei templates generated.")
+
 
 def cmd_stats(args):
     """Show payload database statistics"""
@@ -1761,7 +1786,7 @@ def cmd_bypass(args):
     if output_file:
         _validate_output_path(output_file)
 
-    run_bypass(
+    scorecard = run_bypass(
         tester=tester,
         payloads=all_payloads,
         waf_name=getattr(args, 'waf', None),
@@ -1774,6 +1799,38 @@ def cmd_bypass(args):
         json_output=getattr(args, 'json', False),
         category=getattr(args, 'category', 'xss') or 'xss',
     )
+
+    # Interop exports: Burp / ZAP / Nuclei / Share
+    from dataclasses import asdict
+    bypass_results = scorecard.bypasses if scorecard else []
+
+    if getattr(args, 'burp', None) and bypass_results:
+        from fray.interop import export_burp_xml
+        _validate_output_path(args.burp)
+        export_burp_xml(bypass_results, args.target, args.burp)
+        print(f"\n  Burp Suite XML exported: {args.burp}")
+
+    if getattr(args, 'zap', None) and bypass_results:
+        from fray.interop import export_zap_json
+        _validate_output_path(args.zap)
+        export_zap_json(bypass_results, args.target, args.zap)
+        print(f"\n  ZAP alerts JSON exported: {args.zap}")
+
+    if getattr(args, 'nuclei_export', None):
+        from fray.interop import export_nuclei_templates
+        templates = export_nuclei_templates(bypass_results, args.target, args.nuclei_export)
+        if templates:
+            print(f"\n  Nuclei templates exported: {len(templates)} template(s) → {args.nuclei_export}/")
+            print(f"  Run: nuclei -t {args.nuclei_export}/ -u {args.target}")
+        else:
+            print(f"\n  No bypasses found — no Nuclei templates generated.")
+
+    if getattr(args, 'share', False) and bypass_results:
+        from fray.interop import export_bypass_recipes
+        recipe_file = f"fray_bypass_recipes_{int(time.time())}.json"
+        export_bypass_recipes(bypass_results, args.target, recipe_file, anonymize=True)
+        print(f"\n  🔄 Bypass recipes exported (anonymized): {recipe_file}")
+        print(f"     {len([b for b in bypass_results if not b.get('blocked')])} recipe(s) ready for community sharing")
 
 
 def cmd_ai_bypass(args):
@@ -3288,6 +3345,14 @@ Documentation: https://github.com/dalisecurity/fray
                           help="Stealth mode: UA rotation + jitter + throttle")
     p_bypass.add_argument("--rate-limit", type=float, default=0.0,
                           help="Max requests per second")
+    p_bypass.add_argument("--burp", default=None, metavar="FILE",
+                            help="Export results as Burp Suite XML")
+    p_bypass.add_argument("--zap", default=None, metavar="FILE",
+                            help="Export results as ZAP alerts JSON")
+    p_bypass.add_argument("--nuclei-export", dest="nuclei_export", default=None, metavar="DIR",
+                            help="Export bypasses as Nuclei YAML templates")
+    p_bypass.add_argument("--share", action="store_true",
+                            help="Export bypass recipes (anonymized) for community sharing")
     p_bypass.set_defaults(func=cmd_bypass)
 
     # ai-bypass
@@ -3429,6 +3494,14 @@ Documentation: https://github.com/dalisecurity/fray
                          help="Scope file: one domain/IP/CIDR per line (restricts crawl)")
     p_scan.add_argument("-w", "--workers", type=int, default=1,
                          help="Concurrent workers for crawl + injection (default: 1)")
+    p_scan.add_argument("--burp", default=None, metavar="FILE",
+                         help="Export results as Burp Suite XML (e.g. --burp results.xml)")
+    p_scan.add_argument("--zap", default=None, metavar="FILE",
+                         help="Export results as ZAP alerts JSON (e.g. --zap results.json)")
+    p_scan.add_argument("--nuclei-export", dest="nuclei_export", default=None, metavar="DIR",
+                         help="Export bypasses as Nuclei YAML templates to DIR")
+    p_scan.add_argument("--burp-import", dest="burp_import", default=None, metavar="FILE",
+                         help="Import Burp request file as scan targets")
     p_scan.set_defaults(func=cmd_scan)
 
     # graph

@@ -1675,6 +1675,65 @@ def create_server() -> "FastMCP":
         except Exception as e:
             return json.dumps({"error": str(e)})
 
+    # ── Tool: leak_search ────────────────────────────────────────────────
+
+    @mcp.tool()
+    async def leak_search(target: str, github: bool = True,
+                           hibp: bool = True) -> str:
+        """Search for leaked credentials and data breaches for a domain or email.
+
+        Checks two sources:
+        - GitHub Code Search: finds passwords, API keys, tokens, private keys
+          in public repos mentioning the target domain. Requires GITHUB_TOKEN env var.
+        - Have I Been Pwned: checks if the domain appears in known data breaches.
+          Free public breach catalog (no API key needed).
+
+        Also runs regex-based secret detection on found files to confirm
+        real secrets (AWS keys, Stripe keys, GitHub PATs, private keys, etc.)
+        vs. keyword-only mentions.
+
+        Args:
+            target: Domain (e.g. 'example.com') or email (e.g. 'user@example.com')
+            github: Include GitHub code search (default: True)
+            hibp: Include Have I Been Pwned breach lookup (default: True)
+        """
+        import asyncio
+        try:
+            from fray.leak import search_leaks
+            result = await asyncio.to_thread(
+                search_leaks, target, github=github, hibp=hibp, timeout=10)
+
+            # Build compact summary for LLM consumption
+            summary = result.get("summary", {})
+            gh = result.get("github") or {}
+            hb = result.get("hibp") or {}
+
+            compact = {
+                "target": target,
+                "risk_level": summary.get("risk_level", "low"),
+                "risk_factors": summary.get("risk_factors", []),
+                "recommended_actions": summary.get("recommended_actions", []),
+                "github": {
+                    "repos_with_leaks": gh.get("repos_with_leaks", 0),
+                    "total_matches": gh.get("total_matches", 0),
+                    "confirmed_secrets": gh.get("confirmed_secrets", [])[:10],
+                    "top_repos": [r["repo"] for r in gh.get("repos", [])[:5]],
+                    "patterns_searched": gh.get("patterns_searched", 0),
+                } if gh and not gh.get("skipped") else {"skipped": True},
+                "hibp": {
+                    "breached": hb.get("breached", False),
+                    "breach_count": hb.get("breach_count", 0),
+                    "total_pwned": hb.get("total_pwned", 0),
+                    "breaches": [{"name": b["name"], "date": b["date"],
+                                  "pwn_count": b["pwn_count"]}
+                                 for b in hb.get("breaches", [])[:5]],
+                } if hb and not hb.get("skipped") else {"skipped": True},
+            }
+
+            return json.dumps(compact, indent=2, ensure_ascii=False)
+        except Exception as e:
+            return json.dumps({"error": str(e)})
+
     return mcp
 
 

@@ -515,6 +515,9 @@ class SecurityReportGenerator:
             {self._render_recommendations(recommendations)}
         </div>
         
+        <!-- Leak Search Results -->
+        {self._render_leak_section(test_results)}
+        
         <!-- Detailed Test Results -->
         <div class="section">
             <h2>📋 Detailed Test Results</h2>
@@ -869,6 +872,89 @@ class SecurityReportGenerator:
 
         return html
     
+    def _render_leak_section(self, test_results):
+        """Render leak search results section if leak data is present."""
+        # Extract leak data from test_results dict
+        leak_data = None
+        if isinstance(test_results, dict):
+            leak_data = test_results.get('leak_check') or test_results.get('leak')
+        
+        if not leak_data:
+            return ''
+        
+        risk_level = leak_data.get('risk_level', 'low')
+        risk_colors = {'critical': '#dc2626', 'high': '#ea580c', 'medium': '#ca8a04', 'low': '#16a34a'}
+        risk_color = risk_colors.get(risk_level, '#6b7280')
+        
+        html = f'''
+        <div class="section">
+            <h2>🔓 Leak Search Results</h2>
+            <div style="background: {risk_color}15; border-left: 4px solid {risk_color}; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <strong style="color: {risk_color};">Risk Level: {risk_level.upper()}</strong>
+            </div>
+        '''
+        
+        # Risk factors
+        factors = leak_data.get('risk_factors', [])
+        if factors:
+            html += '<ul style="margin: 10px 0;">'
+            for f in factors:
+                html += f'<li>{f}</li>'
+            html += '</ul>'
+        
+        # GitHub results
+        gh_repos = leak_data.get('github_repos', 0)
+        confirmed = leak_data.get('confirmed_secrets', 0)
+        if gh_repos > 0 or confirmed > 0:
+            html += f'''
+            <h3 style="margin-top: 15px;">📁 GitHub Code Search</h3>
+            <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;"><strong>Repos with credential keywords</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">{gh_repos}</td></tr>
+                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;"><strong>Confirmed secrets (regex-verified)</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #e2e8f0; color: {"#dc2626" if confirmed > 0 else "#16a34a"};">{confirmed}</td></tr>
+            </table>
+            '''
+            
+            # Top repos
+            details = leak_data.get('details', {})
+            gh_detail = details.get('github', {})
+            top_repos = gh_detail.get('top_repos', [])
+            if top_repos:
+                html += '<p><strong>Top repos:</strong></p><ul>'
+                for repo in top_repos[:5]:
+                    html += f'<li><code>{repo}</code></li>'
+                html += '</ul>'
+        
+        # HIBP results
+        hibp_breaches = leak_data.get('hibp_breaches', 0)
+        hibp_pwn = leak_data.get('hibp_pwn_count', 0)
+        if hibp_breaches > 0:
+            html += f'''
+            <h3 style="margin-top: 15px;">🔓 Have I Been Pwned</h3>
+            <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;"><strong>Breaches</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #e2e8f0; color: #dc2626;">{hibp_breaches}</td></tr>
+                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;"><strong>Total accounts affected</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">{hibp_pwn:,}</td></tr>
+            </table>
+            '''
+            
+            details = leak_data.get('details', {})
+            hibp_detail = details.get('hibp', {})
+            breaches = hibp_detail.get('breaches', [])
+            if breaches:
+                html += '<p><strong>Breach details:</strong></p><ul>'
+                for b in breaches[:5]:
+                    html += f'<li><strong>{b.get("name", "?")}</strong> ({b.get("date", "?")}) — {b.get("pwn_count", 0):,} accounts</li>'
+                html += '</ul>'
+        
+        if gh_repos == 0 and confirmed == 0 and hibp_breaches == 0:
+            html += '<p style="color: #16a34a;">✅ No leaked credentials or breaches found.</p>'
+        
+        html += '</div>'
+        return html
+
     def generate_markdown_report(self, test_results, output_file='security_report.md', waf_detection=None):
         """Generate a Markdown security report (great for GitHub issues / bug bounty submissions)."""
         stats = self._calculate_statistics(test_results)
