@@ -3,10 +3,54 @@ pretty-print output."""
 
 import asyncio
 import random
+import sys
 import time
 import urllib.parse
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
+
+
+# ── Progress tracker ──────────────────────────────────────────────────
+
+class _ReconProgress:
+    """Real-time progress output for recon pipeline."""
+
+    def __init__(self, total: int, quiet: bool = False):
+        self._total = total
+        self._done = 0
+        self._start = time.time()
+        self._quiet = quiet
+        self._current: Optional[str] = None
+
+    def start(self, label: str) -> None:
+        if self._quiet:
+            return
+        self._current = label
+
+    def done(self, label: str) -> None:
+        if self._quiet:
+            return
+        self._done += 1
+        elapsed = time.time() - self._start
+        pct = int(self._done / self._total * 100)
+        bar_len = 20
+        filled = int(bar_len * self._done / self._total)
+        bar = "█" * filled + "░" * (bar_len - filled)
+        sys.stderr.write(
+            f"\r  [{bar}] {pct:3d}% ({self._done}/{self._total}) "
+            f"{elapsed:5.1f}s  ✓ {label:<30}")
+        sys.stderr.flush()
+        if self._done >= self._total:
+            sys.stderr.write("\n")
+            sys.stderr.flush()
+
+    def status(self, msg: str) -> None:
+        if self._quiet:
+            return
+        elapsed = time.time() - self._start
+        sys.stderr.write(
+            f"\r  {'⏳':2} {elapsed:5.1f}s  {msg:<50}")
+        sys.stderr.flush()
 
 from fray.recon.http import _parse_url, _http_get, check_http, check_tls
 from fray.recon.fingerprint import (
@@ -52,7 +96,8 @@ def run_recon(url: str, timeout: int = 8,
               mode: str = "default",
               stealth: bool = False,
               retirejs: bool = False,
-              leak: bool = False) -> Dict[str, Any]:
+              leak: bool = False,
+              quiet: bool = False) -> Dict[str, Any]:
     """Run full reconnaissance on a target URL.
 
     Args:
@@ -64,6 +109,7 @@ def run_recon(url: str, timeout: int = 8,
         stealth: If True, limit parallel workers to 3 and add random jitter
                  between requests to avoid triggering WAF rate limits.
         leak: If True, run GitHub + HIBP leak search for the target domain.
+        quiet: If True, suppress progress output (for JSON/AI mode).
     """
     host, path, port, use_ssl = _parse_url(url)
 
@@ -100,44 +146,80 @@ def run_recon(url: str, timeout: int = 8,
     concurrency = 3 if stealth else 10
     verify = use_ssl
 
+    # Count total checks for progress bar
+    n_checks = 13  # tier-1 core checks
+    if not is_fast:
+        n_checks += 4  # hist, admin, rate, gql
+    n_checks += 2  # tier-2: subdomain brute + origin
+    n_checks += 1  # CPU analysis (headers/csp/cookies/fingerprint)
+    if leak:
+        n_checks += 1
+
+    prog = _ReconProgress(n_checks, quiet=quiet)
+    if not quiet:
+        checks_label = f"{n_checks} checks"
+        mode_label = f"mode={mode}"
+        if stealth:
+            mode_label += " stealth"
+        sys.stderr.write(f"\n  🔍 Recon: {host} ({checks_label}, {mode_label})\n")
+        sys.stderr.flush()
+
     async def _run_all():
         sem = asyncio.Semaphore(concurrency)
 
-        async def _run(fn):
+        async def _run(fn, label: str = ""):
             """Run a sync function in a thread, respecting the semaphore."""
             async with sem:
                 if stealth:
                     await asyncio.sleep(random.uniform(0.3, 1.0))
-                return await asyncio.to_thread(fn)
+                if label:
+                    prog.start(label)
+                r = await asyncio.to_thread(fn)
+                if label:
+                    prog.done(label)
+                return r
 
         # ── Tier 1: Independent network I/O (no dependencies) ──
-        t_http    = asyncio.create_task(_run(lambda: check_http(host, timeout=timeout)))
+        t_http    = asyncio.create_task(_run(
+            lambda: check_http(host, timeout=timeout), "HTTP probe"))
         t_tls     = asyncio.create_task(_run(
-            lambda: check_tls(host, port=port, timeout=timeout) if (use_ssl or port == 443) else {}))
+            lambda: check_tls(host, port=port, timeout=timeout) if (use_ssl or port == 443) else {},
+            "TLS/certificate"))
         t_page    = asyncio.create_task(_run(
-            lambda: _http_get(host, port, path, use_ssl, timeout=timeout, extra_headers=headers)))
-        t_dns     = asyncio.create_task(_run(lambda: check_dns(host, deep=is_deep)))
+            lambda: _http_get(host, port, path, use_ssl, timeout=timeout, extra_headers=headers),
+            "Page fetch"))
+        t_dns     = asyncio.create_task(_run(
+            lambda: check_dns(host, deep=is_deep), "DNS records"))
         t_robots  = asyncio.create_task(_run(
-            lambda: check_robots_sitemap(host, port, use_ssl, timeout=timeout)))
+            lambda: check_robots_sitemap(host, port, use_ssl, timeout=timeout),
+            "Robots & sitemap"))
         t_cors    = asyncio.create_task(_run(
-            lambda: check_cors(host, port, use_ssl, timeout=timeout)))
-        t_subs    = asyncio.create_task(_run(lambda: check_subdomains_crt(host, timeout=timeout)))
+            lambda: check_cors(host, port, use_ssl, timeout=timeout), "CORS policy"))
+        t_subs    = asyncio.create_task(_run(
+            lambda: check_subdomains_crt(host, timeout=timeout),
+            "Subdomains (CT logs)"))
         t_exposed = asyncio.create_task(_run(
-            lambda: check_exposed_files(host, port, use_ssl, timeout=timeout)))
+            lambda: check_exposed_files(host, port, use_ssl, timeout=timeout),
+            "Exposed files"))
         t_methods = asyncio.create_task(_run(
-            lambda: check_http_methods(host, port, use_ssl, timeout=timeout)))
+            lambda: check_http_methods(host, port, use_ssl, timeout=timeout),
+            "HTTP methods"))
         t_error   = asyncio.create_task(_run(
-            lambda: check_error_page(host, port, use_ssl, timeout=timeout)))
+            lambda: check_error_page(host, port, use_ssl, timeout=timeout),
+            "Error pages"))
         t_params  = asyncio.create_task(_run(
             lambda: discover_params(url, max_depth=2, max_pages=10,
                                     timeout=timeout, verify_ssl=verify,
-                                    extra_headers=headers)))
+                                    extra_headers=headers),
+            "Parameter discovery"))
         t_api     = asyncio.create_task(_run(
             lambda: check_api_discovery(host, port, use_ssl, timeout=timeout,
-                                        extra_headers=headers)))
+                                        extra_headers=headers),
+            "API endpoints"))
         t_hhi     = asyncio.create_task(_run(
             lambda: check_host_header_injection(host, port, use_ssl,
-                                                timeout=timeout, extra_headers=headers)))
+                                                timeout=timeout, extra_headers=headers),
+            "Host header injection"))
 
         # Non-fast tasks
         t_hist = t_admin = t_rate = t_gql = t_leak = None
@@ -145,22 +227,27 @@ def run_recon(url: str, timeout: int = 8,
             t_hist  = asyncio.create_task(_run(
                 lambda: discover_historical_urls(url, timeout=timeout, verify_ssl=verify,
                                                  extra_headers=headers,
-                                                 wayback_limit=500 if is_deep else 200)))
+                                                 wayback_limit=500 if is_deep else 200),
+                "Wayback history"))
             t_admin = asyncio.create_task(_run(
                 lambda: check_admin_panels(host, port, use_ssl, timeout=timeout,
-                                           extra_headers=headers)))
+                                           extra_headers=headers),
+                "Admin panels"))
             t_rate  = asyncio.create_task(_run(
                 lambda: check_rate_limits(host, port, use_ssl, timeout=timeout,
-                                          extra_headers=headers)))
+                                          extra_headers=headers),
+                "Rate limits"))
             t_gql   = asyncio.create_task(_run(
                 lambda: check_graphql_introspection(host, port, use_ssl, timeout=timeout,
-                                                    extra_headers=headers)))
+                                                    extra_headers=headers),
+                "GraphQL introspection"))
 
         # Leak check (--leak flag, runs concurrently with other checks)
         if leak:
             from fray.leak import run_leak_check
             t_leak = asyncio.create_task(_run(
-                lambda: run_leak_check(host, timeout=timeout)))
+                lambda: run_leak_check(host, timeout=timeout),
+                "Leak search (GitHub+HIBP)"))
 
         # ── Await DNS + page first (needed for tier 2 tasks) ──
         dns_data = await _safe(t_dns, {})
@@ -181,11 +268,13 @@ def run_recon(url: str, timeout: int = 8,
             lambda: check_subdomains_bruteforce(
                 host, timeout=3.0, parent_ips=parent_ips or None,
                 parent_cdn=parent_cdn,
-                wordlist=_SUBDOMAIN_WORDLIST_DEEP if is_deep else None)))
+                wordlist=_SUBDOMAIN_WORDLIST_DEEP if is_deep else None),
+            "Subdomains (brute-force)"))
         t_origin = asyncio.create_task(_run(
             lambda: discover_origin_ip(
                 host, timeout=4.0 if is_deep else 3.0, dns_data=dns_data,
-                tls_data=tls_data, parent_cdn=parent_cdn)))
+                tls_data=tls_data, parent_cdn=parent_cdn),
+            "Origin IP discovery"))
 
         # ── CPU-only analysis (derived from page fetch, no network) ──
         result["headers"] = check_security_headers(resp_headers)
@@ -205,6 +294,7 @@ def run_recon(url: str, timeout: int = 8,
         result["cookies"] = check_cookies(resp_headers)
         result["fingerprint"] = fingerprint_app(resp_headers, body)
         result["frontend_libs"] = check_frontend_libs(body, retirejs=retirejs)
+        prog.done("Headers/CSP/fingerprint")
 
         # ── Collect remaining tier 1 results ──
         result["http"]          = await _safe(t_http, {})
@@ -270,6 +360,9 @@ def run_recon(url: str, timeout: int = 8,
     # Subdomain takeover detection (runs on merged subdomain list)
     all_subs = result["subdomains"].get("subdomains", [])
     if all_subs and not is_fast:
+        if not quiet:
+            sys.stderr.write(f"\r  ⏳ Checking {len(all_subs)} subdomain(s) for takeover...          \n")
+            sys.stderr.flush()
         result["subdomain_takeover"] = check_subdomain_takeover(all_subs, timeout=4.0)
     else:
         result["subdomain_takeover"] = {"vulnerable": [], "checked": 0, "count": 0}
@@ -283,6 +376,9 @@ def run_recon(url: str, timeout: int = 8,
             result["recommended_categories"].insert(0, "csp_bypass")
 
     # 23. Differential response analysis (WAF detection mode) — sequential, sends attack probes
+    if not quiet:
+        sys.stderr.write(f"\r  ⏳ WAF detection (differential response analysis)...          \n")
+        sys.stderr.flush()
     if stealth:
         time.sleep(random.uniform(1.0, 2.0))
     result["differential"] = check_differential_responses(host, port, use_ssl,

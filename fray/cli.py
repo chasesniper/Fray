@@ -1463,10 +1463,14 @@ def cmd_recon(args):
 
     all_results = []
     for target in targets:
+        json_mode = getattr(args, 'json', False)
+        ai_mode = getattr(args, 'ai', False)
+        suppress_progress = json_mode or ai_mode or ci_mode
         result = run_recon(target, timeout=getattr(args, 'timeout', 8),
                            headers=auth_headers, mode=scan_mode,
                            stealth=stealth, retirejs=retirejs,
-                           leak=getattr(args, 'leak', False))
+                           leak=getattr(args, 'leak', False),
+                           quiet=suppress_progress)
 
         # SARIF output for recon
         if getattr(args, 'sarif', False):
