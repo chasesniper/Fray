@@ -129,7 +129,7 @@ pip install 'fray[mcp]'
 
 ---
 
-## その他のコマンド
+## 高度な使い方
 
 ```bash
 fray graph example.com --deep       # 攻撃サーフェスのビジュアルツリー（27項目）
@@ -150,7 +150,9 @@ fray report results.json --html     # クライアント向けHTMLレポート
 
 ## コントリビュート
 
-[CONTRIBUTING.md](CONTRIBUTING.md) を参照。
+[CONTRIBUTING.md](CONTRIBUTING.md) を参照。AIコーディングエージェントは [AGENTS.md](AGENTS.md) を参照。
+
+ご質問は [Discussions](https://github.com/dalisecurity/fray/discussions) または [ドキュメント](docs/) をご覧ください。
 
 ## 法的事項
 

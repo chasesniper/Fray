@@ -129,7 +129,7 @@ The largest open-source WAF payload database — curated for real-world penetrat
 
 ---
 
-## More Commands
+## Advanced Usage
 
 ```bash
 fray graph example.com --deep       # Visual attack surface tree (27 checks)
@@ -150,7 +150,9 @@ fray report results.json --html     # Client-ready HTML report
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). For AI coding agents, see [AGENTS.md](AGENTS.md).
+
+Questions? [Open a Discussion](https://github.com/dalisecurity/fray/discussions) or [browse the docs](docs/).
 
 ## Legal
 
