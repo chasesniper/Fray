@@ -420,15 +420,6 @@ def run_recon(url: str, timeout: int = 8,
         if "prototype_pollution" not in result["recommended_categories"]:
             result["recommended_categories"].append("prototype_pollution")
 
-    # Always ensure core attack categories are recommended
-    # (even when no specific tech is detected, XSS/SQLi/CmdInj are always relevant)
-    from pathlib import Path as _P
-    _available = {d.name for d in (_P(__file__).resolve().parent.parent / "payloads").iterdir()
-                  if d.is_dir() and not d.name.startswith(".")} if (_P(__file__).resolve().parent.parent / "payloads").exists() else set()
-    for _core_cat in ("xss", "sqli", "command_injection", "ssrf", "ssti"):
-        if _core_cat in _available and _core_cat not in result["recommended_categories"]:
-            result["recommended_categories"].append(_core_cat)
-
     # 25. Attack surface summary
     result["attack_surface"] = _build_attack_surface_summary(result)
 
@@ -1576,10 +1567,16 @@ def print_recon(result: Dict[str, Any]) -> None:
         ms = mode_styles.get(mode, "dim")
         console.print(f"    Mode:            [{ms}]{mode}[/{ms}]")
 
+        # Show redirect follow info
+        redir = diff.get("redirect_followed")
+        if redir:
+            console.print(f"    Redirect:        [dim]{redir}[/dim]")
+
         baseline = diff.get("baseline", {})
         blocked = diff.get("blocked_fingerprint", {})
         if baseline:
-            console.print(f"    Baseline:        {baseline.get('status', '?')} \u00b7 {baseline.get('body_length', '?')} bytes \u00b7 {baseline.get('response_time_ms', '?')}ms")
+            redir_note = f" [dim]({baseline['redirect_target']})[/dim]" if baseline.get("redirect_target") else ""
+            console.print(f"    Baseline:        {baseline.get('status', '?')} \u00b7 {baseline.get('body_length', '?')} bytes \u00b7 {baseline.get('response_time_ms', '?')}ms{redir_note}")
         if blocked:
             console.print(f"    Blocked:         {blocked.get('status', '?')} \u00b7 {blocked.get('body_length', '?')} bytes \u00b7 {blocked.get('response_time_ms', '?')}ms")
 

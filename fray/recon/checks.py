@@ -1214,12 +1214,67 @@ def check_differential_responses(host: str, port: int, use_ssl: bool,
     avg_benign_len = sum(benign_lengths) // len(benign_lengths) if benign_lengths else 0
     avg_benign_time = sum(benign_times) / len(benign_times) if benign_times else 0
 
+    # ── Follow redirect: if baseline is 301/302, re-probe the redirect target ──
+    # Sites like amazon.co.jp redirect to www.amazon.co.jp — the WAF is on the
+    # final destination, not the redirect stub.
+    redirect_host = None
+    if avg_benign_status in (301, 302, 307, 308):
+        # Extract Location from the last benign response
+        last_s, last_h, last_b, last_t = _send_raw("GET", path)
+        loc = last_h.get("location", "")
+        if loc:
+            import urllib.parse as _up
+            parsed_loc = _up.urlparse(loc if loc.startswith("http") else f"https://{host}{loc}")
+            redir_host = parsed_loc.hostname
+            redir_path = parsed_loc.path or "/"
+            redir_ssl = parsed_loc.scheme == "https"
+            redir_port = parsed_loc.port or (443 if redir_ssl else 80)
+            if redir_host and redir_host != host:
+                redirect_host = redir_host
+                result["redirect_followed"] = f"{host} -> {redir_host}"
+                # Re-send baseline against redirect target
+                _orig_host = host
+                host = redir_host
+                path = redir_path
+                port = redir_port
+                use_ssl = redir_ssl
+                # Update request template with new host
+                req_template = (
+                    "{method} {path} HTTP/1.1\r\n"
+                    "Host: {host}\r\n"
+                    "User-Agent: Fray/{version} Recon\r\n"
+                    "Accept: text/html,*/*\r\n"
+                    "{extra}"
+                    "Connection: close\r\n\r\n{body}"
+                )
+
+                benign_statuses = []
+                benign_lengths = []
+                benign_times = []
+                benign_headers_set = set()
+                for _ in range(3):
+                    s, h, b, t = _send_raw("GET", path)
+                    if s == 0:
+                        continue
+                    benign_statuses.append(s)
+                    benign_lengths.append(len(b))
+                    benign_times.append(t)
+                    benign_headers_set.update(h.keys())
+                    time.sleep(0.2)
+
+                if benign_statuses:
+                    avg_benign_status = max(set(benign_statuses), key=benign_statuses.count)
+                    avg_benign_len = sum(benign_lengths) // len(benign_lengths)
+                    avg_benign_time = sum(benign_times) / len(benign_times)
+
     result["baseline"] = {
         "status": avg_benign_status,
         "body_length": avg_benign_len,
         "response_time_ms": round(avg_benign_time, 1),
         "headers": sorted(benign_headers_set),
     }
+    if redirect_host:
+        result["baseline"]["redirect_target"] = redirect_host
 
     # ── Phase 2: Signature-triggering payloads ──
     # URL-encoded payloads so they pass edge HTTP parsers and reach actual WAF rules.
@@ -1660,8 +1715,12 @@ def _infer_vendor_from_recon(recon: Dict[str, Any], vendors_db: Dict[str, Any]) 
                 cookie_names.add(c.get("name", "").lower())
 
     # Header-based vendor detection
+    # NOTE: cf-team is a Cloudflare Zero Trust header injected by the user's
+    # own WARP/ZT tunnel — it does NOT indicate the target has Cloudflare WAF.
+    # Same for server-timing: cfReqDur which is ZT proxy timing.
+    # Only cf-ray + cf-cache-status + cf-mitigated are reliable target-side indicators.
     header_vendor_map = {
-        "cloudflare": ["cf-ray", "cf-cache-status", "cf-mitigated", "cf-team"],
+        "cloudflare": ["cf-ray", "cf-cache-status", "cf-mitigated"],
         "aws_waf": ["x-amzn-waf-action", "x-amz-cf-id", "x-amzn-requestid", "x-amz-cf-pop"],
         "azure_waf": ["x-azure-ref", "x-msedge-ref", "x-azure-fdid"],
         "akamai": ["akamai-origin-hop", "x-akamai-transformed"],
@@ -1670,18 +1729,6 @@ def _infer_vendor_from_recon(recon: Dict[str, Any], vendors_db: Dict[str, Any]) 
         "sucuri": ["x-sucuri-id", "x-sucuri-cache"],
         "f5_bigip": ["x-wa-info", "x-cnection"],
     }
-
-    # Also check server-timing header for vendor hints
-    for hdr_key in all_header_keys:
-        if hdr_key == "server-timing":
-            # Look at value if available
-            st_val = ""
-            if isinstance(raw_headers, dict):
-                st_val = raw_headers.get("server-timing", raw_headers.get("Server-Timing", "")).lower()
-            if isinstance(page_headers, dict):
-                st_val = st_val or page_headers.get("server-timing", page_headers.get("Server-Timing", "")).lower()
-            if "cfreqdur" in st_val and "cloudflare" in vendors_db:
-                return "cloudflare"
 
     for vendor_key, hdr_indicators in header_vendor_map.items():
         if any(h in all_header_keys for h in hdr_indicators):
