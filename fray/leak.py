@@ -17,12 +17,63 @@ Zero dependencies — stdlib only (urllib.request, json, ssl).
 
 import json
 import os
+import re
 import ssl
+import sys
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any, Dict, List, Optional
+
+
+# ── Regex-based secret detection ────────────────────────────────────────
+# Detect ACTUAL secrets (not just keyword mentions).
+# Each tuple: (name, compiled_regex, severity)
+
+_SECRET_REGEXES = [
+    ("AWS Access Key",        re.compile(r'AKIA[0-9A-Z]{16}'),                          "critical"),
+    ("AWS Secret Key",        re.compile(r'[\'"][0-9a-zA-Z/+]{40}[\'"]'),             "critical"),
+    ("GitHub PAT",            re.compile(r'gh[pousr]_[A-Za-z0-9_]{36,}'),                "critical"),
+    ("GitHub OAuth",          re.compile(r'gho_[A-Za-z0-9_]{36,}'),                      "critical"),
+    ("Stripe Live Key",       re.compile(r'sk_live_[0-9a-zA-Z]{24,}'),                   "critical"),
+    ("Stripe Publishable",    re.compile(r'pk_live_[0-9a-zA-Z]{24,}'),                   "high"),
+    ("Slack Token",           re.compile(r'xox[baprs]-[0-9]{10,}-[0-9a-zA-Z-]+'),       "critical"),
+    ("Slack Webhook",         re.compile(r'https://hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[a-zA-Z0-9]+'), "high"),
+    ("Google API Key",        re.compile(r'AIza[0-9A-Za-z\-_]{35}'),                     "high"),
+    ("Google OAuth",          re.compile(r'[0-9]+-[0-9A-Za-z_]{32}\.apps\.googleusercontent\.com'), "high"),
+    ("Private Key",           re.compile(r'-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----'),"critical"),
+    ("JWT Token",             re.compile(r'eyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+'),      "high"),
+    ("Sendgrid API Key",      re.compile(r'SG\.[a-zA-Z0-9_-]{22}\.[a-zA-Z0-9_-]{43}'),  "critical"),
+    ("Twilio API Key",        re.compile(r'SK[0-9a-f]{32}'),                              "high"),
+    ("Mailgun API Key",       re.compile(r'key-[0-9a-zA-Z]{32}'),                         "high"),
+    ("Square Access Token",   re.compile(r'sq0atp-[0-9A-Za-z\-_]{22}'),                  "critical"),
+    ("Telegram Bot Token",    re.compile(r'[0-9]{8,10}:[A-Za-z0-9_-]{35}'),              "high"),
+    ("Discord Webhook",       re.compile(r'https://discord(?:app)?\.com/api/webhooks/[0-9]+/[A-Za-z0-9_-]+'), "high"),
+    ("Firebase URL",          re.compile(r'[a-z0-9-]+\.firebaseio\.com'),                "medium"),
+    ("Generic Secret",        re.compile(r'(?:password|passwd|pwd|secret|token|api_?key|access_?key)\s*[=:]\s*[\'\"][^\'\"\{\s]{8,}[\'\"]', re.IGNORECASE), "high"),
+]
+
+
+def scan_text_for_secrets(text: str) -> List[Dict[str, str]]:
+    """Scan text for real secrets using regex patterns.
+
+    Returns list of {type, match, severity} for each detected secret.
+    """
+    found = []
+    seen = set()
+    for name, pattern, severity in _SECRET_REGEXES:
+        for m in pattern.finditer(text):
+            match_str = m.group(0)[:80]  # Truncate for safety
+            key = f"{name}:{match_str[:20]}"
+            if key not in seen:
+                seen.add(key)
+                found.append({
+                    "type": name,
+                    "match": match_str,
+                    "severity": severity,
+                })
+    return found
 
 
 # ── GitHub Code Search ──────────────────────────────────────────────────
@@ -49,68 +100,87 @@ _GITHUB_PATTERNS = [
 ]
 
 
-def _github_api_request(url: str, token: str, timeout: int = 10) -> Optional[dict]:
-    """Make an authenticated GitHub API request."""
-    headers = {
+def _github_api_request(url: str, token: str, timeout: int = 10,
+                        max_retries: int = 3) -> Optional[dict]:
+    """Make an authenticated GitHub API request with auto-retry on rate limit."""
+    req_headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
         "User-Agent": "Fray-Leak-Scanner",
     }
-    req = urllib.request.Request(url, headers=headers)
+    for attempt in range(max_retries):
+        req = urllib.request.Request(url, headers=req_headers)
+        ctx = ssl.create_default_context()
+        try:
+            with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            if e.code in (403, 429):
+                reset = e.headers.get("X-RateLimit-Reset", "")
+                retry_after = e.headers.get("Retry-After", "")
+                if attempt < max_retries - 1:
+                    if reset:
+                        wait = min(max(int(reset) - int(time.time()), 1), 65)
+                    elif retry_after:
+                        wait = min(int(retry_after), 65)
+                    else:
+                        wait = 30
+                    sys.stderr.write(f"  \u23f3 GitHub rate limit \u2014 waiting {wait}s (retry {attempt + 1}/{max_retries})\n")
+                    sys.stderr.flush()
+                    time.sleep(wait)
+                    continue
+                if reset:
+                    wait = max(int(reset) - int(time.time()), 1)
+                    return {"error": f"GitHub rate limit exceeded. Resets in {wait}s.", "rate_limited": True}
+                return {"error": "GitHub API rate limit exceeded.", "rate_limited": True}
+            elif e.code == 401:
+                return {"error": "Invalid GITHUB_TOKEN. Check your token permissions.", "auth_error": True}
+            elif e.code == 422:
+                return {"error": "GitHub search validation error (HTTP 422).", "total_count": 0}
+            return {"error": f"GitHub API error: HTTP {e.code}", "total_count": 0}
+        except Exception as e:
+            return {"error": f"GitHub API request failed: {e}", "total_count": 0}
+    return {"error": "GitHub API: max retries exceeded.", "rate_limited": True}
+
+
+def _fetch_file_content(url: str, token: str, timeout: int = 10) -> str:
+    """Fetch raw file content from GitHub API for secret scanning."""
+    req_headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3.raw",
+        "User-Agent": "Fray-Leak-Scanner",
+    }
+    req = urllib.request.Request(url, headers=req_headers)
     ctx = ssl.create_default_context()
     try:
         with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        if e.code == 403:
-            # Rate limit
-            reset = e.headers.get("X-RateLimit-Reset", "")
-            if reset:
-                wait = max(int(reset) - int(time.time()), 1)
-                return {"error": f"GitHub rate limit exceeded. Resets in {wait}s.", "rate_limited": True}
-            return {"error": "GitHub API rate limit exceeded.", "rate_limited": True}
-        elif e.code == 401:
-            return {"error": "Invalid GITHUB_TOKEN. Check your token permissions.", "auth_error": True}
-        elif e.code == 422:
-            return {"error": f"GitHub search validation error (HTTP 422).", "total_count": 0}
-        return {"error": f"GitHub API error: HTTP {e.code}", "total_count": 0}
-    except Exception as e:
-        return {"error": f"GitHub API request failed: {e}", "total_count": 0}
+            return resp.read(10240).decode("utf-8", errors="replace")
+    except Exception:
+        return ""
 
 
-def search_github(domain: str, token: str, max_patterns: int = 10,
-                  timeout: int = 10) -> Dict[str, Any]:
+def search_github(domain: str, token: str, max_patterns: int = 17,
+                  timeout: int = 10, auto_retry: bool = True) -> Dict[str, Any]:
     """Search GitHub code for leaked credentials mentioning the target domain.
 
-    Uses GitHub Code Search API to find public repos containing
-    passwords, API keys, tokens, etc. alongside the domain name.
-
-    Args:
-        domain: Target domain (e.g. 'example.com')
-        token: GitHub personal access token
-        max_patterns: Max number of patterns to search (rate limit friendly)
-        timeout: Request timeout in seconds
-
-    Returns:
-        Dict with 'results' list and 'summary' stats.
+    With auto_retry=True, waits and retries on rate limit to cover all patterns.
+    Fetches file content and runs regex secret detection on matches.
     """
     results = []
     total_matches = 0
     errors = []
     rate_limited = False
+    confirmed_secrets = []
+    max_retries = 3 if auto_retry else 1
 
     patterns_to_search = _GITHUB_PATTERNS[:max_patterns]
 
     for i, pattern in enumerate(patterns_to_search):
-        if rate_limited:
-            break
-
-        # GitHub code search: "domain" + "pattern" in file contents
         query = f'"{domain}" "{pattern}"'
         encoded = urllib.parse.quote(query)
         url = f"https://api.github.com/search/code?q={encoded}&per_page=5&sort=indexed&order=desc"
 
-        data = _github_api_request(url, token, timeout)
+        data = _github_api_request(url, token, timeout, max_retries=max_retries)
         if not data:
             continue
 
@@ -132,21 +202,39 @@ def search_github(domain: str, token: str, max_patterns: int = 10,
 
         if count > 0:
             total_matches += count
-            for item in items[:3]:  # Top 3 per pattern
+            for item in items[:3]:
                 repo = item.get("repository", {})
-                results.append({
+                api_url = item.get("url", "")
+                html_url = item.get("html_url", "")
+
+                entry = {
                     "pattern": pattern,
                     "total_matches": count,
                     "file": item.get("path", ""),
                     "repo": repo.get("full_name", ""),
                     "repo_url": repo.get("html_url", ""),
-                    "file_url": item.get("html_url", ""),
+                    "file_url": html_url,
                     "score": item.get("score", 0),
-                })
+                    "secrets_detected": [],
+                }
 
-        # Rate limit: GitHub allows 10 code searches per minute for authenticated users
+                # Fetch file content and scan for real secrets
+                if api_url:
+                    content = _fetch_file_content(api_url, token, timeout)
+                    if content:
+                        secrets = scan_text_for_secrets(content)
+                        entry["secrets_detected"] = secrets
+                        for s in secrets:
+                            confirmed_secrets.append({
+                                **s,
+                                "file": entry["file"],
+                                "repo": entry["repo"],
+                            })
+
+                results.append(entry)
+
         if i < len(patterns_to_search) - 1:
-            time.sleep(2)  # Conservative delay between searches
+            time.sleep(2)
 
     # Deduplicate by repo
     seen_repos = {}
@@ -158,6 +246,7 @@ def search_github(domain: str, token: str, max_patterns: int = 10,
                 "repo_url": r["repo_url"],
                 "patterns_found": [],
                 "files": [],
+                "confirmed_secrets": [],
             }
         if r["pattern"] not in seen_repos[repo]["patterns_found"]:
             seen_repos[repo]["patterns_found"].append(r["pattern"])
@@ -166,6 +255,8 @@ def search_github(domain: str, token: str, max_patterns: int = 10,
             "pattern": r["pattern"],
             "url": r["file_url"],
         })
+        if r.get("secrets_detected"):
+            seen_repos[repo]["confirmed_secrets"].extend(r["secrets_detected"])
 
     return {
         "source": "github",
@@ -174,8 +265,69 @@ def search_github(domain: str, token: str, max_patterns: int = 10,
         "repos_with_leaks": len(seen_repos),
         "patterns_searched": len(patterns_to_search),
         "rate_limited": rate_limited,
+        "confirmed_secrets": confirmed_secrets,
         "errors": errors,
         "repos": list(seen_repos.values()),
+    }
+
+
+# ── GitHub Gist Search ──────────────────────────────────────────────────
+
+def search_github_gists(domain: str, token: str, timeout: int = 10,
+                        max_retries: int = 3) -> Dict[str, Any]:
+    """Search GitHub for config/secret files mentioning the target domain.
+
+    Targets .env, .yml, .json, .conf, .sh, .py files \u2014 common leak vectors.
+    """
+    gist_patterns = ["password", "api_key", "secret", "token", "private_key"]
+    results = []
+    errors = []
+    rate_limited = False
+
+    for i, pattern in enumerate(gist_patterns):
+        query = f'"{domain}" "{pattern}"'
+        encoded = urllib.parse.quote(query)
+        url = (f"https://api.github.com/search/code?q={encoded}"
+               f"+in:file+language:shell+language:python+language:yaml"
+               f"+language:json&per_page=5&sort=indexed&order=desc")
+
+        data = _github_api_request(url, token, timeout, max_retries=max_retries)
+        if not data:
+            continue
+
+        if data.get("rate_limited"):
+            errors.append(data["error"])
+            rate_limited = True
+            break
+
+        if data.get("auth_error") or data.get("error"):
+            if data.get("error"):
+                errors.append(data["error"])
+            break
+
+        items = data.get("items", [])
+        for item in items[:3]:
+            path = item.get("path", "")
+            if any(ext in path.lower() for ext in (".env", ".yml", ".yaml", ".json",
+                    ".conf", ".cfg", ".ini", ".toml", ".sh", ".py", ".rb", ".js")):
+                repo = item.get("repository", {})
+                results.append({
+                    "pattern": pattern,
+                    "file": path,
+                    "repo": repo.get("full_name", ""),
+                    "file_url": item.get("html_url", ""),
+                })
+
+        if i < len(gist_patterns) - 1:
+            time.sleep(2)
+
+    return {
+        "source": "github_gists",
+        "domain": domain,
+        "matches": len(results),
+        "rate_limited": rate_limited,
+        "errors": errors,
+        "results": results,
     }
 
 
@@ -395,6 +547,8 @@ def search_leaks(target: str, github: bool = True, hibp: bool = True,
         gh_token = os.environ.get("GITHUB_TOKEN", "")
         if gh_token:
             result["github"] = search_github(domain, gh_token, timeout=timeout)
+            # Also search config-file patterns (Gist-like)
+            result["github_gists"] = search_github_gists(domain, gh_token, timeout=timeout)
         else:
             result["github"] = {
                 "source": "github",
@@ -418,16 +572,23 @@ def search_leaks(target: str, github: bool = True, hibp: bool = True,
 
     # Summary
     gh = result.get("github") or {}
+    gists = result.get("github_gists") or {}
     hb = result.get("hibp") or {}
 
     risk_factors = []
     actions = []
     gh_leaks = gh.get("repos_with_leaks", 0)
     hb_breached = hb.get("breached", False)
+    n_confirmed = len(gh.get("confirmed_secrets", []))
+    n_gist_matches = gists.get("matches", 0)
 
     # ── Collect risk factors ──
+    if n_confirmed > 0:
+        risk_factors.append(f"{n_confirmed} confirmed secret(s) (regex-verified)")
     if gh_leaks > 0:
-        risk_factors.append(f"{gh_leaks} GitHub repos with leaked credentials")
+        risk_factors.append(f"{gh_leaks} GitHub repos with keyword matches")
+    if n_gist_matches > 0:
+        risk_factors.append(f"{n_gist_matches} config file(s) with domain + secrets")
     if hb_breached:
         if hb.get("total_emails"):
             risk_factors.append(f"{hb['total_emails']} emails in {hb.get('total_breaches', 0)} breaches")
@@ -435,7 +596,9 @@ def search_leaks(target: str, github: bool = True, hibp: bool = True,
             risk_factors.append(f"{hb['breach_count']} breaches found")
 
     # ── Determine risk level ──
-    if gh_leaks > 5 or (gh_leaks > 0 and hb_breached):
+    if n_confirmed > 0:
+        risk_level = "critical"
+    elif gh_leaks > 5 or (gh_leaks > 0 and hb_breached):
         risk_level = "high"
     elif gh_leaks > 0 or hb_breached:
         risk_level = "medium"
@@ -525,11 +688,83 @@ def search_leaks(target: str, github: bool = True, hibp: bool = True,
 
     result["summary"] = {
         "github_repos_with_leaks": gh_leaks,
+        "confirmed_secrets": n_confirmed,
+        "gist_matches": n_gist_matches,
         "hibp_breached": hb_breached,
         "risk_factors": risk_factors,
         "risk_level": risk_level,
         "recommended_actions": actions,
     }
+
+    return result
+
+
+# ── Recon integration ───────────────────────────────────────────────────
+
+def run_leak_check(domain: str, timeout: int = 8) -> Dict[str, Any]:
+    """Lightweight leak check for recon pipeline integration.
+
+    Runs a faster subset of leak searches suitable for embedding
+    in fray recon --leak. Uses fewer patterns and shorter timeouts.
+
+    Returns a compact dict for inclusion in recon results.
+    """
+    gh_token = os.environ.get("GITHUB_TOKEN", "")
+    hibp_key = os.environ.get("HIBP_API_KEY", "") or None
+
+    result = {
+        "github_repos": 0,
+        "confirmed_secrets": 0,
+        "hibp_breaches": 0,
+        "hibp_pwn_count": 0,
+        "risk_level": "low",
+        "risk_factors": [],
+        "details": {},
+    }
+
+    # GitHub: search top 5 patterns only (fast mode)
+    if gh_token:
+        gh = search_github(domain, gh_token, max_patterns=5,
+                           timeout=timeout, auto_retry=False)
+        result["github_repos"] = gh.get("repos_with_leaks", 0)
+        result["confirmed_secrets"] = len(gh.get("confirmed_secrets", []))
+        result["details"]["github"] = {
+            "repos_with_leaks": gh.get("repos_with_leaks", 0),
+            "total_matches": gh.get("total_matches", 0),
+            "confirmed_secrets": gh.get("confirmed_secrets", [])[:5],
+            "top_repos": [r["repo"] for r in gh.get("repos", [])[:5]],
+        }
+
+    # HIBP: breach catalog (free, fast)
+    hb = search_hibp_breaches(domain, timeout=timeout)
+    if hb.get("breached"):
+        result["hibp_breaches"] = hb.get("breach_count", 0)
+        result["hibp_pwn_count"] = hb.get("total_pwned", 0)
+        result["details"]["hibp"] = {
+            "breach_count": hb.get("breach_count", 0),
+            "total_pwned": hb.get("total_pwned", 0),
+            "breaches": [{"name": b["name"], "date": b["date"],
+                          "pwn_count": b["pwn_count"]}
+                         for b in hb.get("breaches", [])[:5]],
+        }
+
+    # Risk assessment
+    factors = []
+    if result["confirmed_secrets"] > 0:
+        factors.append(f"{result['confirmed_secrets']} confirmed secret(s) on GitHub")
+    if result["github_repos"] > 0:
+        factors.append(f"{result['github_repos']} GitHub repo(s) with credentials")
+    if result["hibp_breaches"] > 0:
+        factors.append(f"{result['hibp_breaches']} breach(es) ({result['hibp_pwn_count']:,} accounts)")
+
+    result["risk_factors"] = factors
+
+    if result["confirmed_secrets"] > 0:
+        result["risk_level"] = "critical"
+    elif result["github_repos"] > 0 and result["hibp_breaches"] > 0:
+        result["risk_level"] = "high"
+    elif result["github_repos"] > 0 or result["hibp_breaches"] > 0:
+        result["risk_level"] = "medium"
 
     return result
 
@@ -562,11 +797,37 @@ def print_leak_results(result: Dict[str, Any]) -> None:
             print(f"  Total matches:     {total}")
             print(f"  Repos with leaks:  {len(repos)}")
 
+            # Show confirmed secrets first (regex-detected real secrets)
+            confirmed = gh.get("confirmed_secrets", [])
+            if confirmed:
+                print(f"\n  🚨 Confirmed Secrets (regex-verified):")
+                severity_icons = {"critical": "🔴", "high": "🟠", "medium": "🟡"}
+                seen = set()
+                for s in confirmed[:15]:
+                    key = f"{s['type']}:{s.get('repo', '')}"
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    icon = severity_icons.get(s.get("severity", ""), "⚪")
+                    # Redact middle of match for safety
+                    match = s.get("match", "")
+                    if len(match) > 16:
+                        redacted = match[:8] + "…" + match[-4:]
+                    else:
+                        redacted = match
+                    print(f"  {icon} {s['type']}: {redacted}")
+                    if s.get("repo"):
+                        print(f"     in {s['repo']} → {s.get('file', '')}")
+                print()
+
             if repos:
+                print(f"  📂 Repos with keyword matches:")
                 print()
                 for repo in repos[:10]:  # Show top 10 repos
+                    has_secrets = bool(repo.get("confirmed_secrets"))
+                    icon = "🚨" if has_secrets else "🔴"
                     patterns = ", ".join(repo["patterns_found"][:5])
-                    print(f"  🔴 {repo['repo']}")
+                    print(f"  {icon} {repo['repo']}")
                     print(f"     Patterns: {patterns}")
                     for f in repo["files"][:3]:
                         print(f"     → {f['path']}")
@@ -581,6 +842,19 @@ def print_leak_results(result: Dict[str, Any]) -> None:
             if gh.get("errors"):
                 for err in gh["errors"]:
                     print(f"  ⚠️  {err}")
+
+    # ── Gist/config file results ──
+    gists = result.get("github_gists")
+    if gists and gists.get("matches", 0) > 0:
+        print(f"\n  📄 Config Files (shell/python/yaml/json/env)")
+        print(f"  {'─' * 40}")
+        print(f"  Matches: {gists['matches']}")
+        for g in gists.get("results", [])[:10]:
+            print(f"  • {g['repo']} → {g['file']} (pattern: {g['pattern']})")
+            if g.get("file_url"):
+                print(f"    {g['file_url']}")
+        if gists.get("rate_limited"):
+            print(f"  ⚠️  Rate-limited. Re-run later for full results.")
 
     # ── HIBP results ──
     hb = result.get("hibp")
@@ -639,7 +913,7 @@ def print_leak_results(result: Dict[str, Any]) -> None:
     actions = summary.get("recommended_actions", [])
 
     print(f"\n  {'─' * 40}")
-    risk_icons = {"high": "🔴", "medium": "🟡", "low": "🟢"}
+    risk_icons = {"critical": "🔴", "high": "�", "medium": "🟡", "low": "🟢"}
     print(f"  {risk_icons.get(risk, '⚪')} Risk Level: {risk.upper()}")
     if factors:
         for f in factors:

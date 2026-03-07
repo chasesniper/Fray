@@ -1440,7 +1440,8 @@ def cmd_recon(args):
     for target in targets:
         result = run_recon(target, timeout=getattr(args, 'timeout', 8),
                            headers=auth_headers, mode=scan_mode,
-                           stealth=stealth, retirejs=retirejs)
+                           stealth=stealth, retirejs=retirejs,
+                           leak=getattr(args, 'leak', False))
 
         # SARIF output for recon
         if getattr(args, 'sarif', False):
@@ -3198,6 +3199,8 @@ Documentation: https://github.com/dalisecurity/fray
     p_recon.add_argument("--fail-on", dest="fail_on", default=None,
                           choices=["critical", "high", "medium", "low"],
                           help="Exit code 1 if any finding >= this severity (implies --ci)")
+    p_recon.add_argument("--leak", action="store_true",
+                          help="Include leak search: GitHub code + HIBP breach check (needs GITHUB_TOKEN)")
     p_recon.set_defaults(func=cmd_recon)
 
     # detect

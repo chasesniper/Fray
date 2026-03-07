@@ -51,7 +51,8 @@ def run_recon(url: str, timeout: int = 8,
               headers: Optional[Dict[str, str]] = None,
               mode: str = "default",
               stealth: bool = False,
-              retirejs: bool = False) -> Dict[str, Any]:
+              retirejs: bool = False,
+              leak: bool = False) -> Dict[str, Any]:
     """Run full reconnaissance on a target URL.
 
     Args:
@@ -62,6 +63,7 @@ def run_recon(url: str, timeout: int = 8,
               'default' (~30s, full scan), or 'deep' (~45s, extended DNS/subdomain/history)
         stealth: If True, limit parallel workers to 3 and add random jitter
                  between requests to avoid triggering WAF rate limits.
+        leak: If True, run GitHub + HIBP leak search for the target domain.
     """
     host, path, port, use_ssl = _parse_url(url)
 
@@ -138,7 +140,7 @@ def run_recon(url: str, timeout: int = 8,
                                                 timeout=timeout, extra_headers=headers)))
 
         # Non-fast tasks
-        t_hist = t_admin = t_rate = t_gql = None
+        t_hist = t_admin = t_rate = t_gql = t_leak = None
         if not is_fast:
             t_hist  = asyncio.create_task(_run(
                 lambda: discover_historical_urls(url, timeout=timeout, verify_ssl=verify,
@@ -153,6 +155,12 @@ def run_recon(url: str, timeout: int = 8,
             t_gql   = asyncio.create_task(_run(
                 lambda: check_graphql_introspection(host, port, use_ssl, timeout=timeout,
                                                     extra_headers=headers)))
+
+        # Leak check (--leak flag, runs concurrently with other checks)
+        if leak:
+            from fray.leak import run_leak_check
+            t_leak = asyncio.create_task(_run(
+                lambda: run_leak_check(host, timeout=timeout)))
 
         # ── Await DNS + page first (needed for tier 2 tasks) ──
         dns_data = await _safe(t_dns, {})
@@ -218,6 +226,8 @@ def run_recon(url: str, timeout: int = 8,
             result["rate_limits"] = await _safe(t_rate, {})
         if t_gql:
             result["graphql"] = await _safe(t_gql, {})
+        if t_leak:
+            result["leak_check"] = await _safe(t_leak, {})
 
         # ── Collect tier 2 results ──
         result["subdomains_active"] = await _safe(t_subs_active, {})
@@ -469,6 +479,20 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
         findings.append({"severity": "medium", "finding": f"{n_sri_missing} CDN-loaded script(s) missing Subresource Integrity (SRI)"})
     if interesting_paths:
         findings.append({"severity": "low", "finding": f"{len(interesting_paths)} interesting paths in robots.txt"})
+
+    # ── Leak check findings ──
+    leak_data = r.get("leak_check", {})
+    n_leak_secrets = leak_data.get("confirmed_secrets", 0) if isinstance(leak_data, dict) else 0
+    n_leak_repos = leak_data.get("github_repos", 0) if isinstance(leak_data, dict) else 0
+    n_leak_breaches = leak_data.get("hibp_breaches", 0) if isinstance(leak_data, dict) else 0
+    leak_pwn = leak_data.get("hibp_pwn_count", 0) if isinstance(leak_data, dict) else 0
+
+    if n_leak_secrets > 0:
+        findings.append({"severity": "critical", "finding": f"{n_leak_secrets} confirmed secret(s) leaked on GitHub (regex-verified)"})
+    elif n_leak_repos > 0:
+        findings.append({"severity": "high", "finding": f"{n_leak_repos} GitHub repo(s) with credential keywords for this domain"})
+    if n_leak_breaches > 0:
+        findings.append({"severity": "high", "finding": f"Domain in {n_leak_breaches} HIBP breach(es) ({leak_pwn:,} accounts)"})
 
     # ── Risk score (0-100) ──
     risk_score = 0
