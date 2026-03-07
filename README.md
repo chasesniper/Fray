@@ -340,7 +340,7 @@ Output:
     └── ⚔️ sqli
 ```
 
-Aggregates all 21 recon checks into a single tree view — subdomains (crt.sh), DNS, WAF/CDN, technologies, admin panels, API endpoints, GraphQL, exposed files, CORS issues, parameters, and recommended attack categories.
+Aggregates all 27 recon checks into a single tree view — subdomains (crt.sh), DNS, WAF/CDN, technologies, admin panels, API endpoints, GraphQL, exposed files, CORS issues, parameters, and recommended attack categories.
 
 ## SARIF Output — GitHub Security Tab
 
