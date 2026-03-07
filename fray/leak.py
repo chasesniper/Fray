@@ -257,11 +257,61 @@ def search_hibp_email(email: str, timeout: int = 10) -> Dict[str, Any]:
     }
 
 
-def search_hibp_domain(domain: str, api_key: str,
+def search_hibp_breaches(domain: str, timeout: int = 10) -> Dict[str, Any]:
+    """Search the public HIBP breach catalog for breaches involving the target domain.
+
+    This endpoint is free and requires no API key. It checks the full breach
+    list and filters for breaches whose Domain field matches the target.
+    """
+    url = "https://haveibeenpwned.com/api/v3/breaches"
+    data = _hibp_request(url, timeout=timeout)
+
+    if data is None or (isinstance(data, dict) and data.get("error")):
+        error = data.get("error", "Failed to fetch breach list") if data else "No response"
+        return {
+            "source": "hibp",
+            "domain": domain,
+            "method": "public_breach_catalog",
+            "breached": False,
+            "error": error,
+            "breaches": [],
+        }
+
+    # Filter breaches where the breached service's domain matches our target
+    # Also check if the domain appears in the breach Name field
+    matching = []
+    domain_lower = domain.lower()
+    if isinstance(data, list):
+        for b in data:
+            breach_domain = (b.get("Domain") or "").lower()
+            breach_name = (b.get("Name") or "").lower()
+            if domain_lower == breach_domain or domain_lower in breach_domain:
+                matching.append({
+                    "name": b.get("Name", ""),
+                    "domain": b.get("Domain", ""),
+                    "date": b.get("BreachDate", ""),
+                    "pwn_count": b.get("PwnCount", 0),
+                    "data_classes": b.get("DataClasses", []),
+                    "is_verified": b.get("IsVerified", False),
+                    "description": b.get("Description", "")[:200],
+                })
+
+    return {
+        "source": "hibp",
+        "domain": domain,
+        "method": "public_breach_catalog",
+        "breached": len(matching) > 0,
+        "breach_count": len(matching),
+        "total_pwned": sum(b["pwn_count"] for b in matching),
+        "breaches": matching,
+    }
+
+
+def search_hibp_domain(domain: str, api_key: Optional[str] = None,
                        timeout: int = 10) -> Dict[str, Any]:
     """Search HIBP for all breached emails on a domain.
 
-    Requires a paid HIBP API key (haveibeenpwned.com/API/Key).
+    Requires a paid HIBP API key or domain verification at haveibeenpwned.com/DomainSearch.
     """
     encoded = urllib.parse.quote(domain)
     url = f"https://haveibeenpwned.com/api/v3/breacheddomain/{encoded}"
@@ -354,21 +404,17 @@ def search_leaks(target: str, github: bool = True, hibp: bool = True,
 
     # HIBP
     if hibp:
-        hibp_key = os.environ.get("HIBP_API_KEY", "")
+        hibp_key = os.environ.get("HIBP_API_KEY", "") or None
 
         if is_email:
-            # Single email lookup (free, no key needed)
+            # Single email lookup (requires API key since v3)
             result["hibp"] = search_hibp_email(target, timeout=timeout)
         elif hibp_key:
-            # Domain-wide search (paid API key)
-            result["hibp"] = search_hibp_domain(domain, hibp_key, timeout=timeout)
+            # Domain search with API key — returns per-email breakdown
+            result["hibp"] = search_hibp_domain(domain, api_key=hibp_key, timeout=timeout)
         else:
-            result["hibp"] = {
-                "source": "hibp",
-                "note": "Set HIBP_API_KEY for domain-wide breach search. "
-                        "Or use: fray leak user@example.com (free, no key).",
-                "skipped": True,
-            }
+            # Free: search public breach catalog for this domain
+            result["hibp"] = search_hibp_breaches(domain, timeout=timeout)
 
     # Summary
     gh = result.get("github") or {}
@@ -464,8 +510,24 @@ def print_leak_results(result: Dict[str, Any]) -> None:
                         print(f"      Data: {data}")
             else:
                 print(f"  ✅ {hb.get('email', target)} — not found in any breaches")
+        elif hb.get("method") == "public_breach_catalog":
+            # Free breach catalog search
+            if hb.get("breached"):
+                total_pwned = hb.get("total_pwned", 0)
+                print(f"  ❌ {domain} appears in {hb['breach_count']} known breach(es) ({total_pwned:,} accounts)")
+                print()
+                for b in hb.get("breaches", [])[:10]:
+                    verified = "✓" if b.get("is_verified") else "?"
+                    data = ", ".join(b.get("data_classes", [])[:5])
+                    print(f"  [{verified}] {b['name']} ({b['date']}) — {b['pwn_count']:,} accounts")
+                    if data:
+                        print(f"      Data: {data}")
+                print(f"\n  ℹ️  For per-email breakdown, verify domain at haveibeenpwned.com/DomainSearch")
+            else:
+                print(f"  ✅ {domain} not found in HIBP breach catalog")
+                print(f"     (checked {len(hb.get('breaches', []))} known breaches)")
         else:
-            # Domain result
+            # Domain result with API key (per-email breakdown)
             if hb.get("breached"):
                 print(f"  ❌ {hb['total_emails']} email(s) from {domain} found in breaches")
                 print(f"     Total breach entries: {hb.get('total_breaches', 0)}")
