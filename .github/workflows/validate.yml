@@ -57,7 +57,7 @@ jobs:
         print(f"{'='*60}\n")
         
         # Verify expected count
-        expected = 2913
+        expected = 4003
         if total != expected:
             print(f"⚠️  WARNING: Expected {expected} payloads, found {total}")
             exit(1)

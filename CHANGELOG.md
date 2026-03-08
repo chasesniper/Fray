@@ -14,7 +14,7 @@ The first public release of Fray - the most comprehensive security testing platf
 ### Added
 
 #### Core Features
-- **2,900+ total payloads** across 23 attack categories
+- **4,000+ total payloads** across 23 attack categories
 - **175 critical CVE payloads** from 2020-2026
 - Interactive CLI tool (`waf_tester.py`)
 - Docker support with Dockerfile and docker-compose.yml
@@ -126,7 +126,7 @@ The first public release of Fray - the most comprehensive security testing platf
 ## Version History
 
 - **1.0.0** (2026-02-28) - Initial public release
-  - 2,900+ payloads
+  - 4,000+ payloads
   - 175 CVEs (2020-2026)
   - Complete documentation suite
   - Interactive CLI tool
