@@ -99,6 +99,7 @@ from fray.recon.checks import (
     check_host_header_injection,
     check_admin_panels,
     check_rate_limits,
+    check_rate_limits_critical,
     check_differential_responses,
     waf_gap_analysis,
 )
@@ -342,6 +343,21 @@ def run_recon(url: str, timeout: int = 8,
         # ── Collect tier 2 results ──
         result["subdomains_active"] = await _safe(t_subs_active, {})
         result["origin_ip"]         = await _safe(t_origin, {})
+
+        # ── Tier 3: Critical path rate limit probe (needs subdomain list) ──
+        all_subs = []
+        for s in (result.get("subdomains", {}).get("subdomains", []) +
+                  result.get("subdomains_active", {}).get("subdomains", [])):
+            if isinstance(s, dict):
+                all_subs.append(s)
+            elif isinstance(s, str):
+                all_subs.append({"fqdn": s})
+        t_rl_crit = asyncio.create_task(_run(
+            lambda: check_rate_limits_critical(host, port, use_ssl, timeout=6,
+                                               extra_headers=headers,
+                                               subdomains=all_subs),
+            "Rate limits (critical paths)"))
+        result["rate_limits_critical"] = await _safe(t_rl_crit, {})
 
         return csp_analysis
 
@@ -1706,6 +1722,30 @@ def print_recon(result: Dict[str, Any]) -> None:
         if rl.get("rate_limit_headers"):
             hdrs_str = ", ".join(f"{k}={v}" for k, v in rl["rate_limit_headers"].items())
             console.print(f"    Headers:         [dim]{hdrs_str}[/dim]")
+        console.print()
+
+    # ── Critical Path Rate Limits ──
+    rlc = result.get("rate_limits_critical", {})
+    if rlc and rlc.get("paths_checked"):
+        n_limited = len(rlc.get("rate_limited_paths", []))
+        n_checked = rlc.get("paths_checked", 0)
+        console.print("  [bold]Rate Limits (Critical Paths)[/bold]")
+        if n_limited == 0:
+            console.print(f"    [green]No rate limiting[/green] on {n_checked} critical paths")
+        else:
+            console.print(f"    [yellow]{n_limited}/{n_checked}[/yellow] critical paths have rate limiting")
+            for rp in rlc.get("rate_limited_paths", [])[:8]:
+                path_key = f"{rp['host']}{rp['path']}"
+                hdrs = rp.get("headers", {})
+                limit_val = hdrs.get("x-ratelimit-limit", hdrs.get("ratelimit-limit", ""))
+                limit_str = f" ({limit_val} req/window)" if limit_val else ""
+                status_str = f" [red]429[/red]" if rp.get("status") == 429 else ""
+                console.print(f"    ⚡ [cyan]{path_key}[/cyan]{limit_str}{status_str}")
+            most = rlc.get("most_restrictive")
+            if most:
+                console.print(f"    Most restrictive: [bold]{most['host']}{most['path']}[/bold] "
+                              f"— {most['limit']} req/window")
+        console.print(f"    [dim]{rlc.get('summary', '')}[/dim]")
         console.print()
 
     # ── Differential Response Analysis ──

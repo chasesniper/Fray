@@ -53,6 +53,7 @@ from fray.recon.checks import (  # noqa: F401
     check_host_header_injection,
     check_admin_panels,
     check_rate_limits,
+    check_rate_limits_critical,
     check_differential_responses,
     waf_gap_analysis,
 )

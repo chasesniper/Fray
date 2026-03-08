@@ -918,6 +918,171 @@ def check_admin_panels(host: str, port: int, use_ssl: bool,
     }
 
 
+_CRITICAL_PATHS = [
+    "/admin", "/login", "/api", "/api/v1", "/graphql",
+    "/wp-admin", "/wp-login.php", "/administrator",
+    "/dashboard", "/console", "/phpmyadmin",
+    "/.env", "/.git/config", "/server-status",
+    "/actuator", "/actuator/health",
+]
+
+
+def check_rate_limits_critical(host: str, port: int, use_ssl: bool,
+                               timeout: int = 6,
+                               extra_headers: Optional[Dict[str, str]] = None,
+                               subdomains: Optional[list] = None) -> Dict[str, Any]:
+    """Lightweight rate-limit probe for critical paths only.
+
+    Instead of full burst testing against every subdomain/endpoint,
+    sends a single request to each critical path and checks for
+    rate-limit headers. Fast enough to include in default recon.
+
+    Args:
+        host: Target hostname
+        port: Target port
+        use_ssl: Whether to use SSL
+        timeout: Per-request timeout
+        extra_headers: Additional headers
+        subdomains: Optional list of subdomains to also probe
+
+    Returns:
+        Dict with per-path rate limit headers and a summary.
+    """
+    import concurrent.futures
+
+    result: Dict[str, Any] = {
+        "paths_checked": 0,
+        "rate_limited_paths": [],
+        "headers_by_path": {},
+        "most_restrictive": None,
+        "summary": "unknown",
+    }
+
+    req_headers = {
+        "Host": host,
+        "User-Agent": f"Fray/{__version__} Recon",
+        "Accept": "text/html,*/*",
+        "Connection": "close",
+    }
+    if extra_headers:
+        req_headers.update(extra_headers)
+
+    # Build probe targets: critical paths on main host + optional subdomains
+    targets: list = [(host, p) for p in _CRITICAL_PATHS]
+    if subdomains:
+        # Only probe critical subdomains (admin, api, dev, staging)
+        critical_prefixes = {"admin", "api", "dev", "staging", "test", "internal",
+                             "dashboard", "console", "portal", "vpn", "sso", "auth"}
+        for sub in subdomains[:50]:
+            fqdn = sub if isinstance(sub, str) else sub.get("fqdn", "")
+            if not fqdn:
+                continue
+            prefix = fqdn.split(".")[0].lower()
+            if prefix in critical_prefixes:
+                targets.append((fqdn, "/"))
+
+    def _probe_one(target_host: str, path: str):
+        """Single GET and return rate-limit headers if present."""
+        try:
+            hdrs = dict(req_headers)
+            hdrs["Host"] = target_host
+            if use_ssl:
+                try:
+                    ctx = _make_ssl_context(verify=True)
+                    conn = http.client.HTTPSConnection(target_host, port, context=ctx, timeout=timeout)
+                    conn.request("GET", path, headers=hdrs)
+                    resp = conn.getresponse()
+                except ssl.SSLError:
+                    ctx = _make_ssl_context(verify=False)
+                    conn = http.client.HTTPSConnection(target_host, port, context=ctx, timeout=timeout)
+                    conn.request("GET", path, headers=hdrs)
+                    resp = conn.getresponse()
+            else:
+                conn = http.client.HTTPConnection(target_host, port, timeout=timeout)
+                conn.request("GET", path, headers=hdrs)
+                resp = conn.getresponse()
+
+            status = resp.status
+            resp_headers = {k.lower(): v for k, v in resp.getheaders()}
+            resp.read(512)
+            conn.close()
+
+            rl = {}
+            for key in ("x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset",
+                        "ratelimit-limit", "ratelimit-remaining", "ratelimit-reset",
+                        "x-rate-limit-limit", "x-rate-limit-remaining",
+                        "retry-after"):
+                if key in resp_headers:
+                    rl[key] = resp_headers[key]
+
+            return {
+                "host": target_host,
+                "path": path,
+                "status": status,
+                "rate_limit_headers": rl,
+                "is_rate_limited": status == 429 or bool(rl),
+            }
+        except Exception:
+            return None
+
+    # Run probes concurrently (max 10 workers, polite)
+    probed = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
+        futures = {pool.submit(_probe_one, h, p): (h, p) for h, p in targets[:30]}
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                r = future.result()
+                if r:
+                    probed.append(r)
+            except Exception:
+                pass
+
+    result["paths_checked"] = len(probed)
+
+    # Aggregate findings
+    rate_limited = [p for p in probed if p["is_rate_limited"]]
+    result["rate_limited_paths"] = [
+        {"host": p["host"], "path": p["path"], "status": p["status"],
+         "headers": p["rate_limit_headers"]}
+        for p in rate_limited
+    ]
+
+    # Find most restrictive limit
+    min_limit = None
+    for p in rate_limited:
+        for key in ("x-ratelimit-limit", "ratelimit-limit", "x-rate-limit-limit"):
+            val = p["rate_limit_headers"].get(key)
+            if val:
+                try:
+                    limit_int = int(val)
+                    if min_limit is None or limit_int < min_limit:
+                        min_limit = limit_int
+                        result["most_restrictive"] = {
+                            "host": p["host"],
+                            "path": p["path"],
+                            "limit": limit_int,
+                            "headers": p["rate_limit_headers"],
+                        }
+                except (ValueError, TypeError):
+                    pass
+
+    # Collect all headers by path for display
+    for p in probed:
+        if p["rate_limit_headers"]:
+            key = f"{p['host']}{p['path']}"
+            result["headers_by_path"][key] = p["rate_limit_headers"]
+
+    if not rate_limited:
+        result["summary"] = "No rate limiting detected on critical paths"
+    elif len(rate_limited) == len(probed):
+        result["summary"] = f"All {len(probed)} critical paths are rate-limited"
+    else:
+        result["summary"] = (f"{len(rate_limited)}/{len(probed)} critical paths "
+                             f"have rate limiting")
+
+    return result
+
+
 def check_rate_limits(host: str, port: int, use_ssl: bool,
                       timeout: int = 8,
                       extra_headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:

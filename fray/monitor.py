@@ -331,6 +331,10 @@ def _run_single_cycle(domain: str, timeout: int = 10,
                       quiet: bool = False) -> Dict[str, Any]:
     """Run a single recon (+ optional leak) cycle and return snapshot data."""
     from fray.recon.pipeline import run_recon
+    from fray.progress import FrayProgress
+
+    steps = 1 + (1 if include_leak else 0)
+    prog = FrayProgress(steps, title=f"🔄 Scanning {domain}", quiet=quiet)
 
     snapshot: Dict[str, Any] = {
         "domain": domain,
@@ -340,18 +344,22 @@ def _run_single_cycle(domain: str, timeout: int = 10,
     }
 
     # Run recon
+    prog.start("Recon scan")
     target = f"https://{domain}" if not domain.startswith("http") else domain
-    recon_result = run_recon(target, timeout=timeout, quiet=quiet)
+    recon_result = run_recon(target, timeout=timeout, quiet=True)
     snapshot["recon"] = recon_result
+    prog.done("Recon scan")
 
     # Run leak search if requested
     if include_leak:
+        prog.start("Leak search (GitHub+HIBP)")
         try:
             from fray.leak import search_leaks
             leak_result = search_leaks(domain, timeout=timeout)
             snapshot["leak"] = leak_result
         except Exception as e:
             snapshot["leak"] = {"error": str(e)}
+        prog.done("Leak search (GitHub+HIBP)")
 
     return snapshot
 

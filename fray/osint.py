@@ -374,10 +374,88 @@ _SOCIAL_PLATFORMS = [
 ]
 
 
+def _verify_profile_owns_domain(url: str, domain: str, timeout: int = 6) -> str:
+    """Fetch a profile page and check if it references the domain.
+
+    Returns:
+        "verified"   — page body or meta tags contain the domain
+        "unverified" — page exists but no domain reference found
+        "not_found"  — page doesn't exist (404 / error)
+    """
+    # Patterns that indicate the profile belongs to this domain
+    # Match the domain itself, with or without scheme/www
+    domain_bare = domain.lower()
+    domain_no_tld = domain_bare.split(".")[0]
+    patterns = [
+        domain_bare,                      # dalisec.io
+        f"www.{domain_bare}",             # www.dalisec.io
+        f"https://{domain_bare}",         # https://dalisec.io
+        f"http://{domain_bare}",          # http://dalisec.io
+    ]
+
+    ctx = ssl.create_default_context()
+    try:
+        req = urllib.request.Request(url, headers={
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                          "AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml",
+        })
+        with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
+            if resp.status != 200:
+                return "not_found"
+            body = resp.read(64_000).decode("utf-8", errors="replace").lower()
+
+            # Check if the page references the domain (in bio, website, links, meta)
+            for pat in patterns:
+                if pat in body:
+                    return "verified"
+            return "unverified"
+    except urllib.error.HTTPError as e:
+        if e.code in (301, 302):
+            return "unverified"  # Exists but can't verify
+        return "not_found"
+    except Exception:
+        return "not_found"
+
+
+# GitHub API can confirm profile ownership via website field without scraping
+def _verify_github(username: str, domain: str, timeout: int = 6) -> str:
+    """Use GitHub API to check if user/org blog field matches the domain."""
+    try:
+        req = urllib.request.Request(
+            f"https://api.github.com/users/{username}",
+            headers={
+                "Accept": "application/vnd.github.v3+json",
+                "User-Agent": "Fray-OSINT/1.0",
+            },
+        )
+        token = os.environ.get("GITHUB_TOKEN")
+        if token:
+            req.add_header("Authorization", f"token {token}")
+        ctx = ssl.create_default_context()
+        with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
+            data = json.loads(resp.read().decode())
+            blog = (data.get("blog") or "").lower().rstrip("/")
+            bio = (data.get("bio") or "").lower()
+            domain_bare = domain.lower()
+            if domain_bare in blog or domain_bare in bio:
+                return "verified"
+            if f"https://{domain_bare}" in blog or f"http://{domain_bare}" in blog:
+                return "verified"
+            return "unverified"
+    except Exception:
+        return "unverified"
+
+
 def check_social_profiles(domain: str, timeout: int = 8) -> Dict[str, Any]:
     """Check for social media profiles using the domain's brand name.
 
-    Derives likely usernames from the domain name and checks major platforms.
+    Derives likely usernames from the domain name, checks major platforms,
+    then **verifies** each profile actually belongs to the domain owner by
+    checking if the profile page references the domain. Profiles that exist
+    but don't reference the domain are marked "unverified" to avoid false
+    positives.
     """
     # Derive candidate usernames from domain
     name = domain.split(".")[0]
@@ -400,6 +478,7 @@ def check_social_profiles(domain: str, timeout: int = 8) -> Dict[str, Any]:
             url = url_template.format(username=username)
             checked += 1
             try:
+                # Quick HEAD check first to see if profile exists
                 req = urllib.request.Request(url, headers={
                     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                                   "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -408,31 +487,37 @@ def check_social_profiles(domain: str, timeout: int = 8) -> Dict[str, Any]:
                 }, method="HEAD")
                 with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
                     if resp.status == 200:
+                        # Profile exists — verify it belongs to the domain
+                        if platform == "GitHub":
+                            verification = _verify_github(username, domain, timeout)
+                        else:
+                            verification = _verify_profile_owns_domain(url, domain, timeout)
+
                         found.append({
                             "platform": platform,
                             "username": username,
                             "url": url,
                             "status": resp.status,
+                            "verification": verification,
                         })
-            except urllib.error.HTTPError as e:
-                if e.code in (301, 302):
-                    found.append({
-                        "platform": platform,
-                        "username": username,
-                        "url": url,
-                        "status": e.code,
-                        "note": "redirect (may exist)",
-                    })
+            except urllib.error.HTTPError:
+                pass
             except Exception:
                 pass
             time.sleep(0.3)  # Be polite
+
+    # Separate verified from unverified
+    verified = [p for p in found if p.get("verification") == "verified"]
+    unverified = [p for p in found if p.get("verification") != "verified"]
 
     return {
         "domain": domain,
         "usernames_tested": sorted(usernames),
         "checked": checked,
-        "found": len(found),
-        "profiles": found,
+        "found": len(verified),
+        "found_unverified": len(unverified),
+        "profiles": verified,
+        "unverified_profiles": unverified,
     }
 
 
@@ -461,6 +546,8 @@ def run_osint(domain: str, whois: bool = True, emails: bool = True,
     if domain.startswith(("http://", "https://")):
         domain = urllib.parse.urlparse(domain).hostname or domain
 
+    from fray.progress import FrayProgress
+
     result: Dict[str, Any] = {
         "domain": domain,
         "whois": None,
@@ -469,25 +556,31 @@ def run_osint(domain: str, whois: bool = True, emails: bool = True,
         "social": None,
     }
 
+    # Count enabled modules for progress bar
+    modules = []
+    if whois:
+        modules.append(("whois", "WHOIS lookup", lambda: whois_lookup(domain, timeout)))
+    if emails:
+        modules.append(("emails", "Email harvesting", lambda: harvest_emails(domain, timeout)))
+    if permutations:
+        modules.append(("permutations", "Typosquatting check", lambda: check_permutations(domain, timeout=2.0)))
+    if social:
+        modules.append(("social", "Social profiles", lambda: check_social_profiles(domain, timeout)))
+
+    prog = FrayProgress(len(modules), title=f"🌐 OSINT: {domain}", quiet=quiet)
+
     tasks = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        if whois:
-            if not quiet:
-                sys.stderr.write(f"  🔍 OSINT: {domain}\n")
-                sys.stderr.flush()
-            tasks["whois"] = pool.submit(whois_lookup, domain, timeout)
-        if emails:
-            tasks["emails"] = pool.submit(harvest_emails, domain, timeout)
-        if permutations:
-            tasks["permutations"] = pool.submit(check_permutations, domain, timeout=2.0)
-        if social:
-            tasks["social"] = pool.submit(check_social_profiles, domain, timeout)
+        for key, label, fn in modules:
+            prog.start(label)
+            tasks[key] = (label, pool.submit(fn))
 
-        for key, future in tasks.items():
+        for key, (label, future) in tasks.items():
             try:
                 result[key] = future.result()
             except Exception as e:
                 result[key] = {"error": str(e)}
+            prog.done(label)
 
     return result
 
@@ -569,11 +662,18 @@ def print_osint(result: Dict[str, Any]) -> None:
     # Social profiles
     s = result.get("social")
     if s:
-        found = s.get("found", 0)
-        console.print(f"  [bold]Social Media Profiles[/bold] ([cyan]{found}[/cyan] found)")
+        verified = s.get("found", 0)
+        unverified_count = s.get("found_unverified", 0)
+        total_label = f"{verified} verified"
+        if unverified_count:
+            total_label += f", {unverified_count} unverified"
+        console.print(f"  [bold]Social Media Profiles[/bold] ({total_label})")
         for prof in s.get("profiles", []):
-            note = f"  [dim]({prof['note']})[/dim]" if prof.get("note") else ""
-            console.print(f"    [green]{prof['platform']}[/green]: {prof['url']}{note}")
+            console.print(f"    [green]✓ {prof['platform']}[/green]: {prof['url']}")
+        for prof in s.get("unverified_profiles", []):
+            console.print(f"    [dim]? {prof['platform']}: {prof['url']}  (unverified — may not belong to {s.get('domain', 'target')})[/dim]")
+        if not verified and not unverified_count:
+            console.print(f"    [dim]No profiles found for usernames: {', '.join(s.get('usernames_tested', []))}[/dim]")
         console.print()
 
     console.print(f"  {'━' * 50}")

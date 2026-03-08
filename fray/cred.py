@@ -369,8 +369,13 @@ def run_credential_test(url: str, pairs_file: str,
     csrf_value = form.get("csrf_value")
     form_action = form.get("form_action", url)
 
+    from fray.progress import FrayProgress
+
+    # Progress: form detection (1) + baseline (1) + each pair
+    total_steps = 1 + (0 if dry_run else 1) + len(pairs)
+    prog = FrayProgress(total_steps, title=f"🔑 Credential Test: {url}", quiet=quiet)
+
     if not quiet:
-        sys.stderr.write(f"\n  🔑 Credential Test: {url}\n")
         sys.stderr.write(f"     Pairs: {len(pairs)} | Fields: {u_field}/{p_field} | "
                          f"Type: {ct.split('/')[-1]}\n")
         if form.get("detected"):
@@ -379,7 +384,10 @@ def run_credential_test(url: str, pairs_file: str,
             sys.stderr.write(f"     CSRF: {csrf_field} ✓\n")
         if dry_run:
             sys.stderr.write(f"     [DRY RUN] No requests will be sent\n")
+        sys.stderr.write("\n")
         sys.stderr.flush()
+
+    prog.done("Form detection")
 
     result: Dict[str, Any] = {
         "url": url,
@@ -404,25 +412,24 @@ def run_credential_test(url: str, pairs_file: str,
                 "password": pw[:3] + "***",
                 "classification": "dry_run",
             })
+            prog.done(f"{user[:20]}")
         return result
 
     # Establish baseline with a known-bad login
+    prog.start("Baseline request")
     baseline = _send_login(
         form_action, u_field, p_field,
         "fray_baseline_test@invalid.tld", "fray_baseline_invalid_pw_9x7z",
         content_type=ct, csrf_field=csrf_field, csrf_value=csrf_value,
         headers=headers, proxy=proxy, timeout=timeout,
     )
+    prog.done("Baseline request")
 
     # Run credential tests
     interval = max(1.0 / rate, delay)
     for i, (user, pw) in enumerate(pairs):
-        if not quiet:
-            sys.stderr.write(
-                f"\r  Testing [{i + 1}/{len(pairs)}] {user[:30]}{'...' if len(user) > 30 else ''}"
-                f"{'':40}"
-            )
-            sys.stderr.flush()
+        label = f"{user[:25]}{'...' if len(user) > 25 else ''}"
+        prog.start(label)
 
         resp = _send_login(
             form_action, u_field, p_field, user, pw,
@@ -451,19 +458,14 @@ def run_credential_test(url: str, pairs_file: str,
             result["possible_successes"].append(attempt)
         elif classification == "lockout":
             result["lockouts"].append(attempt)
-            if not quiet:
-                sys.stderr.write(f"\n  ⚠️  Lockout detected at attempt {i + 1}, pausing...\n")
-                sys.stderr.flush()
+            prog.status(f"⚠️  Lockout at attempt {i + 1}, pausing 30s...")
             time.sleep(30)  # Back off on lockout
 
         result["attempts"].append(attempt)
+        prog.done(label)
 
         if i < len(pairs) - 1:
             time.sleep(interval)
-
-    if not quiet:
-        sys.stderr.write("\r" + " " * 70 + "\r")
-        sys.stderr.flush()
 
     return result
 
