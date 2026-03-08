@@ -879,6 +879,43 @@ class WAFTester:
         console.print()
         console.print(Panel(tbl, title="[bold]Test Summary[/bold]", border_style="bright_cyan", expand=False))
 
+        # ── Next Steps (actionable recommendations) ──
+        console.print()
+        console.print("  [bold]What This Means / Next Steps:[/bold]")
+        if passed == 0:
+            console.print(f"    → [bold]All {blocked} payloads blocked — WAF is actively filtering[/bold]")
+            console.print(f"      Try bypass mode:     fray bypass {self.target} -c xss -m 50")
+            console.print(f"      Try smart mode:      fray test {self.target} -c xss --smart --max 100")
+            console.print(f"      Try mutation:         fray test {self.target} -c xss --mutate 20 -m 50")
+            console.print(f"      Try different payloads: fray test {self.target} -c sqli -m 20")
+            console.print(f"      Run recon:            fray recon {self.target}")
+        elif blocked == 0:
+            if avg_conf < 40:
+                console.print(f"    → [bold]All {passed} payloads passed but avg confidence is low ({avg_conf}%)[/bold]")
+                console.print(f"      This likely means no WAF is present, or the parameter is ignored")
+                console.print(f"      Run scan to find real injection points: fray scan {self.target} -c xss")
+                console.print(f"      Detect WAF:  fray detect {self.target}")
+                console.print(f"      Run recon:   fray recon {self.target}")
+            else:
+                console.print(f"    → [bold]{passed} bypass(es) found — {high_conf} high-confidence[/bold]")
+                console.print(f"      Run bypass scorer:    fray bypass {self.target} -c xss -m 30")
+                console.print(f"      Export report:        fray report -i {output} --format html")
+        else:
+            bypass_rate = passed / total * 100
+            if avg_conf >= 70:
+                console.print(f"    → [bold]{passed} bypass(es) at {avg_conf}% avg confidence ({bypass_rate:.0f}% bypass rate)[/bold]")
+                console.print(f"      Strong results — run bypass scorer: fray bypass {self.target} -c xss -m 50")
+                console.print(f"      Export report: fray report -i {output} --format html")
+            elif avg_conf >= 40:
+                console.print(f"    → [bold]{passed} bypass(es) at {avg_conf}% avg confidence — needs verification[/bold]")
+                console.print(f"      Amplify with mutations: fray test {self.target} -c xss --mutate 20")
+                console.print(f"      Try bypass scorer:      fray bypass {self.target} -c xss -m 50")
+            else:
+                console.print(f"    → [bold]{passed} passed but low confidence ({avg_conf}%) — likely false positives[/bold]")
+                console.print(f"      Find real injection points: fray scan {self.target} -c xss")
+                console.print(f"      Run recon:                  fray recon {self.target}")
+        console.print()
+
 def interactive_mode():
     """Interactive mode for easy testing"""
     print(f"\n{Colors.HEADER}{'='*60}{Colors.END}")

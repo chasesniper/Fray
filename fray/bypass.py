@@ -265,11 +265,11 @@ def _is_soft_block(result: dict, baseline: Optional[dict]) -> bool:
 def _score_label(pct: int) -> str:
     """Return a human-readable severity label for a bypass score percentage.
 
-    Score meaning (higher = more dangerous bypass):
-      90-100%  CRITICAL — Confirmed WAF bypass, payload reflected, high-risk
-      70-89%   HIGH     — Strong bypass indicator, likely exploitable
-      40-69%   MEDIUM   — Bypass detected but unconfirmed (no reflection/baseline match)
-      1-39%    LOW      — Weak signal, likely false positive or baseline match
+    Score meaning (higher = more dangerous / exploitable bypass):
+      90-100%  CRITICAL — Confirmed real bypass, exploit-ready
+      70-89%   HIGH     — Strong bypass, likely exploitable with refinement
+      40-69%   MEDIUM   — Bypass detected, needs manual verification
+      1-39%    LOW      — Weak signal, probably false positive
       0%       NONE     — Blocked or no bypass
     """
     if pct >= 90:
@@ -281,6 +281,58 @@ def _score_label(pct: int) -> str:
     elif pct > 0:
         return "LOW"
     return "NONE"
+
+
+def _next_steps_for_score(score: int, total_blocked: int, total_bypassed: int,
+                           waf_label: str, strictness: str, target: str,
+                           category: str = "xss") -> list:
+    """Generate actionable next-step recommendations based on results.
+
+    Returns a list of recommendation strings.
+    """
+    steps = []
+    total = total_blocked + total_bypassed
+
+    if total == 0:
+        steps.append(f"No payloads tested. Run: fray bypass {target} -c {category} -m 20")
+        return steps
+
+    if total_bypassed == 0:
+        # All blocked — user needs guidance
+        steps.append(f"All {total_blocked} payloads blocked by {waf_label} ({strictness})")
+        steps.append(f"Try mutation mode:    fray bypass {target} -c {category} -m 50 --waf {waf_label.lower().replace(' ', '_')}")
+        steps.append(f"Try different category: fray bypass {target} -c sqli -m 30")
+        steps.append(f"Try smart mode:       fray test {target} -c {category} --smart --max 100")
+        if strictness in ("strict", "moderate"):
+            steps.append(f"Try stealth mode:     fray bypass {target} -c {category} --stealth -d 1.5")
+        steps.append(f"Run full recon first: fray recon {target}")
+        return steps
+
+    bypass_rate = total_bypassed / total * 100
+
+    if score >= 90:
+        steps.append(f"CRITICAL: {total_bypassed} confirmed bypass(es) — this WAF is vulnerable")
+        steps.append(f"Export for report:    fray bypass {target} -c {category} -o bypass_report.json")
+        steps.append(f"Generate HTML report: fray report -i bypass_report.json --format html")
+        steps.append(f"Test more categories: fray bypass {target} -c sqli,rce,ssrf -m 30")
+    elif score >= 70:
+        steps.append(f"HIGH: {total_bypassed} strong bypass(es) found ({bypass_rate:.0f}% bypass rate)")
+        steps.append(f"Amplify with mutations: fray bypass {target} -c {category} -m 50")
+        steps.append(f"Verify with reflection: check if payloads execute in browser context")
+        steps.append(f"Try more categories:    fray bypass {target} -c sqli -m 30")
+    elif score >= 40:
+        steps.append(f"MEDIUM: {total_bypassed} bypass(es) detected but not confirmed")
+        steps.append(f"Verify manually — open target in browser and inject payload")
+        steps.append(f"Increase testing:   fray bypass {target} -c {category} -m 100")
+        steps.append(f"Try smart mode:     fray test {target} -c {category} --smart --max 100")
+    else:
+        steps.append(f"LOW: {total_bypassed} weak signal(s) — likely false positives (response matches baseline)")
+        steps.append(f"This usually means the app ignores the parameter, not a real bypass")
+        steps.append(f"Try with a real param:  fray test {target}?q=test -c {category} -m 10")
+        steps.append(f"Run scan to find real injection points: fray scan {target} -c {category}")
+        steps.append(f"Run recon to find endpoints: fray recon {target}")
+
+    return steps
 
 
 def _compute_evasion_score(result: dict, profile: WAFProfile, is_mutation: bool,
@@ -413,14 +465,40 @@ def run_bypass(
 
     # ── Resolve WAF vendor ────────────────────────────────────────────────
     waf_key = resolve_waf_name(waf_name) if waf_name else None
+
+    # Auto-detect WAF if not specified
+    if not waf_key:
+        try:
+            from fray.detector import WAFDetector
+            detector = WAFDetector()
+            det = detector.detect_waf(tester.target, timeout=tester.timeout,
+                                       verify_ssl=tester.verify_ssl)
+            detected_name = det.get("waf_vendor", "") or ""
+            if detected_name and detected_name.lower() not in ("none", "unknown", ""):
+                waf_key = resolve_waf_name(detected_name)
+                if not waf_key:
+                    # Try matching individual words against known WAF keys
+                    import re
+                    words = re.findall(r'[a-zA-Z0-9_]+', detected_name.lower())
+                    for word in words:
+                        if word in WAF_EVASION_HINTS:
+                            waf_key = word
+                            break
+                if not waf_key:
+                    # Last resort: use raw detected name
+                    waf_key = detected_name.lower().replace(" ", "_")
+        except Exception:
+            pass
+
     hints = WAF_EVASION_HINTS.get(waf_key, {}) if waf_key else {}
-    waf_label = hints.get("label", waf_name or "Unknown")
+    waf_label = hints.get("label", waf_name or (waf_key or "Unknown"))
 
     if verbose:
         from fray.output import console, print_header, print_phase
         print_header(f"Fray Bypass — WAF Evasion Scorer v{__version__}",
                      target=tester.target)
-        console.print(f"  WAF:      [bold]{waf_label}[/bold]")
+        detected_tag = " [dim](auto-detected)[/dim]" if not waf_name and waf_key else ""
+        console.print(f"  WAF:      [bold]{waf_label}[/bold]{detected_tag}")
         console.print(f"  Category: {len(payloads)} payloads loaded")
 
     # ── Phase 1: Probe WAF ────────────────────────────────────────────────
@@ -796,7 +874,7 @@ def run_bypass(
         target=tester.target,
         waf_vendor=waf_label,
         waf_detected=profile.waf_vendor or waf_label,
-        category="",
+        category=category,
         timestamp=datetime.now().isoformat(),
         duration=duration,
         waf_strictness=profile.strictness,
@@ -931,13 +1009,27 @@ def _print_scorecard(sc: BypassScorecard):
         for tip in sc.tips[:4]:
             console.print(f"    [dim]💡 {tip}[/dim]")
 
-    # ── Score Legend ──
+    # ── Next Steps (actionable recommendations) ──
+    next_steps = _next_steps_for_score(
+        score=sc.overall_evasion_score,
+        total_blocked=sc.total_blocked + (sc.mutations_tested - sc.mutations_bypassed),
+        total_bypassed=sc.total_bypassed + sc.mutations_bypassed,
+        waf_label=sc.waf_vendor,
+        strictness=sc.waf_strictness,
+        target=sc.target,
+        category=sc.category or "xss",
+    )
+    if next_steps:
+        console.print()
+        console.print("  [bold]What This Means / Next Steps:[/bold]")
+        for i, step in enumerate(next_steps):
+            prefix = "  →" if i == 0 else "   "
+            style = "bold" if i == 0 else "dim"
+            console.print(f"    {prefix} [{style}]{step}[/{style}]")
+
+    # ── Score Guide (compact) ──
     console.print()
-    console.print("  [bold]Score Guide:[/bold]")
-    console.print("    [bold red]90-100% CRITICAL[/bold red]  Confirmed bypass — reflected, strict WAF evaded")
-    console.print("    [red]70-89%  HIGH[/red]      Strong bypass — likely exploitable")
-    console.print("    [yellow]40-69%  MEDIUM[/yellow]    Bypass detected — not yet confirmed (no reflection)")
-    console.print("    [dim]1-39%   LOW[/dim]       Weak signal — likely false positive or baseline match")
+    console.print("  [dim]Score: 90%+ CRITICAL (exploit-ready) │ 70%+ HIGH (strong) │ 40%+ MEDIUM (unconfirmed) │ <40% LOW (weak/FP)[/dim]")
 
     console.print()
     console.rule(style="dim")
