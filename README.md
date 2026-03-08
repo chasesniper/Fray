@@ -6,6 +6,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/fray.svg)](https://pypi.org/project/fray/)
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/DaliSecurity.fray-security?label=VS%20Code&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=DaliSecurity.fray-security)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/dalisecurity/fray?style=social)](https://github.com/dalisecurity/fray/stargazers)
 
@@ -74,6 +75,27 @@ If Fray helped your recon workflow, please [⭐ star the repo](https://github.co
 **Built-in options:** `--scope` (scope enforcement) · `--stealth` (randomized UA, jitter) · `-w 4` (concurrent) · `--cookie` / `--bearer` (auth) · `--sarif` (GitHub Security tab) · `--json` · `--ai` (LLM output)
 
 [Scan guide →](docs/scanning-guide.md) · [Recon guide →](docs/quickstart.md) · [Auth guide →](docs/authentication-guide.md) · [CI/CD guide →](docs/quickstart.md)
+
+---
+
+## VS Code Extension
+
+Run Fray directly from your editor — scan, test, bypass, detect, and harden without leaving VS Code.
+
+[![Install from Marketplace](https://img.shields.io/badge/Install-VS%20Code%20Marketplace-007ACC?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=DaliSecurity.fray-security)
+
+```
+Cmd+Shift+P → "Fray: Run Command..."
+```
+
+- **11 commands** — Scan, Test, Bypass, Detect, Harden, Recon, OSINT, Leak Search, and more
+- **Right-click scan** — Select a URL in any file → context menu → scan
+- **HTML report** — Rich in-editor report with stat cards and bypass tables (`Cmd+Shift+R`)
+- **Inline diagnostics** — Bypass findings appear as warnings/errors in the editor
+- **Activity bar sidebar** — Browse results and scan history
+- **Status bar** — Live scan progress indicator
+
+[Extension README →](vscode-fray/README.md)
 
 ---
 

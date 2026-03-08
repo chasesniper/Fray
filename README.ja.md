@@ -6,6 +6,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/fray.svg)](https://pypi.org/project/fray/)
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/DaliSecurity.fray-security?label=VS%20Code&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=DaliSecurity.fray-security)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/dalisecurity/fray?style=social)](https://github.com/dalisecurity/fray/stargazers)
 
@@ -74,6 +75,27 @@ Frayがリコンワークフローに役立ったら、ぜひ[⭐ スター](htt
 **組み込みオプション：** `--scope`（スコープ制限）· `--stealth`（UA回転、ジッター）· `-w 4`（並行）· `--cookie` / `--bearer`（認証）· `--sarif`（GitHubセキュリティタブ）· `--json` · `--ai`（LLM出力）
 
 [スキャンガイド →](docs/scanning-guide.md) · [情報収集ガイド →](docs/quickstart.md) · [認証ガイド →](docs/authentication-guide.md) · [CI/CDガイド →](docs/quickstart.md)
+
+---
+
+## VS Code拡張機能
+
+エディタから直接Frayを実行 — スキャン、テスト、バイパス、検出、堅牢化をVS Codeから離れずに実行可能。
+
+[![Marketplaceからインストール](https://img.shields.io/badge/Install-VS%20Code%20Marketplace-007ACC?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=DaliSecurity.fray-security)
+
+```
+Cmd+Shift+P → "Fray: Run Command..."
+```
+
+- **11コマンド** — Scan、Test、Bypass、Detect、Harden、Recon、OSINT、Leak Searchなど
+- **右クリックスキャン** — ファイル内のURLを選択 → コンテキストメニュー → スキャン
+- **HTMLレポート** — エディタ内にリッチなレポート表示（`Cmd+Shift+R`）
+- **インライン診断** — バイパス結果がエディタ内に警告/エラーとして表示
+- **アクティビティバー** — 結果とスキャン履歴をサイドバーで参照
+- **ステータスバー** — スキャン進捗をリアルタイム表示
+
+[拡張機能README →](vscode-fray/README.md)
 
 ---
 
