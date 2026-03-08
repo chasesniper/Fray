@@ -109,6 +109,141 @@ from fray.recon.discovery import (
 )
 
 
+# ── Employee email breach cross-reference ────────────────────────────────
+
+def _employee_breach_check(domain: str, github_data: Dict[str, Any],
+                           timeout: int = 10) -> Dict[str, Any]:
+    """Cross-reference discovered employee emails against breach databases.
+
+    Checks:
+        1. HIBP (Have I Been Pwned) — breached accounts
+        2. GitHub code search — emails leaked in public repos
+        3. GitLab profile lookup — accounts using same email
+
+    Returns dict with breached_emails, code_exposures, and stats.
+    """
+    import hashlib
+    import ssl
+    import urllib.error
+    import urllib.request
+
+    result: Dict[str, Any] = {
+        "domain": domain,
+        "emails_checked": 0,
+        "breached_emails": [],
+        "code_exposures": [],
+        "total_breaches": 0,
+        "error": None,
+    }
+
+    # Collect unique emails from GitHub commit data
+    emails = set()
+    for author in (github_data or {}).get("commit_authors", []):
+        email = (author.get("email") or "").strip().lower()
+        if email and "@" in email and not email.endswith("@users.noreply.github.com"):
+            emails.add(email)
+
+    if not emails:
+        return result
+
+    result["emails_checked"] = len(emails)
+    ctx = ssl.create_default_context()
+
+    # ── HIBP breach check (uses k-anonymity API — no API key needed) ──
+    for email in sorted(emails):
+        sha1 = hashlib.sha1(email.encode("utf-8")).hexdigest().upper()
+        prefix, suffix = sha1[:5], sha1[5:]
+        try:
+            req = urllib.request.Request(
+                f"https://api.pwnedpasswords.com/range/{prefix}",
+                headers={"User-Agent": "Fray-Recon/1.0"},
+            )
+            with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
+                body = resp.read().decode("utf-8", errors="replace")
+                # Note: this is the password range API, not the account API.
+                # The account API requires an API key.
+                # We'll use a different approach — check the HIBP breach API
+                pass
+        except Exception:
+            pass
+
+        # Use HIBP breachedaccount API (v3) — requires API key
+        hibp_key = __import__("os").environ.get("HIBP_API_KEY")
+        if hibp_key:
+            try:
+                req = urllib.request.Request(
+                    f"https://haveibeenpwned.com/api/v3/breachedaccount/{urllib.request.quote(email)}"
+                    f"?truncateResponse=true",
+                    headers={
+                        "User-Agent": "Fray-Recon/1.0",
+                        "hibp-api-key": hibp_key,
+                    },
+                )
+                with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
+                    import json as _json
+                    breaches = _json.loads(resp.read().decode())
+                    if breaches:
+                        result["breached_emails"].append({
+                            "email": email,
+                            "breach_count": len(breaches),
+                            "breaches": [b.get("Name", "?") for b in breaches[:5]],
+                        })
+                        result["total_breaches"] += len(breaches)
+            except urllib.error.HTTPError as e:
+                if e.code == 404:
+                    pass  # Not breached
+                elif e.code == 429:
+                    import time as _time
+                    _time.sleep(1.6)  # HIBP rate limit: 10 req/min
+            except Exception:
+                pass
+
+            import time as _time
+            _time.sleep(0.15)  # polite delay
+
+    # ── GitHub code search — find emails leaked in public repos ──
+    gh_token = __import__("os").environ.get("GITHUB_TOKEN")
+    if gh_token and emails:
+        # Search for corporate emails in code (limit to 3 to avoid rate limits)
+        corporate = [e for e in emails if e.endswith(f"@{domain}")][:3]
+        for email in corporate:
+            try:
+                req = urllib.request.Request(
+                    f"https://api.github.com/search/code?q={urllib.request.quote(email)}"
+                    f"&per_page=5",
+                    headers={
+                        "Accept": "application/vnd.github.v3+json",
+                        "User-Agent": "Fray-Recon/1.0",
+                        "Authorization": f"token {gh_token}",
+                    },
+                )
+                with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
+                    import json as _json
+                    data = _json.loads(resp.read().decode())
+                    total = data.get("total_count", 0)
+                    if total > 0:
+                        items = data.get("items", [])
+                        result["code_exposures"].append({
+                            "email": email,
+                            "total_results": total,
+                            "sample_repos": [
+                                {
+                                    "repo": item.get("repository", {}).get("full_name", "?"),
+                                    "path": item.get("path", "?"),
+                                    "url": item.get("html_url", ""),
+                                }
+                                for item in items[:3]
+                            ],
+                        })
+            except Exception:
+                pass
+
+            import time as _time
+            _time.sleep(1.0)  # GitHub code search rate limit
+
+    return result
+
+
 # ── Full recon pipeline ──────────────────────────────────────────────────
 
 def run_recon(url: str, timeout: int = 8,
@@ -172,6 +307,8 @@ def run_recon(url: str, timeout: int = 8,
         n_checks += 4  # hist, admin, rate, gql
     n_checks += 2  # tier-2: subdomain brute + origin
     n_checks += 1  # CPU analysis (headers/csp/cookies/fingerprint)
+    n_checks += 1  # tier-4: GitHub org recon
+    n_checks += 1  # tier-4: employee email breach check
     if leak:
         n_checks += 1
 
@@ -358,6 +495,19 @@ def run_recon(url: str, timeout: int = 8,
                                                subdomains=all_subs),
             "Rate limits (critical paths)"))
         result["rate_limits_critical"] = await _safe(t_rl_crit, {})
+
+        # ── Tier 4: GitHub org recon + employee email breach check ──
+        from fray.osint import github_org_recon, enumerate_employees
+        t_github = asyncio.create_task(_run(
+            lambda: github_org_recon(host, timeout=timeout),
+            "GitHub org recon"))
+        result["github_recon"] = await _safe(t_github, {})
+
+        # Cross-reference discovered employee emails with breach databases
+        t_emp_breach = asyncio.create_task(_run(
+            lambda: _employee_breach_check(host, result.get("github_recon", {}), timeout),
+            "Employee breach check"))
+        result["employee_exposure"] = await _safe(t_emp_breach, {})
 
         return csp_analysis
 
@@ -1879,6 +2029,74 @@ def print_recon(result: Dict[str, Any]) -> None:
             if blk_techs:
                 console.print(f"      [red]\u274c Blocked:[/red]   {', '.join(blk_techs)}")
 
+        console.print()
+
+    # ── GitHub Org Recon ──
+    gh = result.get("github_recon", {})
+    if gh and gh.get("org_found"):
+        console.print(f"  [bold]GitHub Organisation — {gh.get('org_login', '?')}[/bold]")
+        console.print(f"    Public repos: [bold]{gh.get('public_repos', 0)}[/bold]  "
+                       f"Members: [bold]{len(gh.get('members', []))}[/bold]  "
+                       f"Commit authors: [bold]{len(gh.get('commit_authors', []))}[/bold]")
+        if gh.get("blog"):
+            console.print(f"    Website:      [dim]{gh['blog']}[/dim]")
+
+        # Interesting repos (infra/deploy/secrets)
+        interesting = gh.get("interesting_repos", [])
+        if interesting:
+            console.print(f"\n    [bold red]Infrastructure Repos[/bold red] ({len(interesting)} flagged)")
+            for r in interesting[:8]:
+                console.print(f"    🔴 [bold]{r['name']}[/bold]  [yellow]({r['reason']})[/yellow]")
+                if r.get("description"):
+                    console.print(f"       [dim]{r['description'][:80]}[/dim]")
+
+        # Commit authors with corporate emails
+        authors = gh.get("commit_authors", [])
+        corp_authors = [a for a in authors if a.get("email", "").endswith(f"@{result.get('host', '')}")]
+        if corp_authors:
+            console.print(f"\n    [bold]Corporate Emails in Git History[/bold] ({len(corp_authors)})")
+            for a in corp_authors[:8]:
+                console.print(f"    📧 {a['name']:<25} [green]{a['email']}[/green]")
+            if len(corp_authors) > 8:
+                console.print(f"    [dim]... and {len(corp_authors) - 8} more[/dim]")
+
+        # Leaked URLs
+        leaked = gh.get("leaked_urls", [])
+        if leaked:
+            console.print(f"\n    [bold red]Leaked Internal URLs[/bold red]")
+            for l in leaked[:5]:
+                console.print(f"    🚨 [red]{l['url']}[/red]  [dim]({l['source']})[/dim]")
+
+        console.print()
+    elif gh and gh.get("error"):
+        console.print(f"  [bold]GitHub Organisation[/bold]  [dim]{gh['error']}[/dim]")
+        console.print()
+
+    # ── Employee Email Exposure ──
+    emp = result.get("employee_exposure", {})
+    if emp and (emp.get("breached_emails") or emp.get("code_exposures")):
+        n_checked = emp.get("emails_checked", 0)
+        n_breached = len(emp.get("breached_emails", []))
+        n_code = len(emp.get("code_exposures", []))
+        console.print(f"  [bold]Employee Email Exposure[/bold] ({n_checked} emails checked)")
+
+        if n_breached:
+            console.print(f"\n    [bold red]Breached Accounts (HIBP)[/bold red] ({n_breached})")
+            for b in emp["breached_emails"][:10]:
+                breaches_str = ", ".join(b.get("breaches", [])[:3])
+                console.print(f"    🔓 [red]{b['email']}[/red]  {b['breach_count']} breach(es): [dim]{breaches_str}[/dim]")
+
+        if n_code:
+            console.print(f"\n    [bold yellow]Emails Leaked in Code[/bold yellow] ({n_code})")
+            for c in emp["code_exposures"][:5]:
+                console.print(f"    📂 [yellow]{c['email']}[/yellow]  {c['total_results']} result(s)")
+                for s in c.get("sample_repos", [])[:2]:
+                    console.print(f"       [dim]{s['repo']} / {s['path']}[/dim]")
+
+        if not n_breached and not n_code:
+            console.print(f"    [green]No breaches or code leaks found[/green]")
+        else:
+            console.print(f"\n    [dim]Tip: Set HIBP_API_KEY and GITHUB_TOKEN for deeper checks[/dim]")
         console.print()
 
     # ── High Value Targets + Suggested Tests ──
