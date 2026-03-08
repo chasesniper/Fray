@@ -1,7 +1,7 @@
 """
 Fray — AI-Powered WAF Security Testing Platform
 
-Open-source offensive security toolkit with 5,500+ attack payloads,
+Open-source offensive security toolkit with 4,000+ attack payloads,
 25 WAF vendor fingerprints, and AI-native workflows.
 
 Usage:

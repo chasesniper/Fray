@@ -5,6 +5,47 @@ All notable changes to Fray will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-03-08
+
+### Added
+
+#### Payload Database Expansion (2,913 → 4,003)
+- **XSS:** +220 payloads — DOM XSS, framework-specific (Vue/Angular/React), WAF-specific bypasses (Cloudflare/Akamai), async XSS, Web API abuse
+- **SQLi:** +100 payloads — WAF bypass, time/error/boolean blind, stacked queries, Oracle/MSSQL/SQLite
+- **Command Injection:** +75 payloads — Reverse shells, IFS bypass, wildcard bypass, Windows, OOB exfiltration
+- **SSTI:** +60 payloads — Jinja2, Freemarker, SpEL, Twig, Mako, Smarty, Pug, EJS, Velocity
+- **XXE:** +50 payloads — OOB, PHP wrappers, cloud metadata SSRF, SVG XXE, encoding bypass
+- **SSRF:** +50 payloads — AWS/GCP/Azure metadata, DNS rebinding, gopher smuggling
+- **API Security:** +50 payloads — IDOR, GraphQL, JWT attacks, mass assignment, method bypass
+- **Path Traversal:** +50 payloads — PHP wrappers, /proc, log poisoning, Tomcat bypass
+- **CSP Bypass:** +40 payloads — CDN gadgets, JSONP, dynamic import, exfiltration
+- **CRLF:** +40 payloads — Response splitting, session fixation, Unicode bypass
+- **Open Redirect:** +40 payloads — URL parsing, homograph, encoding bypass
+- **LDAP:** +35 payloads — AD enumeration, blind extraction, Kerberoast
+- **XPath:** +35 payloads — Blind char extraction, data dump, auth bypass
+- **Prototype Pollution:** +35 payloads — EJS/Pug RCE chains, XSS, config manipulation
+
+#### New Categories (Previously Empty)
+- **File Upload:** 60 payloads — extension bypasses, polyglots, MIME spoofing, path traversal
+- **Web Shells:** 50 payloads — PHP/JSP/ASP/Python/Node/Ruby, obfuscation techniques
+- **WordPress:** 50 payloads — REST API, XML-RPC SSRF, plugin enumeration, info disclosure
+- **LLM Testing:** 50 payloads — jailbreaks, prompt injection, extraction, exfiltration
+
+#### VS Code Extension
+- Published **Fray Security Scanner** to VS Code Marketplace (`DaliSecurity.fray-security`)
+- 11 commands: scan, test, bypass, detect, harden, recon, OSINT, leak search, and more
+- Rich HTML report webview panel (`Cmd+Shift+R`)
+- Inline diagnostics — bypass findings appear as warnings/errors in the editor
+- Activity bar sidebar with results + scan history
+- Right-click context menu to scan selected URLs
+
+### Changed
+- Updated `validate.yml` expected payload count to 4,003
+- Updated README.md and README.ja.md with new payload statistics and VS Code extension section
+- Added VS Code Marketplace badge to both READMEs
+
+---
+
 ## [1.0.0] - 2026-02-28
 
 ### 🎉 Initial Release

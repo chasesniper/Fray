@@ -1,5 +1,5 @@
 name: 'Fray WAF Security Test'
-description: 'Automated WAF security testing with 2300+ payloads. Detects WAF vendor, tests for bypasses, posts results as PR comments.'
+description: 'Automated WAF security testing with 4,000+ payloads. Detects WAF vendor, tests for bypasses, posts results as PR comments.'
 author: 'Dali Security'
 
 branding:

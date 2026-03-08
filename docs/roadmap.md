@@ -10,8 +10,16 @@
 - [x] Auto scan: crawl → discover → inject (`fray scan`)
 - [x] 27-check reconnaissance, smart mode, WAF detection
 - [x] 14 MCP tools, HTML/Markdown reports, SARIF output
+- [x] 4,000+ payload database across 23 categories
+- [x] VS Code extension on Marketplace (`DaliSecurity.fray-security`)
+- [x] GitHub Action (`action.yml`) for CI/CD integration
 
 ## Planned
 
+- [ ] `fray dashboard` — browser-based web UI for results, history, attack surface
+- [ ] `fray stats` leaderboard — payload effectiveness scoring per WAF vendor
+- [ ] Homebrew formula (`brew install fray`)
+- [ ] docs.dalisec.io — hosted documentation site
+- [ ] Fray landing page on dalisec.io
 - [ ] HackerOne API integration (auto-submit findings)
-- [ ] Web-based report dashboard
+- [ ] Demo video/GIF refresh with latest features

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fray"
-version = "3.3.0"
-description = "Open-source WAF Security Testing Platform — 5,500+ attack payloads, 25 WAF fingerprints, beautiful CLI output"
+version = "3.4.0"
+description = "Open-source WAF Security Testing Platform — 4,000+ attack payloads, 25 WAF fingerprints, beautiful CLI output"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.8"
