@@ -1,0 +1,52 @@
+{
+  "category": "auth_bypass",
+  "subcategory": "threat_intel_auth_bypass",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 2,
+  "payloads": [
+    {
+      "id": "threat-intel-CVE-2025-15597-0000",
+      "category": "auth_bypass",
+      "subcategory": "role_escalation",
+      "payload": "{\"role\": \"admin\", \"user\": \"attacker\"}",
+      "description": "CVE-2025-15597: A vulnerability has been found in Dataease SQLBot up to 1.4.0. This affects an unknown function of the file backend/apps",
+      "source": "NVD (CVSS 6.3)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2025-15597",
+      "severity": "medium",
+      "reference": "https://github.com/dataease/SQLBot/",
+      "technique": "role_escalation",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2025-15597"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2017-7921-0001",
+      "category": "auth_bypass",
+      "subcategory": "path_normalization",
+      "payload": "/admin/../admin",
+      "description": "CVE-2017-7921: Multiple Hikvision products contain an improper authentication vulnerability that could allow a malicious user to escala",
+      "source": "CISA KEV (actively exploited)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2017-7921",
+      "severity": "critical",
+      "reference": "https://nvd.nist.gov/vuln/detail/CVE-2017-7921",
+      "technique": "path_normalization",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2017-7921"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.035244+00:00"
+}

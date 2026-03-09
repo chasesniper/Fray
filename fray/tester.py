@@ -19,28 +19,48 @@ from datetime import datetime
 import sys
 
 
-# Realistic User-Agent pool for stealth mode
-_STEALTH_USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0",
-    "Mozilla/5.0 (X11; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Mobile/15E148 Safari/604.1",
+# Realistic browser User-Agent pool (2025-2026 versions)
+# Used by DEFAULT — not just stealth mode — to avoid bot detection before reaching WAF
+_BROWSER_USER_AGENTS = [
+    # Chrome 131-134 (Windows, Mac, Linux)
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    # Firefox 133-135
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0",
+    "Mozilla/5.0 (X11; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0",
+    # Safari 18
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15",
+    # Edge 131-134
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0",
+    # Mobile
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.36",
 ]
 
-# Accept-Language variants for stealth
-_STEALTH_ACCEPT_LANGS = [
+# Accept-Language variants
+_BROWSER_ACCEPT_LANGS = [
     "en-US,en;q=0.9",
     "en-GB,en;q=0.9",
     "en-US,en;q=0.9,ja;q=0.8",
-    "en-US,en;q=0.8",
+    "en-US,en;q=0.9,zh-CN;q=0.8",
     "en,*;q=0.5",
 ]
+
+# Browser-realistic Accept headers by content type
+_BROWSER_ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+_BROWSER_ACCEPT_ENCODING = "gzip, deflate, br"
+
+# Sec-Fetch headers that real browsers always send (absence flags bots)
+_SEC_FETCH_HEADERS = {
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+}
 
 
 def _is_private_host(hostname: str) -> bool:
@@ -141,13 +161,29 @@ class WAFTester:
 
         self._last_request_time = time.time()
 
-    def _get_stealth_headers(self) -> str:
-        """Return randomized User-Agent and Accept-Language for stealth mode."""
-        if not self.stealth:
-            return ""
-        ua = random.choice(_STEALTH_USER_AGENTS)
-        lang = random.choice(_STEALTH_ACCEPT_LANGS)
-        lines = f"User-Agent: {ua}\r\nAccept-Language: {lang}\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+    def _get_browser_headers(self) -> str:
+        """Return browser-mimicking headers.
+
+        ALWAYS used (not just stealth) because bot detectors check UA, Accept,
+        Sec-Fetch-* etc. BEFORE traffic even reaches the WAF layer.
+        Without these, the request gets blocked by bot detection, not the WAF,
+        giving a false 'blocked' result.
+        """
+        ua = random.choice(_BROWSER_USER_AGENTS)
+        lang = random.choice(_BROWSER_ACCEPT_LANGS)
+        # Header ordering matters — Chrome sends them in this exact order
+        lines = (f"User-Agent: {ua}\r\n"
+                 f"Accept: {_BROWSER_ACCEPT}\r\n"
+                 f"Accept-Language: {lang}\r\n"
+                 f"Accept-Encoding: {_BROWSER_ACCEPT_ENCODING}\r\n")
+        # Sec-Fetch-* headers — their absence is a strong bot signal
+        for k, v in _SEC_FETCH_HEADERS.items():
+            lines += f"{k}: {v}\r\n"
+        if self.stealth:
+            # Extra stealth: add DNT, Upgrade-Insecure-Requests, Cache-Control
+            lines += "DNT: 1\r\n"
+            lines += "Upgrade-Insecure-Requests: 1\r\n"
+            lines += f"Cache-Control: max-age=0\r\n"
         return lines
 
     def _build_post_body(self, payload: str, param: str, enc: str,
@@ -461,7 +497,7 @@ class WAFTester:
             try:
                 enc = urllib.parse.quote(payload, safe='')
 
-                stealth_hdrs = self._get_stealth_headers()
+                stealth_hdrs = self._get_browser_headers()
 
                 if method == 'GET' or hop > 0:
                     query_string = f"{current_query}&{param}={enc}" if current_query else f"{param}={enc}"

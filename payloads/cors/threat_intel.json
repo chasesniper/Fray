@@ -1,0 +1,31 @@
+{
+  "category": "cors",
+  "subcategory": "threat_intel_cors",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 1,
+  "payloads": [
+    {
+      "id": "threat-intel-GHSA-g9rg-8vq5-mpwm-0000",
+      "category": "cors",
+      "subcategory": "origin_test",
+      "payload": "Origin: https://evil.com",
+      "description": "GHSA-g9rg-8vq5-mpwm: mcp-memory-service's Wildcard CORS with Credentials Enables Cross-Origin Memory Theft",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "GHSA-g9rg-8vq5-mpwm",
+      "severity": "high",
+      "reference": "https://github.com/advisories/GHSA-g9rg-8vq5-mpwm",
+      "technique": "origin_test",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "ghsa-g9rg-8vq5-mpwm"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.038378+00:00"
+}

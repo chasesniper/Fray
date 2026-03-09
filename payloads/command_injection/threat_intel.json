@@ -1,0 +1,644 @@
+{
+  "category": "command_injection",
+  "subcategory": "threat_intel_command_injection",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 33,
+  "payloads": [
+    {
+      "id": "threat-intel-CVE-2026-2999-0000",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2026-2999",
+      "description": "CVE-2026-2999: IDExpert Windows Logon Agent developed by Changing has a Remote Code Execution vulnerability, allowing unauthenticated r",
+      "source": "NVD (CVSS 9.8)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-2999",
+      "severity": "critical",
+      "reference": "https://www.changingtec.com/news_detail.jsp?item_id=348",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-2999"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-3000-0001",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2026-3000",
+      "description": "CVE-2026-3000: IDExpert Windows Logon Agent developed by Changing has a Remote Code Execution vulnerability, allowing unauthenticated r",
+      "source": "NVD (CVSS 9.8)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-3000",
+      "severity": "critical",
+      "reference": "https://www.changingtec.com/news_detail.jsp?item_id=348",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-3000"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2025-14532-0002",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2025-14532",
+      "description": "CVE-2025-14532: DobryCMS's upload file functionality allows an unauthenticated remote attacker to upload files of any type and extension",
+      "source": "NVD (CVSS 9.8)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2025-14532",
+      "severity": "critical",
+      "reference": "https://cert.pl/posts/2026/03/CVE-2025-12462/",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2025-14532"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2024-47886-0003",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2024-47886",
+      "description": "CVE-2024-47886: Chamilo is a learning management system. Chamillo is affected by a post-authentication phar unserialize which leads to a",
+      "source": "NVD (CVSS 7.2)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2024-47886",
+      "severity": "high",
+      "reference": "https://github.com/chamilo/chamilo-lms/releases/tag/v1.11.28",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2024-47886"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2025-50187-0004",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2025-50187",
+      "description": "CVE-2025-50187: Chamilo is a learning management system. Prior to version 1.11.28, parameter from SOAP request is evaluated without filt",
+      "source": "NVD (CVSS 9.8)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2025-50187",
+      "severity": "critical",
+      "reference": "https://github.com/chamilo/chamilo-lms/releases/tag/v1.11.28",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2025-50187"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2025-50189-0005",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2025-50189",
+      "description": "CVE-2025-50189: Chamilo is a learning management system. Prior to version 1.11.30, the application performs insufficient validation of d",
+      "source": "NVD (CVSS 8.8)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2025-50189",
+      "severity": "high",
+      "reference": "https://github.com/chamilo/chamilo-lms/commit/22bb81df8f7062da20a2f6248789f47b221ca705",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2025-50189"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2021-30952-0006",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2021-30952",
+      "description": "CVE-2021-30952: Apple tvOS, macOS, Safari, iPadOS and watchOS contain an integer overflow or wraparound vulnerability due to the process",
+      "source": "CISA KEV (actively exploited)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2021-30952",
+      "severity": "critical",
+      "reference": "https://nvd.nist.gov/vuln/detail/CVE-2021-30952",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2021-30952"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-22719-0007",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2026-22719",
+      "description": "CVE-2026-22719: Broadcom VMware Aria Operations formerly known as vRealize Operations (vROps) contains a command injection vulnerability",
+      "source": "CISA KEV (actively exploited)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-22719",
+      "severity": "critical",
+      "reference": "https://nvd.nist.gov/vuln/detail/CVE-2026-22719",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-22719"
+      ]
+    },
+    {
+      "id": "threat-intel-GHSA-4j36-39gm-8vq8-0008",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # GHSA-4j36-39gm-8vq8",
+      "description": "GHSA-4j36-39gm-8vq8: OneUptime: Synthetic Monitor RCE via exposed Playwright browser object",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "GHSA-4j36-39gm-8vq8",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-4j36-39gm-8vq8",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "ghsa-4j36-39gm-8vq8"
+      ]
+    },
+    {
+      "id": "threat-intel-GHSA-h343-gg57-2q67-0009",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # GHSA-h343-gg57-2q67",
+      "description": "GHSA-h343-gg57-2q67: OneUpTime's Unsandboxed Code Execution in Probe Allows Any Project Member to Achieve RCE",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "GHSA-h343-gg57-2q67",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-h343-gg57-2q67",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "ghsa-h343-gg57-2q67"
+      ]
+    },
+    {
+      "id": "threat-intel-GHSA-2h2p-mvfx-868w-0010",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # GHSA-2h2p-mvfx-868w",
+      "description": "GHSA-2h2p-mvfx-868w: SiYuan Vulnerable to Path Traversal in /export Endpoint Allows Arbitrary File Read and Secret Leakage",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "GHSA-2h2p-mvfx-868w",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-2h2p-mvfx-868w",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "ghsa-2h2p-mvfx-868w"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-30861-0011",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2026-30861",
+      "description": "CVE-2026-30861: WeKnora has Remote Code Execution (RCE) via Command Injection in MCP Stdio Configuration Validation",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-30861",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-r55h-3rwj-hcmg",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-30861"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-30860-0012",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2026-30860",
+      "description": "CVE-2026-30860: WeKnora Vulnerable to Remote Code Execution via SQL Injection Bypass in AI Database Query Tool",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-30860",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-8w32-6mrw-q5wv",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-30860"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-2833-0013",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2026-2833",
+      "description": "CVE-2026-2833: Pingora vulnerable to HTTP Request Smuggling via Premature Upgrade",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-2833",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-xq2h-p299-vjwv",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-2833"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-27944-0014",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2026-27944",
+      "description": "CVE-2026-27944: Nginx-UI Vulnerable to Unauthenticated Backup Download with Encryption Key Disclosure",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-27944",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-g9w5-qffc-6762",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-27944"
+      ]
+    },
+    {
+      "id": "threat-intel-GHSA-5wp8-q9mx-8jx8-0015",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # GHSA-5wp8-q9mx-8jx8",
+      "description": "GHSA-5wp8-q9mx-8jx8: zeptoclaw has Shell allowlist-blocklist bypass via command/argument injection and file name wildcards",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "GHSA-5wp8-q9mx-8jx8",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-5wp8-q9mx-8jx8",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "ghsa-5wp8-q9mx-8jx8"
+      ]
+    },
+    {
+      "id": "threat-intel-1d51f79eaad6843d-0016",
+      "category": "command_injection",
+      "subcategory": "threat_intel_command_injection",
+      "payload": "; cat /etc/pass[w]d",
+      "description": "",
+      "source": "GitHub Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://github.com/advisories/GHSA-5wp8-q9mx-8jx8"
+    },
+    {
+      "id": "threat-intel-GHSA-qr2g-p6q7-w82m-0017",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # GHSA-qr2g-p6q7-w82m",
+      "description": "GHSA-qr2g-p6q7-w82m: x402 SDK Security Advisory",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "GHSA-qr2g-p6q7-w82m",
+      "severity": "high",
+      "reference": "https://github.com/advisories/GHSA-qr2g-p6q7-w82m",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "ghsa-qr2g-p6q7-w82m"
+      ]
+    },
+    {
+      "id": "threat-intel-GHSA-v53h-f6m7-xcgm-0018",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # GHSA-v53h-f6m7-xcgm",
+      "description": "GHSA-v53h-f6m7-xcgm: Black's vulnerable version parsing leads to RCE in GitHub Action",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "GHSA-v53h-f6m7-xcgm",
+      "severity": "high",
+      "reference": "https://github.com/advisories/GHSA-v53h-f6m7-xcgm",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "ghsa-v53h-f6m7-xcgm"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-29064-0019",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # CVE-2026-29064",
+      "description": "CVE-2026-29064: Zarf's symlink targets in archives are not validated against destination directory",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-29064",
+      "severity": "high",
+      "reference": "https://github.com/advisories/GHSA-hcm4-6hpj-vghm",
+      "technique": "basic_rce",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-29064"
+      ]
+    },
+    {
+      "id": "threat-intel-345d53240411ade8-0020",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # [webapps] motionEye 0.43.1b4 -",
+      "description": "ExploitDB: [webapps] motionEye 0.43.1b4 - RCE",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52481",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-712d1fefc4379cd2-0021",
+      "category": "command_injection",
+      "subcategory": "pipe_rce",
+      "payload": "| cat /etc/passwd # [webapps] motionEye 0.43.1b4 -",
+      "description": "ExploitDB: [webapps] motionEye 0.43.1b4 - RCE",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52481",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-e70b5ec46b09d748-0022",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # [remote] Redis 8.0.2 - RCE",
+      "description": "ExploitDB: [remote] Redis 8.0.2 - RCE",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52477",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-15566b5625d158f6-0023",
+      "category": "command_injection",
+      "subcategory": "pipe_rce",
+      "payload": "| cat /etc/passwd # [remote] Redis 8.0.2 - RCE",
+      "description": "ExploitDB: [remote] Redis 8.0.2 - RCE",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52477",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-37ef8f7adbc643ca-0024",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # [remote] Ingress-NGINX Admissi",
+      "description": "ExploitDB: [remote] Ingress-NGINX Admission Controller v1.11.1 - FD Injection to RCE",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52475",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-9d664ed9a0e50f29-0025",
+      "category": "command_injection",
+      "subcategory": "pipe_rce",
+      "payload": "| cat /etc/passwd # [remote] Ingress-NGINX Admissi",
+      "description": "ExploitDB: [remote] Ingress-NGINX Admission Controller v1.11.1 - FD Injection to RCE",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52475",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-65066ca5db9c2924-0026",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # [webapps] FortiWeb Fabric Conn",
+      "description": "ExploitDB: [webapps] FortiWeb Fabric Connector 7.6.x - SQL Injection to Remote Code Execution",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52473",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-eb0c0e8424ce8e70-0027",
+      "category": "command_injection",
+      "subcategory": "pipe_rce",
+      "payload": "| cat /etc/passwd # [webapps] FortiWeb Fabric Conn",
+      "description": "ExploitDB: [webapps] FortiWeb Fabric Connector 7.6.x - SQL Injection to Remote Code Execution",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52473",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-a9a57dc218c100f8-0028",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # [webapps] FreeBSD rtsold 15.x ",
+      "description": "ExploitDB: [webapps] FreeBSD rtsold 15.x - Remote Code Execution via DNSSL",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52463",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-befb6d2e8dad981a-0029",
+      "category": "command_injection",
+      "subcategory": "pipe_rce",
+      "payload": "| cat /etc/passwd # [webapps] FreeBSD rtsold 15.x ",
+      "description": "ExploitDB: [webapps] FreeBSD rtsold 15.x - Remote Code Execution via DNSSL",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52463",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-00196eb83e85bf93-0030",
+      "category": "command_injection",
+      "subcategory": "basic_rce",
+      "payload": "; id # [webapps] Pluck 4.7.7-dev2 -  ",
+      "description": "ExploitDB: [webapps] Pluck 4.7.7-dev2 -  PHP Code Execution",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52460",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-303377d0a3720332-0031",
+      "category": "command_injection",
+      "subcategory": "pipe_rce",
+      "payload": "| cat /etc/passwd # [webapps] Pluck 4.7.7-dev2 -  ",
+      "description": "ExploitDB: [webapps] Pluck 4.7.7-dev2 -  PHP Code Execution",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52460",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-27971-0032",
+      "category": "command_injection",
+      "subcategory": "nuclei_template",
+      "payload": "# Nuclei template: CVE-2026-27971",
+      "description": "Nuclei: Merge pull request #15552 from omarkurt/patch-10\n\nAdd CVE-2026-27971 for Qwik RCE vulnerability",
+      "source": "Nuclei Templates (projectdiscovery)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-27971",
+      "severity": "high",
+      "reference": "https://github.com/projectdiscovery/nuclei-templates/commit/73f3304af1bbb351c50f923cfa77ed8efcca03e2",
+      "tags": [
+        "nuclei",
+        "threat-intel"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.036036+00:00"
+}

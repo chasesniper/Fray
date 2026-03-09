@@ -1,0 +1,193 @@
+{
+  "category": "sqli",
+  "subcategory": "threat_intel_sqli",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 10,
+  "payloads": [
+    {
+      "id": "threat-intel-CVE-2026-3413-0000",
+      "category": "sqli",
+      "subcategory": "auth_bypass",
+      "payload": "' OR 1=1-- /* CVE-2026-3413 */",
+      "description": "CVE-2026-3413: A flaw has been found in itsourcecode University Management System 1.0. This vulnerability affects unknown code of the f",
+      "source": "NVD (CVSS 7.3)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-3413",
+      "severity": "high",
+      "reference": "https://github.com/JXBbozaihuang/vuln-research/issues/1",
+      "technique": "auth_bypass",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-3413"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2025-50190-0001",
+      "category": "sqli",
+      "subcategory": "auth_bypass",
+      "payload": "' OR 1=1-- /* CVE-2025-50190 */",
+      "description": "CVE-2025-50190: Chamilo is a learning management system. Prior to version 1.11.30, there is an error-based SQL Injection via the GET ope",
+      "source": "NVD (CVSS 9.8)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2025-50190",
+      "severity": "critical",
+      "reference": "https://github.com/chamilo/chamilo-lms/commit/613eb19a0fac6dd49c233f32ad5428cd29d5a468",
+      "technique": "auth_bypass",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2025-50190"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-30822-0002",
+      "category": "sqli",
+      "subcategory": "auth_bypass",
+      "payload": "' OR 1=1-- /* CVE-2026-30822 */",
+      "description": "CVE-2026-30822: Flowise Allows Mass Assignment in `/api/v1/leads` Endpoint",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-30822",
+      "severity": "high",
+      "reference": "https://github.com/advisories/GHSA-mq4r-h2gh-qv7x",
+      "technique": "auth_bypass",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-30822"
+      ]
+    },
+    {
+      "id": "threat-intel-78d49dc0a6852af6-0003",
+      "category": "sqli",
+      "subcategory": "auth_bypass",
+      "payload": "' OR 1=1-- /* [webapps] WeGIA 3.5.0 - SQL In */",
+      "description": "ExploitDB: [webapps] WeGIA 3.5.0 - SQL Injection",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52483",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-767b332ee618fb05-0004",
+      "category": "sqli",
+      "subcategory": "union_based",
+      "payload": "' UNION SELECT null,version()-- /* [webapps] WeGIA 3.5.0 - SQL In */",
+      "description": "ExploitDB: [webapps] WeGIA 3.5.0 - SQL Injection",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52483",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-d4fbbf7ad01b2eca-0005",
+      "category": "sqli",
+      "subcategory": "auth_bypass",
+      "payload": "' OR 1=1-- /* [webapps] WordPress Quiz Maker */",
+      "description": "ExploitDB: [webapps] WordPress Quiz Maker 6.7.0.56 - SQL Injection",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52465",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-9f9ad9486d454aa6-0006",
+      "category": "sqli",
+      "subcategory": "union_based",
+      "payload": "' UNION SELECT null,version()-- /* [webapps] WordPress Quiz Maker */",
+      "description": "ExploitDB: [webapps] WordPress Quiz Maker 6.7.0.56 - SQL Injection",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52465",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-350ecab61a2fcbf0-0007",
+      "category": "sqli",
+      "subcategory": "auth_bypass",
+      "payload": "' OR 1=1-- /* [webapps] Summar Employee Port */",
+      "description": "ExploitDB: [webapps] Summar Employee Portal  3.98.0 - Authenticated SQL Injection",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52462",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-4b75bbe89c2c594c-0008",
+      "category": "sqli",
+      "subcategory": "union_based",
+      "payload": "' UNION SELECT null,version()-- /* [webapps] Summar Employee Port */",
+      "description": "ExploitDB: [webapps] Summar Employee Portal  3.98.0 - Authenticated SQL Injection",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52462",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2022-1453-0009",
+      "category": "sqli",
+      "subcategory": "nuclei_template",
+      "payload": "# Nuclei template: CVE-2022-1453",
+      "description": "Nuclei: Merge pull request #15461 from Sechunt3r/patch-94\n\nAdd CVE-2022-1453.yaml for SQL Injection vulnerability",
+      "source": "Nuclei Templates (projectdiscovery)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2022-1453",
+      "severity": "high",
+      "reference": "https://github.com/projectdiscovery/nuclei-templates/commit/41279b50b6a2fc49a5ef9f1fb657c1d3c5e46702",
+      "tags": [
+        "nuclei",
+        "threat-intel"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.036359+00:00"
+}

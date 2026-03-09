@@ -1,0 +1,31 @@
+{
+  "category": "race_condition",
+  "subcategory": "threat_intel_race_condition",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 1,
+  "payloads": [
+    {
+      "id": "threat-intel-CVE-2026-20438-0000",
+      "category": "race_condition",
+      "subcategory": "cve_race_condition",
+      "payload": "# CVE-2026-20438 — In MAE, there is a possible out of bounds write due to a race condition. This could lead to local escalation of privilege if a malicious actor has already obtained the System privilege. User interacti",
+      "description": "CVE-2026-20438: In MAE, there is a possible out of bounds write due to a race condition. This could lead to local escalation of privileg",
+      "source": "NVD (CVSS 6.4)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20438",
+      "severity": "medium",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "race_condition",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20438"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.037514+00:00"
+}

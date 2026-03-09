@@ -1,0 +1,52 @@
+{
+  "category": "file_upload",
+  "subcategory": "threat_intel_file_upload",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 2,
+  "payloads": [
+    {
+      "id": "threat-intel-CVE-2025-50188-0000",
+      "category": "file_upload",
+      "subcategory": "cve_file_upload",
+      "payload": "# CVE-2025-50188 — Chamilo is a learning management system. Prior to version 1.11.30, the application performs insufficient validation of data coming from the user from the GET value parameter with the following scripts",
+      "description": "CVE-2025-50188: Chamilo is a learning management system. Prior to version 1.11.30, the application performs insufficient validation of d",
+      "source": "NVD (CVSS 7.2)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2025-50188",
+      "severity": "high",
+      "reference": "https://github.com/chamilo/chamilo-lms/commit/ef54cc0906a3caaa3e7ac9b640b044f03b1fe733",
+      "technique": "file_upload",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2025-50188"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-30821-0001",
+      "category": "file_upload",
+      "subcategory": "cve_file_upload",
+      "payload": "# CVE-2026-30821 — Flowise has Arbitrary File Upload via MIME Spoofing",
+      "description": "CVE-2026-30821: Flowise has Arbitrary File Upload via MIME Spoofing",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-30821",
+      "severity": "high",
+      "reference": "https://github.com/advisories/GHSA-j8g8-j7fc-43v6",
+      "technique": "file_upload",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-30821"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.037653+00:00"
+}

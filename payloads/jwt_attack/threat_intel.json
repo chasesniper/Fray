@@ -1,0 +1,31 @@
+{
+  "category": "jwt_attack",
+  "subcategory": "threat_intel_jwt_attack",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 1,
+  "payloads": [
+    {
+      "id": "threat-intel-GHSA-c8m8-3jcr-6rj5-0000",
+      "category": "jwt_attack",
+      "subcategory": "alg_none",
+      "payload": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJhZG1pbiJ9.",
+      "description": "GHSA-c8m8-3jcr-6rj5: FUXA has a hardcoded fallback JWT signing secret",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "GHSA-c8m8-3jcr-6rj5",
+      "severity": "high",
+      "reference": "https://github.com/advisories/GHSA-c8m8-3jcr-6rj5",
+      "technique": "alg_none",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "ghsa-c8m8-3jcr-6rj5"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.038165+00:00"
+}

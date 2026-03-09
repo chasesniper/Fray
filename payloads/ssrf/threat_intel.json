@@ -1,0 +1,31 @@
+{
+  "category": "ssrf",
+  "subcategory": "threat_intel_ssrf",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 1,
+  "payloads": [
+    {
+      "id": "threat-intel-CVE-2026-30832-0000",
+      "category": "ssrf",
+      "subcategory": "gcp_metadata",
+      "payload": "http://metadata.google.internal/computeMetadata/v1/",
+      "description": "CVE-2026-30832: soft-serve vulnerable to SSRF via unvalidated LFS endpoint in repo import",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-30832",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-3fvx-xrxq-8jvv",
+      "technique": "gcp_metadata",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "auto-generated",
+        "threat-intel",
+        "cve-2026-30832"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.037795+00:00"
+}

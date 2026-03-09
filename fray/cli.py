@@ -6,6 +6,8 @@ Usage:
     fray detect <url>           Detect WAF vendor
     fray test <url>             Test WAF with payloads
     fray test <url> -c xss      Test specific category
+    fray test <url> --blind      Blind injection detection (time-based + OOB DNS)
+    fray test <url> --auth-profile ~/.fray/auth/mysite.json   Authenticated scan
     fray test <url> --smart      Adaptive payload evolution (fewer requests, more impact)
     fray test <url> --webhook <url>  Notify on completion
     fray report                 Generate HTML report
@@ -23,6 +25,10 @@ Usage:
     fray bounty --platform h1    Bug bounty scope auto-fetch + batch test
     fray explain <CVE-ID>       Explain a CVE — payloads, severity, what to test
     fray explain results.json    Explain scan findings — impact, remediation, next steps
+    fray agent <url>             Self-improving payload agent: probe → mutate → learn
+    fray feed                    Threat intel feed: auto-discover CVEs → translate to payloads
+    fray update                  Pull latest payload database from cloud (R2 / GitHub)
+    fray sync --push             Publish payload database to cloud (maintainer)
     fray demo [url]             Quick showcase: detect WAF + XSS scan (great for GIFs)
     fray version                Show version
 """
@@ -786,8 +792,19 @@ def cmd_test(args):
             print(f"  ✅ Target in scope — {reason}")
 
     from fray.tester import WAFTester
-    # Build custom headers from auth flags
-    custom_headers = build_auth_headers(args)
+
+    # Auth profile support: --auth-profile overrides --cookie/--bearer
+    auth_profile_path = getattr(args, 'auth_profile', None)
+    if auth_profile_path:
+        from fray.auth import AuthProfile
+        auth_prof = AuthProfile.from_file(auth_profile_path)
+        if not auth_prof.authenticate(verbose=not getattr(args, 'json', False)):
+            print("Error: Authentication failed. Check your auth profile.", file=sys.stderr)
+            sys.exit(1)
+        custom_headers = auth_prof.get_headers()
+    else:
+        # Build custom headers from auth flags
+        custom_headers = build_auth_headers(args)
     # Redirect policy
     if getattr(args, 'no_follow_redirects', False):
         max_redirects = 0
@@ -985,6 +1002,38 @@ def cmd_test(args):
             if not json_mode:
                 sys.stderr.write(f"  Mutations: {len(mutation_results)} tested, {mutation_bypassed} bypassed\n")
             results.extend(mutation_results)
+
+    # Blind injection detection (--blind)
+    blind_findings = []
+    if getattr(args, 'blind', False):
+        from fray.blind import BlindDetector
+        blind_cats = [args.category] if args.category else None
+        oob_server = getattr(args, 'oob_server', '') or ''
+        blind_det = BlindDetector(
+            tester, param=args.param or 'input',
+            oob_server=oob_server,
+            verbose=not json_mode,
+        )
+        blind_findings = blind_det.detect_all(categories=blind_cats)
+        # Add blind findings as result entries
+        for bf in blind_findings:
+            results.append({
+                'payload': bf.payload,
+                'status': 0,
+                'blocked': False,
+                'detection_method': bf.detection_method,
+                'category': bf.category,
+                'subcategory': bf.subcategory,
+                'confidence': bf.confidence,
+                'blind': True,
+                'bypass_confidence': 95 if bf.confidence == 'confirmed' else 70,
+                'fp_score': 5 if bf.confidence == 'confirmed' else 25,
+                'confidence_label': bf.confidence,
+                'evidence': bf.evidence,
+                'baseline_ms': bf.baseline_ms,
+                'actual_ms': bf.actual_ms,
+                'timestamp': bf.timestamp or __import__('datetime').datetime.now().isoformat(),
+            })
 
     # Build report dict
     from datetime import datetime as _dt
@@ -1994,6 +2043,381 @@ def cmd_ai_bypass(args):
             json.dump(asdict(result), f, indent=2, ensure_ascii=False)
         if not json_mode:
             print(f"\n  Results saved to {output_file}")
+
+
+def cmd_agent(args):
+    """Self-improving payload agent — iterative probe → test → mutate → learn loop"""
+    from fray.tester import WAFTester
+    from fray.agent import run_agent
+
+    targets = _read_targets(args)
+    args.target = targets[0]
+
+    # Scope validation
+    scope_file = getattr(args, 'scope', None)
+    if scope_file:
+        from fray.scope import parse_scope_file, is_target_in_scope
+        scope = parse_scope_file(scope_file)
+        in_scope, reason = is_target_in_scope(args.target, scope)
+        if not in_scope:
+            print(f"\n  Target is OUT OF SCOPE: {reason}")
+            sys.exit(1)
+
+    custom_headers = build_auth_headers(args)
+    tester = WAFTester(
+        target=args.target,
+        timeout=getattr(args, 'timeout', 8),
+        delay=getattr(args, 'delay', 0.5),
+        verify_ssl=not getattr(args, 'insecure', False),
+        custom_headers=custom_headers or None,
+        jitter=getattr(args, 'jitter', 0.0),
+        stealth=getattr(args, 'stealth', False),
+        rate_limit=getattr(args, 'rate_limit', 0.0),
+    )
+
+    # Load payloads
+    all_payloads = []
+    category = getattr(args, 'category', 'xss') or 'xss'
+    for cat in category.split(','):
+        cat = cat.strip()
+        cat_dir = PAYLOADS_DIR / cat
+        if cat_dir.exists():
+            for pf in sorted(cat_dir.glob("*.json")):
+                all_payloads.extend(tester.load_payloads(str(pf)))
+
+    if not all_payloads:
+        print(f"Error: No payloads loaded for category '{category}'.")
+        print(f"Available: {', '.join(list_categories())}")
+        sys.exit(1)
+
+    json_mode = getattr(args, 'json', False)
+
+    results, stats, profile = run_agent(
+        tester=tester,
+        payloads=all_payloads,
+        max_rounds=getattr(args, 'rounds', 5),
+        budget=getattr(args, 'budget', 100),
+        param=getattr(args, 'param', 'input'),
+        category=category,
+        verbose=not json_mode,
+        use_cache=not getattr(args, 'no_cache', False),
+        use_ai=getattr(args, 'ai', False),
+    )
+
+    # JSON output
+    if json_mode:
+        output = {
+            "target": args.target,
+            "rounds": stats.rounds_completed,
+            "total_requests": stats.total_requests,
+            "bypasses": stats.total_bypasses,
+            "bypass_rate": stats.bypass_rate,
+            "techniques": sorted(stats.unique_bypass_techniques),
+            "results": [r for r in results if not r.get("blocked")],
+        }
+        print(json.dumps(output, indent=2, ensure_ascii=False, default=str))
+
+    # Save output
+    output_file = getattr(args, 'output', None)
+    if output_file:
+        _validate_output_path(output_file)
+        output = {
+            "target": args.target,
+            "rounds": stats.rounds_completed,
+            "total_requests": stats.total_requests,
+            "bypasses": stats.total_bypasses,
+            "bypass_rate": stats.bypass_rate,
+            "techniques": sorted(stats.unique_bypass_techniques),
+            "results": results,
+        }
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(output, f, indent=2, ensure_ascii=False, default=str)
+        if not json_mode:
+            print(f"\n  Results saved to {output_file}")
+
+    # Webhook notification
+    webhook_url = getattr(args, 'notify', None)
+    if webhook_url:
+        from fray.webhook import send_generic_notification
+        send_generic_notification(
+            webhook_url, "agent", args.target,
+            {"Bypasses": stats.total_bypasses,
+             "Rounds": stats.rounds_completed,
+             "Requests": stats.total_requests,
+             "Bypass Rate": stats.bypass_rate},
+        )
+
+
+def cmd_feed(args):
+    """Threat intelligence feed — auto-discover & ingest new attack vectors"""
+    from fray.threat_intel import run_feed, _SOURCES
+
+    # Parse sources
+    sources = None
+    if hasattr(args, 'sources') and args.sources:
+        sources = [s.strip() for s in args.sources.split(',')]
+
+    # Parse --since (e.g. "7d", "30d", "2w")
+    since_days = 7
+    if hasattr(args, 'since') and args.since:
+        s = args.since.strip().lower()
+        if s.endswith('d'):
+            since_days = int(s[:-1])
+        elif s.endswith('w'):
+            since_days = int(s[:-1]) * 7
+        elif s.endswith('m'):
+            since_days = int(s[:-1]) * 30
+        else:
+            since_days = int(s)
+
+    json_mode = getattr(args, 'json', False)
+
+    # List available sources
+    if getattr(args, 'list_sources', False):
+        if json_mode:
+            print(json.dumps({"sources": list(_SOURCES.keys())}, indent=2))
+        else:
+            print("\n  Available threat intelligence sources:\n")
+            for key, src in _SOURCES.items():
+                print(f"    {key:12s}  {src['label']}")
+            print(f"\n  Use: fray feed --sources nvd,cisa,github")
+        return
+
+    payloads, stats = run_feed(
+        sources=sources,
+        since_days=since_days,
+        category_filter=getattr(args, 'category', '') or '',
+        auto_add=getattr(args, 'auto_add', False),
+        dry_run=getattr(args, 'dry_run', False),
+        test_target=getattr(args, 'test_target', '') or '',
+        test_delay=getattr(args, 'delay', 0.3),
+        test_timeout=getattr(args, 'timeout', 8),
+        test_verify_ssl=not getattr(args, 'insecure', False),
+        verbose=not json_mode,
+    )
+
+    # JSON output
+    if json_mode:
+        output = {
+            "sources_queried": stats.sources_queried,
+            "items_fetched": stats.items_fetched,
+            "payloads_new": stats.payloads_new,
+            "payloads_duplicate": stats.payloads_duplicate,
+            "payloads_added": stats.payloads_added,
+            "payloads_tested": stats.payloads_tested,
+            "payloads_bypassed": stats.payloads_bypassed,
+            "payloads_blocked": stats.payloads_blocked,
+            "test_target": stats.test_target,
+            "errors": stats.errors,
+            "payloads": [p.to_fray_format(i) for i, p in enumerate(payloads)],
+        }
+        print(json.dumps(output, indent=2, ensure_ascii=False, default=str))
+
+    # Save output
+    output_file = getattr(args, 'output', None)
+    if output_file:
+        _validate_output_path(output_file)
+        output = {
+            "sources_queried": stats.sources_queried,
+            "items_fetched": stats.items_fetched,
+            "payloads_new": stats.payloads_new,
+            "payloads_added": stats.payloads_added,
+            "payloads": [p.to_fray_format(i) for i, p in enumerate(payloads)],
+        }
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(output, f, indent=2, ensure_ascii=False, default=str)
+        if not json_mode:
+            print(f"\n  Results saved to {output_file}")
+
+    # Webhook notification
+    webhook_url = getattr(args, 'notify', None)
+    if webhook_url:
+        from fray.webhook import send_generic_notification
+        send_generic_notification(
+            webhook_url, "feed", "threat-intel",
+            {"New Payloads": stats.payloads_new,
+             "Added": stats.payloads_added,
+             "Sources": stats.sources_queried,
+             "Tested": stats.payloads_tested,
+             "Bypassed": stats.payloads_bypassed},
+        )
+
+
+def cmd_update(args):
+    """Pull latest payload database from cloud (R2 / GitHub Releases)."""
+    from fray.cloud_sync import update_payloads
+
+    json_mode = getattr(args, 'json', False)
+    source = getattr(args, 'source', 'auto') or 'auto'
+
+    manifest = update_payloads(source=source, verbose=not json_mode)
+
+    if json_mode:
+        output = manifest or {"status": "up_to_date"}
+        print(json.dumps(output, indent=2, ensure_ascii=False, default=str))
+
+
+def cmd_sync(args):
+    """Publish or pull payload database to/from cloud."""
+    from fray.cloud_sync import run_sync, load_config, save_config
+
+    json_mode = getattr(args, 'json', False)
+    push = getattr(args, 'push', False)
+    pull = getattr(args, 'pull', False)
+    source = getattr(args, 'source', 'auto') or 'auto'
+    tag = getattr(args, 'tag', '') or ''
+
+    # Handle --configure
+    if getattr(args, 'configure', False):
+        cfg = load_config()
+        import sys as _sys
+        print("\n  Fray Cloud Sync Configuration")
+        print("  ─────────────────────────────")
+        print(f"  Current config: ~/.fray/cloud.json\n")
+
+        prompts = [
+            ("github_repo", "GitHub repo", cfg.github_repo),
+            ("r2_endpoint", "R2 endpoint URL", cfg.r2_endpoint or "(not set)"),
+            ("r2_bucket", "R2 bucket name", cfg.r2_bucket),
+            ("r2_access_key", "R2 access key", cfg.r2_access_key or "(not set)"),
+            ("r2_secret_key", "R2 secret key", "(hidden)" if cfg.r2_secret_key else "(not set)"),
+            ("d1_api_url", "D1 API URL", cfg.d1_api_url or "(not set)"),
+            ("d1_api_token", "D1 API token", "(hidden)" if cfg.d1_api_token else "(not set)"),
+        ]
+        for attr, label, default in prompts:
+            try:
+                val = input(f"  {label} [{default}]: ").strip()
+                if val:
+                    setattr(cfg, attr, val)
+            except (EOFError, KeyboardInterrupt):
+                print()
+                return
+
+        save_config(cfg)
+        print(f"\n  Config saved to ~/.fray/cloud.json")
+        return
+
+    # Handle --status
+    if getattr(args, 'status', False):
+        cfg = load_config()
+        from fray.cloud_sync import r2_available, d1_available
+        print(f"\n  Fray Cloud Sync Status")
+        print(f"  ─────────────────────")
+        print(f"  GitHub repo:  {cfg.github_repo}")
+        print(f"  R2 storage:   {'configured' if r2_available(cfg) else 'not configured'}")
+        print(f"  D1 database:  {'configured' if d1_available(cfg) else 'not configured'}")
+        print(f"  Share learn:  {'enabled' if cfg.share_patterns else 'disabled'}")
+
+        from pathlib import Path as _P
+        last = _P.home() / ".fray" / "last_update.json"
+        if last.exists():
+            info = json.loads(last.read_text())
+            print(f"\n  Last update:  {info.get('last_update', 'never')}")
+            print(f"  Source:       {info.get('source', '?')}")
+            print(f"  Payloads:     {info.get('total_payloads', '?')}")
+        else:
+            print(f"\n  Last update:  never")
+        return
+
+    result = run_sync(push=push, pull=pull, source=source, tag=tag,
+                      verbose=not json_mode)
+
+    if json_mode:
+        print(json.dumps(result, indent=2, ensure_ascii=False, default=str))
+
+
+def cmd_todo(args):
+    """Internal TODO list — private, stored in ~/.fray/todo.json (never in repo)."""
+    todo_path = Path.home() / ".fray" / "todo.json"
+    todo_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Load existing
+    items = []
+    if todo_path.exists():
+        try:
+            items = json.loads(todo_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            items = []
+
+    json_mode = getattr(args, 'json', False)
+    action = getattr(args, 'action', 'list')
+    text = getattr(args, 'text', None)
+
+    # --- add ---
+    if action == 'add' and text:
+        priority = getattr(args, 'priority', 'medium') or 'medium'
+        new_id = max((i.get("id", 0) for i in items), default=0) + 1
+        items.append({
+            "id": new_id,
+            "content": " ".join(text),
+            "status": "pending",
+            "priority": priority,
+            "created": __import__('datetime').datetime.now().isoformat(),
+        })
+        todo_path.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
+        if not json_mode:
+            print(f"  Added #{new_id}: {' '.join(text)} [{priority}]")
+        else:
+            print(json.dumps(items[-1], indent=2))
+        return
+
+    # --- done ---
+    if action == 'done':
+        tid = getattr(args, 'id', None)
+        if tid is not None:
+            for item in items:
+                if item.get("id") == tid:
+                    item["status"] = "completed"
+                    todo_path.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
+                    if not json_mode:
+                        print(f"  Completed #{tid}: {item['content']}")
+                    return
+            print(f"  Not found: #{tid}")
+        return
+
+    # --- rm ---
+    if action == 'rm':
+        tid = getattr(args, 'id', None)
+        if tid is not None:
+            before = len(items)
+            items = [i for i in items if i.get("id") != tid]
+            if len(items) < before:
+                todo_path.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
+                if not json_mode:
+                    print(f"  Removed #{tid}")
+            else:
+                print(f"  Not found: #{tid}")
+        return
+
+    # --- list (default) ---
+    if json_mode:
+        print(json.dumps(items, indent=2, ensure_ascii=False))
+        return
+
+    show_all = getattr(args, 'all', False)
+    pending = [i for i in items if i.get("status") != "completed"]
+    completed = [i for i in items if i.get("status") == "completed"]
+    display = items if show_all else pending
+
+    if not display:
+        print("  No TODO items. Add one with: fray todo add \"your task\"")
+        return
+
+    priority_sym = {"high": "\033[31m●\033[0m", "medium": "\033[33m●\033[0m", "low": "\033[2m●\033[0m"}
+    status_sym = {"completed": "\033[32m✓\033[0m", "in_progress": "\033[94m→\033[0m", "pending": " "}
+
+    print(f"\n  \033[1mFray Internal TODO\033[0m  \033[2m(~/.fray/todo.json)\033[0m\n")
+    for item in display:
+        sid = item.get("id", "?")
+        st = status_sym.get(item.get("status", "pending"), " ")
+        pr = priority_sym.get(item.get("priority", "medium"), "●")
+        content = item.get("content", "")
+        struck = f"\033[9m\033[2m{content}\033[0m" if item.get("status") == "completed" else content
+        print(f"  {st} {pr} #{sid:<3d} {struck}")
+
+    if not show_all and completed:
+        print(f"\n  \033[2m({len(completed)} completed — use --all to show)\033[0m")
+    print()
 
 
 def cmd_harden(args):
@@ -3498,10 +3922,9 @@ def cmd_help(args):
 """)
 
 
-def cmd_update(args):
-    """Update payloads from GitHub"""
-    from fray.update import run_update
-    run_update(check_only=getattr(args, 'check', False))
+def _cmd_update_legacy(args):
+    """Legacy update — now delegates to cloud sync cmd_update."""
+    cmd_update(args)
 
 
 def cmd_init_config(args):
@@ -3670,6 +4093,12 @@ Documentation: https://github.com/dalisecurity/fray
     p_test.add_argument("--sarif", action="store_true", help="Output SARIF 2.1.0 for GitHub Security tab / CodeQL")
     p_test.add_argument("--mutate", type=int, nargs="?", const=10, default=0, metavar="N",
                           help="Auto-mutate blocked payloads and re-test (default: 10 variants per payload)")
+    p_test.add_argument("--blind", action="store_true",
+                         help="Enable blind injection detection (time-based SQLi/SSTI/CMDi + OOB DNS)")
+    p_test.add_argument("--oob-server", default=None, metavar="DOMAIN",
+                         help="OOB callback server for blind detection (e.g. oast.fun, interact.sh)")
+    p_test.add_argument("--auth-profile", default=None, metavar="FILE",
+                         help="Auth profile JSON file (~/.fray/auth/*.json) — OAuth2, form login, multi-step")
     p_test.add_argument("--notify", default=None, metavar="WEBHOOK_URL",
                          help="Send Slack/Discord/Teams notification on completion")
     p_test.set_defaults(func=cmd_test)
@@ -3743,6 +4172,128 @@ Documentation: https://github.com/dalisecurity/fray
     p_ai.add_argument("--jitter", type=float, default=0.0, help="Random delay variance")
     p_ai.add_argument("--scope", default=None, help="Scope file")
     p_ai.set_defaults(func=cmd_ai_bypass)
+
+    # agent
+    p_agent = subparsers.add_parser("agent",
+        help="Self-improving payload agent — iterative probe → mutate → learn loop")
+    p_agent.add_argument("target", nargs="?", default=None, help="Target URL to test")
+    p_agent.add_argument("-c", "--category", default="xss",
+                         help="Payload categories, comma-separated (default: xss)")
+    p_agent.add_argument("--param", default="input", help="URL parameter to inject (default: input)")
+    p_agent.add_argument("--rounds", type=int, default=5, help="Max mutation rounds (default: 5)")
+    p_agent.add_argument("--budget", type=int, default=100,
+                         help="Total HTTP request budget (default: 100)")
+    p_agent.add_argument("--ai", action="store_true",
+                         help="Enable batched LLM fallback (needs OPENAI_API_KEY or ANTHROPIC_API_KEY)")
+    p_agent.add_argument("--no-cache", action="store_true", dest="no_cache",
+                         help="Disable learned pattern cache (~/.fray/learned_patterns.json)")
+    p_agent.add_argument("-t", "--timeout", type=int, default=8, help="Request timeout (default: 8)")
+    p_agent.add_argument("-d", "--delay", type=float, default=0.5, help="Delay between requests")
+    p_agent.add_argument("-o", "--output", default=None, help="Save results JSON to file")
+    p_agent.add_argument("--json", action="store_true", help="Output as JSON to stdout")
+    p_agent.add_argument("--insecure", action="store_true", help="Skip SSL verification")
+    p_agent.add_argument("--cookie", default=None, help="Cookie header")
+    p_agent.add_argument("--bearer", default=None, help="Bearer token")
+    p_agent.add_argument("-H", "--header", action="append",
+                         help="Custom header (repeatable, format: 'Name: Value')")
+    p_agent.add_argument("--stealth", action="store_true", help="Stealth mode")
+    p_agent.add_argument("--rate-limit", type=float, default=0.0, help="Max requests per second")
+    p_agent.add_argument("--jitter", type=float, default=0.0, help="Random delay variance")
+    p_agent.add_argument("--scope", default=None, help="Scope file")
+    p_agent.add_argument("--notify", default=None, metavar="WEBHOOK_URL",
+                         help="Send webhook notification on completion")
+    p_agent.set_defaults(func=cmd_agent)
+
+    # feed (threat intelligence)
+    p_feed = subparsers.add_parser("feed",
+        help="Threat intelligence feed — auto-discover & ingest new attack vectors from CVEs, advisories, and research")
+    p_feed.add_argument("--sources", default=None,
+                        help="Comma-separated sources: nvd,cisa,github,exploitdb,rss,nuclei (default: all)")
+    p_feed.add_argument("--since", default="7d",
+                        help="Look back period: 7d, 2w, 30d (default: 7d)")
+    p_feed.add_argument("-c", "--category", default=None,
+                        help="Filter by payload category (e.g. xss, sqli, ssrf)")
+    p_feed.add_argument("--auto-add", action="store_true", dest="auto_add",
+                        help="Auto-add new payloads to database (default: stage for review)")
+    p_feed.add_argument("--dry-run", action="store_true", dest="dry_run",
+                        help="Show what would be added without writing any files")
+    p_feed.add_argument("--list-sources", action="store_true", dest="list_sources",
+                        help="List all available threat intel sources")
+    p_feed.add_argument("--test-target", default=None, dest="test_target",
+                        metavar="URL",
+                        help="Auto-test new payloads against this target URL after ingestion")
+    p_feed.add_argument("-d", "--delay", type=float, default=0.3,
+                        help="Delay between test requests (default: 0.3)")
+    p_feed.add_argument("-t", "--timeout", type=int, default=8,
+                        help="Request timeout for tests (default: 8)")
+    p_feed.add_argument("--insecure", action="store_true",
+                        help="Skip SSL verification for tests")
+    p_feed.add_argument("--json", action="store_true", help="Output as JSON")
+    p_feed.add_argument("-o", "--output", default=None, help="Save results to file")
+    p_feed.add_argument("--notify", default=None, metavar="WEBHOOK_URL",
+                        help="Send webhook notification on completion")
+    p_feed.set_defaults(func=cmd_feed)
+
+    # update (pull latest payload DB)
+    p_update = subparsers.add_parser("update",
+        help="Pull latest payload database from cloud (R2 / GitHub Releases)")
+    p_update.add_argument("--source", default="auto",
+                          choices=["auto", "r2", "github"],
+                          help="Download source: auto (R2 first, then GitHub), r2, or github")
+    p_update.add_argument("--json", action="store_true", help="Output as JSON")
+    p_update.set_defaults(func=cmd_update)
+
+    # sync (push/pull/configure cloud)
+    p_sync = subparsers.add_parser("sync",
+        help="Cloud sync — publish or pull payload database (R2 + GitHub)")
+    p_sync.add_argument("--push", action="store_true",
+                        help="Publish local payload DB to cloud (maintainer)")
+    p_sync.add_argument("--pull", action="store_true",
+                        help="Pull latest payload DB from cloud")
+    p_sync.add_argument("--source", default="auto",
+                        choices=["auto", "r2", "github"],
+                        help="Source for pull: auto, r2, or github")
+    p_sync.add_argument("--tag", default=None,
+                        help="Release tag for push (default: payloads-YYYYMMDD)")
+    p_sync.add_argument("--configure", action="store_true",
+                        help="Interactive setup of R2/D1/GitHub credentials")
+    p_sync.add_argument("--status", action="store_true",
+                        help="Show cloud sync configuration status")
+    p_sync.add_argument("--json", action="store_true", help="Output as JSON")
+    p_sync.set_defaults(func=cmd_sync)
+
+    # todo (internal private TODO list)
+    p_todo = subparsers.add_parser("todo",
+        help="Internal TODO list — private, stored in ~/.fray/todo.json")
+    p_todo_sub = p_todo.add_subparsers(dest="action")
+    p_todo_sub.default = "list"
+
+    # todo list (default)
+    p_todo_list = p_todo_sub.add_parser("list", help="Show pending items")
+    p_todo_list.add_argument("--all", action="store_true", help="Show completed items too")
+    p_todo_list.add_argument("--json", action="store_true", help="Output as JSON")
+
+    # todo add
+    p_todo_add = p_todo_sub.add_parser("add", help="Add a new item")
+    p_todo_add.add_argument("text", nargs="+", help="Task description")
+    p_todo_add.add_argument("-p", "--priority", default="medium",
+                            choices=["high", "medium", "low"],
+                            help="Priority (default: medium)")
+    p_todo_add.add_argument("--json", action="store_true", help="Output as JSON")
+
+    # todo done
+    p_todo_done = p_todo_sub.add_parser("done", help="Mark item as completed")
+    p_todo_done.add_argument("id", type=int, help="Item ID")
+    p_todo_done.add_argument("--json", action="store_true", help="Output as JSON")
+
+    # todo rm
+    p_todo_rm = p_todo_sub.add_parser("rm", help="Remove an item")
+    p_todo_rm.add_argument("id", type=int, help="Item ID")
+    p_todo_rm.add_argument("--json", action="store_true", help="Output as JSON")
+
+    p_todo.add_argument("--all", action="store_true", help="Show completed items too")
+    p_todo.add_argument("--json", action="store_true", help="Output as JSON")
+    p_todo.set_defaults(func=cmd_todo)
 
     # harden
     p_harden = subparsers.add_parser("harden",
@@ -3868,6 +4419,12 @@ Documentation: https://github.com/dalisecurity/fray
                          help="Export bypasses as Nuclei YAML templates to DIR")
     p_scan.add_argument("--burp-import", dest="burp_import", default=None, metavar="FILE",
                          help="Import Burp request file as scan targets")
+    p_scan.add_argument("--blind", action="store_true",
+                         help="Enable blind injection detection (time-based + OOB DNS)")
+    p_scan.add_argument("--oob-server", default=None, metavar="DOMAIN",
+                         help="OOB callback server for blind detection (e.g. oast.fun)")
+    p_scan.add_argument("--auth-profile", default=None, metavar="FILE",
+                         help="Auth profile JSON (~/.fray/auth/*.json) — OAuth2, form login, multi-step")
     p_scan.add_argument("--notify", default=None, metavar="WEBHOOK_URL",
                          help="Send Slack/Discord/Teams notification on completion")
     p_scan.set_defaults(func=cmd_scan)
@@ -3977,11 +4534,6 @@ Documentation: https://github.com/dalisecurity/fray
     # mcp
     p_mcp = subparsers.add_parser("mcp", help="Start MCP server for AI assistant integration")
     p_mcp.set_defaults(func=cmd_mcp)
-
-    # update
-    p_update = subparsers.add_parser("update", help="Update payloads from GitHub without reinstalling")
-    p_update.add_argument("--check", action="store_true", help="Check for updates without applying")
-    p_update.set_defaults(func=cmd_update)
 
     # init-config
     p_init_config = subparsers.add_parser("init-config", help="Create a sample .fray.toml config file in the current directory")
@@ -4110,7 +4662,8 @@ Documentation: https://github.com/dalisecurity/fray
     args = parser.parse_args()
 
     if not args.command:
-        cmd_help(None)
+        from fray.welcome import print_welcome
+        print_welcome()
         sys.exit(0)
 
     # Load .fray.toml: env vars first, then apply defaults for the active subcommand

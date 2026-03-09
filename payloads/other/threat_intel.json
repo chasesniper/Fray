@@ -1,0 +1,199 @@
+{
+  "category": "other",
+  "subcategory": "threat_intel_other",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 9,
+  "payloads": [
+    {
+      "id": "threat-intel-CVE-2026-20427-0000",
+      "category": "other",
+      "subcategory": "cve_other",
+      "payload": "# CVE-2026-20427 — In display, there is a possible escalation of privilege due to a missing bounds check. This could lead to local escalation of privilege if a malicious actor has already obtained the System privilege. ",
+      "description": "CVE-2026-20427: In display, there is a possible escalation of privilege due to a missing bounds check. This could lead to local escalati",
+      "source": "NVD (CVSS 6.7)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20427",
+      "severity": "medium",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "other",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20427"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-20436-0001",
+      "category": "other",
+      "subcategory": "cve_other",
+      "payload": "# CVE-2026-20436 — In wlan STA driver, there is a possible escalation of privilege due to a missing bounds check. This could lead to local escalation of privilege if a malicious actor has already obtained the System pri",
+      "description": "CVE-2026-20436: In wlan STA driver, there is a possible escalation of privilege due to a missing bounds check. This could lead to local ",
+      "source": "NVD (CVSS 6.7)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-20436",
+      "severity": "medium",
+      "reference": "https://corp.mediatek.com/product-security-bulletin/March-2026",
+      "technique": "other",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-20436"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-3431-0002",
+      "category": "other",
+      "subcategory": "cve_other",
+      "payload": "# CVE-2026-3431 — On SimStudio version below to 0.5.74, the MongoDB tool endpoints accept arbitrary connection parameters from the caller without authentication or host restrictions. An attacker can leverage these endp",
+      "description": "CVE-2026-3431: On SimStudio version below to 0.5.74, the MongoDB tool endpoints accept arbitrary connection parameters from the caller ",
+      "source": "NVD (CVSS 9.8)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-3431",
+      "severity": "critical",
+      "reference": "https://www.tenable.com/security/research/tra-2026-12",
+      "technique": "other",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-3431"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-3432-0003",
+      "category": "other",
+      "subcategory": "cve_other",
+      "payload": "# CVE-2026-3432 — On SimStudio version below to 0.5.74, the `/api/auth/oauth/token` endpoint contains a code path that bypasses all authorization checks when provided with `credentialAccountUserId` and `providerId` par",
+      "description": "CVE-2026-3432: On SimStudio version below to 0.5.74, the `/api/auth/oauth/token` endpoint contains a code path that bypasses all author",
+      "source": "NVD (CVSS 9.1)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-3432",
+      "severity": "critical",
+      "reference": "https://www.tenable.com/security/research/tra-2026-13",
+      "technique": "other",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-3432"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2021-22681-0004",
+      "category": "other",
+      "subcategory": "cve_other",
+      "payload": "# CVE-2021-22681 — Multiple Rockwell products contain an insufficient protected credentials vulnerability. Studio 5000 Logix Designer software may allow a key to be discovered. This key is used to verify Logix controlle",
+      "description": "CVE-2021-22681: Multiple Rockwell products contain an insufficient protected credentials vulnerability. Studio 5000 Logix Designer softw",
+      "source": "CISA KEV (actively exploited)",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2021-22681",
+      "severity": "critical",
+      "reference": "https://nvd.nist.gov/vuln/detail/CVE-2021-22681",
+      "technique": "other",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2021-22681"
+      ]
+    },
+    {
+      "id": "threat-intel-GHSA-mh23-rw7f-v5pq-0005",
+      "category": "other",
+      "subcategory": "cve_other",
+      "payload": "# GHSA-mh23-rw7f-v5pq — `time-sync` was removed from crates.io due to malicious code",
+      "description": "GHSA-mh23-rw7f-v5pq: `time-sync` was removed from crates.io due to malicious code",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "GHSA-mh23-rw7f-v5pq",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-mh23-rw7f-v5pq",
+      "technique": "other",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "ghsa-mh23-rw7f-v5pq"
+      ]
+    },
+    {
+      "id": "threat-intel-GHSA-xhw7-jhmp-j62j-0006",
+      "category": "other",
+      "subcategory": "cve_other",
+      "payload": "# GHSA-xhw7-jhmp-j62j — `dnp3times` was removed from crates.io due to malicious code",
+      "description": "GHSA-xhw7-jhmp-j62j: `dnp3times` was removed from crates.io due to malicious code",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "GHSA-xhw7-jhmp-j62j",
+      "severity": "critical",
+      "reference": "https://github.com/advisories/GHSA-xhw7-jhmp-j62j",
+      "technique": "other",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "ghsa-xhw7-jhmp-j62j"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-26018-0007",
+      "category": "other",
+      "subcategory": "cve_other",
+      "payload": "# CVE-2026-26018 — CoreDNS Loop Detection Denial of Service Vulnerability",
+      "description": "CVE-2026-26018: CoreDNS Loop Detection Denial of Service Vulnerability",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-26018",
+      "severity": "high",
+      "reference": "https://github.com/advisories/GHSA-h75p-j8xm-m278",
+      "technique": "other",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-26018"
+      ]
+    },
+    {
+      "id": "threat-intel-CVE-2026-30229-0008",
+      "category": "other",
+      "subcategory": "cve_other",
+      "payload": "# CVE-2026-30229 — parse-server's endpoint `/loginAs` allows `readOnlyMasterKey` to gain full read and write access as any user",
+      "description": "CVE-2026-30229: parse-server's endpoint `/loginAs` allows `readOnlyMasterKey` to gain full read and write access as any user",
+      "source": "GitHub Security Advisory",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "cve": "CVE-2026-30229",
+      "severity": "high",
+      "reference": "https://github.com/advisories/GHSA-79wj-8rqv-jvp5",
+      "technique": "other",
+      "date_discovered": "2026-03-09",
+      "tags": [
+        "cve-reference",
+        "threat-intel",
+        "cve-2026-30229"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.037171+00:00"
+}

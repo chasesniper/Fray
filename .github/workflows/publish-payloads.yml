@@ -1,0 +1,104 @@
+name: Publish Payload Database
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      upload_r2:
+        description: 'Upload to Cloudflare R2'
+        required: false
+        default: 'true'
+      upload_github:
+        description: 'Attach to GitHub Release'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Build & Publish Payload Bundle
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Fray
+      run: pip install -e .
+
+    - name: Build payload bundle
+      id: build
+      run: |
+        python -c "
+        from fray.cloud_sync import build_payload_bundle
+        import json
+
+        bundle, manifest = build_payload_bundle()
+
+        # Write bundle
+        with open('fray-payloads.tar.gz', 'wb') as f:
+            f.write(bundle)
+
+        # Write manifest
+        with open('manifest.json', 'w') as f:
+            json.dump(manifest, f, indent=2)
+
+        print(f\"Bundle: {len(bundle)/1024/1024:.1f} MB\")
+        print(f\"Payloads: {manifest['total_payloads']}\")
+        print(f\"Categories: {len(manifest['categories'])}\")
+        print(f\"SHA256: {manifest['bundle_sha256'][:16]}...\")
+        "
+
+        TOTAL=$(python -c "import json; print(json.load(open('manifest.json'))['total_payloads'])")
+        CATS=$(python -c "import json; print(len(json.load(open('manifest.json'))['categories']))")
+        echo "total_payloads=$TOTAL" >> $GITHUB_OUTPUT
+        echo "total_categories=$CATS" >> $GITHUB_OUTPUT
+
+    - name: Upload to Cloudflare R2
+      if: ${{ github.event.inputs.upload_r2 != 'false' }}
+      env:
+        FRAY_R2_ENDPOINT: ${{ secrets.FRAY_R2_ENDPOINT }}
+        FRAY_R2_BUCKET: ${{ secrets.FRAY_R2_BUCKET }}
+        FRAY_R2_ACCESS_KEY: ${{ secrets.FRAY_R2_ACCESS_KEY }}
+        FRAY_R2_SECRET_KEY: ${{ secrets.FRAY_R2_SECRET_KEY }}
+      run: |
+        if [ -n "$FRAY_R2_ENDPOINT" ]; then
+          python -c "
+        from fray.cloud_sync import load_config, r2_upload_bundle
+        import json
+
+        cfg = load_config()
+        bundle = open('fray-payloads.tar.gz', 'rb').read()
+        manifest = json.load(open('manifest.json'))
+        r2_upload_bundle(cfg, bundle, manifest)
+        "
+          echo "Uploaded to R2"
+        else
+          echo "R2 not configured — skipping"
+        fi
+
+    - name: Attach bundle to GitHub Release
+      if: ${{ github.event_name == 'release' && github.event.inputs.upload_github != 'false' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        TAG="${{ github.event.release.tag_name }}"
+        gh release upload "$TAG" fray-payloads.tar.gz manifest.json --clobber
+        echo "Attached to release $TAG"
+
+    - name: Summary
+      run: |
+        echo "## Payload Database Published" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Payloads | ${{ steps.build.outputs.total_payloads }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Categories | ${{ steps.build.outputs.total_categories }} |" >> $GITHUB_STEP_SUMMARY
