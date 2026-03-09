@@ -4,7 +4,7 @@ class Fray < Formula
   desc "Open-source WAF bypass & security testing toolkit"
   homepage "https://github.com/dalisecurity/fray"
   url "https://files.pythonhosted.org/packages/source/f/fray/fray-3.4.0.tar.gz"
-  sha256 ""  # TODO: Update after PyPI publish
+  sha256 "3b2998e08a2521f896c59aea6d86cca854576c6d0f8229cbd3d52a89e35ea78c"
   license "MIT"
 
   depends_on "python@3.12"
