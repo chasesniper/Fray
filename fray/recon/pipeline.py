@@ -74,6 +74,7 @@ class _ReconProgress:
 from fray.recon.http import _parse_url, _http_get, check_http, check_tls
 from fray.recon.fingerprint import (
     check_security_headers,
+    check_clickjacking,
     check_cookies,
     fingerprint_app,
     recommend_categories,
@@ -449,6 +450,7 @@ def run_recon(url: str, timeout: int = 8,
             "bypass_techniques": csp_analysis.bypass_techniques,
             "recommendations": csp_analysis.recommendations,
         }
+        result["clickjacking"] = check_clickjacking(resp_headers, csp_value)
         result["cookies"] = check_cookies(resp_headers)
         result["fingerprint"] = fingerprint_app(resp_headers, body)
         result["frontend_libs"] = check_frontend_libs(body, retirejs=retirejs)
@@ -602,6 +604,7 @@ def run_recon(url: str, timeout: int = 8,
 def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     """Aggregate all recon findings into a compact attack surface overview."""
     host = r.get("host", "")
+    page_status = r.get("page_status", 0)
 
     # ── Subdomains ──
     subs = r.get("subdomains", {})
@@ -611,7 +614,7 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     # Detect staging / dev / internal environments
     staging_keywords = ("dev", "staging", "stage", "test", "qa", "uat", "sandbox",
                         "beta", "alpha", "preprod", "pre-prod", "demo", "internal",
-                        "admin", "debug", "canary", "preview")
+                        "debug", "canary", "preview")
     staging_envs = []
     for sub in subdomain_list:
         name = sub if isinstance(sub, str) else sub.get("name", "") if isinstance(sub, dict) else ""
@@ -663,7 +666,7 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     gap = r.get("gap_analysis", {})
     waf_vendor = gap.get("waf_vendor") if isinstance(gap, dict) else None
     diff = r.get("differential", {})
-    detection_mode = diff.get("detection_mode") if isinstance(diff, dict) else None
+    detection_mode = (diff.get("detection_mode") or "").lower() or None if isinstance(diff, dict) else None
 
     # ── DNS / CDN ──
     dns_info = r.get("dns", {})
@@ -672,7 +675,7 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     # ── TLS ──
     tls = r.get("tls", {})
     tls_version = tls.get("tls_version") if isinstance(tls, dict) else None
-    cert_days = tls.get("cert_days_left") if isinstance(tls, dict) else None
+    cert_days = tls.get("cert_days_remaining") if isinstance(tls, dict) else None
 
     # ── Security headers score ──
     hdrs = r.get("headers", {})
@@ -682,6 +685,10 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     csp = r.get("csp", {})
     csp_present = csp.get("present", False) if isinstance(csp, dict) else False
     csp_score = csp.get("score") if isinstance(csp, dict) else None
+
+    # ── Clickjacking ──
+    clickjack = r.get("clickjacking", {})
+    clickjack_vuln = clickjack.get("vulnerable", False) if isinstance(clickjack, dict) else False
 
     # ── CORS ──
     cors = r.get("cors", {})
@@ -746,6 +753,8 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
         findings.append({"severity": "high", "finding": "Host header injection detected"})
     if cors_vuln:
         findings.append({"severity": "high", "finding": "CORS misconfiguration"})
+    if clickjack_vuln:
+        findings.append({"severity": "medium", "finding": "Clickjacking vulnerable — no X-Frame-Options or CSP frame-ancestors"})
     if gql_introspection:
         findings.append({"severity": "high", "finding": "GraphQL introspection enabled"})
     if dangerous_methods:
@@ -808,6 +817,7 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "risk_score": risk_score,
         "risk_level": risk_level,
+        "http_status": page_status,
         "subdomains": n_subdomains,
         "staging_envs": staging_envs,
         "admin_panels": n_panels,
@@ -826,11 +836,12 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
         "waf_detection_mode": detection_mode,
         "cdn": cdn,
         "tls_version": tls_version,
-        "cert_days_left": cert_days,
+        "cert_days_remaining": cert_days,
         "security_headers_score": hdr_score,
         "csp_present": csp_present,
         "csp_score": csp_score,
         "cors_vulnerable": cors_vuln,
+        "clickjacking_vulnerable": clickjack_vuln,
         "host_header_injection": hhi_vuln,
         "dangerous_http_methods": dangerous_methods,
         "robots_interesting_paths": len(interesting_paths),
@@ -1556,6 +1567,22 @@ def print_recon(result: Dict[str, Any]) -> None:
                 console.print(f"      [yellow]{p}[/yellow]")
         if sitemaps:
             console.print(f"    Sitemaps: {', '.join(sitemaps[:3])}")
+        console.print()
+
+    # ── Clickjacking ──
+    cj = result.get("clickjacking", {})
+    if cj:
+        cj_vuln = cj.get("vulnerable", False)
+        cj_sev = cj.get("severity", "?")
+        cc = "red" if cj_vuln else "green"
+        cl = "VULNERABLE" if cj_vuln else "PROTECTED"
+        console.print(f"  [bold]Clickjacking[/bold] ([{cc}]{cl}[/{cc}])")
+        for prot in cj.get("protections", []):
+            console.print(f"    [green]✓[/green] {prot}")
+        for iss in cj.get("issues", []):
+            console.print(f"    [red]✗[/red] {iss}")
+        if cj.get("recommendation"):
+            console.print(f"    [dim]{cj['recommendation']}[/dim]")
         console.print()
 
     # ── CORS ──

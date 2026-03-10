@@ -1109,7 +1109,7 @@ def create_server() -> "FastMCP":
                 "waf_vendor": atk.get("waf_vendor"),
                 "cdn": atk.get("cdn"),
                 "tls_version": atk.get("tls_version"),
-                "cert_days_left": atk.get("cert_days_left"),
+                "cert_days_remaining": atk.get("cert_days_remaining"),
                 "security_headers_score": atk.get("security_headers_score"),
                 "subdomains": atk.get("subdomains", 0),
                 "subdomain_takeover": atk.get("subdomain_takeover", 0),

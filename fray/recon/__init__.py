@@ -22,6 +22,7 @@ from fray.recon.http import (  # noqa: F401
 )
 from fray.recon.fingerprint import (  # noqa: F401
     check_security_headers,
+    check_clickjacking,
     check_cookies,
     fingerprint_app,
     recommend_categories,

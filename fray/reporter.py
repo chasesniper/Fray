@@ -1146,7 +1146,7 @@ class SecurityReportGenerator:
         # TLS
         tls = recon_data.get('tls', {})
         tls_ver = tls.get('tls_version', '—')
-        cert_days = tls.get('cert_days_left', '—')
+        cert_days = tls.get('cert_days_remaining', '—')
         cert_issuer = tls.get('issuer', '—')
 
         # DNS

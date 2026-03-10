@@ -1734,7 +1734,7 @@ def waf_gap_analysis(
     vdata = vendors_db[vendor_key]
     result["waf_vendor"] = vdata.get("display_name", vendor_key)
     result["vendor_key"] = vendor_key
-    result["detection_mode"] = vdata.get("detection_mode")
+    result["detection_mode"] = (vdata.get("detection_mode") or "").lower() or None
     result["block_behavior"] = vdata.get("block_behavior", {})
     result["recommended_delay"] = vdata.get("recommended_delay")
     result["recommended_categories"] = vdata.get("recommended_categories", [])

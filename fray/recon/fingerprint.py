@@ -305,6 +305,98 @@ def check_security_headers(headers: Dict[str, str]) -> Dict[str, Any]:
     return results
 
 
+def check_clickjacking(headers: Dict[str, str], csp_value: str = "") -> Dict[str, Any]:
+    """Assess clickjacking protection from X-Frame-Options and CSP frame-ancestors.
+
+    Returns a dict with:
+      - vulnerable: bool — True if page can be framed by an attacker
+      - severity: "none" | "low" | "medium" | "high"
+      - x_frame_options: dict with value + issues
+      - frame_ancestors: dict with value + issues
+      - protections: list of active protections
+      - issues: list of problems found
+      - recommendation: str
+    """
+    result: Dict[str, Any] = {
+        "vulnerable": True,
+        "severity": "high",
+        "x_frame_options": {"present": False, "value": None, "valid": False},
+        "frame_ancestors": {"present": False, "value": None, "valid": False},
+        "protections": [],
+        "issues": [],
+        "recommendation": "",
+    }
+
+    # ── X-Frame-Options ──
+    xfo = headers.get("x-frame-options", "").strip()
+    if xfo:
+        result["x_frame_options"]["present"] = True
+        result["x_frame_options"]["value"] = xfo
+        xfo_upper = xfo.upper()
+        if xfo_upper == "DENY":
+            result["x_frame_options"]["valid"] = True
+            result["protections"].append("X-Frame-Options: DENY — framing blocked completely")
+        elif xfo_upper == "SAMEORIGIN":
+            result["x_frame_options"]["valid"] = True
+            result["protections"].append("X-Frame-Options: SAMEORIGIN — only same-origin framing")
+        elif xfo_upper.startswith("ALLOW-FROM"):
+            result["x_frame_options"]["valid"] = True
+            result["issues"].append("X-Frame-Options: ALLOW-FROM is deprecated and ignored by modern browsers")
+        else:
+            result["issues"].append(f"X-Frame-Options: invalid value '{xfo}' — ignored by browsers")
+
+    # ── CSP frame-ancestors ──
+    csp_raw = csp_value or headers.get("content-security-policy", "")
+    if csp_raw:
+        for directive in csp_raw.split(";"):
+            directive = directive.strip().lower()
+            if directive.startswith("frame-ancestors"):
+                fa_value = directive[len("frame-ancestors"):].strip()
+                result["frame_ancestors"]["present"] = True
+                result["frame_ancestors"]["value"] = fa_value
+                if fa_value == "'none'":
+                    result["frame_ancestors"]["valid"] = True
+                    result["protections"].append("CSP frame-ancestors 'none' — framing blocked completely")
+                elif fa_value == "'self'":
+                    result["frame_ancestors"]["valid"] = True
+                    result["protections"].append("CSP frame-ancestors 'self' — only same-origin framing")
+                elif fa_value == "*":
+                    result["issues"].append("CSP frame-ancestors * — allows framing from ANY origin")
+                else:
+                    result["frame_ancestors"]["valid"] = True
+                    result["protections"].append(f"CSP frame-ancestors restricted to: {fa_value}")
+                break
+
+    # ── Verdict ──
+    has_xfo = result["x_frame_options"]["valid"]
+    has_fa = result["frame_ancestors"]["valid"]
+
+    if has_fa and has_xfo:
+        result["vulnerable"] = False
+        result["severity"] = "none"
+        result["recommendation"] = "Both X-Frame-Options and CSP frame-ancestors are set — good defense-in-depth"
+    elif has_fa:
+        result["vulnerable"] = False
+        result["severity"] = "low"
+        result["recommendation"] = "CSP frame-ancestors protects modern browsers. Add X-Frame-Options for legacy browser coverage"
+    elif has_xfo:
+        result["vulnerable"] = False
+        result["severity"] = "low"
+        result["recommendation"] = "X-Frame-Options provides protection. Add CSP frame-ancestors for defense-in-depth"
+    else:
+        result["vulnerable"] = True
+        result["severity"] = "high"
+        result["issues"].append("No clickjacking protection — page can be framed by any origin")
+        result["recommendation"] = "Add both: X-Frame-Options: DENY and CSP frame-ancestors 'none'"
+
+    # Check for report-only CSP (doesn't actually protect)
+    csp_ro = headers.get("content-security-policy-report-only", "")
+    if "frame-ancestors" in csp_ro and not has_fa:
+        result["issues"].append("frame-ancestors is in report-only CSP — does NOT actually block framing")
+
+    return result
+
+
 def check_cookies(headers: Dict[str, str]) -> Dict[str, Any]:
     """Audit cookies for security flags: HttpOnly, Secure, SameSite, Path."""
     results: Dict[str, Any] = {
