@@ -1648,6 +1648,16 @@ def cmd_version(args):
     print(f"Fray v{__version__}")
 
 
+def cmd_completions(args):
+    """Generate shell completion scripts (bash/zsh/fish)."""
+    from fray.completions import generate_completion
+    shell = getattr(args, "shell", None)
+    if not shell:
+        sys.stderr.write("Usage: fray completions {bash,zsh,fish}\n")
+        return 1
+    print(generate_completion(shell))
+
+
 def cmd_doctor(args):
     """Run environment diagnostics and auto-fix issues"""
     from fray.doctor import run_doctor
@@ -5032,6 +5042,13 @@ Documentation: https://github.com/dalisecurity/fray
                                 help="Filter to a specific domain (optional)")
 
     p_cache.set_defaults(func=cmd_cache, cache_cmd="show")
+
+    # completions
+    p_completions = subparsers.add_parser("completions",
+        help="Generate shell completion scripts (bash/zsh/fish)")
+    p_completions.add_argument("shell", nargs="?", choices=["bash", "zsh", "fish"],
+                                help="Shell to generate completions for")
+    p_completions.set_defaults(func=cmd_completions)
 
     # help
     p_help = subparsers.add_parser("help",
