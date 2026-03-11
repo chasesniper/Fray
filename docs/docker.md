@@ -1,208 +1,127 @@
 # Docker Usage Guide
 
-Run WAF Tester in a containerized environment for easy portability and sharing.
+Run Fray in a containerized environment for easy portability and CI/CD integration.
 
-## 🐳 Quick Start with Docker
-
-### Build the Image
+## Quick Start
 
 ```bash
-cd waf-payload-database
-docker build -t waf-tester .
+# Pull and run (from PyPI)
+docker build -t fray .
+docker run --rm fray recon https://example.com --fast
+
+# Or use docker-compose
+docker compose run --rm fray recon https://example.com --fast
 ```
 
-### Run Interactive Mode
+## Build
 
 ```bash
-docker run -it --rm waf-tester
+# Production image (installs from PyPI)
+docker build -t fray .
+
+# Development image (mounts source code)
+docker build --target dev -t fray:dev .
 ```
 
-### Run with Command Line
+## Usage Examples
 
 ```bash
-docker run --rm waf-tester -t https://example.com -p payloads/xss/basic.json
+# WAF detection
+docker run --rm fray detect https://example.com
+
+# Reconnaissance
+docker run --rm fray recon https://example.com --fast --json
+
+# Payload testing
+docker run --rm fray test https://example.com -c xss --smart
+
+# Full pipeline
+docker run --rm fray auto https://example.com
+
+# Save reports to host
+docker run --rm -v $(pwd)/reports:/app/reports fray \
+  recon https://example.com -o /app/reports/recon.json
+
+# Pipe targets from stdin
+cat domains.txt | docker run --rm -i fray recon --fast
 ```
 
-### Save Reports
+## Docker Compose
 
 ```bash
-# Create reports directory
-mkdir reports
+# Production
+docker compose run --rm fray recon https://example.com --fast
 
-# Run with volume mount
-docker run --rm -v $(pwd)/reports:/app/reports waf-tester \
-  -t https://example.com \
-  -p payloads/xss/basic.json \
-  -o /app/reports/report.json
+# Development (live source mount)
+docker compose --profile dev run --rm fray-dev recon https://example.com
 ```
 
-## 🚀 Docker Compose
+## Environment Variables
 
-### Start Interactive Mode
-
-```bash
-docker-compose run --rm waf-tester
-```
-
-### Run Specific Test
-
-Edit `docker-compose.yml` to uncomment and modify the command line:
-
-```yaml
-command: ["-t", "https://your-target.com", "-p", "payloads/xss/basic.json"]
-```
-
-Then run:
-
-```bash
-docker-compose up
-```
-
-## 📦 Pre-built Image (Coming Soon)
-
-Pull from Docker Hub:
-
-```bash
-docker pull dalisecurity/waf-tester:latest
-docker run -it --rm dalisecurity/waf-tester
-```
-
-## 🔧 Advanced Usage
-
-### Custom Payload Files
+Pass API keys and config via environment:
 
 ```bash
 docker run --rm \
-  -v $(pwd)/custom-payloads:/app/custom \
-  waf-tester \
-  -t https://example.com \
-  -p /app/custom/my-payloads.json
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -e GITHUB_TOKEN=$GITHUB_TOKEN \
+  -e FRAY_TIMEOUT=15 \
+  fray ai-bypass https://example.com -c xss
 ```
 
-### Network Configuration
+Or in `docker-compose.yml`, uncomment the environment lines.
 
-```bash
-# Use host network
-docker run --rm --network host waf-tester -t https://example.com -p payloads/xss/basic.json
+## Persistent Data
 
-# Use specific network
-docker run --rm --network my-network waf-tester -t https://example.com -p payloads/xss/basic.json
-```
-
-### Environment Variables
+Session data, learned patterns, and cache are stored in `/root/.fray` inside the container. Mount a volume to persist across runs:
 
 ```bash
 docker run --rm \
-  -e TARGET=https://example.com \
-  -e PAYLOADS=payloads/xss/basic.json \
-  waf-tester
+  -v fray-data:/root/.fray \
+  fray agent https://example.com -c xss --rounds 5
 ```
 
-## 🎯 Use Cases
-
-### 1. Share with Team
-
-Build once, share the image:
-
-```bash
-# Build
-docker build -t waf-tester .
-
-# Save to file
-docker save waf-tester > waf-tester.tar
-
-# Share waf-tester.tar with colleagues
-
-# They load it
-docker load < waf-tester.tar
-
-# They run it
-docker run -it --rm waf-tester
-```
-
-### 2. CI/CD Integration
+## CI/CD Integration
 
 ```yaml
 # .github/workflows/waf-test.yml
-name: WAF Testing
-
+name: WAF Security Test
 on: [push]
-
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Build Docker image
-        run: docker build -t waf-tester .
-      - name: Run WAF tests
+      - uses: actions/checkout@v4
+      - name: Build Fray
+        run: docker build -t fray .
+      - name: Run recon
+        run: docker run --rm fray recon ${{ secrets.TEST_TARGET }} --fast --json
+      - name: Run payload test
         run: |
-          docker run --rm waf-tester \
-            -t ${{ secrets.TEST_TARGET }} \
-            -p payloads/xss/basic.json \
-            -o report.json
+          docker run --rm fray test ${{ secrets.TEST_TARGET }} \
+            -c xss --smart --max 50 --json
 ```
 
-### 3. Automated Testing
+## Multi-Target Batch Testing
 
 ```bash
 #!/bin/bash
-# test-all.sh
-
-targets=(
-  "https://site1.example.com"
-  "https://site2.example.com"
-  "https://site3.example.com"
-)
-
-for target in "${targets[@]}"; do
-  echo "Testing $target..."
-  docker run --rm \
-    -v $(pwd)/reports:/app/reports \
-    waf-tester \
-    -t "$target" \
-    -p payloads/xss/ \
-    -o "/app/reports/$(echo $target | sed 's/https:\/\///g' | sed 's/\//_/g').json"
-done
+cat targets.txt | docker run --rm -i \
+  -v $(pwd)/reports:/app/reports \
+  fray recon --fast
 ```
 
-## 🛠️ Troubleshooting
+## Image Details
 
-### Permission Issues
+- **Base Image**: python:3.12-slim
+- **Size**: ~180MB
+- **Python**: 3.12
+- **Dependencies**: rich (only runtime dep)
+- **Multi-stage**: `base` (production) / `dev` (development)
 
-```bash
-# Run as current user
-docker run --rm --user $(id -u):$(id -g) waf-tester
-```
+## Security Considerations
 
-### Network Issues
-
-```bash
-# Use host network
-docker run --rm --network host waf-tester -t https://example.com -p payloads/xss/basic.json
-```
-
-### Volume Mount Issues
-
-```bash
-# Use absolute path
-docker run --rm -v /absolute/path/to/reports:/app/reports waf-tester
-```
-
-## 📊 Image Details
-
-- **Base Image**: python:3.11-slim
-- **Size**: ~150MB
-- **Python Version**: 3.11
-- **Dependencies**: None (uses standard library)
-
-## 🔒 Security Considerations
-
-- Container runs as root by default (can be changed with --user)
+- Container runs as root by default (use `--user $(id -u):$(id -g)` to override)
 - No sensitive data stored in image
-- Network access required for testing
+- API keys passed via environment variables (never baked into image)
+- Network access required for target testing
 - Reports saved to mounted volumes
-
----
-
-**Happy containerized testing! 🐳**

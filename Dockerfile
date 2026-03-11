@@ -1,24 +1,35 @@
-FROM python:3.11-slim
+FROM python:3.12-slim AS base
 
-LABEL maintainer="WAF Payload Database"
-LABEL description="Containerized WAF testing tool with comprehensive payload database"
+LABEL maintainer="DALI Security <soc@dalisec.io>"
+LABEL description="Fray — AI-Powered WAF Security Testing Platform"
+LABEL org.opencontainers.image.source="https://github.com/dalisecurity/fray"
+LABEL org.opencontainers.image.documentation="https://github.com/dalisecurity/fray"
+LABEL org.opencontainers.image.licenses="MIT"
 
-# Set working directory
+# Avoid Python writing .pyc files and enable unbuffered output
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
-# Copy application files
-COPY waf_tester.py /app/
-COPY payloads/ /app/payloads/
-COPY README.md QUICKSTART.md LICENSE /app/
+# Install from PyPI (production image)
+RUN pip install --no-cache-dir fray
 
-# Create output directory
-RUN mkdir -p /app/reports
+# Create directories for output and session data
+RUN mkdir -p /app/reports /root/.fray
 
-# Make script executable
-RUN chmod +x waf_tester.py
+# Healthcheck: verify fray is installed
+HEALTHCHECK --interval=60s --timeout=5s \
+    CMD fray version || exit 1
 
-# Set entrypoint
-ENTRYPOINT ["python3", "waf_tester.py"]
+ENTRYPOINT ["fray"]
+CMD ["--help"]
 
-# Default to interactive mode
-CMD ["-i"]
+# ── Development image (includes source) ────────────────────────────
+FROM base AS dev
+
+# Copy source and install in editable mode
+COPY . /app/src
+RUN pip install --no-cache-dir -e /app/src
+
+WORKDIR /app/src

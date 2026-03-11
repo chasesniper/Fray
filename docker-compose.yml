@@ -1,15 +1,37 @@
-version: '3.8'
-
 services:
-  waf-tester:
-    build: .
-    image: waf-tester:latest
-    container_name: waf-tester
+  fray:
+    build:
+      context: .
+      target: base
+    image: dalisecurity/fray:latest
+    container_name: fray
     volumes:
       - ./reports:/app/reports
+      - fray-data:/root/.fray
     stdin_open: true
     tty: true
-    network_mode: host
-    
-    # Override for command-line mode
-    # command: ["-t", "https://example.com", "-p", "payloads/xss/basic.json"]
+    environment:
+      - FRAY_TIMEOUT=${FRAY_TIMEOUT:-8}
+      # Uncomment to enable AI features:
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # - GITHUB_TOKEN=${GITHUB_TOKEN}
+
+  # Development image (mounts source code)
+  fray-dev:
+    build:
+      context: .
+      target: dev
+    image: dalisecurity/fray:dev
+    container_name: fray-dev
+    volumes:
+      - .:/app/src
+      - ./reports:/app/reports
+      - fray-data:/root/.fray
+    stdin_open: true
+    tty: true
+    profiles:
+      - dev
+
+volumes:
+  fray-data:
