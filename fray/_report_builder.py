@@ -382,6 +382,7 @@ def build(rd: Dict[str, Any]) -> str:
             'Critical Endpoint Exposure': '#ef4444', 'Staging / Dev Environment': '#eab308',
             'DDoS / L7 Denial of Service': '#eab308', 'DDoS — Direct Origin': '#eab308',
             'Web Cache Poisoning': '#f97316', 'Payment / Financial Abuse': '#ef4444',
+            'LLM / AI Prompt Injection': '#a855f7',
         }
         at_rows = ''
         for i, t in enumerate(attack_targets[:50], 1):

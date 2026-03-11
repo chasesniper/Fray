@@ -1066,12 +1066,56 @@ def _enrich_for_report(result: Dict[str, Any]) -> None:
                 if cat_key in _CRITICAL_PATH_MAP:
                     label, sev = _CRITICAL_PATH_MAP[cat_key]
                     critical_paths.append({"url": f"https://{sub}", "type": label, "severity": sev, "source": "probe"})
-    # From auth_endpoints
+    # From auth_endpoints — all discovered auth endpoints are critical
+    _AUTH_CAT_MAP = {
+        "login": ("Login / Authentication", "critical"),
+        "registration": ("User Registration", "high"),
+        "oauth": ("OAuth / OpenID", "critical"),
+        "sso": ("SSO / SAML", "critical"),
+        "mfa": ("MFA / 2FA", "high"),
+        "password_reset": ("Password Reset", "high"),
+        "api_auth": ("API Auth Endpoint", "critical"),
+        "session": ("Session Management", "high"),
+    }
     if isinstance(auth_ep, dict):
-        if auth_ep.get("has_login") and auth_ep.get("login_url"):
-            critical_paths.append({"url": auth_ep["login_url"], "type": "Login / Authentication", "severity": "critical", "source": "auth_scan"})
-        if auth_ep.get("has_registration"):
-            critical_paths.append({"url": f"https://{host}/signup", "type": "User Registration", "severity": "high", "source": "auth_scan"})
+        auth_endpoints_list = auth_ep.get("endpoints", [])
+        for ep in (auth_endpoints_list if isinstance(auth_endpoints_list, list) else []):
+            if not isinstance(ep, dict):
+                continue
+            ep_path = ep.get("path", "")
+            ep_cat = ep.get("category", "")
+            ep_status = ep.get("status", 0)
+            ep_protected = ep.get("protected", False)
+            ep_redirect = ep.get("redirect", "")
+            ep_auth_scheme = ep.get("auth_scheme", "")
+
+            label, sev = _AUTH_CAT_MAP.get(ep_cat, ("Auth Endpoint", "high"))
+
+            # Endpoints returning 401/403 are protected — still critical to discover
+            extra = ""
+            if ep_protected:
+                extra = f" [Protected: {ep_status}"
+                if ep_auth_scheme:
+                    extra += f", {ep_auth_scheme}"
+                extra += "]"
+            elif ep_redirect:
+                extra = f" [Redirects to auth]"
+            elif ep.get("has_csrf"):
+                extra = " [Has CSRF token]"
+            if ep.get("rate_limited"):
+                extra += " [Rate limited]"
+            if ep.get("openid_discovery"):
+                extra += " [OpenID Discovery]"
+
+            critical_paths.append({
+                "url": f"https://{host}{ep_path}",
+                "type": label,
+                "severity": sev,
+                "source": "auth_scan",
+                "status": ep_status,
+                "protected": ep_protected,
+                "detail": extra.strip(),
+            })
     # From admin_panels
     admin_data = result.get("admin_panels", {})
     admin_panels_list = (admin_data.get("panels_found", []) or admin_data.get("found", []) or []) if isinstance(admin_data, dict) else []
