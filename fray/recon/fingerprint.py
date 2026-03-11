@@ -641,7 +641,15 @@ def check_favicon(host: str, port: int = 443, use_ssl: bool = True,
     if "html" in ct.lower():
         return result
 
-    body_bytes = body.encode("latin-1") if isinstance(body, str) else body
+    # Binary favicon data may have been decoded as str by _fetch_url;
+    # re-encode preserving raw bytes (utf-8 with surrogatepass for \ufffd)
+    if isinstance(body, str):
+        try:
+            body_bytes = body.encode("latin-1")
+        except UnicodeEncodeError:
+            body_bytes = body.encode("utf-8", errors="replace")
+    else:
+        body_bytes = body
 
     if len(body_bytes) < 10 or len(body_bytes) > 1_000_000:
         return result
