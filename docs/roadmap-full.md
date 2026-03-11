@@ -1,6 +1,6 @@
 # Fray Full Roadmap — 205 Items Across 27 Layers
 
-**Status:** 35 done · 170 pending  
+**Status:** 61 done · 144 pending  
 **Last updated:** 2026-03-11
 
 ---
@@ -54,7 +54,7 @@
 | # | Item | Priority | Status |
 |---|------|----------|--------|
 | 30 | Dependency confusion detection | HIGH | pending |
-| 31 | Subdomain takeover verification | HIGH | pending |
+| 31 | Subdomain takeover verification | HIGH | done |
 | 32 | Third-party script integrity (SRI) audit | MEDIUM | done |
 
 ## L6 — OSINT (6 items)
@@ -85,7 +85,7 @@
 | 47 | DNSSEC validation check | MEDIUM | pending |
 | 48 | Zone transfer attempt (AXFR) | MEDIUM | pending |
 | 49 | DNS rebinding detection | LOW | pending |
-| 50 | Dangling CNAME / subdomain takeover via DNS | HIGH | pending |
+| 50 | Dangling CNAME / subdomain takeover via DNS | HIGH | done |
 | 51 | Wildcard DNS detection | LOW | pending |
 
 ## L9 — Bot Detection (5 items)
@@ -210,7 +210,7 @@
 | 136 | CTF-style learning modules | MEDIUM | done |
 | 137 | Adaptive payload agent (probe → mutate → learn) | HIGH | done |
 | 138 | WAF profile caching across sessions | HIGH | done |
-| 139 | Payload effectiveness scoring per WAF | HIGH | pending |
+| 139 | Payload effectiveness scoring per WAF | HIGH | done |
 | 140 | Auto-mutation feedback loop | HIGH | done |
 | 141 | LLM-assisted bypass generation | HIGH | done |
 | 142 | Natural language query for findings | MEDIUM | pending |
@@ -235,7 +235,7 @@
 | 157 | Deep XSS Module (XSStrike-level: context-aware, DOM verify) | HIGH | pending |
 | 158 | Deep CMDi Module (commix-level: auto-shell) | MEDIUM | pending |
 | 159 | Content Discovery / Fuzzing (ffuf-like FUZZ keyword) | HIGH | pending |
-| 160 | Stdin/Stdout Pipeline (cat | fray recon -) | HIGH | pending |
+| 160 | Stdin/Stdout Pipeline (cat | fray recon -) | HIGH | done |
 | 161 | WAF Fingerprint DB Expansion (30→150+ WAFs) | HIGH | pending |
 | 162 | Vulnerability Verification/Proof (dump data, screenshot XSS) | HIGH | pending |
 | 163 | Plugin / Extension API (Python hooks, marketplace) | MEDIUM | pending |
@@ -264,7 +264,7 @@
 | # | Item | Priority | Status |
 |---|------|----------|--------|
 | 180 | Fast mode optimization (42s→28s) | HIGH | done |
-| 181 | Shell completions (bash/zsh/fish) | MEDIUM | pending |
+| 181 | Shell completions (bash/zsh/fish) | MEDIUM | done |
 | 182 | Parallel multi-target recon | MEDIUM | pending |
 | 183 | Progress bar improvements (ETA, speed) | LOW | pending |
 | 184 | Color theme customization | LOW | pending |
@@ -274,7 +274,7 @@
 | # | Item | Priority | Status |
 |---|------|----------|--------|
 | 186 | Homebrew formula (brew install fray) | HIGH | done |
-| 187 | Docker image (Dockerfile) | HIGH | pending |
+| 187 | Docker image (Dockerfile) | HIGH | done |
 | 188 | Kali Linux / Debian package | MEDIUM | pending |
 | 189 | Windows installer (MSI/exe) | LOW | pending |
 | 190 | Arch Linux AUR package | LOW | pending |
@@ -316,10 +316,10 @@
 | L2 Endpoint Classification | 8 | 2 | 6 |
 | L3 Secret/Credential Detection | 6 | 2 | 4 |
 | L4 New Attack Classes | 10 | 0 | 10 |
-| L5 Supply Chain | 3 | 1 | 2 |
+| L5 Supply Chain | 3 | 2 | 1 |
 | L6 OSINT | 6 | 6 | 0 |
 | L7 Cache + D1 Sync | 8 | 3 | 5 |
-| L8 DNS Recon Phase 2 | 5 | 0 | 5 |
+| L8 DNS Recon Phase 2 | 5 | 1 | 4 |
 | L9 Bot Detection | 5 | 1 | 4 |
 | L10 Dashboard / Web UI | 13 | 0 | 13 |
 | L11 Nikkei 225 | 10 | 0 | 10 |
@@ -328,12 +328,12 @@
 | L14 Growth / Stars | 16 | 3 | 13 |
 | L15 Bug Bounty | 11 | 2 | 9 |
 | L16 Credential OSINT | 13 | 2 | 11 |
-| L17 Interactive + Self-Learning | 18 | 6 | 12 |
-| L18 Competitive Parity | 16 | 2 | 14 |
+| L17 Interactive + Self-Learning | 18 | 7 | 11 |
+| L18 Competitive Parity | 16 | 3 | 13 |
 | L19 Recent Session | 10 | 10 | 0 |
-| L20 Performance + UX | 6 | 1 | 5 |
-| L21 Packaging | 6 | 1 | 5 |
+| L20 Performance + UX | 6 | 2 | 4 |
+| L21 Packaging | 6 | 2 | 4 |
 | L22 Docs + Marketing | 6 | 0 | 6 |
 | L23 Extensions | 5 | 1 | 4 |
 | L24 Monitoring | 3 | 2 | 1 |
-| **TOTAL** | **205** | **55** | **150** |
+| **TOTAL** | **205** | **61** | **144** |
