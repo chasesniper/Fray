@@ -664,6 +664,9 @@ def run_recon(url: str, timeout: int = 8,
     # 25. Attack surface summary
     result["attack_surface"] = _build_attack_surface_summary(result)
 
+    # 26. Enrich result with attack vectors, targets, remediation for HTML report
+    _enrich_for_report(result)
+
     # ── Scan duration + stats summary (#189) ──
     scan_end = time.time()
     scan_start = prog._start
@@ -706,6 +709,276 @@ def run_recon(url: str, timeout: int = 8,
         pass
 
     return result
+
+
+def _enrich_for_report(result: Dict[str, Any]) -> None:
+    """Enrich result dict with attack_vectors, attack_targets, remediation for HTML report.
+
+    Reads existing pipeline data and synthesises structured objects that the
+    v11 HTML report builder consumes.  Mutates *result* in place.
+    """
+    host = result.get("host", "")
+    atk = result.get("attack_surface", {})
+    cloud_dist = result.get("cloud_distribution", {})
+    per_sub = cloud_dist.get("per_subdomain", [])
+    waf_vendor = atk.get("waf_vendor") or "WAF"
+    cdn_vendor = atk.get("cdn") or ""
+
+    # ── Attack Vectors ──
+    vectors = []
+    priority_counter = 100
+
+    # WAF bypass subdomains
+    active = result.get("subdomains_active", {})
+    waf_bypass = active.get("waf_bypass", []) if isinstance(active, dict) else []
+    if waf_bypass:
+        targets = [f"https://{e['subdomain']}" for e in waf_bypass if isinstance(e, dict)]
+        vectors.append({
+            "type": "WAF Bypass", "severity": "critical", "count": len(waf_bypass),
+            "priority": priority_counter, "targets": targets,
+            "description": f"Subdomains that resolve to origin IPs outside the WAF/CDN, allowing attackers to send payloads directly to the origin server without any filtering.",
+            "impact": f"Complete bypass of WAF rules — XSS, SQLi, and all OWASP attacks reach the application unfiltered.",
+            "mitre": "T1190 — Exploit Public-Facing Application",
+        })
+        priority_counter -= 5
+
+    # Unprotected subdomains (no WAF and no CDN)
+    unprotected = [s for s in per_sub if not s.get("waf") and not s.get("cdn")]
+    if unprotected:
+        targets = [f"https://{s['subdomain']}" for s in unprotected[:20]]
+        vectors.append({
+            "type": "Unprotected Subdomain", "severity": "high", "count": len(unprotected),
+            "priority": priority_counter, "targets": targets,
+            "description": "Subdomains with no CDN or WAF protection, directly exposed on the internet.",
+            "impact": "No edge security — vulnerable to direct attacks, DDoS, and automated scanning.",
+            "mitre": "T1595 — Active Scanning",
+        })
+        priority_counter -= 5
+
+    # Account takeover surface
+    auth_ep = result.get("auth_endpoints", {})
+    if isinstance(auth_ep, dict) and auth_ep.get("has_login"):
+        auth_subs = []
+        for s in per_sub:
+            nm = s.get("subdomain", "").lower()
+            if any(k in nm for k in ("auth", "sso", "login", "id", "account", "oauth")):
+                auth_subs.append(s["subdomain"])
+        vectors.append({
+            "type": "Account Takeover", "severity": "critical", "count": 1,
+            "priority": priority_counter, "targets": [f"https://{host}"],
+            "description": "Authentication and identity endpoints discovered — login portals, SSO, OAuth flows, password reset, and session management surfaces.",
+            "impact": "Credential stuffing, brute-force, session hijacking, and OAuth abuse can lead to full account compromise.",
+            "mitre": "T1078 — Valid Accounts / T1110 — Brute Force",
+        })
+        priority_counter -= 5
+
+    # API surface
+    api = result.get("api_discovery", {})
+    api_subs = [s["subdomain"] for s in per_sub if "api" in s.get("subdomain", "").lower()]
+    if (isinstance(api, dict) and api.get("endpoints_found")) or api_subs:
+        vectors.append({
+            "type": "API Vulnerability", "severity": "high", "count": 1,
+            "priority": priority_counter, "targets": [f"https://{host}"],
+            "description": "API endpoints discovered — REST, GraphQL, or internal service APIs that may lack proper authentication, rate limiting, or input validation.",
+            "impact": "Broken authentication, excessive data exposure, mass assignment, and SSRF via API abuse.",
+            "mitre": "OWASP API1-API10",
+        })
+        priority_counter -= 5
+
+    # LLM / AI surface
+    ai_subs = [s["subdomain"] for s in per_sub
+               if any(k in s.get("subdomain", "").lower() for k in ("ai", "llm", "chat", "bot", "gpt", "robot"))]
+    if ai_subs:
+        vectors.append({
+            "type": "LLM / AI Prompt Injection", "severity": "high", "count": 1,
+            "priority": priority_counter, "targets": [f"https://{host}"],
+            "description": "AI/ML and chatbot endpoints discovered — LLM-powered services that may be vulnerable to prompt injection, jailbreaking, and data exfiltration.",
+            "impact": "Prompt injection can bypass safety filters, leak system prompts, exfiltrate training data, or cause unintended actions.",
+            "mitre": "OWASP LLM01 — Prompt Injection",
+        })
+        priority_counter -= 5
+
+    # Payment surface
+    pay_subs = [s["subdomain"] for s in per_sub
+                if any(k in s.get("subdomain", "").lower() for k in ("pay", "shop", "store", "cart", "order", "checkout"))]
+    if pay_subs:
+        vectors.append({
+            "type": "Payment / Financial Abuse", "severity": "critical", "count": 1,
+            "priority": priority_counter, "targets": [f"https://{host}"],
+            "description": "Payment processing, e-commerce, and financial transaction endpoints detected.",
+            "impact": "Price manipulation, payment bypass, card testing, and financial fraud.",
+            "mitre": "T1565 — Data Manipulation",
+        })
+        priority_counter -= 5
+
+    # Staging/dev
+    staging_envs = atk.get("staging_envs", [])
+    if staging_envs:
+        targets = [f"https://{s}" for s in staging_envs[:10]]
+        vectors.append({
+            "type": "Staging / Dev Environment", "severity": "high", "count": len(staging_envs),
+            "priority": priority_counter, "targets": targets,
+            "description": "Non-production environments publicly accessible — often with debug mode, verbose errors, default credentials, and weaker WAF rules.",
+            "impact": "Information disclosure, default credential access, code/config leakage, and pivot to production.",
+            "mitre": "T1580 — Cloud Infrastructure Discovery",
+        })
+        priority_counter -= 5
+
+    # DDoS / L7 DoS
+    rate_limit = result.get("rate_limit", {})
+    rl_type = rate_limit.get("type", "none") if isinstance(rate_limit, dict) else "none"
+    if rl_type == "none" and len(unprotected) > 5:
+        vectors.append({
+            "type": "DDoS / L7 Denial of Service", "severity": "high", "count": 1,
+            "priority": priority_counter, "targets": [f"https://{host}"],
+            "description": "Large number of unprotected subdomains without rate limiting — application-layer flood attacks possible.",
+            "impact": "Service degradation or outage via slow HTTP, resource-intensive queries, or connection exhaustion.",
+            "mitre": "T1499 — Endpoint Denial of Service",
+        })
+        priority_counter -= 5
+
+    # Cache poisoning
+    if cdn_vendor and auth_ep and isinstance(auth_ep, dict) and auth_ep.get("has_login"):
+        vectors.append({
+            "type": "Web Cache Poisoning", "severity": "medium", "count": 1,
+            "priority": priority_counter, "targets": [f"https://{host}"],
+            "description": "CDN caching combined with user-specific pages creates cache deception and poisoning attack surface.",
+            "impact": "Serve malicious content to other users, steal credentials via cached authenticated pages, or cause widespread XSS.",
+            "mitre": "T1557 — Adversary-in-the-Middle",
+        })
+        priority_counter -= 5
+
+    # DDoS — Direct Origin (if origin IPs found)
+    origin_data = result.get("origin_ip", {})
+    origin_candidates = origin_data.get("candidates", []) if isinstance(origin_data, dict) else []
+    if origin_candidates and len(unprotected) > 0:
+        targets = [f"https://{s['subdomain']}" for s in unprotected[:3]]
+        vectors.append({
+            "type": "DDoS — Direct Origin", "severity": "high", "count": len(unprotected[:3]),
+            "priority": priority_counter, "targets": targets,
+            "description": "Origin servers reachable without CDN protection — volumetric and application-layer DDoS attacks can target them directly.",
+            "impact": "Service disruption, resource exhaustion, and potential complete outage.",
+            "mitre": "T1499 — Endpoint Denial of Service",
+        })
+
+    atk["attack_vectors"] = vectors
+
+    # ── Attack Targets (union of all vector targets, deduped, sorted by priority) ──
+    seen = set()
+    targets_list = []
+    for vec in vectors:
+        for t in vec.get("targets", []):
+            if t not in seen:
+                seen.add(t)
+                targets_list.append({"target": t, "type": vec["type"], "priority": vec["priority"]})
+    targets_list.sort(key=lambda x: -x["priority"])
+    atk["attack_targets"] = targets_list
+
+    # ── Remediation Plan ──
+    remediation = []
+    hdrs = result.get("headers", {})
+    hdr_score = hdrs.get("score", 0) if isinstance(hdrs, dict) else 0
+    missing_hdrs = hdrs.get("missing", {}) if isinstance(hdrs, dict) else {}
+    csp = result.get("csp", {})
+    csp_present = csp.get("present", False) if isinstance(csp, dict) else False
+
+    if not csp_present:
+        remediation.append({
+            "action": "Deploy Content-Security-Policy header", "severity": "critical",
+            "why": "Prevents XSS, data injection, and clickjacking attacks",
+            "how": "Add CSP header to web server config; start with report-only mode",
+            "timeline": "Immediate",
+        })
+    if hdr_score < 50:
+        n_miss = len(missing_hdrs) if isinstance(missing_hdrs, dict) else 0
+        remediation.append({
+            "action": "Harden security headers", "severity": "critical",
+            "why": f"Only {hdr_score}/100 — missing {n_miss} essential headers",
+            "how": "Add missing headers to reverse proxy / web server configuration",
+            "timeline": "Immediate",
+        })
+    if waf_bypass:
+        remediation.append({
+            "action": f"Fix {len(waf_bypass)} WAF-bypass subdomain(s)", "severity": "critical",
+            "why": "Attackers bypass WAF via direct origin access",
+            "how": "Route all subdomains through CDN or restrict origin IP access via firewall",
+            "timeline": "Short-term",
+        })
+    if rl_type == "none":
+        remediation.append({
+            "action": "Implement rate limiting", "severity": "high",
+            "why": "No rate limiting — vulnerable to brute-force & L7 DDoS",
+            "how": "Enable rate limiting on WAF/reverse proxy (e.g., 100 req/min per IP)",
+            "timeline": "Short-term",
+        })
+    if staging_envs:
+        remediation.append({
+            "action": f"Restrict {len(staging_envs)} staging/dev environments", "severity": "high",
+            "why": "Staging environments often have weaker security controls",
+            "how": "Add authentication, IP whitelist, or remove from public DNS",
+            "timeline": "Short-term",
+        })
+    dns = result.get("dns", {})
+    spf = dns.get("spf", "") if isinstance(dns, dict) else ""
+    dmarc = dns.get("dmarc", "") if isinstance(dns, dict) else ""
+    if not spf:
+        remediation.append({
+            "action": "Add SPF record", "severity": "medium",
+            "why": "Domain vulnerable to email spoofing",
+            "how": 'Add TXT record: v=spf1 include:... -all',
+            "timeline": "Short-term",
+        })
+    if not dmarc:
+        remediation.append({
+            "action": "Add DMARC record", "severity": "medium",
+            "why": "No email authentication enforcement",
+            "how": 'Add TXT record: v=DMARC1; p=reject; rua=...',
+            "timeline": "Short-term",
+        })
+    gap_findings = result.get("gap_analysis", {}).get("findings", [])
+    if gap_findings:
+        remediation.append({
+            "action": f"Address {len(gap_findings)} WAF gap(s)", "severity": "medium",
+            "why": "Known bypass techniques applicable to detected WAF",
+            "how": "Review gap analysis and add custom WAF rules",
+            "timeline": "Medium-term",
+        })
+
+    atk["remediation"] = remediation
+
+    # ── Expose origin_ips and admin_panels in report-friendly format ──
+    origin_ip_data = result.get("origin_ip", {})
+    if isinstance(origin_ip_data, dict):
+        result["origin_ips"] = origin_ip_data
+
+    # ── WAF bypass subdomains in cloud_distribution ──
+    if waf_bypass and "waf_bypass_subdomains" not in cloud_dist:
+        cloud_dist["waf_bypass_subdomains"] = waf_bypass
+
+    # ── Subdomain probes ──
+    probes = result.get("subdomain_probes", {})
+    if not probes:
+        # Build from subdomains_active if available
+        active_data = result.get("subdomains_active", {})
+        if isinstance(active_data, dict) and active_data.get("results"):
+            result["subdomain_probes"] = {
+                "total": active_data.get("total", 0),
+                "responsive": active_data.get("responsive", 0),
+                "results": active_data.get("results", []),
+            }
+
+    # ── Security checks summary ──
+    checks = {}
+    cors = result.get("cors", {})
+    if isinstance(cors, dict) and cors.get("vulnerable"):
+        checks["cors"] = {"findings": [f"CORS misconfiguration: {cors.get('details', 'origin reflected')}"]}
+    takeover = result.get("subdomain_takeover", {})
+    if isinstance(takeover, dict) and takeover.get("vulnerable"):
+        checks["subdomain_takeover"] = {"findings": [f"{len(takeover['vulnerable'])} subdomain(s) vulnerable to takeover"]}
+    hhi = result.get("host_header_injection", {})
+    if isinstance(hhi, dict) and hhi.get("vulnerable"):
+        checks["host_header_injection"] = {"findings": ["Host header injection detected"]}
+    result["security_checks"] = checks
 
 
 def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
