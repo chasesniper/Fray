@@ -1847,7 +1847,8 @@ def cmd_recon(args):
     for target in targets:
         json_mode = getattr(args, 'json', False)
         ai_mode = getattr(args, 'ai', False)
-        suppress_progress = json_mode or ai_mode or ci_mode
+        quiet_mode = getattr(args, 'quiet', False)
+        suppress_progress = json_mode or ai_mode or ci_mode or quiet_mode
         result = run_recon(target, timeout=getattr(args, 'timeout', 8),
                            headers=auth_headers, mode=scan_mode,
                            stealth=stealth, retirejs=retirejs,
@@ -1947,7 +1948,7 @@ def cmd_recon(args):
 
         if getattr(args, 'json', False):
             _json_print(result)
-        else:
+        elif not quiet_mode:
             print_recon(result)
 
         # --ai-summary: LLM-powered (or local fallback) actionable summary
