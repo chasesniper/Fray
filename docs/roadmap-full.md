@@ -1,6 +1,6 @@
 # Fray Full Roadmap — 222 Items Across 27 Layers
 
-**Status:** 68 done · 154 pending  
+**Status:** 70 done · 152 pending  
 **Last updated:** 2026-03-11
 
 ---
@@ -75,7 +75,7 @@
 | 41 | D1 community bypass sharing | MEDIUM | done |
 | 42 | Cache invalidation on WAF config change | MEDIUM | pending |
 | 43 | Cache size limits + eviction policy | LOW | pending |
-| 44 | Cache export/import for offline use | LOW | pending |
+| 44 | Cache export/import for offline use | LOW | done |
 | 45 | Community leaderboard from D1 data | MEDIUM | pending |
 | 46 | Cache warming from threat intel feed | LOW | pending |
 
@@ -330,7 +330,7 @@
 | # | Item | Priority | Status |
 |---|------|----------|--------|
 | 218 | Parallel/async request execution (asyncio + aiohttp) | HIGH | pending |
-| 219 | Response diffing / false positive reduction | MEDIUM | pending |
+| 219 | Response diffing / false positive reduction | MEDIUM | done |
 | 220 | Redirect chain following in testing | MEDIUM | pending |
 | 221 | --resume flag for interrupted scan checkpoint | MEDIUM | pending |
 | 222 | Test coverage expansion (pytest, >80%) | LOW | pending |
@@ -347,7 +347,7 @@
 | L4 New Attack Classes | 10 | 0 | 10 |
 | L5 Supply Chain | 3 | 2 | 1 |
 | L6 OSINT | 6 | 6 | 0 |
-| L7 Cache + D1 Sync | 8 | 3 | 5 |
+| L7 Cache + D1 Sync | 8 | 4 | 4 |
 | L8 DNS Recon Phase 2 | 5 | 5 | 0 |
 | L9 Bot Detection | 5 | 1 | 4 |
 | L10 Dashboard / Web UI | 13 | 0 | 13 |
@@ -367,5 +367,5 @@
 | L24 Monitoring | 3 | 2 | 1 |
 | L25 AI Intelligence | 5 | 0 | 5 |
 | L26 CF Workers AI Gateway | 7 | 0 | 7 |
-| L27 Architecture + Quality | 5 | 0 | 5 |
-| **TOTAL** | **222** | **68** | **154** |
+| L27 Architecture + Quality | 5 | 1 | 4 |
+| **TOTAL** | **222** | **70** | **152** |
