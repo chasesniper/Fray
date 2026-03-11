@@ -698,6 +698,13 @@ def run_recon(url: str, timeout: int = 8,
     # Auto-save for --compare history
     _save_recon_history(result)
 
+    # Historical trend snapshot (#79)
+    try:
+        from fray.adaptive_cache import save_trend_snapshot
+        save_trend_snapshot(host, result)
+    except Exception:
+        pass
+
     return result
 
 

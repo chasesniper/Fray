@@ -438,6 +438,100 @@ def check_subdomains_crt(host: str, timeout: int = 10) -> Dict[str, Any]:
     return result
 
 
+def check_ct_monitor(host: str, days: int = 30,
+                     timeout: int = 10) -> Dict[str, Any]:
+    """Monitor Certificate Transparency logs for recently issued certificates (#75).
+
+    Queries crt.sh for certificates issued within the last N days,
+    flags new/unexpected subdomains and wildcard certs.
+
+    Args:
+        host: Domain to monitor.
+        days: Look-back window in days (default 30).
+        timeout: HTTP timeout for crt.sh query.
+
+    Returns:
+        Dict with 'recent_certs', 'new_subdomains', 'wildcard_certs', 'issuers'.
+    """
+    import json as _json
+    from datetime import datetime, timedelta
+
+    result: Dict[str, Any] = {
+        "recent_certs": [],
+        "total_recent": 0,
+        "new_subdomains": [],
+        "wildcard_certs": [],
+        "issuers": {},
+        "error": None,
+    }
+
+    search_domain = host.lstrip("www.") if host.startswith("www.") else host
+    cutoff = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+
+    try:
+        from fray.recon.http import _follow_redirect
+        status, body = _follow_redirect(
+            "crt.sh",
+            f"/?q=%25.{search_domain}&output=json",
+            timeout=timeout,
+        )
+        if status != 200 or not body:
+            result["error"] = f"crt.sh returned {status}"
+            return result
+
+        entries = _json.loads(body.decode("utf-8", errors="replace"))
+    except Exception as e:
+        result["error"] = str(e)
+        return result
+
+    seen_names: set = set()
+    seen_ids: set = set()
+
+    for entry in entries:
+        cert_id = entry.get("id")
+        if cert_id in seen_ids:
+            continue
+        seen_ids.add(cert_id)
+
+        not_before = entry.get("not_before", "")
+        if not_before < cutoff:
+            continue
+
+        name_value = entry.get("name_value", "")
+        issuer = entry.get("issuer_name", "")
+        names = [n.strip().lower() for n in name_value.split("\n") if n.strip()]
+
+        cert_info = {
+            "id": cert_id,
+            "not_before": not_before,
+            "not_after": entry.get("not_after", ""),
+            "names": names[:10],
+            "issuer": issuer,
+        }
+        result["recent_certs"].append(cert_info)
+
+        # Track issuers
+        issuer_short = issuer.split(",")[0] if issuer else "Unknown"
+        result["issuers"][issuer_short] = result["issuers"].get(issuer_short, 0) + 1
+
+        for name in names:
+            if name.startswith("*."):
+                if name not in seen_names:
+                    result["wildcard_certs"].append({"name": name, "not_before": not_before})
+                    seen_names.add(name)
+            elif name.endswith(f".{search_domain}") and name not in seen_names:
+                result["new_subdomains"].append({"name": name, "not_before": not_before})
+                seen_names.add(name)
+
+    result["total_recent"] = len(result["recent_certs"])
+    # Cap output size
+    result["recent_certs"] = result["recent_certs"][:50]
+    result["new_subdomains"] = result["new_subdomains"][:100]
+    result["wildcard_certs"] = result["wildcard_certs"][:20]
+
+    return result
+
+
 def check_subdomains_bruteforce(host: str, timeout: float = 3.0,
                                  parent_ips: Optional[List[str]] = None,
                                  parent_cdn: Optional[str] = None,

@@ -69,6 +69,10 @@ DEFAULT_TOP_N = 10
 # most payloads are only tested once per domain in practice.
 BLOCK_THRESHOLD = 1
 
+# Cache size limits (#43) — evict least-recently-used domains when exceeded
+MAX_DOMAINS = 500
+MAX_PAYLOADS_PER_DOMAIN = 2000  # max blocked + passed hashes per domain
+
 _cache_lock = threading.Lock()
 
 
@@ -112,7 +116,31 @@ def load_cache() -> Dict:
 
 
 def _save_cache(cache: Dict) -> None:
-    """Persist cache atomically (write tmp → rename)."""
+    """Persist cache atomically (write tmp → rename).
+
+    Applies size limits (#43):
+    - Per-domain: truncate blocked/passed lists to MAX_PAYLOADS_PER_DOMAIN
+    - Global: evict least-recently-updated domains beyond MAX_DOMAINS
+    """
+    # ── Per-domain payload cap ──
+    for domain, entry in cache.items():
+        if isinstance(entry, dict):
+            for key in ("blocked", "passed"):
+                lst = entry.get(key)
+                if isinstance(lst, list) and len(lst) > MAX_PAYLOADS_PER_DOMAIN:
+                    entry[key] = lst[-MAX_PAYLOADS_PER_DOMAIN:]
+
+    # ── Global domain cap (LRU eviction) ──
+    if len(cache) > MAX_DOMAINS:
+        # Sort by updated_at ascending (oldest first), evict oldest
+        sorted_domains = sorted(
+            cache.keys(),
+            key=lambda d: cache[d].get("updated_at", "") if isinstance(cache[d], dict) else "",
+        )
+        evict_count = len(cache) - MAX_DOMAINS
+        for d in sorted_domains[:evict_count]:
+            del cache[d]
+
     _FRAY_DIR.mkdir(parents=True, exist_ok=True)
     tmp = _CACHE_PATH.with_suffix(".tmp")
     try:
@@ -668,6 +696,59 @@ def print_waf_leaderboard() -> None:
     console.print()
 
 
+def get_waf_market_share() -> Dict:
+    """Aggregate WAF vendor distribution from scan cache data (#78).
+
+    Returns:
+        Dict with 'vendors', 'total_domains', 'distribution', 'top_vendor'.
+    """
+    cache = load_cache()
+    vendor_counts: Dict[str, int] = {}
+    total = 0
+
+    for domain, entry in cache.items():
+        if not isinstance(entry, dict):
+            continue
+        total += 1
+        vendor = entry.get("waf_vendor", "").strip()
+        if vendor:
+            vendor_counts[vendor] = vendor_counts.get(vendor, 0) + 1
+
+    no_waf = total - sum(vendor_counts.values())
+    if no_waf > 0:
+        vendor_counts["(no WAF detected)"] = no_waf
+
+    sorted_vendors = sorted(vendor_counts.items(), key=lambda x: -x[1])
+
+    distribution = {}
+    for name, count in sorted_vendors:
+        pct = round(count / total * 100, 1) if total else 0
+        distribution[name] = {"count": count, "pct": pct}
+
+    return {
+        "vendors": [v[0] for v in sorted_vendors if v[0] != "(no WAF detected)"],
+        "total_domains": total,
+        "domains_with_waf": total - no_waf if no_waf > 0 else total,
+        "top_vendor": sorted_vendors[0][0] if sorted_vendors else None,
+        "distribution": distribution,
+    }
+
+
+def print_waf_market_share() -> None:
+    """Print WAF market share table to stdout."""
+    data = get_waf_market_share()
+    if not data["total_domains"]:
+        print("  No scan data yet. Run: fray recon <domain>")
+        return
+
+    print(f"\n  WAF Market Share ({data['total_domains']} domains scanned)")
+    print("  " + "-" * 45)
+    for vendor, info in data["distribution"].items():
+        bar = "█" * int(info["pct"] / 2.5)
+        print(f"  {vendor:<25} {info['count']:>4}  ({info['pct']:>5.1f}%)  {bar}")
+    print()
+
+
 def export_cache(output_path: str, domain: str = "") -> Dict:
     """Export adaptive cache to a portable JSON file.
 
@@ -776,6 +857,114 @@ def clear_domain_cache(domain: str = "") -> int:
             _save_cache(cache)
             return 1
         return 0
+
+
+# ── Historical trend tracking (#79) ───────────────────────────────────────────
+
+_TREND_DIR = _FRAY_DIR / "trends"
+
+
+def save_trend_snapshot(domain: str, scan_result: Dict) -> Dict:
+    """Append a timestamped snapshot for trend tracking.
+
+    Called after each recon scan to record key metrics over time.
+    Snapshots are stored in ~/.fray/trends/<domain>.json as a JSON array.
+
+    Args:
+        domain: Target domain.
+        scan_result: Full recon result dict.
+
+    Returns:
+        Dict with 'snapshots_total', 'path'.
+    """
+    domain = _extract_domain(domain)
+    _TREND_DIR.mkdir(parents=True, exist_ok=True)
+    trend_path = _TREND_DIR / f"{domain}.json"
+
+    # Load existing snapshots
+    snapshots = []
+    if trend_path.exists():
+        try:
+            with open(trend_path, "r", encoding="utf-8") as f:
+                snapshots = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            snapshots = []
+
+    # Extract key metrics from scan result
+    dns = scan_result.get("dns", {})
+    subs = scan_result.get("subdomains", {})
+    tls = scan_result.get("tls", {})
+    hygiene = scan_result.get("dns_hygiene", {})
+    takeover = scan_result.get("subdomain_takeover", {})
+    summary = scan_result.get("attack_surface_summary", {})
+
+    snapshot = {
+        "timestamp": _now_iso(),
+        "subdomains_count": subs.get("count", 0) if isinstance(subs, dict) else 0,
+        "dns_hygiene_score": hygiene.get("score", 0) if isinstance(hygiene, dict) else 0,
+        "dns_hygiene_grade": hygiene.get("grade", "?") if isinstance(hygiene, dict) else "?",
+        "takeover_count": takeover.get("count", 0) if isinstance(takeover, dict) else 0,
+        "tls_grade": scan_result.get("tls_grade", "?"),
+        "cert_days_remaining": tls.get("days_remaining") if isinstance(tls, dict) else None,
+        "waf_vendor": scan_result.get("waf", {}).get("vendor", "") if isinstance(scan_result.get("waf"), dict) else "",
+        "findings_count": len(summary.get("findings", [])) if isinstance(summary, dict) else 0,
+        "risk_score": summary.get("risk_score", 0) if isinstance(summary, dict) else 0,
+        "critical_findings": summary.get("critical", 0) if isinstance(summary, dict) else 0,
+        "high_findings": summary.get("high", 0) if isinstance(summary, dict) else 0,
+    }
+
+    snapshots.append(snapshot)
+
+    # Keep last 100 snapshots per domain
+    if len(snapshots) > 100:
+        snapshots = snapshots[-100:]
+
+    with open(trend_path, "w", encoding="utf-8") as f:
+        json.dump(snapshots, f, indent=2, ensure_ascii=False)
+
+    return {"snapshots_total": len(snapshots), "path": str(trend_path)}
+
+
+def get_trend(domain: str, limit: int = 20) -> Dict:
+    """Get historical trend data for a domain.
+
+    Returns:
+        Dict with 'domain', 'snapshots', 'trend' (improving/stable/degrading).
+    """
+    domain = _extract_domain(domain)
+    trend_path = _TREND_DIR / f"{domain}.json"
+
+    if not trend_path.exists():
+        return {"domain": domain, "snapshots": [], "trend": "unknown",
+                "message": "No historical data yet"}
+
+    try:
+        with open(trend_path, "r", encoding="utf-8") as f:
+            snapshots = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return {"domain": domain, "snapshots": [], "trend": "unknown"}
+
+    recent = snapshots[-limit:]
+
+    # Compute trend from risk scores
+    trend = "stable"
+    if len(recent) >= 2:
+        first_half = recent[:len(recent) // 2]
+        second_half = recent[len(recent) // 2:]
+        avg_first = sum(s.get("risk_score", 0) for s in first_half) / len(first_half)
+        avg_second = sum(s.get("risk_score", 0) for s in second_half) / len(second_half)
+        delta = avg_second - avg_first
+        if delta > 5:
+            trend = "degrading"
+        elif delta < -5:
+            trend = "improving"
+
+    return {
+        "domain": domain,
+        "snapshots": recent,
+        "snapshot_count": len(snapshots),
+        "trend": trend,
+    }
 
 
 def print_cache_summary(domain: str = "") -> None:

@@ -1643,6 +1643,29 @@ def cmd_stats(args):
             print_waf_leaderboard()
         return
 
+    if getattr(args, 'waf_market', False):
+        from fray.adaptive_cache import get_waf_market_share, print_waf_market_share
+        if getattr(args, 'json', False):
+            _json_print(get_waf_market_share())
+        else:
+            print_waf_market_share()
+        return
+
+    if getattr(args, 'trend', None):
+        from fray.adaptive_cache import get_trend
+        domain = args.trend
+        data = get_trend(domain)
+        if getattr(args, 'json', False):
+            _json_print(data)
+        else:
+            print(f"\n  Trend for {data['domain']} ({data['snapshot_count']} snapshots): {data['trend']}")
+            for s in data.get('snapshots', [])[-5:]:
+                print(f"    {s['timestamp'][:10]}  risk={s.get('risk_score',0):>3}  "
+                      f"hygiene={s.get('dns_hygiene_score',0):>3}/{s.get('dns_hygiene_grade','?')}  "
+                      f"findings={s.get('findings_count',0)}")
+            print()
+        return
+
     from fray.stats import collect_stats, print_stats
     stats = collect_stats()
     if args.json:
@@ -4849,6 +4872,10 @@ Documentation: https://github.com/dalisecurity/fray
     # stats
     p_stats = subparsers.add_parser("stats", help="Show payload database statistics")
     p_stats.add_argument("--json", action="store_true", help="Output as JSON")
+    p_stats.add_argument("--waf-market", action="store_true", dest="waf_market",
+                          help="Show WAF vendor market share from scan data")
+    p_stats.add_argument("--trend", metavar="DOMAIN",
+                          help="Show historical trend for a domain")
     p_stats.add_argument("--waf", action="store_true",
                           help="Show WAF effectiveness leaderboard (block rate per vendor from scan history)")
     p_stats.set_defaults(func=cmd_stats)
