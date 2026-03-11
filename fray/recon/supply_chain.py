@@ -380,6 +380,30 @@ def check_frontend_libs(body: str, retirejs: bool = False) -> Dict[str, Any]:
                 "risk": "CDN compromise or MITM could inject malicious code",
             })
 
+    # SRI check for ALL external scripts (not just known libraries)
+    # Any cross-origin <script src="https://..."> without integrity= is a risk
+    known_urls = {l["url"] for l in cdn_libs}
+    all_external_missing_sri = []
+    for tag_url, integrity_val in sri_map.items():
+        if tag_url in known_urls:
+            continue  # already counted above
+        # Only flag cross-origin scripts (http:// or https:// to a different host)
+        if not re.match(r'https?://', tag_url, re.IGNORECASE):
+            continue
+        if integrity_val is None:
+            all_external_missing_sri.append({
+                "library": None,
+                "version": None,
+                "url": tag_url,
+                "issue": "External script loaded without SRI hash",
+                "risk": "CDN compromise or MITM could inject malicious code",
+            })
+        else:
+            sri_present += 1
+
+    sri_missing += len(all_external_missing_sri)
+    sri_issues.extend(all_external_missing_sri)
+
     return {
         "libraries": libraries,
         "vulnerabilities": unique_vulns,

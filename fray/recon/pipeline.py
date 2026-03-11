@@ -100,6 +100,7 @@ from fray.recon.checks import (
     check_api_discovery,
     check_host_header_injection,
     check_admin_panels,
+    check_auth_endpoints,
     check_rate_limits,
     check_rate_limits_critical,
     check_differential_responses,
@@ -381,7 +382,7 @@ def run_recon(url: str, timeout: int = 8,
             "Host header injection"))
 
         # Non-fast tasks
-        t_hist = t_admin = t_rate = t_gql = t_leak = None
+        t_hist = t_admin = t_auth = t_rate = t_gql = t_leak = None
         if not is_fast:
             t_hist  = asyncio.create_task(_run(
                 lambda: discover_historical_urls(url, timeout=timeout, verify_ssl=verify,
@@ -392,6 +393,10 @@ def run_recon(url: str, timeout: int = 8,
                 lambda: check_admin_panels(host, port, use_ssl, timeout=timeout,
                                            extra_headers=headers),
                 "Admin panels"))
+            t_auth  = asyncio.create_task(_run(
+                lambda: check_auth_endpoints(host, port, use_ssl, timeout=timeout,
+                                              extra_headers=headers),
+                "Auth endpoints"))
             t_rate  = asyncio.create_task(_run(
                 lambda: check_rate_limits(host, port, use_ssl, timeout=timeout,
                                           extra_headers=headers),
@@ -475,6 +480,8 @@ def run_recon(url: str, timeout: int = 8,
             result["historical_urls"] = await _safe(t_hist, {})
         if t_admin:
             result["admin_panels"] = await _safe(t_admin, {})
+        if t_auth:
+            result["auth_endpoints"] = await _safe(t_auth, {})
         if t_rate:
             result["rate_limits"] = await _safe(t_rate, {})
         if t_gql:
@@ -632,6 +639,15 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     panel_list = panels.get("panels", []) if isinstance(panels, dict) else []
     n_panels = len(panel_list)
     open_panels = [p for p in panel_list if isinstance(p, dict) and p.get("protected") is False]
+
+    # ── Auth endpoints ──
+    auth_ep = r.get("auth_endpoints", {})
+    auth_endpoints = auth_ep.get("endpoints", []) if isinstance(auth_ep, dict) else []
+    n_auth = len(auth_endpoints)
+    has_login = auth_ep.get("has_login", False) if isinstance(auth_ep, dict) else False
+    has_registration = auth_ep.get("has_registration", False) if isinstance(auth_ep, dict) else False
+    has_oauth = auth_ep.get("has_oauth", False) if isinstance(auth_ep, dict) else False
+    has_mfa = auth_ep.get("has_mfa", False) if isinstance(auth_ep, dict) else False
 
     # ── GraphQL ──
     gql = r.get("graphql", {})
@@ -836,6 +852,11 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
         "staging_envs": staging_envs,
         "admin_panels": n_panels,
         "open_admin_panels": len(open_panels),
+        "auth_endpoints": n_auth,
+        "has_login": has_login,
+        "has_registration": has_registration,
+        "has_oauth": has_oauth,
+        "has_mfa": has_mfa,
         "graphql_endpoints": len(gql_endpoints),
         "graphql_introspection": gql_introspection,
         "api_specs": len(api_specs),
@@ -1538,10 +1559,14 @@ def print_recon(result: Dict[str, Any]) -> None:
         sri_issues = fl.get("sri_issues", [])
         if sri_issues:
             console.print()
-            console.print(f"    [bold yellow]Missing SRI ({len(sri_issues)} CDN resources)[/bold yellow]")
+            console.print(f"    [bold yellow]Missing SRI ({len(sri_issues)} external resources)[/bold yellow]")
             for si in sri_issues:
-                console.print(f"      [yellow]\u26a0[/yellow] {si['library']} {si['version']}")
-                console.print(f"        [dim]{si['risk']}[/dim]")
+                if si.get("library"):
+                    console.print(f"      [yellow]\u26a0[/yellow] {si['library']} {si['version']}")
+                else:
+                    url_short = si['url'][:80] + ("..." if len(si['url']) > 80 else "")
+                    console.print(f"      [yellow]\u26a0[/yellow] {url_short}")
+                console.print(f"        [dim]{si['issue']}[/dim]")
         console.print()
 
     # ── DNS ──
@@ -1915,6 +1940,52 @@ def print_recon(result: Dict[str, Any]) -> None:
                 console.print(f"    [green]\u2192[/green] {path} \u2014 {status} \u2192 {p['redirect']} [dim]({cat})[/dim]")
             else:
                 console.print(f"    [green]\u2192[/green] {path} \u2014 {status} [dim]({cat})[/dim]")
+        console.print()
+
+    # ── Auth Endpoints ──
+    auth_ep = result.get("auth_endpoints", {})
+    auth_found = auth_ep.get("endpoints", []) if isinstance(auth_ep, dict) else []
+    if auth_found:
+        cats = auth_ep.get("categories", {})
+        cat_tags = []
+        if cats.get("login"):
+            cat_tags.append(f"[cyan]{cats['login']} login[/cyan]")
+        if cats.get("registration"):
+            cat_tags.append(f"[cyan]{cats['registration']} registration[/cyan]")
+        if cats.get("oauth") or cats.get("sso"):
+            n_oauth = cats.get("oauth", 0) + cats.get("sso", 0)
+            cat_tags.append(f"[cyan]{n_oauth} OAuth/SSO[/cyan]")
+        if cats.get("mfa"):
+            cat_tags.append(f"[green]{cats['mfa']} MFA[/green]")
+        if cats.get("password_reset"):
+            cat_tags.append(f"[yellow]{cats['password_reset']} password reset[/yellow]")
+        if cats.get("api_auth"):
+            cat_tags.append(f"[cyan]{cats['api_auth']} API auth[/cyan]")
+        summary = ", ".join(cat_tags) if cat_tags else f"{len(auth_found)} endpoints"
+        console.print(f"  [bold]Auth Endpoints[/bold] ({summary})")
+        for ep in auth_found:
+            path = ep["path"]
+            status = ep["status"]
+            cat = ep["category"]
+            extras = []
+            if ep.get("has_csrf"):
+                extras.append("[green]CSRF[/green]")
+            if ep.get("rate_limited"):
+                extras.append("[green]rate-limited[/green]")
+            if ep.get("openid_discovery"):
+                extras.append("[cyan]OpenID[/cyan]")
+            if ep.get("auth_scheme"):
+                extras.append(f"[dim]{ep['auth_scheme']}[/dim]")
+            extra_str = " " + " ".join(extras) if extras else ""
+            if ep.get("protected"):
+                console.print(f"    [yellow]\U0001f512 {path}[/yellow] — {status} auth required [dim]({cat})[/dim]{extra_str}")
+            elif ep.get("redirect"):
+                redir_short = ep['redirect'][:60]
+                console.print(f"    [green]→[/green] {path} — {status} → {redir_short} [dim]({cat})[/dim]{extra_str}")
+            else:
+                console.print(f"    [cyan]●[/cyan] {path} — {status} [dim]({cat})[/dim]{extra_str}")
+        if not auth_ep.get("has_mfa"):
+            console.print("    [yellow]⚠ No MFA/2FA endpoint detected[/yellow]")
         console.print()
 
     # ── Rate Limits ──

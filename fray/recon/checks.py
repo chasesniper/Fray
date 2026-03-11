@@ -918,6 +918,213 @@ def check_admin_panels(host: str, port: int, use_ssl: bool,
     }
 
 
+_AUTH_PATHS = [
+    # Login / Sign-in
+    ("/login", "login"),
+    ("/signin", "login"),
+    ("/sign-in", "login"),
+    ("/auth/login", "login"),
+    ("/user/login", "login"),
+    ("/users/sign_in", "login"),
+    ("/accounts/login", "login"),
+    ("/wp-login.php", "login"),
+    ("/admin/login", "login"),
+    # Registration
+    ("/register", "registration"),
+    ("/signup", "registration"),
+    ("/sign-up", "registration"),
+    ("/auth/register", "registration"),
+    ("/user/register", "registration"),
+    ("/users/sign_up", "registration"),
+    ("/accounts/signup", "registration"),
+    ("/join", "registration"),
+    # OAuth / SSO
+    ("/oauth/authorize", "oauth"),
+    ("/oauth2/authorize", "oauth"),
+    ("/auth/oauth", "oauth"),
+    ("/.well-known/openid-configuration", "oauth"),
+    ("/oauth/token", "oauth"),
+    ("/api/oauth/token", "oauth"),
+    ("/auth/saml", "sso"),
+    ("/saml/login", "sso"),
+    ("/sso/login", "sso"),
+    # Password reset
+    ("/forgot-password", "password_reset"),
+    ("/password/reset", "password_reset"),
+    ("/auth/forgot", "password_reset"),
+    ("/users/password/new", "password_reset"),
+    ("/accounts/password/reset", "password_reset"),
+    # MFA / 2FA
+    ("/2fa", "mfa"),
+    ("/auth/2fa", "mfa"),
+    ("/mfa", "mfa"),
+    ("/totp", "mfa"),
+    ("/auth/verify", "mfa"),
+    # API authentication
+    ("/api/auth", "api_auth"),
+    ("/api/v1/auth", "api_auth"),
+    ("/api/login", "api_auth"),
+    ("/api/token", "api_auth"),
+    ("/auth/token", "api_auth"),
+    ("/api/v1/token", "api_auth"),
+    # Session / Logout
+    ("/logout", "session"),
+    ("/signout", "session"),
+    ("/auth/logout", "session"),
+]
+
+
+def check_auth_endpoints(host: str, port: int, use_ssl: bool,
+                         timeout: int = 5,
+                         extra_headers: Optional[Dict[str, str]] = None,
+                         ) -> Dict[str, Any]:
+    """Probe common login, registration, OAuth, MFA, and API auth endpoints.
+
+    Returns categorized auth endpoints with status, protection flags,
+    and auth-specific metadata (CSRF tokens, OAuth flows, etc.).
+    """
+    from fray.recon.http import _fetch_url
+
+    scheme = "https" if use_ssl else "http"
+    port_str = "" if (use_ssl and port == 443) or (not use_ssl and port == 80) else f":{port}"
+    base = f"{scheme}://{host}{port_str}"
+
+    import concurrent.futures
+
+    _LOGIN_SIGNALS = (
+        "login", "password", "username", "sign in", "log in",
+        "authenticate", "email", "credential",
+        '<input type="password"', 'type="submit"',
+    )
+    _REGISTRATION_SIGNALS = (
+        "register", "sign up", "create account", "join",
+        "confirm password", "email", "username",
+    )
+    _OAUTH_SIGNALS = (
+        "client_id", "redirect_uri", "response_type", "grant_type",
+        "authorization_endpoint", "token_endpoint", "openid",
+    )
+    _MFA_SIGNALS = (
+        "verification code", "authenticator", "2fa", "two-factor",
+        "totp", "one-time", "mfa",
+    )
+
+    found = []
+
+    def _probe_auth(auth_path, category):
+        url = f"{base}{auth_path}"
+        try:
+            status, body, hdrs = _fetch_url(url, timeout=timeout,
+                                             verify_ssl=True,
+                                             headers=extra_headers)
+            if status == 0 and use_ssl:
+                status, body, hdrs = _fetch_url(url, timeout=timeout,
+                                                 verify_ssl=False,
+                                                 headers=extra_headers)
+        except Exception:
+            return None
+
+        if status == 0 or status >= 500:
+            return None
+        if status == 404:
+            return None
+
+        lower = body.lower() if body else ""
+        ct = hdrs.get("content-type", "")
+
+        entry = {
+            "path": auth_path,
+            "status": status,
+            "category": category,
+        }
+
+        # Redirect: follow and note destination
+        if status in (301, 302, 303, 307, 308):
+            loc = hdrs.get("location", "")
+            entry["redirect"] = loc
+            entry["accessible"] = True
+            return entry
+
+        # Protected (401/403) — endpoint exists but is guarded
+        if status in (401, 403):
+            entry["accessible"] = False
+            entry["protected"] = True
+            www_auth = hdrs.get("www-authenticate", "")
+            if www_auth:
+                entry["auth_scheme"] = www_auth.split()[0] if www_auth else None
+            return entry
+
+        # 200 — check if it's actually an auth-related page
+        if status == 200 and body:
+            is_auth_page = False
+
+            if category == "login" and any(s in lower for s in _LOGIN_SIGNALS):
+                is_auth_page = True
+            elif category == "registration" and any(s in lower for s in _REGISTRATION_SIGNALS):
+                is_auth_page = True
+            elif category == "oauth" and any(s in lower for s in _OAUTH_SIGNALS):
+                is_auth_page = True
+                if "openid" in lower or "authorization_endpoint" in lower:
+                    entry["openid_discovery"] = True
+            elif category == "sso":
+                if any(s in lower for s in ("saml", "sso", "single sign", "identity provider")):
+                    is_auth_page = True
+            elif category == "password_reset" and any(s in lower for s in ("reset", "forgot", "email", "recover")):
+                is_auth_page = True
+            elif category == "mfa" and any(s in lower for s in _MFA_SIGNALS):
+                is_auth_page = True
+            elif category == "api_auth":
+                if "json" in ct or any(s in lower for s in ("token", "api_key", "unauthorized")):
+                    is_auth_page = True
+            elif category == "session":
+                is_auth_page = True
+
+            if not is_auth_page:
+                return None
+
+            entry["accessible"] = True
+
+            # Check for CSRF token
+            if re.search(r'name\s*=\s*["\']csrf|_token|authenticity_token', lower):
+                entry["has_csrf"] = True
+
+            # Check for rate limit headers
+            for rl_h in ("x-ratelimit-limit", "x-rate-limit-limit", "retry-after", "ratelimit-limit"):
+                if rl_h in hdrs:
+                    entry["rate_limited"] = True
+                    break
+
+            return entry
+
+        return None
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
+        futures = {pool.submit(_probe_auth, p, c): p for p, c in _AUTH_PATHS}
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                entry = future.result()
+                if entry:
+                    found.append(entry)
+            except Exception:
+                pass
+
+    # Categorize results
+    by_category = {}
+    for e in found:
+        by_category.setdefault(e["category"], []).append(e)
+
+    return {
+        "endpoints": sorted(found, key=lambda x: x["path"]),
+        "total": len(found),
+        "categories": {k: len(v) for k, v in by_category.items()},
+        "has_login": any(e["category"] == "login" for e in found),
+        "has_registration": any(e["category"] == "registration" for e in found),
+        "has_oauth": any(e["category"] == "oauth" for e in found),
+        "has_mfa": any(e["category"] == "mfa" for e in found),
+        "has_sso": any(e["category"] == "sso" for e in found),
+    }
+
+
 _CRITICAL_PATHS = [
     "/admin", "/login", "/api", "/api/v1", "/graphql",
     "/wp-admin", "/wp-login.php", "/administrator",
