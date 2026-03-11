@@ -71,10 +71,11 @@ class _ReconProgress:
         sys.stderr.write(f"\033[2K\r  ⏳ {elapsed:5.1f}s  {msg}")
         sys.stderr.flush()
 
-from fray.recon.http import _parse_url, _http_get, check_http, check_tls
+from fray.recon.http import _parse_url, _http_get, check_http, check_tls, check_tls_grade
 from fray.recon.fingerprint import (
     check_security_headers,
     check_clickjacking,
+    check_captcha,
     check_cookies,
     fingerprint_app,
     recommend_categories,
@@ -421,6 +422,7 @@ def run_recon(url: str, timeout: int = 8,
         result["page_headers"] = resp_headers  # raw headers for WAF vendor inference
         tls_data = await _safe(t_tls, {})
         result["tls"] = tls_data
+        result["tls_grade"] = check_tls_grade(tls_data)
 
         # ── Tier 2: Tasks that depend on DNS/TLS results ──
         t_subs_active = asyncio.create_task(_run(
@@ -451,6 +453,7 @@ def run_recon(url: str, timeout: int = 8,
             "recommendations": csp_analysis.recommendations,
         }
         result["clickjacking"] = check_clickjacking(resp_headers, csp_value)
+        result["captcha"] = check_captcha(resp_headers, body)
         result["cookies"] = check_cookies(resp_headers)
         result["fingerprint"] = fingerprint_app(resp_headers, body)
         result["frontend_libs"] = check_frontend_libs(body, retirejs=retirejs)
@@ -667,6 +670,7 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     waf_vendor = gap.get("waf_vendor") if isinstance(gap, dict) else None
     diff = r.get("differential", {})
     detection_mode = (diff.get("detection_mode") or "").lower() or None if isinstance(diff, dict) else None
+    waf_redirect_target = diff.get("redirect_followed") if isinstance(diff, dict) else None
 
     # ── DNS / CDN ──
     dns_info = r.get("dns", {})
@@ -676,6 +680,9 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     tls = r.get("tls", {})
     tls_version = tls.get("tls_version") if isinstance(tls, dict) else None
     cert_days = tls.get("cert_days_remaining") if isinstance(tls, dict) else None
+    tls_gr = r.get("tls_grade", {})
+    tls_grade = tls_gr.get("grade") if isinstance(tls_gr, dict) else None
+    tls_grade_score = tls_gr.get("score") if isinstance(tls_gr, dict) else None
 
     # ── Security headers score ──
     hdrs = r.get("headers", {})
@@ -689,6 +696,11 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     # ── Clickjacking ──
     clickjack = r.get("clickjacking", {})
     clickjack_vuln = clickjack.get("vulnerable", False) if isinstance(clickjack, dict) else False
+
+    # ── CAPTCHA / Bot Protection ──
+    captcha = r.get("captcha", {})
+    captcha_detected = captcha.get("detected", False) if isinstance(captcha, dict) else False
+    captcha_providers = [p["name"] for p in captcha.get("providers", [])] if isinstance(captcha, dict) else []
 
     # ── CORS ──
     cors = r.get("cors", {})
@@ -753,6 +765,8 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
         findings.append({"severity": "high", "finding": "Host header injection detected"})
     if cors_vuln:
         findings.append({"severity": "high", "finding": "CORS misconfiguration"})
+    if waf_vendor and waf_redirect_target:
+        findings.append({"severity": "low", "finding": f"WAF ({waf_vendor}) detected on redirect target ({waf_redirect_target}), not the original domain"})
     if clickjack_vuln:
         findings.append({"severity": "medium", "finding": "Clickjacking vulnerable — no X-Frame-Options or CSP frame-ancestors"})
     if gql_introspection:
@@ -798,10 +812,10 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
         elif f["severity"] == "low": risk_score += 3
     risk_score = min(risk_score, 100)
 
-    # Factor in WAF presence
+    # Factor in WAF presence (skip penalty for unreachable domains)
     if waf_vendor:
         risk_score = max(0, risk_score - 10)
-    else:
+    elif page_status != 0:
         risk_score = min(100, risk_score + 15)
 
     # Risk level
@@ -833,15 +847,20 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
         "interesting_historical": len(interesting_hist),
         "technologies": tech_names,
         "waf_vendor": waf_vendor,
+        "waf_redirect_target": waf_redirect_target,
         "waf_detection_mode": detection_mode,
         "cdn": cdn,
         "tls_version": tls_version,
+        "tls_grade": tls_grade,
+        "tls_grade_score": tls_grade_score,
         "cert_days_remaining": cert_days,
         "security_headers_score": hdr_score,
         "csp_present": csp_present,
         "csp_score": csp_score,
         "cors_vulnerable": cors_vuln,
         "clickjacking_vulnerable": clickjack_vuln,
+        "captcha_detected": captcha_detected,
+        "captcha_providers": captcha_providers,
         "host_header_injection": hhi_vuln,
         "dangerous_http_methods": dangerous_methods,
         "robots_interesting_paths": len(interesting_paths),
@@ -1343,10 +1362,14 @@ def print_recon(result: Dict[str, Any]) -> None:
 
     # ── TLS ──
     tls = result.get("tls", {})
+    tls_gr = result.get("tls_grade", {})
     if tls and not tls.get("error"):
         v = str(tls.get("tls_version", "?"))
         vc = "green" if "1.3" in v else ("yellow" if "1.2" in v else "red")
-        console.print("  [bold]TLS[/bold]")
+        grade = tls_gr.get("grade", "?") if tls_gr else "?"
+        grade_score = tls_gr.get("score", "?") if tls_gr else "?"
+        gc = "green" if grade in ("A+", "A") else ("yellow" if grade == "B" else "red")
+        console.print(f"  [bold]TLS[/bold] ([{gc}]Grade {grade} · {grade_score}%[/{gc}])")
         console.print(f"    Version:  [{vc}]{v}[/{vc}]")
         console.print(f"    Cipher:   {tls.get('cipher', '?')} ({tls.get('cipher_bits', '?')} bits)")
         console.print(f"    Subject:  {tls.get('cert_subject', '?')}")
@@ -1363,9 +1386,13 @@ def print_recon(result: Dict[str, Any]) -> None:
             console.print("    [red]\u26a0 TLS 1.0 supported (insecure)[/red]")
         if tls.get("supports_tls_1_1"):
             console.print("    [red]\u26a0 TLS 1.1 supported (deprecated)[/red]")
+        for strength in tls_gr.get("strengths", []):
+            console.print(f"    [green]✓[/green] {strength}")
+        for issue in tls_gr.get("issues", []):
+            console.print(f"    [red]✗[/red] {issue}")
         console.print()
     elif tls and tls.get("error"):
-        console.print("  [bold]TLS[/bold]")
+        console.print("  [bold]TLS[/bold] ([red]Grade F[/red])")
         console.print(f"    [red]Error: {tls['error']}[/red]")
         console.print()
 
@@ -1583,6 +1610,20 @@ def print_recon(result: Dict[str, Any]) -> None:
             console.print(f"    [red]✗[/red] {iss}")
         if cj.get("recommendation"):
             console.print(f"    [dim]{cj['recommendation']}[/dim]")
+        console.print()
+
+    # ── CAPTCHA / Bot Protection ──
+    cap = result.get("captcha", {})
+    if cap and cap.get("detected"):
+        providers = cap.get("providers", [])
+        names = ", ".join(p["name"] for p in providers)
+        col = "yellow" if cap.get("challenge_on_load") else "cyan"
+        console.print(f"  [bold]CAPTCHA / Bot Protection[/bold] ([{col}]{len(providers)} provider(s)[/{col}])")
+        for p in providers:
+            ev = "; ".join(p.get("evidence", []))
+            console.print(f"    [{col}]{p['name']}[/{col}] ({p['type']}) — {ev}")
+        if cap.get("challenge_on_load"):
+            console.print("    [yellow]⚠ Challenge fires on page load — automated scanning may be blocked[/yellow]")
         console.print()
 
     # ── CORS ──

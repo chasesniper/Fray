@@ -19,10 +19,12 @@ from fray.recon.http import (  # noqa: F401
     _fetch_url,
     check_http,
     check_tls,
+    check_tls_grade,
 )
 from fray.recon.fingerprint import (  # noqa: F401
     check_security_headers,
     check_clickjacking,
+    check_captcha,
     check_cookies,
     fingerprint_app,
     recommend_categories,

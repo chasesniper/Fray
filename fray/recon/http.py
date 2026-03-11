@@ -221,6 +221,150 @@ def check_tls(host: str, port: int = 443, timeout: int = 8) -> Dict[str, Any]:
     return result
 
 
+# ── Weak cipher / protocol lists ────────────────────────────────────────
+
+_WEAK_CIPHERS = {
+    # NULL ciphers
+    "TLS_NULL_WITH_NULL_NULL", "TLS_RSA_WITH_NULL_MD5", "TLS_RSA_WITH_NULL_SHA",
+    "TLS_RSA_WITH_NULL_SHA256",
+    # Export-grade (FREAK)
+    "TLS_RSA_EXPORT_WITH_RC4_40_MD5", "TLS_RSA_EXPORT_WITH_DES40_CBC_SHA",
+    "TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA",
+    # RC4 (broken)
+    "RC4-MD5", "RC4-SHA", "TLS_RSA_WITH_RC4_128_MD5", "TLS_RSA_WITH_RC4_128_SHA",
+    "ECDHE-RSA-RC4-SHA", "ECDHE-ECDSA-RC4-SHA",
+    # DES / 3DES (Sweet32)
+    "DES-CBC-SHA", "DES-CBC3-SHA", "TLS_RSA_WITH_DES_CBC_SHA",
+    "TLS_RSA_WITH_3DES_EDE_CBC_SHA", "ECDHE-RSA-DES-CBC3-SHA",
+    # CBC with SHA-1 (BEAST-vulnerable with TLS 1.0)
+    "AES128-SHA", "AES256-SHA",
+}
+
+_WEAK_CIPHER_KEYWORDS = ("rc4", "des", "null", "export", "anon", "md5")
+
+
+def check_tls_grade(tls_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Grade TLS configuration from check_tls() output.
+
+    Returns:
+      - grade: "A+" | "A" | "B" | "C" | "D" | "F"
+      - score: 0-100
+      - issues: list of problems found
+      - strengths: list of good practices
+    """
+    result: Dict[str, Any] = {
+        "grade": "A+",
+        "score": 100,
+        "issues": [],
+        "strengths": [],
+    }
+
+    if not tls_data or tls_data.get("error"):
+        result["grade"] = "F"
+        result["score"] = 0
+        result["issues"].append(tls_data.get("error", "TLS connection failed"))
+        return result
+
+    tls_version = tls_data.get("tls_version") or ""
+    cipher = tls_data.get("cipher") or ""
+    cipher_bits = tls_data.get("cipher_bits") or 0
+    supports_10 = tls_data.get("supports_tls_1_0", False)
+    supports_11 = tls_data.get("supports_tls_1_1", False)
+    cert_expired = tls_data.get("cert_expired", False)
+    cert_days = tls_data.get("cert_days_remaining")
+
+    score = 100
+
+    # ── Protocol version ──
+    if "TLSv1.3" in tls_version:
+        result["strengths"].append("TLS 1.3 negotiated")
+    elif "TLSv1.2" in tls_version:
+        result["strengths"].append("TLS 1.2 negotiated")
+        score -= 5  # Not the latest
+    elif "TLSv1.1" in tls_version:
+        result["issues"].append("Negotiated TLS 1.1 — deprecated since 2021 (RFC 8996)")
+        score -= 30
+    elif "TLSv1.0" in tls_version or "TLSv1" == tls_version:
+        result["issues"].append("Negotiated TLS 1.0 — deprecated, vulnerable to BEAST/POODLE")
+        score -= 40
+    elif "SSLv3" in tls_version:
+        result["issues"].append("SSLv3 negotiated — broken (POODLE), must disable")
+        score -= 60
+
+    # ── Weak protocol support ──
+    if supports_10:
+        result["issues"].append("TLS 1.0 supported — should be disabled (PCI DSS non-compliant)")
+        score -= 20
+    if supports_11:
+        result["issues"].append("TLS 1.1 supported — should be disabled (RFC 8996)")
+        score -= 15
+
+    # ── Cipher strength ──
+    cipher_upper = cipher.upper()
+    cipher_lower = cipher.lower()
+
+    if cipher in _WEAK_CIPHERS or any(kw in cipher_lower for kw in _WEAK_CIPHER_KEYWORDS):
+        result["issues"].append(f"Weak cipher: {cipher}")
+        score -= 30
+    elif cipher_bits >= 256:
+        result["strengths"].append(f"Strong cipher: {cipher} ({cipher_bits}-bit)")
+    elif cipher_bits >= 128:
+        result["strengths"].append(f"Adequate cipher: {cipher} ({cipher_bits}-bit)")
+    elif cipher_bits > 0:
+        result["issues"].append(f"Short key: {cipher} ({cipher_bits}-bit) — minimum 128-bit recommended")
+        score -= 25
+
+    # Forward secrecy (TLS 1.3 always has PFS; TLS 1.2 needs ECDHE/DHE)
+    if "TLSv1.3" in tls_version:
+        result["strengths"].append("Forward secrecy (TLS 1.3 — always PFS)")
+    elif "ECDHE" in cipher_upper or "DHE" in cipher_upper:
+        result["strengths"].append("Forward secrecy (ECDHE/DHE)")
+    elif cipher:
+        result["issues"].append(f"No forward secrecy — cipher {cipher} uses static key exchange")
+        score -= 15
+
+    # AEAD cipher (GCM/CCM/ChaCha20)
+    if "GCM" in cipher_upper or "CHACHA20" in cipher_upper or "CCM" in cipher_upper:
+        result["strengths"].append("AEAD cipher mode (GCM/ChaCha20)")
+    elif "CBC" in cipher_upper:
+        result["issues"].append("CBC cipher mode — vulnerable to padding oracle attacks with TLS < 1.3")
+        score -= 10
+
+    # ── Certificate ──
+    if cert_expired:
+        result["issues"].append("Certificate EXPIRED")
+        score -= 40
+    elif cert_days is not None:
+        if cert_days < 7:
+            result["issues"].append(f"Certificate expires in {cert_days} days — URGENT renewal needed")
+            score -= 20
+        elif cert_days < 30:
+            result["issues"].append(f"Certificate expires in {cert_days} days — renew soon")
+            score -= 10
+        elif cert_days > 365:
+            result["issues"].append(f"Certificate validity > 1 year ({cert_days} days) — max 398 days recommended")
+            score -= 5
+
+    # ── Final grade ──
+    score = max(0, min(100, score))
+    result["score"] = score
+
+    if score >= 95:
+        result["grade"] = "A+"
+    elif score >= 85:
+        result["grade"] = "A"
+    elif score >= 70:
+        result["grade"] = "B"
+    elif score >= 50:
+        result["grade"] = "C"
+    elif score >= 30:
+        result["grade"] = "D"
+    else:
+        result["grade"] = "F"
+
+    return result
+
+
 # ── Additional HTTP utilities (moved from _monolith.py) ─────────────────
 
 def _follow_redirect(host: str, path: str, timeout: int = 10,

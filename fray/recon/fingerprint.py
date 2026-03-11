@@ -397,6 +397,94 @@ def check_clickjacking(headers: Dict[str, str], csp_value: str = "") -> Dict[str
     return result
 
 
+def check_captcha(headers: Dict[str, str], body: str) -> Dict[str, Any]:
+    """Detect CAPTCHA / bot-challenge providers from response headers and body.
+
+    Returns:
+      - detected: bool
+      - providers: list of {name, type, evidence}
+      - challenge_on_load: bool — True if challenge fires on page load (not just on form)
+    """
+    result: Dict[str, Any] = {
+        "detected": False,
+        "providers": [],
+        "challenge_on_load": False,
+    }
+
+    body_lower = body.lower() if body else ""
+    hdrs_lower = {k.lower(): v.lower() for k, v in headers.items()} if headers else {}
+
+    _CAPTCHA_SIGNATURES = [
+        # (name, type, body_patterns, header_patterns)
+        ("reCAPTCHA v2", "checkbox",
+         ["google.com/recaptcha", "grecaptcha", "g-recaptcha", "recaptcha.js", "recaptcha/api.js"],
+         []),
+        ("reCAPTCHA v3", "invisible",
+         ["recaptcha/api.js?render=", "grecaptcha.execute", "recaptcha-v3"],
+         []),
+        ("hCaptcha", "checkbox",
+         ["hcaptcha.com", "h-captcha", "hcaptcha.js"],
+         []),
+        ("Cloudflare Turnstile", "invisible",
+         ["challenges.cloudflare.com/turnstile", "cf-turnstile", "turnstile.js"],
+         ["cf-mitigated", "cf-challenge"]),
+        ("Cloudflare Challenge", "interstitial",
+         ["cf-browser-verification", "challenge-platform", "cf_chl_opt", "ray id"],
+         ["cf-mitigated", "cf-chl-bypass"]),
+        ("GeeTest", "slider",
+         ["geetest.com", "gt.js", "initgeetest", "geetest_"],
+         []),
+        ("Arkose Labs / FunCaptcha", "interactive",
+         ["arkoselabs.com", "funcaptcha", "enforcement.arkoselabs"],
+         []),
+        ("AWS WAF CAPTCHA", "checkbox",
+         ["awswaf.com/captcha", "aws-waf-captcha", "captcha.awswaf"],
+         ["x-amzn-waf-action"]),
+        ("Akamai Bot Manager", "invisible",
+         ["akamai.com/bm", "bmak.js", "_abck"],
+         ["akamai-grn"]),
+        ("PerimeterX / HUMAN", "invisible",
+         ["perimeterx.net", "human.com/px", "_pxhd", "px-captcha"],
+         []),
+        ("DataDome", "interstitial",
+         ["datadome.co", "dd.js", "datadome"],
+         ["x-datadome"]),
+        ("Kasada", "invisible",
+         ["kasada.io", "ips.js", "cd.kasada"],
+         []),
+    ]
+
+    for name, cap_type, body_pats, hdr_pats in _CAPTCHA_SIGNATURES:
+        evidence = []
+        for pat in body_pats:
+            if pat in body_lower:
+                evidence.append(f"body: {pat}")
+                break
+        for pat in hdr_pats:
+            for hk, hv in hdrs_lower.items():
+                if pat in hk or pat in hv:
+                    evidence.append(f"header: {hk}={hv[:60]}")
+                    break
+            if evidence and evidence[-1].startswith("header:"):
+                break
+
+        if evidence:
+            result["providers"].append({
+                "name": name,
+                "type": cap_type,
+                "evidence": evidence,
+            })
+
+    if result["providers"]:
+        result["detected"] = True
+        # Challenge-on-load: interstitial or invisible types that block before content
+        result["challenge_on_load"] = any(
+            p["type"] in ("interstitial", "invisible") for p in result["providers"]
+        )
+
+    return result
+
+
 def check_cookies(headers: Dict[str, str]) -> Dict[str, Any]:
     """Audit cookies for security flags: HttpOnly, Secure, SameSite, Path."""
     results: Dict[str, Any] = {
