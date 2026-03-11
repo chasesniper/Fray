@@ -208,20 +208,108 @@ def check_dns(host: str, deep: bool = False) -> Dict[str, Any]:
             result["cdn_detected"] = cdn_name
             break
 
+    # NS and MX are on the apex domain, not www subdomain
+    apex = host
+    if apex.startswith("www."):
+        apex = apex[4:]
+    for rtype in ["NS", "MX"]:
+        if not result.get(rtype.lower()):
+            try:
+                out = subprocess.run(
+                    ["dig", "+short", rtype, apex],
+                    capture_output=True, text=True, timeout=5
+                )
+                lines = [l.strip().rstrip(".") for l in out.stdout.strip().splitlines() if l.strip()]
+                if rtype == "MX":
+                    # MX returns "priority hostname" — extract just hostname, sort by priority
+                    mx_parsed = []
+                    for l in lines:
+                        parts = l.split()
+                        if len(parts) >= 2:
+                            mx_parsed.append({"priority": int(parts[0]), "host": parts[1].rstrip(".")})
+                        else:
+                            mx_parsed.append({"priority": 0, "host": l.rstrip(".")})
+                    mx_parsed.sort(key=lambda x: x["priority"])
+                    result["mx"] = [m["host"] for m in mx_parsed]
+                    result["mx_raw"] = mx_parsed
+                else:
+                    result[rtype.lower()] = lines
+            except Exception:
+                pass
+    # Also fetch TXT for apex if host was www
+    if apex != host and not result.get("txt"):
+        try:
+            out = subprocess.run(
+                ["dig", "+short", "TXT", apex],
+                capture_output=True, text=True, timeout=5
+            )
+            lines = [l.strip().strip('"') for l in out.stdout.strip().splitlines() if l.strip()]
+            result["txt"] = lines
+        except Exception:
+            pass
+
     # SPF/DMARC from TXT records
     txt_joined = " ".join(result.get("txt", [])).lower()
     result["has_spf"] = "v=spf1" in txt_joined
+    result["spf"] = ""
+    for t in result.get("txt", []):
+        if "v=spf1" in t.lower():
+            result["spf"] = t.strip('"')
+            break
     result["has_dmarc"] = False
+    result["dmarc"] = ""
     # DMARC is at _dmarc subdomain
-    try:
-        out = subprocess.run(
-            ["dig", "+short", "TXT", f"_dmarc.{host}"],
-            capture_output=True, text=True, timeout=5
-        )
-        if "v=dmarc1" in out.stdout.lower():
-            result["has_dmarc"] = True
-    except Exception:
-        pass
+    for dmarc_host in [f"_dmarc.{apex}", f"_dmarc.{host}"]:
+        try:
+            out = subprocess.run(
+                ["dig", "+short", "TXT", dmarc_host],
+                capture_output=True, text=True, timeout=5
+            )
+            if "v=dmarc1" in out.stdout.lower():
+                result["has_dmarc"] = True
+                result["dmarc"] = out.stdout.strip().strip('"')
+                break
+        except Exception:
+            pass
+
+    # Email provider detection from MX records
+    _EMAIL_PROVIDERS = {
+        "google": "Google Workspace",
+        "googlemail": "Google Workspace",
+        "gmail": "Google Workspace",
+        "outlook": "Microsoft 365",
+        "microsoft": "Microsoft 365",
+        "protection.outlook": "Microsoft 365",
+        "pphosted": "Proofpoint",
+        "proofpoint": "Proofpoint",
+        "mimecast": "Mimecast",
+        "barracuda": "Barracuda",
+        "messagelabs": "Broadcom (Symantec)",
+        "fireeyecloud": "Trellix (FireEye)",
+        "iphmx": "Cisco IronPort",
+        "ironport": "Cisco IronPort",
+        "ess.symantec": "Broadcom (Symantec)",
+        "sendgrid": "SendGrid",
+        "mailgun": "Mailgun",
+        "postmark": "Postmark",
+        "amazonses": "Amazon SES",
+        "zoho": "Zoho Mail",
+        "yandex": "Yandex Mail",
+        "secureserver": "GoDaddy",
+        "kundenserver": "IONOS",
+        "qq.com": "Tencent QQ Mail",
+        "sakura": "Sakura Internet",
+        "iij": "IIJ",
+        "softbank": "SoftBank",
+        "ntt": "NTT",
+    }
+    email_providers = []
+    mx_hosts = result.get("mx", [])
+    mx_lower = " ".join(mx_hosts).lower()
+    for kw, provider in _EMAIL_PROVIDERS.items():
+        if kw in mx_lower and provider not in email_providers:
+            email_providers.append(provider)
+    result["email_providers"] = email_providers
 
     # Deep mode: PTR lookups for A records (reveals real hostnames behind IPs)
     if deep:

@@ -577,7 +577,7 @@ def build(rd: Dict[str, Any]) -> str:
   {tech_html if tech_html else '<p class="muted">No technologies detected.</p>'}
 </div>''')
 
-    # DNS — separate IPs from CNAME chain hostnames
+    # DNS — show NS, MX, CNAME chain, email provider, SPF, DMARC
     def _is_ip(s):
         try:
             _ipaddr.ip_address(s)
@@ -585,14 +585,10 @@ def build(rd: Dict[str, Any]) -> str:
         except (ValueError, TypeError):
             return False
     raw_a = dns.get('a', [])
-    raw_aaaa = dns.get('aaaa', [])
-    a_ips = [r for r in raw_a if _is_ip(r)]
-    aaaa_ips = [r for r in raw_aaaa if _is_ip(r)]
-    # Build CNAME chain: host → cname1 → cname2 → ... → IP
+    # Build CNAME chain
     cname_list = dns.get('cname', [])
     if isinstance(cname_list, str):
         cname_list = [cname_list] if cname_list else []
-    # Also collect hostnames from A/AAAA that are actually CNAME chain entries
     chain_hosts = [r for r in raw_a if not _is_ip(r)]
     full_chain = []
     if cname_list:
@@ -600,20 +596,38 @@ def build(rd: Dict[str, Any]) -> str:
     for h in chain_hosts:
         if h not in full_chain:
             full_chain.append(h)
+    a_ips = [r for r in raw_a if _is_ip(r)]
+    if a_ips:
+        full_chain.append(a_ips[0])
     cname_display = ' &rarr; '.join(f'<span class="mono">{_esc(h)}</span>' for h in full_chain) if full_chain else '—'
-    a_display = ', '.join(a_ips) if a_ips else '—'
-    aaaa_display = ', '.join(aaaa_ips) if aaaa_ips else '—'
+
+    # NS records
+    ns_recs = dns.get('ns', [])
+    ns_display = ', '.join(ns_recs) if ns_recs else '—'
+
+    # MX records + email provider
+    mx_recs = dns.get('mx', [])
+    email_providers = dns.get('email_providers', [])
+    if mx_recs:
+        mx_chips = ' '.join(f'<code style="background:var(--surface);padding:3px 8px;border-radius:4px;font-size:0.85em;border:1px solid var(--border);">{_esc(m)}</code>' for m in mx_recs[:5])
+        provider_badge = ''
+        if email_providers:
+            provider_badge = ' ' + ' '.join(f'<span class="type-badge" style="background:var(--blue)20;color:var(--blue);font-size:0.8em;">{_esc(p)}</span>' for p in email_providers)
+        mx_display = f'{mx_chips}{provider_badge}'
+    else:
+        mx_display = '<span class="muted">No MX records</span>'
+
     spf = dns.get('spf', '')
     dmarc = dns.get('dmarc', '')
     parts.append(f'''
 <div class="sec" id="dns">
-  <h2>DNS Records</h2>
+  <h2>DNS &amp; Email</h2>
   <table>
-    <tr><td class="kv-key">A</td><td class="mono" style="word-break:break-all;">{_esc(a_display)}</td></tr>
-    <tr><td class="kv-key">AAAA</td><td class="mono" style="word-break:break-all;">{_esc(aaaa_display)}</td></tr>
+    <tr><td class="kv-key">NS</td><td class="mono" style="word-break:break-all;">{_esc(ns_display)}</td></tr>
+    <tr><td class="kv-key">MX</td><td style="word-break:break-all;">{mx_display}</td></tr>
     <tr><td class="kv-key">CNAME Chain</td><td style="word-break:break-all;">{cname_display}</td></tr>
-    <tr><td class="kv-key">SPF</td><td>{'&#x2713; ' + _esc(spf[:80]) if spf else '&#x2717; Missing'}</td></tr>
-    <tr><td class="kv-key">DMARC</td><td>{'&#x2713; ' + _esc(dmarc[:80]) if dmarc else '&#x2717; Missing'}</td></tr>
+    <tr><td class="kv-key">SPF</td><td>{'&#x2713; ' + _esc(spf[:100]) if spf else '&#x2717; <span style=\"color:var(--red);\">Missing</span>'}</td></tr>
+    <tr><td class="kv-key">DMARC</td><td>{'&#x2713; ' + _esc(dmarc[:100]) if dmarc else '&#x2717; <span style=\"color:var(--red);\">Missing</span>'}</td></tr>
   </table>
 </div>''')
 
@@ -827,7 +841,6 @@ def build(rd: Dict[str, Any]) -> str:
         hvt_html = ''
         for label, items, color in hvt_items:
             if label == 'Admin Panels' and admin_panels:
-                # Render admin panels as a collapsible table with path + category
                 ap_rows = ''.join(f'<tr><td class="mono">{_esc(a.get("path",""))}</td><td class="muted">{_esc(a.get("category",""))}</td></tr>' for a in admin_panels[:30])
                 ap_overflow = f'<span class="muted"> + {len(admin_panels) - 30} more</span>' if len(admin_panels) > 30 else ''
                 hvt_html += f'''<div style="background:var(--surface2);border-radius:10px;padding:16px 20px;margin-bottom:12px;border-left:3px solid {color};"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span class="type-badge" style="background:{color}20;color:{color};font-size:0.92em;">{_esc(label)}</span><span class="muted" style="font-size:0.85em;">{n_admin} panel(s) found</span></div><details><summary style="cursor:pointer;font-size:0.85em;color:var(--accent);">Show admin panel paths</summary><table style="margin-top:8px;"><tr><th>Path</th><th>Category</th></tr>{ap_rows}</table>{ap_overflow}</details></div>'''
@@ -835,10 +848,74 @@ def build(rd: Dict[str, Any]) -> str:
                 chips = ''.join(f'<code style="background:var(--surface);padding:5px 12px;border-radius:5px;font-size:0.9em;border:1px solid var(--border);">{_esc(s)}</code>' for s in items[:8])
                 overflow = f'<span class="muted"> + {len(items) - 8} more</span>' if len(items) > 8 else ''
                 hvt_html += f'''<div style="background:var(--surface2);border-radius:10px;padding:16px 20px;margin-bottom:12px;border-left:3px solid {color};"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span class="type-badge" style="background:{color}20;color:{color};font-size:0.92em;">{_esc(label)}</span><span class="muted" style="font-size:0.85em;">{len(items)} environment(s)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">{chips}{overflow}</div></div>'''
+
+        # Per-category recommendations
+        _HVT_RECOMMENDATIONS = {
+            'Staging / Dev': ('Staging and development environments often have weaker security controls, debug modes enabled, and default credentials. They frequently expose internal APIs, database connections, and configuration details that mirror production.',
+                ['Restrict access via IP allowlist or VPN — staging should never be publicly accessible',
+                 'Disable debug mode, verbose error pages, and stack traces',
+                 'Use separate credentials from production and rotate regularly',
+                 'Remove or password-protect directory listings and development tools',
+                 'Ensure staging data does not contain real customer PII']),
+            'Auth / Identity': ('Authentication and identity endpoints are primary targets for credential stuffing, account takeover, and session hijacking. A single flaw here can compromise the entire user base.',
+                ['Enforce rate limiting on login, registration, and password reset endpoints',
+                 'Implement multi-factor authentication (MFA) for all user accounts',
+                 'Use secure session management — HttpOnly, Secure, SameSite cookie flags',
+                 'Deploy CAPTCHA or bot detection on authentication flows',
+                 'Monitor for credential stuffing attacks and implement account lockout policies']),
+            'API': ('API endpoints often lack the same security controls as web UIs. Missing authentication, excessive data exposure, and injection vulnerabilities are common attack vectors.',
+                ['Enforce authentication and authorization on all API endpoints',
+                 'Implement rate limiting and request throttling per API key/user',
+                 'Validate and sanitize all input parameters — prevent injection attacks',
+                 'Use API gateway with WAF rules to filter malicious requests',
+                 'Disable unnecessary HTTP methods (PUT, DELETE, PATCH) where not required',
+                 'Implement proper CORS policies — avoid wildcard (*) origins']),
+            'Payment / E-Commerce': ('Payment and e-commerce endpoints process sensitive financial data. PCI DSS compliance is mandatory. A breach here has direct financial and regulatory consequences.',
+                ['Ensure PCI DSS compliance for all payment processing flows',
+                 'Use tokenization — never store raw credit card numbers',
+                 'Enforce TLS 1.2+ on all payment endpoints',
+                 'Implement Content Security Policy (CSP) to prevent Magecart-style skimming attacks',
+                 'Monitor for unauthorized script injections on checkout pages',
+                 'Use 3D Secure (3DS) for payment verification']),
+            'AI / LLM': ('AI and LLM endpoints are vulnerable to prompt injection, data extraction, and model abuse. These are emerging attack surfaces that often lack mature security controls.',
+                ['Implement input validation and prompt sanitization',
+                 'Set strict output filtering to prevent data leakage',
+                 'Rate limit API calls to prevent model abuse and cost escalation',
+                 'Log and monitor all interactions for anomalous patterns',
+                 'Ensure the model cannot access internal systems or sensitive data']),
+            'Admin Panels': ('Administrative interfaces provide privileged access to application configuration, user management, and data. Exposure of admin panels is a critical finding.',
+                ['Restrict admin panel access to internal networks or VPN only',
+                 'Enforce strong authentication — MFA required for all admin accounts',
+                 'Implement IP allowlisting for admin endpoints',
+                 'Remove default admin paths (/admin, /wp-admin, /administrator) or rename them',
+                 'Enable audit logging for all administrative actions',
+                 'Use separate admin domains (e.g., admin.internal.company.com) not publicly resolvable']),
+        }
+        rec_html = ''
+        active_cats = [label for label, _, _ in hvt_items]
+        for cat in active_cats:
+            if cat in _HVT_RECOMMENDATIONS:
+                desc, recs = _HVT_RECOMMENDATIONS[cat]
+                cat_color = next((c for l, _, c in hvt_items if l == cat), '#64748b')
+                rec_items = ''.join(f'<li>{_esc(r)}</li>' for r in recs)
+                rec_html += f'''<div style="margin-bottom:14px;">
+  <div style="font-weight:600;font-size:0.9em;color:{cat_color};margin-bottom:4px;">{_esc(cat)}</div>
+  <p style="font-size:0.84em;color:var(--muted);margin-bottom:6px;">{_esc(desc)}</p>
+  <ul style="padding-left:18px;font-size:0.84em;line-height:1.8;">{rec_items}</ul>
+</div>'''
+
         parts.append(f'''
 <div class="sec" id="hvt">
   <h2>High Value Targets <span class="count">({total_hvt})</span></h2>
+  <div style="background:var(--surface2);border-radius:10px;padding:14px 18px;margin-bottom:16px;border-left:3px solid var(--accent);">
+    <p style="font-size:0.88em;line-height:1.6;margin:0;">High Value Targets are subdomains, endpoints, and services that represent elevated risk due to their function (authentication, payment, admin), exposure level (staging, dev), or data sensitivity. Compromise of these targets can lead to data breaches, unauthorized access, financial loss, or regulatory violations. Each category below requires specific hardening measures.</p>
+  </div>
   {hvt_html}
+  <details style="margin-top:16px;"><summary style="cursor:pointer;font-weight:600;font-size:0.92em;color:var(--accent);">Security Recommendations by Category</summary>
+  <div style="margin-top:12px;background:var(--surface2);border-radius:10px;padding:18px 22px;">
+    {rec_html}
+  </div>
+  </details>
 </div>''')
 
     # Suggested Tests — each with Fray-specific commands
