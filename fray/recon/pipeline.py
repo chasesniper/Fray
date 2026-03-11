@@ -396,7 +396,7 @@ def run_recon(url: str, timeout: int = 8,
 
         # Non-fast tasks
         t_hist = t_admin = t_auth = t_ports = t_rate = t_gql = t_leak = None
-        t_dnssec = t_axfr = t_wildcard = None
+        t_dnssec = t_axfr = t_wildcard = t_rebind = None
         if not is_fast:
             t_hist  = asyncio.create_task(_run(
                 lambda: discover_historical_urls(url, timeout=timeout, verify_ssl=verify,
@@ -422,14 +422,17 @@ def run_recon(url: str, timeout: int = 8,
                 lambda: check_graphql_introspection(host, port, use_ssl, timeout=timeout,
                                                     extra_headers=headers),
                 "GraphQL introspection"))
-            # DNS security checks (#47, #48, #51)
-            from fray.recon.dns import check_dnssec, check_zone_transfer, check_wildcard_dns
+            # DNS security checks (#47, #48, #49, #51)
+            from fray.recon.dns import (check_dnssec, check_zone_transfer,
+                                         check_wildcard_dns, check_dns_rebinding)
             t_dnssec   = asyncio.create_task(_run(
                 lambda: check_dnssec(host, timeout=5.0), "DNSSEC validation"))
             t_axfr     = asyncio.create_task(_run(
                 lambda: check_zone_transfer(host, timeout=8.0), "Zone transfer (AXFR)"))
             t_wildcard = asyncio.create_task(_run(
                 lambda: check_wildcard_dns(host, timeout=3.0), "Wildcard DNS"))
+            t_rebind   = asyncio.create_task(_run(
+                lambda: check_dns_rebinding(host, timeout=3.0), "DNS rebinding"))
 
         # Leak check (--leak flag, runs concurrently with other checks)
         if leak:
@@ -522,6 +525,8 @@ def run_recon(url: str, timeout: int = 8,
             result["zone_transfer"] = await _safe(t_axfr, {})
         if t_wildcard:
             result["wildcard_dns"] = await _safe(t_wildcard, {})
+        if t_rebind:
+            result["dns_rebinding"] = await _safe(t_rebind, {})
 
         # ── Collect tier 2 results ──
         result["subdomains_active"] = await _safe(t_subs_active, {})
@@ -604,8 +609,17 @@ def run_recon(url: str, timeout: int = 8,
     else:
         result["subdomain_takeover"] = {"vulnerable": [], "checked": 0, "count": 0}
 
+    # Subdomain sprawl detection (#76) + cloud distribution (#77)
+    from fray.recon.dns import score_dns_hygiene, detect_subdomain_sprawl, analyze_cloud_distribution
+    merged_sub_list = result["subdomains"].get("subdomains", [])
+    result["subdomain_sprawl"] = detect_subdomain_sprawl(merged_sub_list, host)
+    if merged_sub_list and not is_fast:
+        result["cloud_distribution"] = analyze_cloud_distribution(
+            merged_sub_list, result.get("dns", {}), timeout=2.0)
+    else:
+        result["cloud_distribution"] = {}
+
     # DNS hygiene score (#74) — aggregates all DNS data collected above
-    from fray.recon.dns import score_dns_hygiene
     result["dns_hygiene"] = score_dns_hygiene(
         dns_data=result.get("dns", {}),
         dnssec_data=result.get("dnssec"),
@@ -846,6 +860,7 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
         # Critical (80-100)
         "origin IP exposed":        95, "takeover":              95,
         "zone transfer":            95, "AXFR":                  95,
+        "DNS rebinding":            95,
         "secret":                   90, "leaked":                90,
         "bypass WAF":               90, "admin panel":           85,
         # High (60-79)
@@ -861,7 +876,8 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
         # Low (10-29)
         "Content-Security-Policy":  20, "robots.txt":            15,
         "DNSSEC":                   15, "Wildcard DNS":          10,
-        "DNS hygiene":              30,
+        "DNS hygiene":              30, "Subdomain sprawl":      30,
+        "Multi-cloud":              10,
         "WAF":                      10,
     }
     _SEVERITY_BASE = {"critical": 90, "high": 65, "medium": 40, "low": 15}
@@ -930,6 +946,29 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     if interesting_paths:
         findings.append({"severity": "low", "finding": f"{len(interesting_paths)} interesting paths in robots.txt"})
 
+    # ── DNS rebinding (#49) ──
+    rebind_data = r.get("dns_rebinding", {})
+    if isinstance(rebind_data, dict) and rebind_data.get("vulnerable"):
+        priv_ips = ", ".join(rebind_data.get("private_ips", [])[:3])
+        findings.append({"severity": "critical", "finding": f"DNS rebinding — domain resolves to private IP(s): {priv_ips}"})
+
+    # ── Subdomain sprawl (#76) ──
+    sprawl = r.get("subdomain_sprawl", {})
+    sprawl_total = sprawl.get("total", 0) if isinstance(sprawl, dict) else 0
+    sprawl_staging = sprawl.get("staging_count", 0) if isinstance(sprawl, dict) else 0
+    sprawl_severity = sprawl.get("severity", "low") if isinstance(sprawl, dict) else "low"
+    if sprawl_total >= 100:
+        findings.append({"severity": "high" if sprawl_total >= 200 else "medium",
+                         "finding": f"Subdomain sprawl: {sprawl_total} subdomains ({sprawl_staging} staging/dev)"})
+    elif sprawl_total >= 50:
+        findings.append({"severity": "low", "finding": f"Subdomain sprawl: {sprawl_total} subdomains ({sprawl_staging} staging/dev)"})
+
+    # ── Cloud distribution (#77) ──
+    cloud_dist = r.get("cloud_distribution", {})
+    if isinstance(cloud_dist, dict) and cloud_dist.get("multi_cloud"):
+        providers = cloud_dist.get("providers", [])[:4]
+        findings.append({"severity": "low", "finding": f"Multi-cloud infrastructure: {', '.join(providers)}"})
+
     # ── DNS hygiene score (#74) ──
     dns_hygiene = r.get("dns_hygiene", {})
     dns_hygiene_score = dns_hygiene.get("score", 0) if isinstance(dns_hygiene, dict) else 0
@@ -988,7 +1027,8 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     # ── Finding grouping by category (#183) ──
     _FINDING_CATEGORIES = {
         "infra": {"origin IP", "takeover", "port", "WAF", "bypass WAF", "DNS",
-                  "zone transfer", "AXFR", "DNSSEC", "Wildcard DNS", "DNS hygiene"},
+                  "zone transfer", "AXFR", "DNSSEC", "Wildcard DNS", "DNS hygiene",
+                  "DNS rebinding", "Subdomain sprawl", "Multi-cloud"},
         "app":   {"XSS", "injection", "CORS", "clickjacking", "GraphQL",
                   "injectable", "HTTP method", "host header"},
         "config": {"Content-Security-Policy", "SRI", "robots.txt", "admin panel",

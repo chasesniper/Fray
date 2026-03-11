@@ -1429,3 +1429,301 @@ def score_dns_hygiene(dns_data: Dict[str, Any],
         "total_checks": len(checks),
         "recommendations": recommendations,
     }
+
+
+# ── DNS rebinding detection (#49) ─────────────────────────────────────
+
+# RFC 1918 / loopback / link-local prefixes — should never appear in
+# public DNS A records.  Their presence enables DNS rebinding attacks.
+_PRIVATE_PREFIXES = (
+    "10.", "127.", "0.",
+    "172.16.", "172.17.", "172.18.", "172.19.",
+    "172.20.", "172.21.", "172.22.", "172.23.",
+    "172.24.", "172.25.", "172.26.", "172.27.",
+    "172.28.", "172.29.", "172.30.", "172.31.",
+    "192.168.", "169.254.",
+    "::1", "fc00:", "fd00:", "fe80:",
+)
+
+
+def check_dns_rebinding(host: str, timeout: float = 3.0) -> Dict[str, Any]:
+    """Detect DNS rebinding by checking if any A/AAAA record resolves to
+    a private, loopback, or link-local IP address.
+
+    Returns:
+        Dict with 'vulnerable', 'private_ips', 'all_ips'.
+    """
+    result: Dict[str, Any] = {
+        "vulnerable": False,
+        "private_ips": [],
+        "all_ips": [],
+    }
+
+    ips = _resolve_hostname(host, timeout=timeout)
+    result["all_ips"] = ips
+
+    for ip in ips:
+        if any(ip.startswith(p) for p in _PRIVATE_PREFIXES):
+            result["vulnerable"] = True
+            result["private_ips"].append(ip)
+
+    return result
+
+
+# ── Subdomain sprawl detection (#76) ──────────────────────────────────
+
+def detect_subdomain_sprawl(subdomains: List[str],
+                             host: str) -> Dict[str, Any]:
+    """Analyze subdomain count and composition for sprawl indicators.
+
+    Flags:
+      - Total count thresholds: >50 moderate, >100 high, >200 critical
+      - Staging/dev/test environments exposed externally
+      - Numeric-suffix patterns (app1, app2, ...) suggesting unmanaged growth
+
+    Args:
+        subdomains: Merged list of discovered subdomain FQDNs.
+        host: Parent domain.
+
+    Returns:
+        Dict with 'total', 'severity', 'staging_envs', 'numeric_patterns',
+        'sprawl_score'.
+    """
+    import re
+
+    total = len(subdomains)
+
+    # Severity by count
+    if total >= 200:
+        severity = "critical"
+    elif total >= 100:
+        severity = "high"
+    elif total >= 50:
+        severity = "medium"
+    else:
+        severity = "low"
+
+    # Detect staging/dev/test subdomains
+    staging_keywords = ("dev", "staging", "stage", "test", "qa", "uat",
+                        "sandbox", "beta", "alpha", "preprod", "demo",
+                        "internal", "debug", "canary", "preview")
+    staging_envs = []
+    for sub in subdomains:
+        name = sub.lower().replace(f".{host.lower()}", "")
+        for kw in staging_keywords:
+            if kw in name:
+                staging_envs.append(sub)
+                break
+
+    # Detect numeric suffix patterns (app1, app2, api3, web01, ...)
+    numeric_re = re.compile(r"^([a-z]+-?[a-z]*)\d{1,3}\." + re.escape(host) + r"$", re.I)
+    numeric_groups: Dict[str, List[str]] = {}
+    for sub in subdomains:
+        m = numeric_re.match(sub)
+        if m:
+            base = m.group(1).rstrip("-")
+            numeric_groups.setdefault(base, []).append(sub)
+    # Only flag groups with 3+ instances
+    numeric_patterns = {k: v for k, v in numeric_groups.items() if len(v) >= 3}
+
+    # Sprawl score (0-100, higher = more sprawl)
+    score = min(100, (total // 2) + len(staging_envs) * 5 + sum(len(v) for v in numeric_patterns.values()) * 3)
+
+    return {
+        "total": total,
+        "severity": severity,
+        "staging_envs": staging_envs[:20],
+        "staging_count": len(staging_envs),
+        "numeric_patterns": {k: len(v) for k, v in numeric_patterns.items()},
+        "numeric_pattern_count": len(numeric_patterns),
+        "sprawl_score": score,
+    }
+
+
+# ── Cloud provider distribution (#77) ─────────────────────────────────
+
+# Extended cloud/hosting provider IP prefixes for distribution analysis
+_CLOUD_PROVIDERS = {
+    **_CDN_IP_PREFIXES,
+    "aws_ec2":      ["3.0.", "3.1.", "3.2.", "3.3.", "3.4.", "3.5.",
+                     "13.52.", "13.56.", "13.57.", "13.112.", "13.113.",
+                     "18.188.", "18.191.", "18.216.", "18.217.", "18.218.",
+                     "34.192.", "34.193.", "34.194.", "34.195.", "34.196.",
+                     "35.153.", "35.154.", "35.155.", "35.160.", "35.161.",
+                     "44.192.", "44.193.", "44.194.", "44.195.",
+                     "50.16.", "50.17.", "52.0.", "52.1.", "52.2.",
+                     "52.4.", "52.5.", "52.6.", "52.7.", "52.20.",
+                     "54.80.", "54.81.", "54.82.", "54.83.", "54.84.",
+                     "54.160.", "54.161.", "54.162.", "54.163.", "54.164.",
+                     "54.196.", "54.197.", "54.198.", "54.199.",
+                     "54.200.", "54.201.", "54.202.", "54.203.", "54.204.",
+                     "54.210.", "54.211.", "54.212.", "54.213.", "54.214.",
+                     "100.20.", "100.21."],
+    "gcp":          ["34.64.", "34.65.", "34.66.", "34.67.", "34.68.",
+                     "34.69.", "34.70.", "34.71.", "34.72.", "34.80.",
+                     "34.81.", "34.82.", "34.83.", "34.84.", "34.85.",
+                     "35.184.", "35.185.", "35.186.", "35.187.", "35.188.",
+                     "35.189.", "35.190.", "35.191.", "35.192.", "35.193.",
+                     "35.194.", "35.195.", "35.196.", "35.197.", "35.198.",
+                     "35.199.", "35.200.", "35.201.", "35.202.", "35.203.",
+                     "35.204.", "35.205.", "35.206.", "35.207.",
+                     "35.220.", "35.221.", "35.222.", "35.223.", "35.224.",
+                     "35.225.", "35.226.", "35.227.", "35.228.", "35.229.",
+                     "35.230.", "35.231.", "35.232.", "35.233.", "35.234.",
+                     "35.235.", "35.236.", "35.237.", "35.238.", "35.239.",
+                     "35.240.", "35.241.", "35.242.", "35.243.", "35.244.",
+                     "35.245.", "35.246.", "35.247.",
+                     "104.196.", "104.197.", "104.198.", "104.199.",
+                     "130.211.", "146.148."],
+    "azure":        ["13.64.", "13.65.", "13.66.", "13.67.", "13.68.",
+                     "13.69.", "13.70.", "13.71.", "13.72.", "13.73.",
+                     "13.74.", "13.75.", "13.76.", "13.77.", "13.78.",
+                     "13.79.", "13.80.", "13.81.", "13.82.", "13.83.",
+                     "13.84.", "13.85.", "13.86.", "13.87.", "13.88.",
+                     "13.89.", "13.90.", "13.91.", "13.92.", "13.93.",
+                     "13.94.", "13.95.",
+                     "20.36.", "20.37.", "20.38.", "20.39.", "20.40.",
+                     "20.41.", "20.42.", "20.43.", "20.44.", "20.45.",
+                     "20.46.", "20.47.", "20.48.", "20.49.", "20.50.",
+                     "20.51.", "20.52.", "20.53.",
+                     "40.64.", "40.65.", "40.66.", "40.67.", "40.68.",
+                     "40.69.", "40.70.", "40.71.", "40.74.", "40.75.",
+                     "40.76.", "40.77.", "40.78.", "40.79.", "40.80.",
+                     "40.81.", "40.82.", "40.83.", "40.84.", "40.85.",
+                     "40.86.", "40.87.", "40.88.", "40.89.", "40.90.",
+                     "40.91.", "40.112.", "40.113.", "40.114.", "40.115.",
+                     "40.116.", "40.117.", "40.118.", "40.119.", "40.120.",
+                     "40.121.", "40.122.", "40.123.", "40.124.", "40.125.",
+                     "40.126.", "40.127.",
+                     "51.104.", "51.105.", "51.120.", "51.124.",
+                     "52.136.", "52.137.", "52.138.", "52.139.",
+                     "52.140.", "52.141.", "52.142.", "52.143.",
+                     "52.146.", "52.147.", "52.148.", "52.149.",
+                     "52.150.", "52.151.", "52.152.", "52.153.",
+                     "52.154.", "52.155.", "52.156.", "52.157.",
+                     "52.158.", "52.159.", "52.160.", "52.161.",
+                     "52.162.", "52.163.", "52.164.", "52.165.",
+                     "52.166.", "52.167.", "52.168.", "52.169.",
+                     "52.170.", "52.171.", "52.172.", "52.173.",
+                     "52.174.", "52.175.", "52.176.", "52.177.",
+                     "52.178.", "52.179.", "52.180.",
+                     "104.40.", "104.41.", "104.42.", "104.43.",
+                     "104.44.", "104.45.", "104.46.", "104.47.",
+                     "104.208.", "104.209.", "104.210.", "104.211.",
+                     "104.214.", "104.215."],
+    "digitalocean": ["64.225.", "134.122.", "134.209.", "137.184.",
+                     "138.68.", "138.197.", "139.59.", "142.93.",
+                     "143.110.", "143.198.", "144.126.", "146.190.",
+                     "147.182.", "157.230.", "157.245.", "159.65.",
+                     "159.89.", "159.203.", "161.35.", "162.243.",
+                     "163.47.", "164.90.", "164.92.", "165.22.",
+                     "165.227.", "167.71.", "167.99.", "167.172.",
+                     "170.64.", "174.138.", "178.62.", "178.128.",
+                     "188.166.", "192.241.", "206.189.", "209.97."],
+    "hetzner":      ["5.75.", "5.161.", "23.88.", "49.12.", "49.13.",
+                     "65.21.", "65.108.", "65.109.", "78.46.", "78.47.",
+                     "85.10.", "88.198.", "88.99.", "95.216.",
+                     "116.202.", "116.203.", "128.140.", "135.181.",
+                     "136.243.", "138.201.", "142.132.", "144.76.",
+                     "148.251.", "157.90.", "159.69.", "162.55.",
+                     "167.235.", "168.119.", "176.9.", "178.63.",
+                     "188.34.", "195.201.", "213.133.", "213.239."],
+    "ovh":          ["51.38.", "51.68.", "51.75.", "51.77.", "51.79.",
+                     "51.81.", "51.83.", "51.89.", "51.91.", "51.161.",
+                     "51.178.", "51.195.", "51.210.", "51.222.",
+                     "54.36.", "54.37.", "54.38.", "54.39.",
+                     "135.125.", "137.74.", "141.94.", "141.95.",
+                     "142.4.", "144.217.", "145.239.", "147.135.",
+                     "148.113.", "149.56.", "149.202.", "151.80.",
+                     "158.69.", "164.132.", "167.114.", "176.31.",
+                     "178.32.", "178.33.", "185.12.", "188.165.",
+                     "192.95.", "192.99.", "193.70.", "198.27.",
+                     "198.50.", "198.100.", "198.245.", "209.126."],
+    "linode":       ["45.33.", "45.56.", "45.79.", "50.116.", "66.175.",
+                     "66.228.", "69.164.", "72.14.", "74.207.",
+                     "96.126.", "97.107.", "139.144.", "139.162.",
+                     "143.42.", "170.187.", "172.104.", "172.105.",
+                     "173.230.", "173.255.", "178.79.", "192.46.",
+                     "192.155.", "194.195.", "198.58.", "198.74.",
+                     "209.123."],
+}
+
+
+def analyze_cloud_distribution(subdomains: List[str],
+                                dns_data: Dict[str, Any],
+                                timeout: float = 2.0) -> Dict[str, Any]:
+    """Map subdomain IPs to cloud/CDN providers for infrastructure analysis.
+
+    Args:
+        subdomains: List of discovered subdomain FQDNs.
+        dns_data: Output from check_dns() (uses A records for parent domain).
+        timeout: Resolution timeout per subdomain.
+
+    Returns:
+        Dict with 'providers', 'unidentified', 'primary_provider',
+        'multi_cloud', 'distribution'.
+    """
+    import concurrent.futures
+
+    provider_counts: Dict[str, int] = {}
+    provider_subs: Dict[str, List[str]] = {}
+    unidentified: List[str] = []
+
+    def _classify_ip(ip: str) -> Optional[str]:
+        for provider, prefixes in _CLOUD_PROVIDERS.items():
+            for prefix in prefixes:
+                if ip.startswith(prefix):
+                    return provider
+        return None
+
+    def _resolve_and_classify(fqdn: str) -> Tuple[str, Optional[str]]:
+        ips = _resolve_hostname(fqdn, timeout=timeout)
+        if not ips:
+            return fqdn, None
+        # Classify by first IP
+        provider = _classify_ip(ips[0])
+        return fqdn, provider
+
+    # Also classify parent domain A records
+    for ip in dns_data.get("a", []):
+        provider = _classify_ip(ip)
+        if provider:
+            provider_counts[provider] = provider_counts.get(provider, 0) + 1
+            provider_subs.setdefault(provider, []).append(f"(parent:{ip})")
+
+    # Resolve subdomains in parallel (cap at 60)
+    candidates = list(subdomains)[:60]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
+        futures = [pool.submit(_resolve_and_classify, s) for s in candidates]
+        for f in concurrent.futures.as_completed(futures):
+            try:
+                fqdn, provider = f.result()
+                if provider:
+                    provider_counts[provider] = provider_counts.get(provider, 0) + 1
+                    provider_subs.setdefault(provider, []).append(fqdn)
+                else:
+                    unidentified.append(fqdn)
+            except Exception:
+                pass
+
+    # Sort by count descending
+    sorted_providers = sorted(provider_counts.items(), key=lambda x: -x[1])
+    total_classified = sum(provider_counts.values())
+    primary = sorted_providers[0][0] if sorted_providers else None
+
+    # Distribution percentages
+    distribution = {}
+    for name, count in sorted_providers:
+        pct = round(count / total_classified * 100, 1) if total_classified else 0
+        distribution[name] = {"count": count, "pct": pct,
+                              "subdomains": provider_subs.get(name, [])[:10]}
+
+    return {
+        "providers": [p[0] for p in sorted_providers],
+        "provider_count": len(sorted_providers),
+        "primary_provider": primary,
+        "multi_cloud": len(sorted_providers) > 1,
+        "total_classified": total_classified,
+        "unidentified_count": len(unidentified),
+        "distribution": distribution,
+    }
