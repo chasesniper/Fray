@@ -60,8 +60,14 @@ def build(rd: Dict[str, Any]) -> str:
     attack_targets = atk.get('attack_targets', [])
     n_attack_targets = len(attack_targets)
 
+    csp_data = rd.get('csp', {}) or {}
+    csp_present = csp_data.get('present', False) if isinstance(csp_data, dict) else False
+    csp_score = csp_data.get('score', 0) if isinstance(csp_data, dict) else 0
+    csp_bypasses = csp_data.get('bypass_techniques', []) if isinstance(csp_data, dict) else []
+
     admin_data = rd.get('admin_panels', {}) or {}
-    admin_panels = admin_data.get('found', []) if isinstance(admin_data, dict) else []
+    admin_panels = (admin_data.get('panels_found', []) or admin_data.get('found', []) or
+                    admin_data.get('panels', [])) if isinstance(admin_data, dict) else []
     n_admin = len(admin_panels)
 
     cloud_dist = rd.get('cloud_distribution', {}) or {}
@@ -89,6 +95,15 @@ def build(rd: Dict[str, Any]) -> str:
     remediation = atk.get('remediation', [])
     staging_envs = atk.get('staging_envs', [])
     checks = rd.get('security_checks', {}) or {}
+
+    # Emoji map for attack vectors
+    _VEC_EMOJI = {
+        'WAF Bypass': '\U0001f6e1\ufe0f', 'Unprotected Subdomain': '\U0001f310',
+        'Account Takeover': '\U0001f511', 'API Vulnerability': '\U0001f50c',
+        'LLM / AI Prompt Injection': '\U0001f916', 'Payment / Financial Abuse': '\U0001f4b3',
+        'Staging / Dev Environment': '\U0001f9ea', 'DDoS / L7 Denial of Service': '\u26a1',
+        'Web Cache Poisoning': '\U0001f4be', 'DDoS \u2014 Direct Origin': '\u26a1',
+    }
 
     rc = risk_color(risk_score)
     hdr_color = 'var(--red)' if hdr_score < 30 else 'var(--yellow)' if hdr_score < 60 else 'var(--green)'
@@ -149,11 +164,11 @@ def build(rd: Dict[str, Any]) -> str:
     <div><div style="font-size:0.72em;font-weight:600;color:var(--accent2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Overview</div>
       <div style="display:flex;flex-wrap:wrap;gap:5px;"><a href="#exec" class="toc-link">Summary</a><a href="#methodology" class="toc-link">Methodology</a><a href="#findings" class="toc-link">Findings</a><a href="#remediation" class="toc-link">Remediation</a></div></div>
     <div><div style="font-size:0.72em;font-weight:600;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Threats</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px;"><a href="#vectors" class="toc-link">Attack Vectors</a><a href="#cves" class="toc-link">CVEs</a><a href="#checks" class="toc-link">Security Checks</a></div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;"><a href="#vectors" class="toc-link">Attack Vectors</a><a href="#priorities" class="toc-link">Priorities</a><a href="#cves" class="toc-link">CVEs</a><a href="#checks" class="toc-link">Security Checks</a></div></div>
     <div><div style="font-size:0.72em;font-weight:600;color:var(--cyan);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Infrastructure</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px;"><a href="#headers" class="toc-link">Headers</a><a href="#tech" class="toc-link">Tech</a><a href="#dns" class="toc-link">DNS</a><a href="#waf-cdn" class="toc-link">WAF/CDN</a><a href="#gap" class="toc-link">Gap Analysis</a><a href="#rl" class="toc-link">Rate Limits</a></div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;"><a href="#headers" class="toc-link">Headers</a><a href="#csp" class="toc-link">CSP</a><a href="#tech" class="toc-link">Tech</a><a href="#dns" class="toc-link">DNS</a><a href="#waf-cdn" class="toc-link">WAF/CDN</a><a href="#gap" class="toc-link">Gap Analysis</a><a href="#rl" class="toc-link">Rate Limits</a></div></div>
     <div><div style="font-size:0.72em;font-weight:600;color:var(--orange);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Targets</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px;"><a href="#subs" class="toc-link">Subdomains</a><a href="#probes" class="toc-link">Probes</a><a href="#origin" class="toc-link">Origin IPs</a><a href="#admin" class="toc-link">Admin Panels</a><a href="#cats" class="toc-link">Categories</a></div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;"><a href="#subs" class="toc-link">Subdomains</a><a href="#probes" class="toc-link">Probes</a><a href="#origin" class="toc-link">Origin IPs</a><a href="#admin" class="toc-link">Admin Panels</a><a href="#hvt" class="toc-link">HVT</a><a href="#tests" class="toc-link">Tests</a><a href="#cats" class="toc-link">Categories</a></div></div>
   </div>
 </nav>''')
 
@@ -271,15 +286,23 @@ def build(rd: Dict[str, Any]) -> str:
         for vec in attack_vectors:
             vs = vec.get('severity', 'medium')
             vc = SEV_COLORS.get(vs, '#64748b')
-            vn = _esc(vec.get('type', 'Unknown'))
+            vn_raw = vec.get('type', 'Unknown')
+            vn = _esc(vn_raw)
             vct = vec.get('count', 0)
             vp = vec.get('priority', 0)
             vd = _esc(vec.get('description', ''))
             vim = _esc(vec.get('impact', ''))
             vm = vec.get('mitre', '')
             vt = vec.get('targets', [])
+            emoji = _VEC_EMOJI.get(vn_raw, '')
+            emoji_html = f'<span style="font-size:1.4em;">{emoji}</span>' if emoji else ''
+            detail = vec.get('detail', '')
+            if not detail and vt:
+                detail = f'{vn_raw}: {len(vt)} target(s)'
+            detail_html = f'<details style="margin-top:8px;"><summary style="font-size:0.82em;">Detail</summary><p class="muted" style="font-size:0.85em;margin-top:6px;">{_esc(detail[:200])}</p></details>' if detail else ''
             vi += f'''<div style="background:var(--surface2);border-radius:12px;padding:20px 24px;margin-bottom:16px;border-left:4px solid {vc};">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+    {emoji_html}
     <div style="flex:1;"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <strong style="font-size:1.1em;">{vn}</strong>
       <span class="sev-badge" style="background:{vc}20;color:{vc};">{vs.upper()}</span>
@@ -290,11 +313,27 @@ def build(rd: Dict[str, Any]) -> str:
   {f'<p style="margin-bottom:8px;font-size:0.92em;"><strong style="color:var(--orange);">Impact:</strong> {vim}</p>' if vim else ''}
   {f'<p style="margin-bottom:8px;font-size:0.82em;"><span class="muted">MITRE:</span> <code style="background:var(--surface);padding:2px 8px;border-radius:4px;">{_esc(vm)}</code></p>' if vm else ''}
   {f'<div style="margin-top:10px;"><span class="muted" style="font-size:0.82em;">Affected:</span><br><div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;">{_targets_chips(vt)}</div></div>' if vt else ''}
+  {detail_html}
 </div>'''
         parts.append(f'''
 <div class="sec" id="vectors">
   <h2>Attack Vectors <span class="count">({len(attack_vectors)} types across {n_attack_targets} targets)</span></h2>
   {vi}
+</div>''')
+
+    # Attack Priorities
+    if attack_targets:
+        at_rows = ''
+        for i, t in enumerate(attack_targets[:50], 1):
+            tp = t.get('priority', 0)
+            tt = t.get('type', '')
+            tgt = t.get('target', '')
+            pc = '#ef4444' if tp >= 90 else '#f97316' if tp >= 70 else '#eab308' if tp >= 50 else '#64748b'
+            at_rows += f'<tr><td class="num">{i}</td><td style="color:{pc};font-weight:700;">P{tp}</td><td><span class="type-badge" style="background:#64748b20;color:#64748b;">{_esc(tt)}</span></td><td class="mono" style="font-size:0.85em;">{_esc(tgt)}</td></tr>'
+        parts.append(f'''
+<div class="sec" id="priorities">
+  <h2>Attack Priorities <span class="count">({n_attack_targets} targets)</span></h2>
+  <table><tr><th>#</th><th>P</th><th>Type</th><th>Target</th></tr>{at_rows}</table>
 </div>''')
 
     # CVEs
@@ -320,6 +359,21 @@ def build(rd: Dict[str, Any]) -> str:
             ck_html = '<p style="color:var(--green);">All additional checks passed — no CORS, subdomain takeover, exposed files, or cookie issues detected.</p>'
         parts.append(f'<div class="sec" id="checks"><h2>Additional Security Checks</h2>{ck_html}</div>')
 
+    # CSP Analysis
+    csp_html_sec = ''
+    if csp_present:
+        csp_html_sec = f'<p style="margin-bottom:8px;"><strong>Score:</strong> {csp_score}/100</p>'
+        if csp_bypasses:
+            for bp in csp_bypasses[:5]:
+                csp_html_sec += f'<div class="finding" style="border-left:4px solid #f97316;"><span class="sev-badge" style="background:#f9731620;color:#f97316;">BYPASS</span> {_esc(str(bp))}</div>'
+    else:
+        csp_html_sec = '<div class="finding" style="border-left:4px solid #ef4444;"><span class="sev-badge" style="background:#ef444420;color:#ef4444;">CRITICAL</span> No Content-Security-Policy header — all inline scripts execute freely</div>'
+    parts.append(f'''
+<div class="sec" id="csp">
+  <h2>CSP Analysis <span class="count">({csp_score}/100)</span></h2>
+  {csp_html_sec}
+</div>''')
+
     # Security Headers
     pt = ''.join(f'<span class="tag tag-ok">{_esc(h)}</span>' for h in present_hdrs)
     mt = ''
@@ -336,12 +390,16 @@ def build(rd: Dict[str, Any]) -> str:
     # Technologies
     tr_html = ''
     for name, ver in sorted(techs.items()):
-        v = ver if isinstance(ver, str) else str(ver) if ver else '—'
-        tr_html += f'<tr><td>{_esc(name)}</td><td>{_esc(str(v))}</td></tr>'
+        if isinstance(ver, (int, float)):
+            pct = max(1, int(ver * 100)) if ver <= 1 else int(ver)
+            tr_html += f'<tr><td>{_esc(name)}</td><td><div class="bar-wrap"><div class="bar-fill" style="width:{pct}%"></div></div></td><td class="num">{pct}%</td></tr>'
+        else:
+            v = ver if isinstance(ver, str) else str(ver) if ver else '—'
+            tr_html += f'<tr><td>{_esc(name)}</td><td colspan="2">{_esc(str(v))}</td></tr>'
     parts.append(f'''
 <div class="sec" id="tech">
   <h2>Technologies <span class="count">({len(techs)})</span></h2>
-  {f'<table><tr><th>Technology</th><th>Version</th></tr>{tr_html}</table>' if tr_html else '<p class="muted">No technologies detected.</p>'}
+  {f'<table><tr><th>Technology</th><th>Confidence</th><th></th></tr>{tr_html}</table>' if tr_html else '<p class="muted">No technologies detected.</p>'}
 </div>''')
 
     # DNS
@@ -477,6 +535,52 @@ def build(rd: Dict[str, Any]) -> str:
 <div class="sec" id="admin">
   <h2>Admin Panels <span class="count">({n_admin} found)</span></h2>
   <table><tr><th>Path</th><th>Protection</th><th>Status</th><th>Category</th></tr>{ap}</table>
+</div>''')
+
+    # High Value Targets
+    hvt_items = []
+    if staging_envs:
+        hvt_items.append(('Staging / Dev', staging_envs, '#eab308'))
+    auth_subs = [s for s in sub_list if any(k in s.lower() for k in ('auth', 'sso', 'login', 'id', 'account', 'oauth'))]
+    if auth_subs:
+        hvt_items.append(('Auth / Identity', auth_subs[:10], '#ef4444'))
+    api_subs = [s for s in sub_list if any(k in s.lower() for k in ('api', 'graphql', 'grpc', 'gateway'))]
+    if api_subs:
+        hvt_items.append(('API', api_subs[:10], '#f97316'))
+    pay_subs = [s for s in sub_list if any(k in s.lower() for k in ('pay', 'shop', 'store', 'cart', 'order', 'checkout'))]
+    if pay_subs:
+        hvt_items.append(('Payment / E-Commerce', pay_subs[:10], '#ef4444'))
+    ai_subs = [s for s in sub_list if any(k in s.lower() for k in ('ai', 'llm', 'chat', 'bot', 'gpt', 'robot'))]
+    if ai_subs:
+        hvt_items.append(('AI / LLM', ai_subs[:10], '#a855f7'))
+    if hvt_items:
+        total_hvt = sum(len(items) for _, items, _ in hvt_items)
+        hvt_html = ''
+        for label, items, color in hvt_items:
+            chips = ''.join(f'<code style="background:var(--surface);padding:5px 12px;border-radius:5px;font-size:0.9em;border:1px solid var(--border);">{_esc(s)}</code>' for s in items[:8])
+            overflow = f'<span class="muted"> + {len(items) - 8} more</span>' if len(items) > 8 else ''
+            hvt_html += f'''<div style="background:var(--surface2);border-radius:10px;padding:16px 20px;margin-bottom:12px;border-left:3px solid {color};"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span class="type-badge" style="background:{color}20;color:{color};font-size:0.92em;">{_esc(label)}</span><span class="muted" style="font-size:0.85em;">{len(items)} environment(s)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">{chips}{overflow}</div></div>'''
+        parts.append(f'''
+<div class="sec" id="hvt">
+  <h2>High Value Targets <span class="count">({total_hvt})</span></h2>
+  {hvt_html}
+</div>''')
+
+    # Suggested Tests
+    tests_by_type = {}
+    for t in attack_targets:
+        typ = t.get('type', 'Other')
+        tests_by_type.setdefault(typ, []).append(t.get('target', ''))
+    if tests_by_type:
+        st_html = ''
+        for typ, targets in tests_by_type.items():
+            chips = ''.join(f'<code style="background:var(--surface);padding:5px 12px;border-radius:5px;font-size:0.9em;border:1px solid var(--border);">{_esc(t)}</code>' for t in targets[:10])
+            overflow = f'<span class="muted"> + {len(targets) - 10} more</span>' if len(targets) > 10 else ''
+            st_html += f'''<div style="background:var(--surface2);border-radius:10px;padding:16px 20px;margin-bottom:12px;border-left:3px solid #64748b;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span class="type-badge" style="background:#64748b20;color:#64748b;font-size:0.92em;">{_esc(typ)}</span><span class="muted" style="font-size:0.85em;">{len(targets)} target(s)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">{chips}{overflow}</div></div>'''
+        parts.append(f'''
+<div class="sec" id="tests">
+  <h2>Suggested Tests <span class="count">({len(tests_by_type)} types, {n_attack_targets} targets)</span></h2>
+  {st_html}
 </div>''')
 
     # Recommended Categories
