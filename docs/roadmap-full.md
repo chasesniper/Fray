@@ -1,6 +1,6 @@
 # Fray Full Roadmap — 222 Items Across 27 Layers
 
-**Status:** 61 done · 161 pending  
+**Status:** 64 done · 158 pending  
 **Last updated:** 2026-03-11
 
 ---
@@ -82,11 +82,11 @@
 ## L8 — DNS Recon Phase 2 (5 items)
 | # | Item | Priority | Status |
 |---|------|----------|--------|
-| 47 | DNSSEC validation check | MEDIUM | pending |
-| 48 | Zone transfer attempt (AXFR) | MEDIUM | pending |
+| 47 | DNSSEC validation check | MEDIUM | done |
+| 48 | Zone transfer attempt (AXFR) | MEDIUM | done |
 | 49 | DNS rebinding detection | LOW | pending |
 | 50 | Dangling CNAME / subdomain takeover via DNS | HIGH | done |
-| 51 | Wildcard DNS detection | LOW | pending |
+| 51 | Wildcard DNS detection | LOW | done |
 
 ## L9 — Bot Detection (5 items)
 | # | Item | Priority | Status |
@@ -348,7 +348,7 @@
 | L5 Supply Chain | 3 | 2 | 1 |
 | L6 OSINT | 6 | 6 | 0 |
 | L7 Cache + D1 Sync | 8 | 3 | 5 |
-| L8 DNS Recon Phase 2 | 5 | 1 | 4 |
+| L8 DNS Recon Phase 2 | 5 | 4 | 1 |
 | L9 Bot Detection | 5 | 1 | 4 |
 | L10 Dashboard / Web UI | 13 | 0 | 13 |
 | L11 Nikkei 225 | 10 | 0 | 10 |
@@ -368,4 +368,4 @@
 | L25 AI Intelligence | 5 | 0 | 5 |
 | L26 CF Workers AI Gateway | 7 | 0 | 7 |
 | L27 Architecture + Quality | 5 | 0 | 5 |
-| **TOTAL** | **222** | **61** | **161** |
+| **TOTAL** | **222** | **64** | **158** |
