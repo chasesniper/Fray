@@ -374,7 +374,7 @@ def build(rd: Dict[str, Any]) -> str:
             tt = t.get('type', '')
             tgt = t.get('target', '')
             pc = '#ef4444' if tp >= 90 else '#f97316' if tp >= 70 else '#eab308' if tp >= 50 else '#64748b'
-            at_rows += f'<tr><td class="num">{i}</td><td style="color:{pc};font-weight:700;">P{tp}</td><td><span class="type-badge" style="background:#64748b20;color:#64748b;">{_esc(tt)}</span></td><td class="mono" style="font-size:0.85em;">{_esc(tgt)}</td></tr>'
+            at_rows += f'<tr><td class="num">{i}</td><td style="color:{pc};font-weight:700;">{tp}</td><td><span class="type-badge" style="background:#64748b20;color:#64748b;">{_esc(tt)}</span></td><td class="mono" style="font-size:0.85em;">{_esc(tgt)}</td></tr>'
         parts.append(f'''
 <div class="sec" id="priorities">
   <h2>Attack Priorities <span class="count">({n_attack_targets} targets)</span></h2>
@@ -495,25 +495,39 @@ def build(rd: Dict[str, Any]) -> str:
         'Database': 'var(--red)', 'Search Engine': 'var(--blue)',
         'API': 'var(--accent2)', 'Container Orchestration': 'var(--cyan)',
     }
-    tr_html = ''
-    tech_items = sorted(techs.items(), key=lambda x: -(x[1].get('confidence', 0) if isinstance(x[1], dict) else (x[1] * 100 if isinstance(x[1], (int, float)) and x[1] <= 1 else x[1] if isinstance(x[1], (int, float)) else 0)))
-    for name, ver in tech_items:
+    # Group technologies by category
+    _CAT_ORDER = ['WAF', 'CDN', 'CDN/WAF', 'Cloud', 'Cloud/CDN', 'Web Server', 'Load Balancer',
+                  'Proxy', 'Storage', 'Application Server', 'Framework', 'Runtime', 'Language',
+                  'CMS', 'JavaScript Framework', 'JavaScript Library', 'CSS Framework',
+                  'Icon Library', 'Analytics', 'Marketing', 'Captcha', 'Security',
+                  'E-commerce', 'SaaS', 'PaaS', 'Hosting', 'Database', 'Search Engine',
+                  'Container', 'Container Orchestration', 'CI/CD', 'DevOps', 'Monitoring',
+                  'API', 'TLS', 'Cipher Suite', 'Certificate Authority', 'Infrastructure']
+    cat_groups = {}  # category -> [(name, info), ...]
+    for name, ver in techs.items():
         if isinstance(ver, dict):
-            cat = ver.get('category', '')
-            conf = ver.get('confidence', 50)
-            cat_col = _CAT_COLORS.get(cat, 'var(--muted)')
-            cat_badge = f'<span class="type-badge" style="background:{cat_col}20;color:{cat_col};font-size:0.8em;">{_esc(cat)}</span>' if cat else ''
-            tr_html += f'<tr><td><strong>{_esc(name)}</strong> {cat_badge}</td><td><div class="bar-wrap"><div class="bar-fill" style="width:{conf}%"></div></div></td><td class="num">{conf}%</td></tr>'
-        elif isinstance(ver, (int, float)):
-            pct = max(1, int(ver * 100)) if ver <= 1 else int(ver)
-            tr_html += f'<tr><td><strong>{_esc(name)}</strong></td><td><div class="bar-wrap"><div class="bar-fill" style="width:{pct}%"></div></div></td><td class="num">{pct}%</td></tr>'
+            cat = ver.get('category', 'Other')
         else:
-            v = ver if isinstance(ver, str) else str(ver) if ver else '—'
-            tr_html += f'<tr><td><strong>{_esc(name)}</strong></td><td colspan="2">{_esc(str(v))}</td></tr>'
+            cat = 'Other'
+        cat_groups.setdefault(cat, []).append(name)
+    tech_html = ''
+    for cat in _CAT_ORDER + [c for c in cat_groups if c not in _CAT_ORDER]:
+        if cat not in cat_groups:
+            continue
+        names = sorted(cat_groups[cat])
+        cat_col = _CAT_COLORS.get(cat, 'var(--muted)')
+        # Also check partial matches for combined categories like CDN/WAF
+        if cat_col == 'var(--muted)':
+            for base_cat in cat.split('/'):
+                if base_cat.strip() in _CAT_COLORS:
+                    cat_col = _CAT_COLORS[base_cat.strip()]
+                    break
+        chips = ' '.join(f'<span style="display:inline-block;background:var(--surface);padding:5px 12px;border-radius:6px;font-size:0.88em;border:1px solid var(--border);margin:3px 2px;">{_esc(n)}</span>' for n in names)
+        tech_html += f'<div style="margin-bottom:10px;"><span class="type-badge" style="background:{cat_col}20;color:{cat_col};font-size:0.82em;min-width:100px;text-align:center;">{_esc(cat)}</span> {chips}</div>'
     parts.append(f'''
 <div class="sec" id="tech">
   <h2>Technologies <span class="count">({len(techs)})</span></h2>
-  {f'<table><tr><th>Technology</th><th>Confidence</th><th></th></tr>{tr_html}</table>' if tr_html else '<p class="muted">No technologies detected.</p>'}
+  {tech_html if tech_html else '<p class="muted">No technologies detected.</p>'}
 </div>''')
 
     # DNS
