@@ -1,6 +1,6 @@
 # Fray Full Roadmap — 222 Items Across 27 Layers
 
-**Status:** 64 done · 158 pending  
+**Status:** 65 done · 157 pending  
 **Last updated:** 2026-03-11
 
 ---
@@ -121,7 +121,7 @@
 | 71 | Corporate WAF coverage report | MEDIUM | pending |
 | 72 | Industry-level security posture comparison | MEDIUM | pending |
 | 73 | Automated report generation per company | MEDIUM | pending |
-| 74 | DNS hygiene scoring | LOW | pending |
+| 74 | DNS hygiene scoring | LOW | done |
 | 75 | Certificate transparency monitoring | MEDIUM | pending |
 | 76 | Subdomain sprawl detection | LOW | pending |
 | 77 | Cloud provider distribution analysis | LOW | pending |
@@ -351,7 +351,7 @@
 | L8 DNS Recon Phase 2 | 5 | 4 | 1 |
 | L9 Bot Detection | 5 | 1 | 4 |
 | L10 Dashboard / Web UI | 13 | 0 | 13 |
-| L11 Nikkei 225 | 10 | 0 | 10 |
+| L11 Nikkei 225 | 10 | 1 | 9 |
 | L12 Integrations | 4 | 4 | 0 |
 | L13 GitHub Repos | 12 | 6 | 6 |
 | L14 Growth / Stars | 16 | 3 | 13 |
@@ -368,4 +368,4 @@
 | L25 AI Intelligence | 5 | 0 | 5 |
 | L26 CF Workers AI Gateway | 7 | 0 | 7 |
 | L27 Architecture + Quality | 5 | 0 | 5 |
-| **TOTAL** | **222** | **64** | **158** |
+| **TOTAL** | **222** | **65** | **157** |
