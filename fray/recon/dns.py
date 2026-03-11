@@ -1261,3 +1261,171 @@ def check_wildcard_dns(host: str, timeout: float = 3.0) -> Dict[str, Any]:
             result["wildcard_ips"] = sorted(common)
 
     return result
+
+
+# ── DNS hygiene scoring (#74) ─────────────────────────────────────────
+
+def score_dns_hygiene(dns_data: Dict[str, Any],
+                      dnssec_data: Optional[Dict[str, Any]] = None,
+                      zone_transfer_data: Optional[Dict[str, Any]] = None,
+                      wildcard_data: Optional[Dict[str, Any]] = None,
+                      takeover_data: Optional[Dict[str, Any]] = None,
+                      ) -> Dict[str, Any]:
+    """Score DNS hygiene based on collected recon data (0–100, higher = better).
+
+    Scoring rubric (100-point deduction model):
+      - SPF record present:         +15
+      - DMARC record present:       +15
+      - DNSSEC enabled:             +15  (+5 bonus if validated)
+      - CAA record present:         +10
+      - No zone transfer (AXFR):    +15  (0 if vulnerable)
+      - No wildcard DNS:            +10  (0 if wildcard detected)
+      - No dangling CNAMEs:         +15  (0 if takeover vulnerable)
+      - NS redundancy (≥2 NS):      +5
+
+    Args:
+        dns_data: Output from check_dns().
+        dnssec_data: Output from check_dnssec() (optional).
+        zone_transfer_data: Output from check_zone_transfer() (optional).
+        wildcard_data: Output from check_wildcard_dns() (optional).
+        takeover_data: Output from check_subdomain_takeover() (optional).
+
+    Returns:
+        Dict with 'score', 'grade', 'checks', 'recommendations'.
+    """
+    checks: List[Dict[str, Any]] = []
+    score = 0
+
+    # ── SPF (+15) ──
+    has_spf = dns_data.get("has_spf", False)
+    if has_spf:
+        score += 15
+        checks.append({"check": "SPF", "pass": True, "points": 15,
+                        "detail": "SPF record found"})
+    else:
+        checks.append({"check": "SPF", "pass": False, "points": 0,
+                        "detail": "No SPF record — email spoofing possible"})
+
+    # ── DMARC (+15) ──
+    has_dmarc = dns_data.get("has_dmarc", False)
+    if has_dmarc:
+        score += 15
+        checks.append({"check": "DMARC", "pass": True, "points": 15,
+                        "detail": "DMARC record found"})
+    else:
+        checks.append({"check": "DMARC", "pass": False, "points": 0,
+                        "detail": "No DMARC record — no email authentication policy"})
+
+    # ── DNSSEC (+15, +5 bonus) ──
+    if dnssec_data:
+        enabled = dnssec_data.get("enabled", False)
+        validated = dnssec_data.get("validated", False)
+        if enabled:
+            pts = 15
+            detail = "DNSSEC enabled"
+            if validated:
+                pts += 5
+                detail += " and validated"
+            score += pts
+            checks.append({"check": "DNSSEC", "pass": True, "points": pts,
+                            "detail": detail})
+        else:
+            checks.append({"check": "DNSSEC", "pass": False, "points": 0,
+                            "detail": "DNSSEC not enabled — DNS responses can be spoofed"})
+    else:
+        checks.append({"check": "DNSSEC", "pass": False, "points": 0,
+                        "detail": "DNSSEC not checked"})
+
+    # ── CAA (+10) ──
+    caa = dns_data.get("caa", [])
+    if caa:
+        score += 10
+        checks.append({"check": "CAA", "pass": True, "points": 10,
+                        "detail": f"CAA record(s) present ({len(caa)})"})
+    else:
+        checks.append({"check": "CAA", "pass": False, "points": 0,
+                        "detail": "No CAA records — any CA can issue certificates"})
+
+    # ── Zone transfer (+15) ──
+    if zone_transfer_data:
+        if zone_transfer_data.get("vulnerable", False):
+            checks.append({"check": "Zone Transfer", "pass": False, "points": 0,
+                            "detail": f"AXFR allowed on {', '.join(zone_transfer_data.get('ns_vulnerable', [])[:3])}"})
+        else:
+            score += 15
+            checks.append({"check": "Zone Transfer", "pass": True, "points": 15,
+                            "detail": "AXFR denied on all nameservers"})
+    else:
+        score += 15  # Assume safe if not tested
+        checks.append({"check": "Zone Transfer", "pass": True, "points": 15,
+                        "detail": "Not tested (assumed safe)"})
+
+    # ── Wildcard DNS (+10) ──
+    if wildcard_data:
+        if wildcard_data.get("wildcard", False):
+            wc_ips = ", ".join(wildcard_data.get("wildcard_ips", [])[:3])
+            checks.append({"check": "Wildcard DNS", "pass": False, "points": 0,
+                            "detail": f"Wildcard detected — all subs resolve to {wc_ips}"})
+        else:
+            score += 10
+            checks.append({"check": "Wildcard DNS", "pass": True, "points": 10,
+                            "detail": "No wildcard DNS"})
+    else:
+        score += 10
+        checks.append({"check": "Wildcard DNS", "pass": True, "points": 10,
+                        "detail": "Not tested (assumed safe)"})
+
+    # ── Dangling CNAMEs / takeover (+15) ──
+    if takeover_data:
+        n_vuln = takeover_data.get("count", 0)
+        if n_vuln > 0:
+            names = [v["subdomain"] for v in takeover_data.get("vulnerable", [])[:3]]
+            checks.append({"check": "Subdomain Takeover", "pass": False, "points": 0,
+                            "detail": f"{n_vuln} dangling CNAME(s): {', '.join(names)}"})
+        else:
+            score += 15
+            checks.append({"check": "Subdomain Takeover", "pass": True, "points": 15,
+                            "detail": f"No dangling CNAMEs ({takeover_data.get('checked', 0)} checked)"})
+    else:
+        score += 15
+        checks.append({"check": "Subdomain Takeover", "pass": True, "points": 15,
+                        "detail": "Not tested (assumed safe)"})
+
+    # ── NS redundancy (+5) ──
+    ns_count = len(dns_data.get("ns", []))
+    if ns_count >= 2:
+        score += 5
+        checks.append({"check": "NS Redundancy", "pass": True, "points": 5,
+                        "detail": f"{ns_count} nameservers"})
+    else:
+        checks.append({"check": "NS Redundancy", "pass": False, "points": 0,
+                        "detail": f"Only {ns_count} nameserver(s) — no redundancy"})
+
+    # Cap at 100 (bonus can push above)
+    score = min(score, 100)
+
+    # Grade
+    if score >= 90:
+        grade = "A"
+    elif score >= 75:
+        grade = "B"
+    elif score >= 60:
+        grade = "C"
+    elif score >= 40:
+        grade = "D"
+    else:
+        grade = "F"
+
+    # Recommendations (from failed checks)
+    recommendations = [c["detail"] for c in checks if not c["pass"]]
+
+    return {
+        "score": score,
+        "max_score": 105,  # 100 base + 5 DNSSEC validation bonus
+        "grade": grade,
+        "checks": checks,
+        "passed": sum(1 for c in checks if c["pass"]),
+        "failed": sum(1 for c in checks if not c["pass"]),
+        "total_checks": len(checks),
+        "recommendations": recommendations,
+    }

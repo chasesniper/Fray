@@ -604,6 +604,16 @@ def run_recon(url: str, timeout: int = 8,
     else:
         result["subdomain_takeover"] = {"vulnerable": [], "checked": 0, "count": 0}
 
+    # DNS hygiene score (#74) — aggregates all DNS data collected above
+    from fray.recon.dns import score_dns_hygiene
+    result["dns_hygiene"] = score_dns_hygiene(
+        dns_data=result.get("dns", {}),
+        dnssec_data=result.get("dnssec"),
+        zone_transfer_data=result.get("zone_transfer"),
+        wildcard_data=result.get("wildcard_dns"),
+        takeover_data=result.get("subdomain_takeover"),
+    )
+
     # 14. Smart payload recommendation
     result["recommended_categories"] = recommend_categories(result["fingerprint"])
 
@@ -851,6 +861,7 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
         # Low (10-29)
         "Content-Security-Policy":  20, "robots.txt":            15,
         "DNSSEC":                   15, "Wildcard DNS":          10,
+        "DNS hygiene":              30,
         "WAF":                      10,
     }
     _SEVERITY_BASE = {"critical": 90, "high": 65, "medium": 40, "low": 15}
@@ -919,6 +930,16 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     if interesting_paths:
         findings.append({"severity": "low", "finding": f"{len(interesting_paths)} interesting paths in robots.txt"})
 
+    # ── DNS hygiene score (#74) ──
+    dns_hygiene = r.get("dns_hygiene", {})
+    dns_hygiene_score = dns_hygiene.get("score", 0) if isinstance(dns_hygiene, dict) else 0
+    dns_hygiene_grade = dns_hygiene.get("grade", "?") if isinstance(dns_hygiene, dict) else "?"
+    dns_hygiene_failed = dns_hygiene.get("failed", 0) if isinstance(dns_hygiene, dict) else 0
+    if dns_hygiene_failed > 0 and dns_hygiene_score < 60:
+        findings.append({"severity": "medium", "finding": f"DNS hygiene score {dns_hygiene_score}/100 (grade {dns_hygiene_grade}) — {dns_hygiene_failed} check(s) failed"})
+    elif dns_hygiene_failed > 0:
+        findings.append({"severity": "low", "finding": f"DNS hygiene score {dns_hygiene_score}/100 (grade {dns_hygiene_grade}) — {dns_hygiene_failed} check(s) failed"})
+
     # ── DNS security findings (#47, #48, #51) ──
     dnssec_data = r.get("dnssec", {})
     if isinstance(dnssec_data, dict) and dnssec_data:
@@ -967,7 +988,7 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     # ── Finding grouping by category (#183) ──
     _FINDING_CATEGORIES = {
         "infra": {"origin IP", "takeover", "port", "WAF", "bypass WAF", "DNS",
-                  "zone transfer", "AXFR", "DNSSEC", "Wildcard DNS"},
+                  "zone transfer", "AXFR", "DNSSEC", "Wildcard DNS", "DNS hygiene"},
         "app":   {"XSS", "injection", "CORS", "clickjacking", "GraphQL",
                   "injectable", "HTTP method", "host header"},
         "config": {"Content-Security-Policy", "SRI", "robots.txt", "admin panel",
