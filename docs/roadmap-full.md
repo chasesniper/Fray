@@ -1,6 +1,6 @@
-# Fray Full Roadmap — 205 Items Across 27 Layers
+# Fray Full Roadmap — 222 Items Across 27 Layers
 
-**Status:** 61 done · 144 pending  
+**Status:** 61 done · 161 pending  
 **Last updated:** 2026-03-11
 
 ---
@@ -306,6 +306,35 @@
 | 204 | Email alerts (Resend integration) | MEDIUM | done |
 | 205 | PagerDuty / OpsGenie integration | LOW | pending |
 
+## L25 — AI Intelligence Pipeline (5 items)
+| # | Item | Priority | Status |
+|---|------|----------|--------|
+| 206 | AI Payload Intelligence Engine (CVE→LLM→staged payloads) | HIGH | pending |
+| 207 | fray ask — natural language interface over Fray data | MEDIUM | pending |
+| 208 | Payload mutation feedback loop (blocked→LLM bypass→retry) | HIGH | pending |
+| 209 | Recon interpretation (LLM→attack narrative) | MEDIUM | pending |
+| 210 | AI research pipeline (NVD+arxiv+blogs→extract→generate) | LOW | pending |
+
+## L26 — Cloudflare Workers AI Gateway (7 items)
+| # | Item | Priority | Status |
+|---|------|----------|--------|
+| 211 | CF Worker — AI Gateway + Payload API (worker.js) | HIGH | pending |
+| 212 | Payload Mutation Endpoint (blocked→LLM→5 bypass variants) | HIGH | pending |
+| 213 | CVE Extraction Endpoint (CVE text→payloads+metadata) | MEDIUM | pending |
+| 214 | Recon Interpretation Endpoint (findings→risk narrative) | MEDIUM | pending |
+| 215 | D1 Schema (mutations, cve_cache, payload_staging, scan_results) | HIGH | pending |
+| 216 | Python Client (fray/intelligence/cf_client.py) | HIGH | pending |
+| 217 | LLM Provider Abstraction (cloudflare/ollama/openai dispatch) | MEDIUM | pending |
+
+## L27 — Architecture + Code Quality (5 items)
+| # | Item | Priority | Status |
+|---|------|----------|--------|
+| 218 | Parallel/async request execution (asyncio + aiohttp) | HIGH | pending |
+| 219 | Response diffing / false positive reduction | MEDIUM | pending |
+| 220 | Redirect chain following in testing | MEDIUM | pending |
+| 221 | --resume flag for interrupted scan checkpoint | MEDIUM | pending |
+| 222 | Test coverage expansion (pytest, >80%) | LOW | pending |
+
 ---
 
 ## Summary
@@ -336,4 +365,7 @@
 | L22 Docs + Marketing | 6 | 0 | 6 |
 | L23 Extensions | 5 | 1 | 4 |
 | L24 Monitoring | 3 | 2 | 1 |
-| **TOTAL** | **205** | **61** | **144** |
+| L25 AI Intelligence | 5 | 0 | 5 |
+| L26 CF Workers AI Gateway | 7 | 0 | 7 |
+| L27 Architecture + Quality | 5 | 0 | 5 |
+| **TOTAL** | **222** | **61** | **161** |
