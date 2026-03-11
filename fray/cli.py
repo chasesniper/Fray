@@ -2043,6 +2043,14 @@ def cmd_recon(args):
         crit = sum(1 for r in all_results if r.get("attack_surface", {}).get("risk_level") == "CRITICAL")
         high = sum(1 for r in all_results if r.get("attack_surface", {}).get("risk_level") == "HIGH")
         sys.stderr.write(f"\n  Fray recon complete: {total} targets — {crit} CRITICAL, {high} HIGH\n")
+        # Return highest risk_score across all targets for exit code mapping
+        max_rs = max(r.get("attack_surface", {}).get("risk_score", 0) for r in all_results)
+        return {"risk_score": max_rs}
+
+    # Single target: return risk_score for exit code mapping (#190)
+    if not multi and result:
+        rs = result.get("attack_surface", {}).get("risk_score", 0)
+        return {"risk_score": rs}
 
 
 def cmd_smuggle(args):
