@@ -1743,81 +1743,219 @@ _CLOUD_PROVIDERS = {
 }
 
 
+# WAF fingerprint signatures detected from HTTP response headers
+_WAF_HEADER_SIGNATURES = {
+    "Cloudflare":   {"headers": {"server": "cloudflare", "cf-ray": ""},
+                     "cname_hints": ["cloudflare"]},
+    "AWS WAF":      {"headers": {"x-amzn-waf-action": "", "x-amz-cf-id": ""},
+                     "cname_hints": ["awswaf"]},
+    "CloudFront":   {"headers": {"x-amz-cf-id": "", "x-amz-cf-pop": "", "via": "cloudfront"},
+                     "cname_hints": ["cloudfront.net"]},
+    "Akamai":       {"headers": {"x-akamai-transformed": "", "server": "akamaighost"},
+                     "cname_hints": ["akamai", "edgesuite", "edgekey"]},
+    "Imperva":      {"headers": {"x-iinfo": "", "x-cdn": "imperva"},
+                     "cname_hints": ["incapsula", "imperva"]},
+    "Sucuri":       {"headers": {"x-sucuri-id": "", "x-sucuri-cache": ""},
+                     "cname_hints": ["sucuri"]},
+    "Fastly":       {"headers": {"x-served-by": "", "via": "varnish", "x-fastly-request-id": ""},
+                     "cname_hints": ["fastly"]},
+    "Azure CDN":    {"headers": {"x-msedge-ref": ""},
+                     "cname_hints": ["azureedge", "msecnd"]},
+    "Azure Front Door": {"headers": {"x-azure-ref": ""},
+                          "cname_hints": ["azurefd", "afd."]},
+    "Google CDN":   {"headers": {"via": "google"},
+                     "cname_hints": ["googleusercontent", "googlevideo"]},
+    "F5 BIG-IP":    {"headers": {"server": "big-ip", "x-cnection": ""},
+                     "cname_hints": []},
+    "Barracuda":    {"headers": {"server": "barracuda"},
+                     "cname_hints": ["barracuda"]},
+    "FortiWeb":     {"headers": {"server": "fortiweb"},
+                     "cname_hints": []},
+}
+
+
+def _fingerprint_waf_cdn(fqdn: str, timeout: float = 3.0) -> Dict[str, Any]:
+    """Quick HTTP HEAD probe to fingerprint WAF/CDN from response headers + CNAME.
+
+    Returns:
+        Dict with 'waf', 'cdn', 'cname', 'ip', 'headers_matched'.
+    """
+    import http.client
+    import ssl as _ssl
+    import subprocess
+
+    result: Dict[str, Any] = {
+        "waf": None,
+        "cdn": None,
+        "cname": None,
+        "ip": None,
+        "server": None,
+        "headers_matched": [],
+    }
+
+    # 1. Resolve CNAME (for CDN hints)
+    try:
+        out = subprocess.run(
+            ["dig", "+short", "CNAME", fqdn],
+            capture_output=True, text=True, timeout=timeout,
+        )
+        cname = out.stdout.strip().rstrip(".").lower()
+        if cname:
+            result["cname"] = cname
+    except Exception:
+        pass
+
+    # 2. Resolve A record
+    ips = _resolve_hostname(fqdn, timeout=timeout)
+    if ips:
+        result["ip"] = ips[0]
+
+    # 3. HTTP HEAD probe
+    resp_headers: Dict[str, str] = {}
+    for scheme, port_num in [("https", 443), ("http", 80)]:
+        try:
+            if scheme == "https":
+                ctx = _ssl.create_default_context()
+                ctx.check_hostname = False
+                ctx.verify_mode = _ssl.CERT_NONE
+                conn = http.client.HTTPSConnection(fqdn, port_num,
+                                                    timeout=timeout, context=ctx)
+            else:
+                conn = http.client.HTTPConnection(fqdn, port_num, timeout=timeout)
+            conn.request("HEAD", "/", headers={"User-Agent": "Mozilla/5.0"})
+            resp = conn.getresponse()
+            resp_headers = {k.lower(): v.lower() for k, v in resp.getheaders()}
+            result["server"] = resp_headers.get("server", None)
+            conn.close()
+            break
+        except Exception:
+            continue
+
+    # 4. Match against WAF/CDN signatures
+    detected_wafs = []
+    detected_cdns = []
+
+    for vendor, sig in _WAF_HEADER_SIGNATURES.items():
+        matched = False
+        # Check headers
+        for hdr_key, hdr_val in sig["headers"].items():
+            if hdr_key in resp_headers:
+                if not hdr_val or hdr_val in resp_headers[hdr_key]:
+                    matched = True
+                    result["headers_matched"].append(f"{vendor}:{hdr_key}")
+                    break
+        # Check CNAME hints
+        if not matched and result["cname"]:
+            for hint in sig.get("cname_hints", []):
+                if hint in result["cname"]:
+                    matched = True
+                    result["headers_matched"].append(f"{vendor}:cname={hint}")
+                    break
+
+        if matched:
+            # Classify as WAF or CDN (some are both)
+            if vendor in ("CloudFront", "Azure CDN", "Google CDN", "Fastly",
+                          "Akamai", "Azure Front Door"):
+                detected_cdns.append(vendor)
+            elif vendor in ("Cloudflare",):
+                detected_wafs.append(vendor)
+                detected_cdns.append(vendor)  # Cloudflare is both
+            else:
+                detected_wafs.append(vendor)
+
+    result["waf"] = detected_wafs[0] if detected_wafs else None
+    result["cdn"] = detected_cdns[0] if detected_cdns else None
+    # If IP matched a cloud provider, use that as CDN fallback
+    if not result["cdn"] and result["ip"]:
+        for provider, prefixes in _CLOUD_PROVIDERS.items():
+            for prefix in prefixes:
+                if result["ip"].startswith(prefix):
+                    result["cdn"] = provider
+                    break
+            if result["cdn"]:
+                break
+
+    return result
+
+
 def analyze_cloud_distribution(subdomains: List[str],
                                 dns_data: Dict[str, Any],
-                                timeout: float = 2.0) -> Dict[str, Any]:
-    """Map subdomain IPs to cloud/CDN providers for infrastructure analysis.
+                                timeout: float = 3.0) -> Dict[str, Any]:
+    """Map subdomain IPs to cloud/CDN providers and fingerprint WAF per subdomain.
+
+    Performs both IP-based classification and HTTP header fingerprinting
+    to detect WAF vendor, CDN provider, and CNAME chain per subdomain.
 
     Args:
         subdomains: List of discovered subdomain FQDNs.
         dns_data: Output from check_dns() (uses A records for parent domain).
-        timeout: Resolution timeout per subdomain.
+        timeout: Resolution + HTTP timeout per subdomain.
 
     Returns:
-        Dict with 'providers', 'unidentified', 'primary_provider',
-        'multi_cloud', 'distribution'.
+        Dict with 'per_subdomain', 'waf_distribution', 'cdn_distribution',
+        'multi_waf', 'multi_cdn', 'providers', 'primary_provider'.
     """
     import concurrent.futures
 
-    provider_counts: Dict[str, int] = {}
-    provider_subs: Dict[str, List[str]] = {}
-    unidentified: List[str] = []
-
-    def _classify_ip(ip: str) -> Optional[str]:
-        for provider, prefixes in _CLOUD_PROVIDERS.items():
-            for prefix in prefixes:
-                if ip.startswith(prefix):
-                    return provider
-        return None
-
-    def _resolve_and_classify(fqdn: str) -> Tuple[str, Optional[str]]:
-        ips = _resolve_hostname(fqdn, timeout=timeout)
-        if not ips:
-            return fqdn, None
-        # Classify by first IP
-        provider = _classify_ip(ips[0])
-        return fqdn, provider
-
-    # Also classify parent domain A records
-    for ip in dns_data.get("a", []):
-        provider = _classify_ip(ip)
-        if provider:
-            provider_counts[provider] = provider_counts.get(provider, 0) + 1
-            provider_subs.setdefault(provider, []).append(f"(parent:{ip})")
+    per_subdomain: List[Dict[str, Any]] = []
+    waf_counts: Dict[str, int] = {}
+    cdn_counts: Dict[str, int] = {}
 
     # Resolve subdomains in parallel (cap at 60)
     candidates = list(subdomains)[:60]
-    with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
-        futures = [pool.submit(_resolve_and_classify, s) for s in candidates]
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
+        futures = {pool.submit(_fingerprint_waf_cdn, s, timeout): s
+                   for s in candidates}
         for f in concurrent.futures.as_completed(futures):
+            fqdn = futures[f]
             try:
-                fqdn, provider = f.result()
-                if provider:
-                    provider_counts[provider] = provider_counts.get(provider, 0) + 1
-                    provider_subs.setdefault(provider, []).append(fqdn)
-                else:
-                    unidentified.append(fqdn)
+                info = f.result()
+                entry = {
+                    "subdomain": fqdn,
+                    "ip": info.get("ip"),
+                    "cname": info.get("cname"),
+                    "waf": info.get("waf"),
+                    "cdn": info.get("cdn"),
+                    "server": info.get("server"),
+                }
+                per_subdomain.append(entry)
+
+                waf = info.get("waf")
+                cdn = info.get("cdn")
+                if waf:
+                    waf_counts[waf] = waf_counts.get(waf, 0) + 1
+                if cdn:
+                    cdn_counts[cdn] = cdn_counts.get(cdn, 0) + 1
             except Exception:
                 pass
 
-    # Sort by count descending
-    sorted_providers = sorted(provider_counts.items(), key=lambda x: -x[1])
-    total_classified = sum(provider_counts.values())
-    primary = sorted_providers[0][0] if sorted_providers else None
+    # Sort per_subdomain by name
+    per_subdomain.sort(key=lambda x: x["subdomain"])
 
-    # Distribution percentages
-    distribution = {}
-    for name, count in sorted_providers:
-        pct = round(count / total_classified * 100, 1) if total_classified else 0
-        distribution[name] = {"count": count, "pct": pct,
-                              "subdomains": provider_subs.get(name, [])[:10]}
+    total = len(per_subdomain)
+    sorted_wafs = sorted(waf_counts.items(), key=lambda x: -x[1])
+    sorted_cdns = sorted(cdn_counts.items(), key=lambda x: -x[1])
+
+    waf_dist = {}
+    for name, count in sorted_wafs:
+        pct = round(count / total * 100, 1) if total else 0
+        waf_dist[name] = {"count": count, "pct": pct}
+
+    cdn_dist = {}
+    for name, count in sorted_cdns:
+        pct = round(count / total * 100, 1) if total else 0
+        cdn_dist[name] = {"count": count, "pct": pct}
 
     return {
-        "providers": [p[0] for p in sorted_providers],
-        "provider_count": len(sorted_providers),
-        "primary_provider": primary,
-        "multi_cloud": len(sorted_providers) > 1,
-        "total_classified": total_classified,
-        "unidentified_count": len(unidentified),
-        "distribution": distribution,
+        "per_subdomain": per_subdomain,
+        "total_probed": total,
+        "waf_distribution": waf_dist,
+        "cdn_distribution": cdn_dist,
+        "waf_vendors": [w[0] for w in sorted_wafs],
+        "cdn_vendors": [c[0] for c in sorted_cdns],
+        "multi_waf": len(sorted_wafs) > 1,
+        "multi_cdn": len(sorted_cdns) > 1,
+        "primary_waf": sorted_wafs[0][0] if sorted_wafs else None,
+        "primary_cdn": sorted_cdns[0][0] if sorted_cdns else None,
     }
