@@ -1338,7 +1338,7 @@ def cmd_test(args):
     if getattr(args, 'json', False):
         _json_print(report)
     else:
-        # Auto-detect HTML output
+        # Auto-detect output format from extension
         out = args.output or "fray_results.json"
         _validate_output_path(out)
         if out.endswith('.html') or out.endswith('.htm'):
@@ -1346,6 +1346,10 @@ def cmd_test(args):
             gen = SecurityReportGenerator()
             gen.generate_html_report(report, out)
             print(f"\n  HTML report saved to {out}")
+        elif out.endswith('.md'):
+            from fray.reporter import generate_markdown_report
+            generate_markdown_report(report, out)
+            print(f"\n  Markdown report saved to {out}")
         else:
             tester.generate_report(results, output=out)
             print(f"\nResults saved to {out}")
@@ -4327,6 +4331,10 @@ Documentation: https://github.com/dalisecurity/fray
                           help="Save session cookies/tokens to ~/.fray/sessions/NAME.json for reuse")
     p_recon.add_argument("--load-session", dest="load_session", default=None, metavar="NAME",
                           help="Load a saved session from ~/.fray/sessions/NAME.json")
+    p_recon.add_argument("-q", "--quiet", action="store_true",
+                          help="Suppress all non-essential output (only errors and JSON)")
+    p_recon.add_argument("-v", "--verbose", action="store_true",
+                          help="Verbose output with extra debugging details")
     p_recon.add_argument("--profile", default=None,
                           choices=["quick", "standard", "deep", "stealth", "api", "bounty"],
                           help="Scan preset: quick (~10s), standard (default), deep (~60s), stealth (slow+evasive), api (API-focused), bounty (max coverage)")
@@ -4378,6 +4386,10 @@ Documentation: https://github.com/dalisecurity/fray
                            help="Save session cookies/tokens to ~/.fray/sessions/NAME.json")
     p_detect.add_argument("--load-session", dest="load_session", default=None, metavar="NAME",
                            help="Load a saved session from ~/.fray/sessions/NAME.json")
+    p_detect.add_argument("-q", "--quiet", action="store_true",
+                           help="Suppress all non-essential output")
+    p_detect.add_argument("-v", "--verbose", action="store_true",
+                           help="Verbose output with extra debugging details")
     p_detect.set_defaults(func=cmd_detect)
 
     # test
@@ -4436,6 +4448,8 @@ Documentation: https://github.com/dalisecurity/fray
                          help="Load a saved session from ~/.fray/sessions/NAME.json")
     p_test.add_argument("--resume", action="store_true",
                          help="Resume an interrupted scan from checkpoint (~/.fray/checkpoints/)")
+    p_test.add_argument("-q", "--quiet", action="store_true",
+                         help="Suppress all non-essential output (only errors and JSON)")
     p_test.add_argument("--notify", default=None, metavar="WEBHOOK_URL",
                          help="Send Slack/Discord/Teams notification on completion")
     p_test.set_defaults(func=cmd_test)
@@ -5015,6 +5029,43 @@ Documentation: https://github.com/dalisecurity/fray
         help="Show friendly guide to all fray commands")
     p_help.set_defaults(func=cmd_help)
 
+    # ── Environment variable overrides (#186) ──────────────────────────────
+    # FRAY_<FLAG> env vars → argparse defaults. CLI flags always win.
+    # Example: FRAY_TIMEOUT=15 fray test target -c xss
+    #          FRAY_DELAY=1.0 FRAY_CATEGORY=sqli fray test target
+
+    _ENV_TYPE_MAP = {
+        'timeout': int, 'delay': float, 'jitter': float, 'rate_limit': float,
+        'max': int, 'redirect_limit': int, 'mutate': int,
+    }
+    _ENV_BOOL_KEYS = {
+        'insecure', 'verbose', 'quiet', 'stealth', 'fast', 'deep', 'blind',
+        'json', 'all', 'resume', 'retirejs', 'history', 'js', 'params', 'leak',
+    }
+
+    def _apply_env_overrides(args):
+        """Apply FRAY_* environment variables as defaults. CLI flags take precedence."""
+        import os as _os
+        for key, val in _os.environ.items():
+            if not key.startswith('FRAY_'):
+                continue
+            attr = key[5:].lower().replace('-', '_')
+            current = getattr(args, attr, None)
+            # Only apply if CLI didn't set it
+            if current is not None and current is not False:
+                continue
+            if not hasattr(args, attr):
+                continue
+            if attr in _ENV_BOOL_KEYS:
+                setattr(args, attr, val.lower() in ('1', 'true', 'yes'))
+            elif attr in _ENV_TYPE_MAP:
+                try:
+                    setattr(args, attr, _ENV_TYPE_MAP[attr](val))
+                except (ValueError, TypeError):
+                    pass
+            else:
+                setattr(args, attr, val)
+
     # ── Scan Profile Presets ──────────────────────────────────────────────
     # Profiles map to argparse defaults. CLI flags always override profiles.
     # Usage: fray recon target --profile quick
@@ -5073,6 +5124,9 @@ Documentation: https://github.com/dalisecurity/fray
         print_welcome()
         sys.exit(0)
 
+    # ── Environment variable overrides (FRAY_* → argparse defaults) ──
+    _apply_env_overrides(args)
+
     # Load .fray.toml: env vars first, then apply defaults for the active subcommand
     from fray.config import load_config, apply_config_defaults, load_env_from_config
     config = load_config()
@@ -5083,7 +5137,32 @@ Documentation: https://github.com/dalisecurity/fray
     # Apply --profile presets (after config, before command execution)
     _apply_profile(args)
 
-    args.func(args)
+    # ── Verbosity level ──
+    _verbosity = getattr(args, 'verbose', False)
+    _quiet = getattr(args, 'quiet', False)
+    args._verbosity = 2 if _verbosity else (0 if _quiet else 1)
+
+    # ── Execute command and map exit code from severity ──
+    _exit_code = 0
+    try:
+        result = args.func(args)
+        # cmd functions may return a risk_score or severity hint
+        if isinstance(result, dict):
+            rs = result.get('risk_score', 0)
+            if rs >= 60:
+                _exit_code = 3  # CRITICAL
+            elif rs >= 40:
+                _exit_code = 2  # HIGH
+            elif rs >= 20:
+                _exit_code = 1  # MEDIUM
+        elif isinstance(result, int):
+            _exit_code = result
+    except SystemExit as e:
+        _exit_code = e.code if isinstance(e.code, int) else 1
+    except KeyboardInterrupt:
+        sys.stderr.write("\n  Interrupted.\n")
+        _exit_code = 130
+    sys.exit(_exit_code)
 
 
 if __name__ == "__main__":

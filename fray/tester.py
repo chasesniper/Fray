@@ -875,6 +875,65 @@ class WAFTester:
             return data['payloads']
         return data if isinstance(data, list) else []
     
+    def probe_rate_limit(self, n_probes: int = 6, burst_delay: float = 0.1) -> Dict:
+        """Proactively detect rate limiting before a full scan.
+
+        Sends a quick burst of benign requests and watches for 429s.
+        Returns dict with detected, threshold_rps, recommended_delay.
+        """
+        statuses = []
+        t0 = time.monotonic()
+        for i in range(n_probes):
+            try:
+                req = (f"GET {self.path}?_rl_probe={i} HTTP/1.1\r\n"
+                       f"Host: {self.host}\r\n"
+                       f"{self._get_browser_headers()}"
+                       f"Connection: close\r\n\r\n")
+                status, _, _, _ = self._raw_request(self.host, self.port, self.use_ssl, req)
+                statuses.append(status)
+            except Exception:
+                statuses.append(0)
+            if burst_delay > 0:
+                time.sleep(burst_delay)
+        elapsed = time.monotonic() - t0
+
+        n_429 = statuses.count(429)
+        n_ok = sum(1 for s in statuses if 200 <= s < 400)
+        detected = n_429 > 0
+
+        if detected and n_ok > 0:
+            # Estimate threshold: how many OK before first 429
+            first_429_idx = statuses.index(429)
+            threshold_rps = max(1, first_429_idx) / max(0.1, elapsed * (first_429_idx / n_probes))
+            rec_delay = max(0.5, 1.0 / threshold_rps * 1.5)  # 1.5× safety margin
+        elif detected:
+            threshold_rps = 1.0
+            rec_delay = 2.0
+        else:
+            threshold_rps = n_probes / elapsed if elapsed > 0 else 10.0
+            rec_delay = self.delay
+
+        result = {
+            "detected": detected,
+            "threshold_rps": round(threshold_rps, 1),
+            "recommended_delay": round(rec_delay, 2),
+            "probes": n_probes,
+            "ok": n_ok,
+            "rate_limited": n_429,
+        }
+
+        if detected and not getattr(self, '_quiet_429', False):
+            sys.stderr.write(
+                f"  \033[33m⚡ Rate limit detected ({n_429}/{n_probes} probes → 429), "
+                f"adjusting delay to {rec_delay:.1f}s\033[0m\n")
+            # Auto-adjust delay
+            if rec_delay > self.delay:
+                self.delay = rec_delay
+            if self.rate_limit == 0.0 or threshold_rps < self.rate_limit:
+                self.rate_limit = max(0.5, threshold_rps * 0.6)
+
+        return result
+
     def test_payloads(self, payloads: List[Dict], method: str = 'GET', param: str = 'input',
                      max_payloads: Optional[int] = None, quiet: bool = False,
                      smart_sort: bool = True, waf_vendor: str = '',
@@ -889,6 +948,10 @@ class WAFTester:
                          cross-vendor filtering (Phase 2).
             resume:      If True, load checkpoint and skip already-tested payloads.
         """
+        # ── Proactive rate limit detection (#192) ──
+        if not quiet and len(payloads) >= 10:
+            self.probe_rate_limit()
+
         # ── Adaptive sort: put proven bypasses first, known-blocked last ──
         if smart_sort:
             try:

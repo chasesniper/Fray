@@ -616,6 +616,36 @@ def run_recon(url: str, timeout: int = 8,
     # 25. Attack surface summary
     result["attack_surface"] = _build_attack_surface_summary(result)
 
+    # ── Scan duration + stats summary (#189) ──
+    scan_end = time.time()
+    scan_start = prog._start
+    scan_duration_s = round(scan_end - scan_start, 1)
+    scan_minutes = int(scan_duration_s // 60)
+    scan_seconds = int(scan_duration_s % 60)
+    duration_str = f"{scan_minutes}m {scan_seconds}s" if scan_minutes > 0 else f"{scan_seconds}s"
+
+    atk = result.get("attack_surface", {})
+    n_findings = len(atk.get("findings", []))
+    risk_lvl = atk.get("risk_level", "?")
+    risk_sc = atk.get("risk_score", 0)
+
+    result["scan_stats"] = {
+        "duration_seconds": scan_duration_s,
+        "duration": duration_str,
+        "checks_run": prog._total,
+        "checks_done": prog._done,
+        "mode": mode,
+        "findings": n_findings,
+        "risk_score": risk_sc,
+        "risk_level": risk_lvl,
+    }
+
+    if not quiet:
+        sys.stderr.write(
+            f"\n  ✅ Recon complete: {duration_str} │ {n_findings} finding(s) │ "
+            f"risk {risk_sc}/100 ({risk_lvl}) │ {prog._done}/{prog._total} checks\n")
+        sys.stderr.flush()
+
     # Auto-save for --compare history
     _save_recon_history(result)
 
@@ -876,9 +906,38 @@ def _build_attack_surface_summary(r: Dict[str, Any]) -> Dict[str, Any]:
     if n_leak_breaches > 0:
         findings.append({"severity": "high", "finding": f"Domain in {n_leak_breaches} HIBP breach(es) ({leak_pwn:,} accounts)"})
 
+    # ── Finding deduplication (#182) ──
+    _seen_hashes = set()
+    _deduped = []
+    for f in findings:
+        _key = f["finding"].lower().strip()
+        if _key not in _seen_hashes:
+            _seen_hashes.add(_key)
+            _deduped.append(f)
+    findings = _deduped
+
     # ── Per-finding risk scores (0-100) ──
     for f in findings:
         f["risk_score"] = _score_finding(f)
+
+    # ── Finding grouping by category (#183) ──
+    _FINDING_CATEGORIES = {
+        "infra": {"origin IP", "takeover", "port", "WAF", "bypass WAF", "DNS"},
+        "app":   {"XSS", "injection", "CORS", "clickjacking", "GraphQL",
+                  "injectable", "HTTP method", "host header"},
+        "config": {"Content-Security-Policy", "SRI", "robots.txt", "admin panel",
+                   "exposed sensitive", "staging", "TLS certificate"},
+        "data":  {"secret", "leaked", "credential", "HIBP", "CVE"},
+    }
+    for f in findings:
+        text = f.get("finding", "")
+        cat = "other"
+        for category, keywords in _FINDING_CATEGORIES.items():
+            if any(kw.lower() in text.lower() for kw in keywords):
+                cat = category
+                break
+        f["category"] = cat
+
     # Sort findings by risk_score descending
     findings.sort(key=lambda f: f["risk_score"], reverse=True)
 

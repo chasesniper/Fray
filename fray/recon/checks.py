@@ -18,12 +18,18 @@ from fray.recon.http import _http_get, _make_ssl_context
 
 def check_robots_sitemap(host: str, port: int, use_ssl: bool,
                          timeout: int = 8) -> Dict[str, Any]:
-    """Parse robots.txt and sitemap.xml for hidden paths."""
+    """Parse robots.txt and sitemap.xml for hidden paths and URL extraction.
+
+    Phase 1: Parse robots.txt — extract Disallow paths, Sitemap references.
+    Phase 2: Fetch and parse sitemap.xml — extract URLs, detect sub-sitemaps.
+    """
     result: Dict[str, Any] = {
         "robots_txt": False,
         "disallowed_paths": [],
         "sitemaps": [],
         "interesting_paths": [],
+        "sitemap_urls": [],
+        "sitemap_url_count": 0,
     }
 
     # robots.txt
@@ -44,13 +50,75 @@ def check_robots_sitemap(host: str, port: int, use_ssl: bool,
                         result["interesting_paths"].append(path)
             elif line.lower().startswith("sitemap:"):
                 sm = line.split(":", 1)[1].strip()
-                result["sitemaps"].append(sm)
+                if sm:
+                    result["sitemaps"].append(sm)
 
-    # sitemap.xml (if no sitemaps found in robots.txt)
+    # sitemap.xml (if no sitemaps found in robots.txt, try default location)
     if not result["sitemaps"]:
         status, _, body = _http_get(host, port, "/sitemap.xml", use_ssl, timeout=timeout)
         if status == 200 and body and "<urlset" in body.lower():
             result["sitemaps"].append(f"{'https' if use_ssl else 'http'}://{host}/sitemap.xml")
+
+    # ── Phase 2: Parse sitemap.xml URLs (#180) ──
+    # Extract <loc> URLs from sitemaps (follow one level of sitemap index)
+    _SM_PATHS = set()
+    for sm_url in result["sitemaps"][:5]:  # Cap at 5 sitemaps
+        # Determine path from URL
+        try:
+            parsed = urllib.parse.urlparse(sm_url)
+            sm_path = parsed.path or "/sitemap.xml"
+            sm_host = parsed.hostname or host
+            sm_port = parsed.port or port
+            sm_ssl = parsed.scheme == "https" if parsed.scheme else use_ssl
+        except Exception:
+            sm_path, sm_host, sm_port, sm_ssl = "/sitemap.xml", host, port, use_ssl
+
+        s, _, sm_body = _http_get(sm_host, sm_port, sm_path, sm_ssl, timeout=timeout)
+        if s != 200 or not sm_body:
+            continue
+
+        # Extract <loc>...</loc> tags
+        locs = re.findall(r'<loc>\s*(.*?)\s*</loc>', sm_body, re.IGNORECASE)
+        for loc in locs:
+            loc = loc.strip()
+            if not loc:
+                continue
+            # Sub-sitemap (sitemap index) — follow one level deep
+            if loc.endswith(".xml") or "sitemap" in loc.lower():
+                if loc not in _SM_PATHS and len(_SM_PATHS) < 10:
+                    _SM_PATHS.add(loc)
+                    try:
+                        p2 = urllib.parse.urlparse(loc)
+                        s2, _, b2 = _http_get(
+                            p2.hostname or host, p2.port or port,
+                            p2.path or "/", p2.scheme == "https" if p2.scheme else use_ssl,
+                            timeout=timeout)
+                        if s2 == 200 and b2:
+                            sub_locs = re.findall(r'<loc>\s*(.*?)\s*</loc>', b2, re.IGNORECASE)
+                            for sl in sub_locs[:200]:
+                                sl = sl.strip()
+                                if sl and not sl.endswith(".xml"):
+                                    result["sitemap_urls"].append(sl)
+                    except Exception:
+                        pass
+            else:
+                result["sitemap_urls"].append(loc)
+
+        # Cap total extracted URLs
+        if len(result["sitemap_urls"]) > 500:
+            result["sitemap_urls"] = result["sitemap_urls"][:500]
+            break
+
+    result["sitemap_url_count"] = len(result["sitemap_urls"])
+
+    # Flag interesting sitemap URLs
+    _sm_interesting = ("admin", "api", "login", "dashboard", "internal",
+                       "staging", "debug", "graphql", "wp-json", "upload")
+    for url in result["sitemap_urls"]:
+        path = urllib.parse.urlparse(url).path.lower()
+        if any(kw in path for kw in _sm_interesting):
+            if url not in result["interesting_paths"]:
+                result["interesting_paths"].append(url)
 
     return result
 
@@ -252,30 +320,40 @@ def check_exposed_files(host: str, port: int, use_ssl: bool,
 
 def check_http_methods(host: str, port: int, use_ssl: bool,
                        timeout: int = 5) -> Dict[str, Any]:
-    """Check allowed HTTP methods via OPTIONS request."""
+    """Check allowed HTTP methods via OPTIONS + individual probes.
+
+    Phase 1: Send OPTIONS request to get Allow header.
+    Phase 2: Probe dangerous methods individually (PUT, DELETE, TRACE, PATCH,
+             CONNECT) since many servers omit them from OPTIONS but still accept them.
+    """
     result: Dict[str, Any] = {
         "allowed_methods": [],
         "dangerous_methods": [],
+        "options_status": 0,
+        "probed_methods": {},
         "issues": [],
     }
 
-    try:
+    def _make_conn():
         if use_ssl:
             try:
                 ctx = _make_ssl_context(verify=True)
-                conn = http.client.HTTPSConnection(host, port, context=ctx, timeout=timeout)
+                return http.client.HTTPSConnection(host, port, context=ctx, timeout=timeout)
             except Exception:
                 ctx = _make_ssl_context(verify=False)
-                conn = http.client.HTTPSConnection(host, port, context=ctx, timeout=timeout)
-        else:
-            conn = http.client.HTTPConnection(host, port, timeout=timeout)
+                return http.client.HTTPSConnection(host, port, context=ctx, timeout=timeout)
+        return http.client.HTTPConnection(host, port, timeout=timeout)
 
+    # Phase 1: OPTIONS
+    try:
+        conn = _make_conn()
         conn.request("OPTIONS", "/", headers={
             "Host": host,
             "User-Agent": f"Fray/{__version__} Recon",
         })
         resp = conn.getresponse()
         resp.read()
+        result["options_status"] = resp.status
         headers = {k.lower(): v for k, v in resp.getheaders()}
         conn.close()
 
@@ -283,31 +361,65 @@ def check_http_methods(host: str, port: int, use_ssl: bool,
         if allow:
             methods = [m.strip().upper() for m in allow.split(",")]
             result["allowed_methods"] = methods
-
-            dangerous = {"PUT", "DELETE", "TRACE", "CONNECT", "PATCH"}
-            found_dangerous = [m for m in methods if m in dangerous]
-            result["dangerous_methods"] = found_dangerous
-
-            if "TRACE" in found_dangerous:
-                result["issues"].append({
-                    "method": "TRACE",
-                    "severity": "high",
-                    "risk": "Cross-Site Tracing (XST) — can steal credentials via XSS",
-                })
-            if "PUT" in found_dangerous:
-                result["issues"].append({
-                    "method": "PUT",
-                    "severity": "medium",
-                    "risk": "File upload via PUT — may allow arbitrary file writes",
-                })
-            if "DELETE" in found_dangerous:
-                result["issues"].append({
-                    "method": "DELETE",
-                    "severity": "medium",
-                    "risk": "Resource deletion — may allow unauthorized deletions",
-                })
     except Exception:
         pass
+
+    # Phase 2: Probe dangerous methods individually
+    _DANGEROUS = {"PUT", "DELETE", "TRACE", "PATCH", "CONNECT"}
+    # Only probe methods not already confirmed by OPTIONS
+    confirmed = set(result["allowed_methods"])
+    to_probe = _DANGEROUS - confirmed
+
+    for method in sorted(to_probe):
+        try:
+            conn = _make_conn()
+            conn.request(method, "/_fray_method_probe", headers={
+                "Host": host,
+                "User-Agent": f"Fray/{__version__} Recon",
+                "Content-Length": "0",
+            })
+            resp = conn.getresponse()
+            resp.read()
+            status = resp.status
+            conn.close()
+            result["probed_methods"][method] = status
+            # 405 = Method Not Allowed → server rejects it (good)
+            # 501 = Not Implemented → server doesn't support it (good)
+            # Anything else (200, 201, 204, 301, 302, 400, 403) = method is accepted
+            if status not in (405, 501):
+                if method not in result["allowed_methods"]:
+                    result["allowed_methods"].append(method)
+        except Exception:
+            result["probed_methods"][method] = 0
+
+    # Classify dangerous
+    found_dangerous = [m for m in result["allowed_methods"] if m in _DANGEROUS]
+    result["dangerous_methods"] = found_dangerous
+
+    if "TRACE" in found_dangerous:
+        result["issues"].append({
+            "method": "TRACE",
+            "severity": "high",
+            "risk": "Cross-Site Tracing (XST) — can steal credentials via XSS",
+        })
+    if "PUT" in found_dangerous:
+        result["issues"].append({
+            "method": "PUT",
+            "severity": "medium",
+            "risk": "File upload via PUT — may allow arbitrary file writes",
+        })
+    if "DELETE" in found_dangerous:
+        result["issues"].append({
+            "method": "DELETE",
+            "severity": "medium",
+            "risk": "Resource deletion — may allow unauthorized deletions",
+        })
+    if "PATCH" in found_dangerous:
+        result["issues"].append({
+            "method": "PATCH",
+            "severity": "low",
+            "risk": "PATCH method accepted — verify authorization controls",
+        })
 
     return result
 
