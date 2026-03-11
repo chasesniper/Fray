@@ -1,6 +1,7 @@
 """v11 Recon Report HTML builder — called by SecurityReportGenerator._build_recon_html_v11()."""
 import html as _html
 import ipaddress as _ipaddr
+import re as _re_mod
 from typing import Dict, Any
 from fray._report_css import CSS, SEV_COLORS, risk_color, risk_grade, gauge_svg, donut_svg
 
@@ -378,6 +379,9 @@ def build(rd: Dict[str, Any]) -> str:
             'Cache Poisoning': '#eab308', 'JWT': '#f97316',
             'Rate Limit': '#eab308', 'WebSocket': '#3b82f6',
             'Robots Paths': '#64748b', 'Open Redirect': '#f97316',
+            'Critical Endpoint Exposure': '#ef4444', 'Staging / Dev Environment': '#eab308',
+            'DDoS / L7 Denial of Service': '#eab308', 'DDoS — Direct Origin': '#eab308',
+            'Web Cache Poisoning': '#f97316', 'Payment / Financial Abuse': '#ef4444',
         }
         at_rows = ''
         for i, t in enumerate(attack_targets[:50], 1):
@@ -840,7 +844,18 @@ def build(rd: Dict[str, Any]) -> str:
     pay_subs = [s for s in sub_list if any(k in s.lower() for k in ('pay', 'shop', 'store', 'cart', 'order', 'checkout'))]
     if pay_subs:
         hvt_items.append(('Payment / E-Commerce', pay_subs[:10], '#ef4444'))
-    ai_subs = [s for s in sub_list if any(k in s.lower() for k in ('ai', 'llm', 'chat', 'bot', 'gpt', 'robot'))]
+    _HVT_AI_STRICT = {"llm", "gpt", "openai", "chatgpt", "copilot", "genai", "gen-ai", "langchain", "ollama", "agenticai", "agentic"}
+    _HVT_AI_SEG = {"ai", "chat", "bot", "robot", "chatbot", "aibot", "assistant"}
+    def _hvt_is_ai(s):
+        sl = s.lower()
+        segs = _re_mod.split(r'[.\-_]', sl)
+        for seg in segs:
+            if seg in _HVT_AI_SEG:
+                return True
+            if len(seg) > 3 and seg.endswith("ai"):
+                return True
+        return any(kw in sl for kw in _HVT_AI_STRICT)
+    ai_subs = [s for s in sub_list if _hvt_is_ai(s)]
     if ai_subs:
         hvt_items.append(('AI / LLM', ai_subs[:10], '#a855f7'))
     # Add Admin Panels as HVT category

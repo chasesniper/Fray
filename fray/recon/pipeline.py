@@ -871,9 +871,42 @@ def _enrich_for_report(result: Dict[str, Any]) -> None:
         })
         priority_counter -= 5
 
-    # LLM / AI surface
-    ai_subs = [s["subdomain"] for s in per_sub
-               if any(k in s.get("subdomain", "").lower() for k in ("ai", "llm", "chat", "bot", "gpt", "robot"))]
+    # LLM / AI surface — strict word-boundary matching to avoid false positives
+    # "ai" must be a standalone segment (ai.example, my-ai-app) not part of "air", "mail", "paint"
+    import re as _re
+    _AI_STRICT_KW = {"llm", "gpt", "openai", "chatgpt", "copilot", "genai", "gen-ai",
+                      "langchain", "ollama", "agenticai", "agentic", "generativeai",
+                      "vertexai", "azureai", "bedrock", "sagemaker", "huggingface"}
+    _AI_SEGMENT_KW = {"ai", "chat", "bot", "robot", "chatbot", "aibot", "assistant"}
+
+    def _is_ai_subdomain(sub_lower):
+        # Split into segments by dots and hyphens
+        segments = _re.split(r'[.\-_]', sub_lower)
+        # Exact segment match for short keywords (avoids "air", "airem", "mailbot")
+        for seg in segments:
+            if seg in _AI_SEGMENT_KW:
+                return True
+            # Check if segment ends with 'ai' and is long enough (agenticai, genai)
+            if len(seg) > 3 and seg.endswith("ai"):
+                return True
+        # Substring match for longer, unambiguous keywords
+        for kw in _AI_STRICT_KW:
+            if kw in sub_lower:
+                return True
+        # Also check compound patterns: ai as standalone segment
+        if _re.search(r'(?:^|[.\-_])ai(?:[.\-_]|$)', sub_lower):
+            return True
+        return False
+
+    ai_subs = [s["subdomain"] for s in per_sub if _is_ai_subdomain(s.get("subdomain", "").lower())]
+    # Also check probe results for AI indicators (chatbot widgets, LLM API responses)
+    for s in per_sub:
+        sub = s.get("subdomain", "")
+        if sub in ai_subs:
+            continue
+        surfaces = s.get("surfaces", []) if isinstance(s.get("surfaces"), list) else []
+        if any(k in str(surfaces).lower() for k in ("llm", "chatbot", "ai_assistant")):
+            ai_subs.append(sub)
     if ai_subs:
         ai_detail = f"{len(ai_subs)} AI/chatbot subdomain(s): {', '.join(ai_subs[:5])}"
         if len(ai_subs) > 5:
@@ -975,6 +1008,83 @@ def _enrich_for_report(result: Dict[str, Any]) -> None:
             "impact": "Service disruption, resource exhaustion, and potential complete outage.",
             "mitre": "T1499 — Endpoint Denial of Service",
             "detail": origin_detail,
+        })
+
+    # Critical path endpoints — /login, /signup, /checkout, /api, /admin discovered via probes
+    probe_results = result.get("subdomain_probes", [])
+    critical_paths = []
+    _CRITICAL_PATH_MAP = {
+        "login": ("Login / Authentication", "critical"),
+        "password": ("Password Reset", "high"),
+        "password_reset": ("Password Reset", "high"),
+        "registration": ("User Registration", "high"),
+        "api": ("API Endpoint", "high"),
+        "admin": ("Admin Panel", "critical"),
+        "file_upload": ("File Upload", "high"),
+        "payment": ("Payment / Checkout", "critical"),
+    }
+    # From subdomain probes — check detected surfaces
+    for p in (probe_results if isinstance(probe_results, list) else []):
+        sub = p.get("subdomain", "")
+        cats = p.get("categories", p.get("surfaces", {}))
+        if isinstance(cats, dict):
+            for cat_key in cats:
+                if cat_key in _CRITICAL_PATH_MAP and cats[cat_key]:
+                    label, sev = _CRITICAL_PATH_MAP[cat_key]
+                    critical_paths.append({"url": f"https://{sub}", "type": label, "severity": sev, "source": "probe"})
+        elif isinstance(cats, list):
+            for cat_key in cats:
+                if cat_key in _CRITICAL_PATH_MAP:
+                    label, sev = _CRITICAL_PATH_MAP[cat_key]
+                    critical_paths.append({"url": f"https://{sub}", "type": label, "severity": sev, "source": "probe"})
+    # From auth_endpoints
+    if isinstance(auth_ep, dict):
+        if auth_ep.get("has_login") and auth_ep.get("login_url"):
+            critical_paths.append({"url": auth_ep["login_url"], "type": "Login / Authentication", "severity": "critical", "source": "auth_scan"})
+        if auth_ep.get("has_registration"):
+            critical_paths.append({"url": f"https://{host}/signup", "type": "User Registration", "severity": "high", "source": "auth_scan"})
+    # From admin_panels
+    admin_data = result.get("admin_panels", {})
+    admin_panels_list = (admin_data.get("panels_found", []) or admin_data.get("found", []) or []) if isinstance(admin_data, dict) else []
+    for ap in (admin_panels_list[:5] if isinstance(admin_panels_list, list) else []):
+        path = ap.get("path", "") if isinstance(ap, dict) else str(ap)
+        if path:
+            critical_paths.append({"url": f"https://{host}{path}", "type": "Admin Panel", "severity": "critical", "source": "admin_scan"})
+    # From endpoint discovery
+    endpoint_data = result.get("endpoints", result.get("api_discovery", {}))
+    if isinstance(endpoint_data, dict):
+        for ep in endpoint_data.get("endpoints", endpoint_data.get("endpoints_found", []))[:5]:
+            if isinstance(ep, dict):
+                path = ep.get("path", ep.get("url", ""))
+                if path:
+                    critical_paths.append({"url": f"https://{host}{path}" if not path.startswith("http") else path,
+                                           "type": "API Endpoint", "severity": "high", "source": "endpoint_scan"})
+
+    if critical_paths:
+        # Deduplicate
+        seen_urls = set()
+        unique_paths = []
+        for cp in critical_paths:
+            if cp["url"] not in seen_urls:
+                seen_urls.add(cp["url"])
+                unique_paths.append(cp)
+        critical_paths = unique_paths
+
+        crit_targets = [cp["url"] for cp in critical_paths[:10]]
+        crit_detail = f"{len(critical_paths)} critical endpoint(s) discovered: "
+        type_counts = {}
+        for cp in critical_paths:
+            type_counts[cp["type"]] = type_counts.get(cp["type"], 0) + 1
+        crit_detail += ", ".join(f"{count} {t}" for t, count in type_counts.items())
+        crit_detail += ". These endpoints handle sensitive operations and require hardened access controls, input validation, and monitoring."
+        vectors.append({
+            "type": "Critical Endpoint Exposure", "severity": "critical", "count": len(critical_paths),
+            "priority": max(85, priority_counter), "targets": crit_targets,
+            "description": "Critical application endpoints discovered — login, registration, payment, admin, and API surfaces that are primary attack targets.",
+            "impact": "Credential theft, unauthorized access, payment fraud, privilege escalation, and data exfiltration.",
+            "mitre": "T1190 — Exploit Public-Facing Application",
+            "detail": crit_detail,
+            "critical_paths": critical_paths,
         })
 
     atk["attack_vectors"] = vectors
