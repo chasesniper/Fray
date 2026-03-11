@@ -326,6 +326,8 @@ def run_recon(url: str, timeout: int = 8,
         sys.stderr.write(f"\n  🔍 Recon: {host} ({checks_label}, {mode_label})\n\n\n")
         sys.stderr.flush()
 
+    _check_timings: Dict[str, float] = {}
+
     async def _run_all():
         sem = asyncio.Semaphore(concurrency)
 
@@ -336,7 +338,9 @@ def run_recon(url: str, timeout: int = 8,
                     await asyncio.sleep(random.uniform(0.3, 1.0))
                 if label:
                     prog.start(label)
+                t0 = time.time()
                 r = await asyncio.to_thread(fn)
+                _check_timings[label] = round(time.time() - t0, 1)
                 if label:
                     prog.done(label)
                 return r
@@ -353,7 +357,8 @@ def run_recon(url: str, timeout: int = 8,
         t_dns     = asyncio.create_task(_run(
             lambda: check_dns(host, deep=is_deep), "DNS records"))
         t_robots  = asyncio.create_task(_run(
-            lambda: check_robots_sitemap(host, port, use_ssl, timeout=timeout),
+            lambda: check_robots_sitemap(host, port, use_ssl, timeout=timeout,
+                                         fast=is_fast),
             "Robots & sitemap"))
         t_cors    = asyncio.create_task(_run(
             lambda: check_cors(host, port, use_ssl, timeout=timeout), "CORS policy"))
@@ -363,11 +368,14 @@ def run_recon(url: str, timeout: int = 8,
         t_favicon = asyncio.create_task(_run(
             lambda: check_favicon(host, port=port, use_ssl=use_ssl, timeout=timeout),
             "Favicon fingerprint"))
+        _fast_to = max(3, timeout // 2) if is_fast else timeout
         t_exposed = asyncio.create_task(_run(
-            lambda: check_exposed_files(host, port, use_ssl, timeout=timeout),
+            lambda: check_exposed_files(host, port, use_ssl, timeout=_fast_to,
+                                        fast=is_fast),
             "Exposed files"))
         t_methods = asyncio.create_task(_run(
-            lambda: check_http_methods(host, port, use_ssl, timeout=timeout),
+            lambda: check_http_methods(host, port, use_ssl, timeout=_fast_to,
+                                       fast=is_fast),
             "HTTP methods"))
         t_error   = asyncio.create_task(_run(
             lambda: check_error_page(host, port, use_ssl, timeout=timeout),
@@ -378,12 +386,12 @@ def run_recon(url: str, timeout: int = 8,
                                     extra_headers=headers),
             "Parameter discovery"))
         t_api     = asyncio.create_task(_run(
-            lambda: check_api_discovery(host, port, use_ssl, timeout=timeout,
-                                        extra_headers=headers),
+            lambda: check_api_discovery(host, port, use_ssl, timeout=_fast_to,
+                                        extra_headers=headers, fast=is_fast),
             "API endpoints"))
         t_hhi     = asyncio.create_task(_run(
             lambda: check_host_header_injection(host, port, use_ssl,
-                                                timeout=timeout, extra_headers=headers),
+                                                timeout=_fast_to, extra_headers=headers),
             "Host header injection"))
 
         # Non-fast tasks
@@ -513,7 +521,8 @@ def run_recon(url: str, timeout: int = 8,
             elif isinstance(s, str):
                 all_subs.append({"fqdn": s})
         t_rl_crit = asyncio.create_task(_run(
-            lambda: check_rate_limits_critical(host, port, use_ssl, timeout=6,
+            lambda: check_rate_limits_critical(host, port, use_ssl,
+                                               timeout=3 if is_fast else 6,
                                                extra_headers=headers,
                                                subdomains=all_subs),
             "Rate limits (critical paths)"))
@@ -638,6 +647,7 @@ def run_recon(url: str, timeout: int = 8,
         "findings": n_findings,
         "risk_score": risk_sc,
         "risk_level": risk_lvl,
+        "check_timings": _check_timings,
     }
 
     if not quiet:

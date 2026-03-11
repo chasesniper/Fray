@@ -17,11 +17,12 @@ from fray.recon.http import _http_get, _make_ssl_context
 
 
 def check_robots_sitemap(host: str, port: int, use_ssl: bool,
-                         timeout: int = 8) -> Dict[str, Any]:
+                         timeout: int = 8, fast: bool = False) -> Dict[str, Any]:
     """Parse robots.txt and sitemap.xml for hidden paths and URL extraction.
 
     Phase 1: Parse robots.txt — extract Disallow paths, Sitemap references.
     Phase 2: Fetch and parse sitemap.xml — extract URLs, detect sub-sitemaps.
+             Skipped in fast mode.
     """
     result: Dict[str, Any] = {
         "robots_txt": False,
@@ -60,6 +61,12 @@ def check_robots_sitemap(host: str, port: int, use_ssl: bool,
             result["sitemaps"].append(f"{'https' if use_ssl else 'http'}://{host}/sitemap.xml")
 
     # ── Phase 2: Parse sitemap.xml URLs (#180) ──
+    # Skip in fast mode — sitemap URL extraction is slow for large sitemaps
+    if fast:
+        result["sitemap_url_count"] = 0
+        # Flag interesting paths from robots disallowed paths only
+        return result
+
     # Extract <loc> URLs from sitemaps (follow one level of sitemap index)
     _SM_PATHS = set()
     for sm_url in result["sitemaps"][:5]:  # Cap at 5 sitemaps
@@ -203,43 +210,49 @@ def check_cors(host: str, port: int, use_ssl: bool,
 
 
 def check_exposed_files(host: str, port: int, use_ssl: bool,
-                        timeout: int = 5) -> Dict[str, Any]:
+                        timeout: int = 5, fast: bool = False) -> Dict[str, Any]:
     """Probe for commonly exposed sensitive files."""
     result: Dict[str, Any] = {
         "exposed": [],
         "checked": 0,
     }
 
-    probes = [
+    # High-value probes — always checked
+    _PROBES_CORE = [
         ("/.env", "Environment variables (credentials, API keys)"),
         ("/.git/HEAD", "Git repository (source code exposure)"),
         ("/.git/config", "Git config (repo URL, credentials)"),
-        ("/.svn/entries", "SVN repository metadata"),
         ("/wp-config.php.bak", "WordPress config backup (DB creds)"),
+        ("/phpinfo.php", "PHP info page (full server details)"),
+        ("/actuator", "Spring Boot actuator (Java)"),
+        ("/actuator/env", "Spring Boot environment variables"),
+        ("/.well-known/security.txt", "Security contact info"),
+        ("/backup.sql", "Database backup"),
+        ("/package.json", "Node.js dependency file"),
+        ("/requirements.txt", "Python dependency file"),
+        ("/server-status", "Apache server status page"),
+    ]
+    # Extended probes — skipped in fast mode
+    _PROBES_EXTENDED = [
+        ("/.svn/entries", "SVN repository metadata"),
         ("/web.config", ".NET configuration file"),
         ("/.htaccess", "Apache configuration (may leak paths)"),
         ("/.htpasswd", "Apache password file"),
-        ("/server-status", "Apache server status page"),
         ("/server-info", "Apache server info page"),
-        ("/phpinfo.php", "PHP info page (full server details)"),
         ("/info.php", "PHP info page"),
         ("/debug", "Debug endpoint"),
-        ("/actuator", "Spring Boot actuator (Java)"),
-        ("/actuator/env", "Spring Boot environment variables"),
         ("/elmah.axd", ".NET error log"),
         ("/trace.axd", ".NET trace log"),
-        ("/.well-known/security.txt", "Security contact info"),
         ("/crossdomain.xml", "Flash cross-domain policy"),
         ("/sitemap.xml.gz", "Compressed sitemap"),
-        ("/backup.sql", "Database backup"),
         ("/dump.sql", "Database dump"),
         ("/db.sql", "Database file"),
         ("/.DS_Store", "macOS directory metadata"),
         ("/composer.json", "PHP dependency file (versions exposed)"),
-        ("/package.json", "Node.js dependency file"),
         ("/Gemfile", "Ruby dependency file"),
-        ("/requirements.txt", "Python dependency file"),
     ]
+
+    probes = _PROBES_CORE if fast else _PROBES_CORE + _PROBES_EXTENDED
 
     import concurrent.futures
 
@@ -319,12 +332,13 @@ def check_exposed_files(host: str, port: int, use_ssl: bool,
 
 
 def check_http_methods(host: str, port: int, use_ssl: bool,
-                       timeout: int = 5) -> Dict[str, Any]:
+                       timeout: int = 5, fast: bool = False) -> Dict[str, Any]:
     """Check allowed HTTP methods via OPTIONS + individual probes.
 
     Phase 1: Send OPTIONS request to get Allow header.
     Phase 2: Probe dangerous methods individually (PUT, DELETE, TRACE, PATCH,
              CONNECT) since many servers omit them from OPTIONS but still accept them.
+             Skipped in fast mode.
     """
     result: Dict[str, Any] = {
         "allowed_methods": [],
@@ -365,6 +379,13 @@ def check_http_methods(host: str, port: int, use_ssl: bool,
         pass
 
     # Phase 2: Probe dangerous methods individually
+    # Skipped in fast mode — OPTIONS result is sufficient
+    if fast:
+        _DANGEROUS = {"PUT", "DELETE", "TRACE", "PATCH", "CONNECT"}
+        found_dangerous = [m for m in result["allowed_methods"] if m in _DANGEROUS]
+        result["dangerous_methods"] = found_dangerous
+        return result
+
     _DANGEROUS = {"PUT", "DELETE", "TRACE", "PATCH", "CONNECT"}
     # Only probe methods not already confirmed by OPTIONS
     confirmed = set(result["allowed_methods"])
@@ -648,10 +669,12 @@ _API_SPEC_PATHS = [
 def check_api_discovery(host: str, port: int, use_ssl: bool,
                          timeout: int = 5,
                          extra_headers: Optional[Dict[str, str]] = None,
+                         fast: bool = False,
                          ) -> Dict[str, Any]:
     """Probe common API paths to discover specs, docs, and versioned endpoints.
 
     Swagger/OpenAPI specs expose every endpoint, parameter, and auth method.
+    In fast mode, only probes the top 10 most common paths instead of all 30+.
     """
     from fray.recon.http import _fetch_url
 
@@ -663,6 +686,12 @@ def check_api_discovery(host: str, port: int, use_ssl: bool,
 
     found = []
     specs = []
+
+    # In fast mode, only probe the most valuable paths (specs + docs)
+    _paths = _API_SPEC_PATHS
+    if fast:
+        _fast_cats = {"swagger", "openapi", "swagger-ui", "api-docs", "redoc"}
+        _paths = [(p, c) for p, c in _API_SPEC_PATHS if c in _fast_cats][:12]
 
     def _probe_api(api_path, category):
         url = f"{base}{api_path}"
@@ -731,7 +760,7 @@ def check_api_discovery(host: str, port: int, use_ssl: bool,
         return None, None
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
-        futures = {pool.submit(_probe_api, p, c): p for p, c in _API_SPEC_PATHS}
+        futures = {pool.submit(_probe_api, p, c): p for p, c in _paths}
         for future in concurrent.futures.as_completed(futures):
             try:
                 entry, spec_entry = future.result()
@@ -808,11 +837,12 @@ def check_host_header_injection(host: str, port: int, use_ssl: bool,
     if base_status == 0:
         return result
 
-    # 2. Test each override header
-    for header_name, header_value in _HOST_OVERRIDE_HEADERS:
+    # 2. Test each override header (parallel for speed)
+    import concurrent.futures
+
+    def _probe_hhi(header_name, header_value):
         test_headers = dict(extra_headers) if extra_headers else {}
         test_headers[header_name] = header_value
-
         try:
             status, body, hdrs = _fetch_url(base + "/",
                                              timeout=timeout,
@@ -824,10 +854,9 @@ def check_host_header_injection(host: str, port: int, use_ssl: bool,
                                                  verify_ssl=False,
                                                  headers=test_headers)
         except Exception:
-            continue
-
+            return None
         if status == 0:
-            continue
+            return None
 
         finding = {
             "header": header_name,
@@ -836,26 +865,31 @@ def check_host_header_injection(host: str, port: int, use_ssl: bool,
             "status_changed": status != base_status,
             "status": status,
         }
-
-        # Check if our sentinel is reflected in body
         if body and _HHI_SENTINEL in body.lower():
-            # Verify it wasn't in the baseline
             if not base_body or _HHI_SENTINEL not in base_body.lower():
                 finding["reflected"] = True
-                result["reflected"] = True
-                result["vulnerable_headers"].append(header_name)
-
-        # Check for redirect to our injected host
         location = hdrs.get("location", "")
         if _HHI_SENTINEL in location.lower():
             finding["reflected"] = True
             finding["redirect"] = location
-            result["reflected"] = True
-            if header_name not in result["vulnerable_headers"]:
-                result["vulnerable_headers"].append(header_name)
+        return finding
 
-        if finding["reflected"] or finding["status_changed"]:
-            result["details"].append(finding)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=7) as pool:
+        futures = {pool.submit(_probe_hhi, h, v): h
+                   for h, v in _HOST_OVERRIDE_HEADERS}
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                finding = future.result()
+            except Exception:
+                continue
+            if finding is None:
+                continue
+            if finding["reflected"]:
+                result["reflected"] = True
+                if finding["header"] not in result["vulnerable_headers"]:
+                    result["vulnerable_headers"].append(finding["header"])
+            if finding["reflected"] or finding["status_changed"]:
+                result["details"].append(finding)
 
     return result
 
