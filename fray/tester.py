@@ -492,6 +492,7 @@ class WAFTester:
         current_path = self.path
         current_query = self.query
         extra_hdrs = self._build_extra_headers()
+        redirect_chain = []  # Track full chain of URLs visited
 
         for hop in range(max_redirects + 1):
             try:
@@ -522,6 +523,15 @@ class WAFTester:
                 # Follow redirects
                 if status in (301, 302, 303, 307, 308) and 'location' in headers:
                     location = headers['location']
+                    # Record this hop in the chain
+                    scheme = 'https' if current_ssl else 'http'
+                    port_s = '' if (current_ssl and current_port == 443) or (not current_ssl and current_port == 80) else f':{current_port}'
+                    chain_url = f"{scheme}://{current_host}{port_s}{current_path}"
+                    redirect_chain.append({
+                        'url': chain_url,
+                        'status': status,
+                        'location': location,
+                    })
                     if location.startswith('/'):
                         current_path = location.split('?')[0]
                         current_query = location.split('?')[1] if '?' in location else ''
@@ -536,6 +546,7 @@ class WAFTester:
                                 'error': f'Redirect to private/internal host blocked: {redirect_host}',
                                 'blocked': True,
                                 'redirects': hop,
+                                'redirect_chain': redirect_chain,
                                 'timestamp': datetime.now().isoformat()
                             }
                         current_host = redirect_host
@@ -714,6 +725,7 @@ class WAFTester:
                     'error_code': error_code,
                     'blocked': blocked,
                     'redirects': hop,
+                    'redirect_chain': redirect_chain,
                     'final_url': f"{'https' if current_ssl else 'http'}://{current_host}{current_path}",
                     'reflected': reflected,
                     'reflection_context': reflection_context[:200],
@@ -739,6 +751,7 @@ class WAFTester:
                     'confidence_label': 'error',
                     'elapsed_ms': 0,
                     'redirects': hop,
+                    'redirect_chain': redirect_chain,
                     'timestamp': datetime.now().isoformat()
                 }
 
@@ -754,6 +767,7 @@ class WAFTester:
             'confidence_label': 'error',
             'elapsed_ms': 0,
             'redirects': max_redirects,
+            'redirect_chain': redirect_chain,
             'timestamp': datetime.now().isoformat()
         }
     
