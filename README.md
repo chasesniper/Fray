@@ -22,8 +22,10 @@ Fray is the missing link between [wafw00f](https://github.com/EnableSecurity/waf
 | | Fray | Nuclei | XSStrike | wafw00f | sqlmap |
 |-|------|--------|----------|---------|--------|
 | **WAF bypass engine** | ✅ AI + mutation | ❌ | Partial | ❌ | Tamper scripts |
-| **WAF detection** | 25 vendors + mode | Via templates | Basic | 150+ vendors | Basic |
-| **Recon pipeline** | 27 checks | Separate tools | Crawl only | ❌ | ❌ |
+| **WAF detection** | 68 vendors (87 sigs) | Via templates | Basic | 150+ vendors | Basic |
+| **Recon pipeline** | 35+ checks | Separate tools | Crawl only | ❌ | ❌ |
+| **Content discovery** | ✅ ffuf-like fuzzer | Via templates | ❌ | ❌ | ❌ |
+| **Template DSL** | ✅ Nuclei-compatible YAML | ✅ Native | ❌ | ❌ | ❌ |
 | **Payload database** | 4,000+ built-in | Community templates | XSS only | ❌ | SQLi only |
 | **Adaptive cache** | ✅ Cross-domain WAF learning | ❌ | ❌ | ❌ | ❌ |
 | **OWASP hardening** | ✅ A-F grade | ❌ | ❌ | ❌ | ❌ |
@@ -45,7 +47,9 @@ brew install fray                # macOS
 ```bash
 fray auto https://example.com          # Full pipeline: recon → scan → bypass
 fray scan https://example.com          # Auto crawl → inject → detect reflection
-fray recon https://example.com         # 27-check reconnaissance
+fray recon https://example.com         # 35+ check reconnaissance
+fray fuzz https://example.com/FUZZ     # Content discovery (ffuf-like)
+fray template run templates/ -t url    # Run YAML vulnerability templates
 ```
 
 <p align="center">
@@ -62,13 +66,16 @@ If Fray helped your recon workflow, please [⭐ star the repo](https://github.co
 |---------|-------------|
 | **`fray auto`** | Full pipeline: recon → scan → ai-bypass in one command |
 | **`fray scan`** | Crawl → discover params → inject payloads → detect reflection |
-| **`fray recon`** | 27 checks: TLS, DNS, subdomains, CORS, params, JS, API, admin panels, WAF intel |
+| **`fray recon`** | 35+ checks: TLS, DNS, subdomains, CORS, params, JS, API, admin panels, WAF, secrets, cloud buckets |
 | **`fray ai-bypass`** | Probe WAF → LLM generates payloads → test → mutate → header tricks |
 | **`fray bypass`** | 5-phase WAF evasion scorer with mutation feedback loop |
 | **`fray harden`** | Security headers (A-F grade) + OWASP Top 10 misconfig checks + fix snippets |
-| **`fray detect`** | Fingerprint 25 WAF vendors (signature / anomaly / hybrid) |
+| **`fray fuzz`** | ffuf-like content discovery — FUZZ keyword, filters, recursion, built-in wordlists |
+| **`fray template`** | Nuclei-compatible YAML templates with WAF bypass logic |
+| **`fray detect`** | Fingerprint 68 WAF vendors (87 signatures — header, CNAME, cookie) |
 | **`fray test`** | 4,000+ payloads across 23 categories with adaptive throttling and cross-domain WAF learning |
 | **`fray cache`** | Inspect, manage, and clear the adaptive payload cache per domain |
+| **`fray bounty`** | HackerOne / Bugcrowd scope auto-fetch + batch scan |
 | **`fray graph`** | Visual attack surface tree |
 
 <p align="center">
