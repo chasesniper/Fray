@@ -711,42 +711,110 @@ def run_recon(url: str, timeout: int = 8,
     else:
         result["subdomain_takeover"] = {"vulnerable": [], "checked": 0, "count": 0}
 
-    # ── Per-subdomain security checks ──────────────────────────────────
-    # Run bot detection, API security, cloud buckets, and JS endpoints
-    # across discovered subdomains (not just the main host).
-    # Cap at 50 subdomains to bound scan time; use 10 concurrent threads.
-    _SUB_CHECK_LIMIT = 50
-    _SUB_CHECK_WORKERS = 10
+    # ── Smart per-subdomain security checks ─────────────────────────────
+    # Instead of blanket scanning all subdomains, target each check type
+    # to relevant subdomains based on naming patterns:
+    #   - API security  → api.*, gateway.*, graphql.*, rest.*, *-api.*
+    #   - Bot detection → login.*, auth.*, sso.*, checkout.*, signup.*,
+    #                      account.*, pay.*, my.*, portal.*, register.*
+    #   - Cloud buckets → cdn.*, assets.*, static.*, media.*, storage.*,
+    #                      backup.*, dev.*, staging.*, s3.*, blob.*
+    #   - JS endpoints  → app.*, portal.*, dashboard.*, admin.*, console.*,
+    #                      web.*, www2.*, m.*
+    #   - Tech stack    → ALL reachable subdomains (lightweight CPU-only)
+    #
+    # This avoids wasting time probing /swagger on login.example.com or
+    # checking bot cookies on cdn.example.com.
+    _SUB_CHECK_WORKERS = 12
     _sub_check_timeout = 4 if is_fast else 6
 
-    # Exclude the main host (already scanned) and filter to unique FQDNs
+    import re as _re_sub
+
+    # Keyword sets for subdomain classification
+    _API_KEYWORDS = {"api", "gateway", "graphql", "gql", "rest", "grpc",
+                     "service", "services", "backend", "ws", "webhook",
+                     "internal", "microservice"}
+    _BOT_KEYWORDS = {"login", "auth", "sso", "oauth", "checkout", "signup",
+                     "sign-up", "register", "account", "accounts", "pay",
+                     "payment", "billing", "my", "portal", "secure",
+                     "identity", "id", "session", "cart", "order", "orders",
+                     "member", "members", "user", "users", "profile"}
+    _BUCKET_KEYWORDS = {"cdn", "assets", "static", "media", "storage",
+                        "backup", "dev", "development", "staging", "stg",
+                        "test", "testing", "s3", "blob", "files", "upload",
+                        "uploads", "content", "img", "images", "data"}
+    _JS_KEYWORDS = {"app", "portal", "dashboard", "admin", "console",
+                    "web", "www2", "m", "mobile", "spa", "ui", "frontend",
+                    "panel", "cms", "editor", "manage", "management"}
+
+    def _classify_subdomain(fqdn_lower: str):
+        """Return set of check types this subdomain should receive."""
+        # Extract the leftmost label (e.g. "api" from "api.shop.example.com")
+        parts = fqdn_lower.split(".")
+        labels = set()
+        # Check first 2 labels + hyphenated segments
+        for p in parts[:2]:
+            labels.add(p)
+            for seg in p.split("-"):
+                labels.add(seg)
+
+        checks = set()
+        # Tech stack always runs (lightweight, CPU-only from the fetch we do)
+        checks.add("tech")
+
+        if labels & _API_KEYWORDS or "-api" in fqdn_lower or "api-" in fqdn_lower:
+            checks.add("api")
+        if labels & _BOT_KEYWORDS:
+            checks.add("bot")
+        if labels & _BUCKET_KEYWORDS:
+            checks.add("bucket")
+        if labels & _JS_KEYWORDS:
+            checks.add("js")
+
+        # Subdomains containing "api" anywhere in them get API checks
+        if "api" in fqdn_lower:
+            checks.add("api")
+
+        return checks
+
+    # Exclude the main host (already scanned) and classify each subdomain
     _main_host_lower = host.lower()
-    _sub_fqdns = []
+    _sub_tasks = []  # (fqdn, check_types_set)
     _sub_seen = set()
     for _s in all_subs:
         fqdn = _s.get("fqdn", _s) if isinstance(_s, dict) else str(_s)
         fqdn_l = fqdn.lower().strip(".")
         if fqdn_l and fqdn_l != _main_host_lower and fqdn_l not in _sub_seen:
             _sub_seen.add(fqdn_l)
-            _sub_fqdns.append(fqdn_l)
-    _sub_fqdns = _sub_fqdns[:_SUB_CHECK_LIMIT]
+            checks = _classify_subdomain(fqdn_l)
+            _sub_tasks.append((fqdn_l, checks))
+
+    # Count targeted subdomains per check type
+    _n_api_targets = sum(1 for _, c in _sub_tasks if "api" in c)
+    _n_bot_targets = sum(1 for _, c in _sub_tasks if "bot" in c)
+    _n_bkt_targets = sum(1 for _, c in _sub_tasks if "bucket" in c)
+    _n_js_targets = sum(1 for _, c in _sub_tasks if "js" in c)
 
     # Per-subdomain result accumulators
     _sub_bot_findings = []       # (subdomain, vendor_entries)
     _sub_api_findings = []       # (subdomain, api_result)
     _sub_bucket_findings = []    # (subdomain, bucket_result)
     _sub_js_findings = []        # (subdomain, js_result)
+    _sub_tech_findings = []      # (subdomain, tech_dict)
 
-    if _sub_fqdns and not is_fast:
+    if _sub_tasks and not is_fast:
         if not quiet:
-            sys.stderr.write(f"\r  ⏳ Per-subdomain checks on {len(_sub_fqdns)} subdomain(s)...          \n")
+            sys.stderr.write(
+                f"\r  ⏳ Smart subdomain checks: {len(_sub_tasks)} sub(s) "
+                f"[API:{_n_api_targets} Bot:{_n_bot_targets} "
+                f"Bucket:{_n_bkt_targets} JS:{_n_js_targets}]          \n")
             sys.stderr.flush()
 
         from fray.recon.http import _fetch_url as _sub_fetch
 
-        def _scan_subdomain(sub_fqdn: str):
-            """Fetch one subdomain and run all new checks."""
-            findings = {"fqdn": sub_fqdn}
+        def _scan_subdomain_targeted(sub_fqdn: str, check_types: set):
+            """Fetch one subdomain and run only the relevant checks."""
+            findings = {"fqdn": sub_fqdn, "checks_run": sorted(check_types)}
             try:
                 _st, _bd, _hd = _sub_fetch(
                     f"https://{sub_fqdn}", timeout=_sub_check_timeout, verify_ssl=False)
@@ -755,34 +823,42 @@ def run_recon(url: str, timeout: int = 8,
                         f"http://{sub_fqdn}", timeout=_sub_check_timeout, verify_ssl=False)
                 if _st == 0:
                     return findings
-                _use_ssl = True  # tried https first
                 findings["status"] = _st
                 findings["body_len"] = len(_bd)
 
-                # Bot protection (CPU-only, uses fetched body + headers)
-                bp = check_bot_protection(sub_fqdn, 443, _use_ssl,
-                                          body=_bd, resp_headers=_hd)
-                if bp.get("vendors"):
-                    findings["bot_protection"] = bp
+                # Tech stack fingerprinting (always — lightweight CPU-only)
+                if "tech" in check_types and (_bd or _hd):
+                    fp = fingerprint_app(_hd, _bd)
+                    if fp.get("technologies"):
+                        findings["fingerprint"] = fp
 
-                # API security (probes API paths on this subdomain)
-                api = check_api_security(sub_fqdn, 443, _use_ssl,
-                                         timeout=_sub_check_timeout)
-                if (api.get("total_specs", 0) > 0 or
-                    api.get("api_gateway", {}).get("detected") or
-                    api.get("rate_limiting", {}).get("detected") or
-                        api.get("authentication", {}).get("detected")):
-                    findings["api_security"] = api
+                # Bot protection — only on auth/login/checkout/signup endpoints
+                if "bot" in check_types:
+                    bp = check_bot_protection(sub_fqdn, 443, True,
+                                              body=_bd, resp_headers=_hd)
+                    if bp.get("vendors"):
+                        findings["bot_protection"] = bp
 
-                # Cloud buckets (uses body for reference discovery)
-                cb = check_cloud_buckets(sub_fqdn, timeout=_sub_check_timeout,
-                                         body=_bd)
-                if cb.get("total_public", 0) > 0:
-                    findings["cloud_buckets"] = cb
+                # API security — only on api/gateway/graphql subdomains
+                if "api" in check_types:
+                    api = check_api_security(sub_fqdn, 443, True,
+                                             timeout=_sub_check_timeout)
+                    if (api.get("total_specs", 0) > 0 or
+                        api.get("api_gateway", {}).get("detected") or
+                        api.get("rate_limiting", {}).get("detected") or
+                            api.get("authentication", {}).get("detected")):
+                        findings["api_security"] = api
 
-                # JS endpoints (extracts from body + fetches JS files)
-                if len(_bd) > 200:
-                    js = check_js_endpoints(sub_fqdn, 443, _use_ssl,
+                # Cloud buckets — only on cdn/assets/storage/dev subdomains
+                if "bucket" in check_types:
+                    cb = check_cloud_buckets(sub_fqdn, timeout=_sub_check_timeout,
+                                             body=_bd)
+                    if cb.get("total_public", 0) > 0:
+                        findings["cloud_buckets"] = cb
+
+                # JS endpoints — only on app/portal/dashboard/admin subdomains
+                if "js" in check_types and len(_bd) > 200:
+                    js = check_js_endpoints(sub_fqdn, 443, True,
                                             timeout=_sub_check_timeout, body=_bd)
                     if (js.get("total_endpoints", 0) > 5 or
                         js.get("has_file_upload") or
@@ -795,13 +871,18 @@ def run_recon(url: str, timeout: int = 8,
 
         import concurrent.futures as _cf
         with _cf.ThreadPoolExecutor(max_workers=_SUB_CHECK_WORKERS) as _pool:
-            _futures = {_pool.submit(_scan_subdomain, sf): sf for sf in _sub_fqdns}
-            for _fut in _cf.as_completed(_futures, timeout=_sub_check_timeout * 8):
+            _futures = {
+                _pool.submit(_scan_subdomain_targeted, sf, ct): sf
+                for sf, ct in _sub_tasks
+            }
+            for _fut in _cf.as_completed(_futures, timeout=_sub_check_timeout * 10):
                 try:
                     _res = _fut.result(timeout=_sub_check_timeout * 2)
                     if not _res:
                         continue
                     _sf = _res.get("fqdn", "")
+                    if _res.get("fingerprint"):
+                        _sub_tech_findings.append((_sf, _res["fingerprint"]))
                     if _res.get("bot_protection"):
                         _sub_bot_findings.append((_sf, _res["bot_protection"]))
                     if _res.get("api_security"):
@@ -818,15 +899,31 @@ def run_recon(url: str, timeout: int = 8,
             _n_api = len(_sub_api_findings)
             _n_bkt = len(_sub_bucket_findings)
             _n_js = len(_sub_js_findings)
-            if _n_bot or _n_api or _n_bkt or _n_js:
+            _n_tech = len(_sub_tech_findings)
+            parts = []
+            if _n_tech:
+                parts.append(f"{_n_tech} tech")
+            if _n_bot:
+                parts.append(f"{_n_bot} bot")
+            if _n_api:
+                parts.append(f"{_n_api} API")
+            if _n_bkt:
+                parts.append(f"{_n_bkt} bucket")
+            if _n_js:
+                parts.append(f"{_n_js} JS")
+            if parts:
                 sys.stderr.write(
-                    f"\r  ✓ Subdomain findings: {_n_bot} bot, {_n_api} API, "
-                    f"{_n_bkt} bucket, {_n_js} JS          \n")
+                    f"\r  ✓ Subdomain findings: {', '.join(parts)}          \n")
                 sys.stderr.flush()
 
     # Store per-subdomain findings in result for report consumption
     result["subdomain_security"] = {
-        "scanned": len(_sub_fqdns),
+        "total_subdomains": len(_sub_tasks),
+        "api_targeted": _n_api_targets,
+        "bot_targeted": _n_bot_targets,
+        "bucket_targeted": _n_bkt_targets,
+        "js_targeted": _n_js_targets,
+        "tech_fingerprints": _sub_tech_findings,
         "bot_protection": _sub_bot_findings,
         "api_security": _sub_api_findings,
         "cloud_buckets": _sub_bucket_findings,
@@ -839,7 +936,6 @@ def run_recon(url: str, timeout: int = 8,
     _main_vendor_ids = {v["id"] for v in _main_vendors}
     for _sf, _bp in _sub_bot_findings:
         for v in _bp.get("vendors", []):
-            # Add unique vendor detections found on subdomains
             if v["id"] not in _main_vendor_ids:
                 v["found_on"] = _sf
                 _main_vendors.append(v)
@@ -855,11 +951,31 @@ def run_recon(url: str, timeout: int = 8,
                 b["found_on"] = _sf
                 _main_buckets.append(b)
                 _main_bucket_names.add(b.get("name", ""))
-        # Update public count
         _main_cb["total_public"] = sum(
             1 for b in _main_buckets
             if b.get("public_read") or b.get("public_listing"))
         _main_cb["total_found"] = len(_main_buckets)
+
+    # Merge per-subdomain tech fingerprints into main technologies
+    _main_fp = result.get("fingerprint", {})
+    _main_techs = _main_fp.get("technologies", {})
+    _sub_tech_distribution = {}  # tech -> [subs that use it]
+    for _sf, _fp in _sub_tech_findings:
+        for tech_name, tech_info in _fp.get("technologies", {}).items():
+            if tech_name not in _sub_tech_distribution:
+                _sub_tech_distribution[tech_name] = []
+            _sub_tech_distribution[tech_name].append(_sf)
+            # Add to main techs if not already present
+            if tech_name not in _main_techs:
+                if isinstance(tech_info, dict):
+                    tech_info["found_on"] = _sf
+                    _main_techs[tech_name] = tech_info
+                else:
+                    _main_techs[tech_name] = {"confidence": tech_info, "found_on": _sf}
+    result["subdomain_security"]["tech_distribution"] = {
+        k: {"count": len(v), "subdomains": v[:5]}
+        for k, v in sorted(_sub_tech_distribution.items(), key=lambda x: -len(x[1]))[:30]
+    }
 
     # Subdomain sprawl detection (#76) + cloud distribution (#77)
     from fray.recon.dns import score_dns_hygiene, detect_subdomain_sprawl, analyze_cloud_distribution
@@ -1593,7 +1709,7 @@ def _enrich_for_report(result: Dict[str, Any]) -> None:
         bot_detail = (f"Bot protection detected on {len(sub_bot)} subdomain(s): "
                       + "; ".join(bot_detail_parts))
         # Only add as vector if there's inconsistency (some subs protected, some not)
-        _n_scanned = sub_sec.get("scanned", 0)
+        _n_scanned = sub_sec.get("bot_targeted", 0)
         if _n_scanned > len(sub_bot):
             n_unprotected = _n_scanned - len(sub_bot)
             bot_detail += f". {n_unprotected}/{_n_scanned} subdomain(s) lack bot protection — inconsistent coverage."
