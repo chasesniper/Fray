@@ -4381,7 +4381,8 @@ def cmd_help(args):
   subfinder -d example.com | fray detect         Chain with any tool
   cat targets.txt | fray recon | jq '.risk_level'   Filter with jq
 
-  📖 Docs: https://github.com/dalisecurity/fray
+  📖 Docs:   https://dalisec.io/docs/#quickstart
+  🔗 GitHub: https://github.com/dalisecurity/fray
   ⚠️  Only test systems you own or have written permission to test.
 """)
 
@@ -4518,7 +4519,8 @@ Pipe-friendly (like httpx):
   subfinder -d example.com | fray detect           # chain with subfinder
   cat targets.txt | fray recon | jq '.risk_level'  # chain with jq
 
-Documentation: https://github.com/dalisecurity/fray
+Docs:   https://dalisec.io/docs/#quickstart
+GitHub: https://github.com/dalisecurity/fray
         """
     )
 

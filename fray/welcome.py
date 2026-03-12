@@ -225,11 +225,11 @@ def _relative_time(delta: timedelta) -> str:
 # ── What's New ───────────────────────────────────────────────────────────────
 
 _WHATS_NEW = [
+    ("Guided pipeline", "fray go <url>", "Zero-knowledge: recon → smart test → report in one command"),
+    ("Interactive hints", "After every command", "Smart next-step suggestions — no security knowledge needed"),
     ("Blind injection detection", "fray test <url> --blind", "Time-based SQLi/SSTI/CMDi + OOB DNS callbacks"),
-    ("Authenticated scans", "fray test <url> --auth-profile ~/.fray/auth/site.json", "OAuth2, form login, multi-step auth"),
-    ("Anti-bot evasion", "Always on", "Browser-realistic UA, Sec-Fetch-*, Accept headers bypass bot detection"),
-    ("Threat intel feed", "fray feed --auto-add", "Auto-ingest CVEs from NVD, CISA, GitHub, ExploitDB, RSS, Nuclei"),
     ("Self-improving agent", "fray agent <url>", "Iterative probe → mutate → learn loop with persistent cache"),
+    ("Threat intel feed", "fray feed --auto-add", "Auto-ingest CVEs from NVD, CISA, GitHub, ExploitDB, RSS, Nuclei"),
     ("Cloud sync", "fray update / fray sync", "Pull/push payload database via Cloudflare R2 or GitHub releases"),
 ]
 
@@ -242,6 +242,7 @@ _TIPS = [
     "Add {B}--blind{R} to detect time-based SQLi and OOB vulnerabilities",
     "Try {B}fray recon <url> --js{R} to extract API endpoints from JavaScript files",
     "Set up auth once: {B}fray test <url> --auth-profile ~/.fray/auth/site.json{R}",
+    "Try {B}fray go <url>{R} for a zero-knowledge guided pipeline (recon+test+report)",
     "Use {B}fray scan <url> --sarif{R} to upload results to GitHub Security tab",
     "Run {B}fray todo add \"my task\"{R} to track your private roadmap",
     "The threat feed runs daily in CI: {B}fray feed --auto-add --test-target <url>{R}",
@@ -305,6 +306,7 @@ def render_welcome() -> str:
     lines.append(f"  {_C.BOLD}{_C.WHITE}Quick Start{_C.R}")
     lines.append(f"  {_C.DIM}{'─' * 50}{_C.R}")
     cmds = [
+        ("fray go <url>", "Guided pipeline (recon→test→report)"),
         ("fray recon <url>", "Reconnaissance & fingerprinting"),
         ("fray test <url>", "Test WAF with payloads"),
         ("fray scan <url>", "Auto crawl → discover → inject"),
@@ -329,8 +331,10 @@ def render_welcome() -> str:
     lines.append("")
 
     # ── Footer ───────────────────────────────────────────────────────────
-    lines.append(f"  {_C.DIM}Docs: https://github.com/dalisecurity/fray{_C.R}")
-    lines.append(f"  {_C.DIM}⚠ Only test systems you own or have written permission to test.{_C.R}")
+    lines.append(f"  {_C.DIM}──────────────────────────────────────────────────{_C.R}")
+    lines.append(f"  {_C.BCYAN}📖 Docs:{_C.R}   https://dalisec.io/docs/#quickstart")
+    lines.append(f"  {_C.DIM}🔗 GitHub:{_C.R} https://github.com/dalisecurity/fray")
+    lines.append(f"  {_C.DIM}⚠  Only test systems you own or have written permission to test.{_C.R}")
     lines.append("")
 
     return "\n".join(lines)
