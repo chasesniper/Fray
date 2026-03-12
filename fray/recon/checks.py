@@ -5221,3 +5221,156 @@ def check_dependency_confusion(host: str, port: int, use_ssl: bool,
         "total_at_risk": len(at_risk),
         "has_confusion_risk": bool(at_risk),
     }
+
+
+# ---------------------------------------------------------------------------
+# #3  Parameter Mining from HTML Forms + JS
+# ---------------------------------------------------------------------------
+
+def check_parameter_mining(host: str, port: int, use_ssl: bool,
+                           timeout: int = 5,
+                           extra_headers: Optional[Dict[str, str]] = None,
+                           body: str = "",
+                           wayback_data: Optional[Dict[str, Any]] = None,
+                           ) -> Dict[str, Any]:
+    """#3 — Extract parameters from HTML forms, JS source, and URL query strings.
+
+    Mines parameter names from:
+    1. HTML <input>, <select>, <textarea> name attributes
+    2. URL query parameters in links/actions
+    3. JS fetch/XMLHttpRequest/axios calls with parameter objects
+    4. JS object keys passed to API calls
+    5. Wayback Machine historical parameters (if provided)
+
+    Returns categorized parameters useful for fuzzing and injection testing.
+    """
+
+    params: Dict[str, Dict[str, Any]] = {}  # name -> {sources, type, form_action}
+
+    def _add(name: str, source: str, **meta):
+        name = name.strip()
+        if not name or len(name) > 100 or len(name) < 1:
+            return
+        # Skip obviously non-parameter strings
+        if name.startswith(("http://", "https://", "//", "#", "javascript:")):
+            return
+        if name in params:
+            params[name]["sources"].add(source)
+            params[name].update({k: v for k, v in meta.items() if v})
+        else:
+            params[name] = {"name": name, "sources": {source}, **meta}
+
+    # ── Phase 1: HTML form inputs ──
+    # <input name="..."> <select name="..."> <textarea name="...">
+    for m in re.finditer(r'<(?:input|select|textarea)\b[^>]*\bname\s*=\s*["\']([^"\']+)["\']', body, re.I):
+        name = m.group(1)
+        # Try to find the input type
+        itype = ""
+        tm = re.search(r'type\s*=\s*["\']([^"\']+)["\']', m.group(0), re.I)
+        if tm:
+            itype = tm.group(1).lower()
+        _add(name, "html_form", input_type=itype)
+
+    # <form action="..."> — extract params from action URLs
+    for m in re.finditer(r'<form[^>]*\baction\s*=\s*["\']([^"\']*\?[^"\']+)["\']', body, re.I):
+        url = m.group(1)
+        for param in url.split("?", 1)[-1].split("&"):
+            pname = param.split("=")[0]
+            if pname:
+                _add(pname, "form_action")
+
+    # ── Phase 2: URL query parameters from links ──
+    for m in re.finditer(r'(?:href|src|action|data-url)\s*=\s*["\']([^"\']*\?[^"\']+)["\']', body, re.I):
+        url = m.group(1)
+        try:
+            query = url.split("?", 1)[-1].split("#")[0]
+            for param in query.split("&"):
+                pname = param.split("=")[0]
+                if pname and len(pname) < 50:
+                    _add(pname, "url_query")
+        except Exception:
+            pass
+
+    # ── Phase 3: JS fetch/axios/XMLHttpRequest parameters ──
+    # fetch("/api/...", { body: JSON.stringify({ email: ..., password: ... }) })
+    _JS_PARAM_PATTERNS = [
+        # Object keys in JSON.stringify, body, params, data
+        re.compile(r'(?:JSON\.stringify|body|params|data|payload)\s*[:(]\s*\{([^}]{5,500})\}', re.I),
+        # URLSearchParams
+        re.compile(r'URLSearchParams\s*\(\s*\{([^}]{5,500})\}', re.I),
+        # .append("name", ...)
+        re.compile(r'\.(?:append|set)\s*\(\s*["\'](\w+)["\']', re.I),
+        # query string construction: "?param=" or "&param="
+        re.compile(r'[?&](\w{2,30})=', re.I),
+    ]
+
+    for pat in _JS_PARAM_PATTERNS[:2]:
+        for m in pat.finditer(body[:300000]):
+            obj_str = m.group(1)
+            # Extract keys from object literal
+            for km in re.finditer(r'["\']?(\w+)["\']?\s*:', obj_str):
+                _add(km.group(1), "js_object")
+
+    for m in _JS_PARAM_PATTERNS[2].finditer(body[:300000]):
+        _add(m.group(1), "js_append")
+
+    for m in _JS_PARAM_PATTERNS[3].finditer(body[:300000]):
+        _add(m.group(1), "js_query_string")
+
+    # ── Phase 4: Hidden inputs (often CSRF tokens, IDs) ──
+    for m in re.finditer(r'<input[^>]+type\s*=\s*["\']hidden["\'][^>]*name\s*=\s*["\']([^"\']+)["\']', body, re.I):
+        _add(m.group(1), "hidden_input")
+    # Reversed order: name before type
+    for m in re.finditer(r'<input[^>]+name\s*=\s*["\']([^"\']+)["\'][^>]*type\s*=\s*["\']hidden["\']', body, re.I):
+        _add(m.group(1), "hidden_input")
+
+    # ── Phase 5: Merge Wayback historical parameters ──
+    if wayback_data and wayback_data.get("parameters_found"):
+        for p in wayback_data["parameters_found"]:
+            _add(p, "wayback")
+
+    # ── Classify parameters ──
+    _AUTH_PARAMS = {"username", "password", "passwd", "email", "login", "user",
+                    "token", "csrf", "csrftoken", "csrf_token", "_token",
+                    "authenticity_token", "nonce", "session", "api_key", "apikey"}
+    _INJECTION_INTERESTING = {"id", "uid", "user_id", "page", "file", "path",
+                              "url", "redirect", "next", "return", "callback",
+                              "query", "search", "q", "cmd", "exec", "sort",
+                              "order", "filter", "column", "table", "dir",
+                              "template", "lang", "locale", "format", "type"}
+
+    auth_params = []
+    injectable_params = []
+    all_params = []
+
+    for name, info in params.items():
+        entry = {
+            "name": name,
+            "sources": sorted(info["sources"]),
+        }
+        if info.get("input_type"):
+            entry["input_type"] = info["input_type"]
+
+        lower = name.lower()
+        if lower in _AUTH_PARAMS or "csrf" in lower or "token" in lower:
+            entry["category"] = "auth"
+            auth_params.append(name)
+        elif lower in _INJECTION_INTERESTING or "id" in lower:
+            entry["category"] = "injectable"
+            injectable_params.append(name)
+        else:
+            entry["category"] = "general"
+
+        all_params.append(entry)
+
+    # Sort: auth first, then injectable, then general
+    cat_order = {"auth": 0, "injectable": 1, "general": 2}
+    all_params.sort(key=lambda x: (cat_order.get(x.get("category", "general"), 3), x["name"]))
+
+    return {
+        "parameters": all_params,
+        "total_found": len(all_params),
+        "auth_params": sorted(auth_params),
+        "injectable_params": sorted(injectable_params),
+        "sources_used": sorted({s for info in params.values() for s in info["sources"]}),
+    }
