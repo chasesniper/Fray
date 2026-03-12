@@ -1,6 +1,6 @@
 # Fray Full Roadmap — 222 Items Across 27 Layers
 
-**Status:** 96 done · 126 pending  
+**Status:** 97 done · 125 pending  
 **Last updated:** 2026-03-11
 
 ---
@@ -53,7 +53,7 @@
 ## L5 — Supply Chain Pipeline (3 items)
 | # | Item | Priority | Status |
 |---|------|----------|--------|
-| 30 | Dependency confusion detection | HIGH | pending |
+| 30 | Dependency confusion detection | HIGH | done |
 | 31 | Subdomain takeover verification | HIGH | done |
 | 32 | Third-party script integrity (SRI) audit | MEDIUM | done |
 
