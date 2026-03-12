@@ -431,13 +431,17 @@ class ReconInteractive:
             sys.stderr.write(f"     Report: file://{os.path.abspath(report_path)}\n")
         sys.stderr.write("\n")
 
-    def _run_module(self, vuln_type: str, target: str, params: dict) -> None:
-        """Run a specific vulnerability test module and print results."""
+    def _run_module(self, vuln_type: str, target: str, params: dict) -> Optional[dict]:
+        """Run a specific vulnerability test module and print results.
+
+        Returns dict with keys: module, target, vulnerable, findings, requests
+        or None on skip/error.
+        """
         module_info = _VULN_MODULE_MAP.get(vuln_type)
         if not module_info or not module_info[0]:
             # No deep module — fallback to fray test CLI
             sys.stderr.write(f"  ⏭  {vuln_type}: use `fray test {target} -c {vuln_type} --smart`\n")
-            return
+            return None
 
         mod_path, class_name, display_name = module_info
         sys.stderr.write(f"  ▶ {display_name}...")
@@ -507,9 +511,19 @@ class ReconInteractive:
             result_dict["target"] = target
             print(json.dumps(result_dict, ensure_ascii=False, default=str))
 
+            return {
+                "module": vuln_type,
+                "target": target,
+                "vulnerable": vuln,
+                "findings": len(findings),
+                "requests": requests,
+                "elapsed_ms": elapsed,
+            }
+
         except Exception as e:
             elapsed = (time.monotonic() - t0) * 1000
             sys.stderr.write(f" error: {e} ({elapsed:.0f}ms)\n")
+            return None
 
     def _guess_param(self, url: str) -> str:
         """Guess the best injectable parameter from URL or recon data."""
@@ -589,6 +603,8 @@ def next_steps(target: str, context: str = "recon", *,
     context: "recon", "test", "scan", "bypass", "harden"
     """
     if not sys.stderr.isatty():
+        return
+    if os.environ.get("FRAY_NO_HINTS"):
         return
 
     from fray.ui import S, cmd_hint, section_title
@@ -829,16 +845,36 @@ class GuidedPipeline:
             out.write(f"  {S.dim}Modules:{S.reset} {mods}\n\n")
             out.flush()
 
-        # Run each module
-        total_vulns = 0
+        # Run each module and collect results
+        module_results = []
         for vtype in vuln_types[:5]:
-            menu._run_module(vtype, self.target, {})
+            res = menu._run_module(vtype, self.target, {})
+            if res:
+                module_results.append(res)
 
-        # Collect test result count from stdout (modules print JSON)
+        total_vulns = sum(1 for r in module_results if r.get("vulnerable"))
+        total_findings = sum(r.get("findings", 0) for r in module_results)
+        total_requests = sum(r.get("requests", 0) for r in module_results)
+
+        if not self.quiet and module_results:
+            out.write(f"\n  {S.success}✔{S.reset} {S.bold}{S.white}Testing complete{S.reset}\n")
+            vuln_c = S.error if total_vulns > 0 else S.success
+            out.write(summary_line("Modules", f"{len(module_results)} tested") + "\n")
+            out.write(f"  {S.gray}{'Vulnerable':<20}{S.reset} {vuln_c}{total_vulns}{S.reset}\n")
+            out.write(summary_line("Findings", str(total_findings)) + "\n")
+            out.write(summary_line("Requests", str(total_requests)) + "\n")
+            out.write("\n")
+            out.flush()
+
+        self.test_results = module_results
         summary["phases"].append({
             "name": "test",
             "modules_tested": vuln_types[:5],
             "count": len(vuln_types[:5]),
+            "vulnerable": total_vulns,
+            "findings": total_findings,
+            "requests": total_requests,
+            "results": module_results,
         })
 
         # ── Phase 3: Report ────────────────────────────────────────────
@@ -884,8 +920,15 @@ class GuidedPipeline:
             out.write(f"  {S.gray}{'Risk':<20}{S.reset} {risk_c}{risk}/100 ({risk_level}){S.reset}\n")
             if waf:
                 out.write(summary_line("WAF", waf, "accent") + "\n")
-            out.write(summary_line("Findings", str(len(findings))) + "\n")
+            out.write(summary_line("Recon findings", str(len(findings))) + "\n")
             out.write(summary_line("Modules tested", str(len(vuln_types[:5]))) + "\n")
+            if total_vulns > 0:
+                out.write(f"  {S.gray}{'Vulnerabilities':<20}{S.reset} {S.error}{total_vulns} vulnerable{S.reset}\n")
+            else:
+                out.write(f"  {S.gray}{'Vulnerabilities':<20}{S.reset} {S.success}0 (clean){S.reset}\n")
+            if total_findings > 0:
+                out.write(summary_line("Test findings", str(total_findings)) + "\n")
+            out.write(summary_line("Total requests", str(total_requests)) + "\n")
             out.write(summary_line("Report", self.report_path, "target") + "\n")
 
             # What's Next

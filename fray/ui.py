@@ -119,6 +119,10 @@ class S:
     dark       = _fg(107, 114, 128)   # #6b7280 gray-500
     muted      = _ansi("2")           # dim
 
+    # Accent colors
+    cyan       = _fg(34, 211, 238)    # #22d3ee cyan-400
+    bright_cyan = _fg(103, 232, 249)  # #67e8f9 cyan-300
+
     # Target / URL
     target     = _fg(96, 165, 250)    # #60a5fa blue-400
     url        = _fg(96, 165, 250)

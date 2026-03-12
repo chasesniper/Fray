@@ -15,35 +15,38 @@ from typing import Dict, List, Optional, Tuple
 
 from fray import __version__, PAYLOADS_DIR
 
-# ── ANSI color helpers ───────────────────────────────────────────────────────
+# ── ANSI color helpers (delegated to fray.ui) ────────────────────────────────
+
+from fray.ui import S as _S
 
 class _C:
-    BOLD = "\033[1m"
-    DIM = "\033[2m"
-    ITALIC = "\033[3m"
-    UNDER = "\033[4m"
-    STRIKE = "\033[9m"
-    R = "\033[0m"  # reset
+    """Thin shim over fray.ui.S — provides NO_COLOR / truecolor for free."""
+    BOLD = _S.bold
+    DIM = _S.dim
+    ITALIC = _S.italic
+    UNDER = _S.underline
+    STRIKE = ""  # unused in welcome
+    R = _S.reset
     # Colors
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    BLUE = "\033[34m"
-    MAGENTA = "\033[35m"
-    CYAN = "\033[36m"
-    WHITE = "\033[37m"
+    RED = _S.error
+    GREEN = _S.success
+    YELLOW = _S.warning
+    BLUE = _S.info
+    MAGENTA = _S.brand2
+    CYAN = _S.cyan
+    WHITE = _S.white
     # Bright
-    BRED = "\033[91m"
-    BGREEN = "\033[92m"
-    BYELLOW = "\033[93m"
-    BBLUE = "\033[94m"
-    BMAGENTA = "\033[95m"
-    BCYAN = "\033[96m"
+    BRED = _S.error
+    BGREEN = _S.success
+    BYELLOW = _S.warning
+    BBLUE = _S.info
+    BMAGENTA = _S.brand
+    BCYAN = _S.bright_cyan
     # BG
-    BG_BLUE = "\033[44m"
-    BG_CYAN = "\033[46m"
-    BG_RED = "\033[41m"
-    BG_GREEN = "\033[42m"
+    BG_BLUE = _S.bg_info
+    BG_CYAN = _S.bg_brand
+    BG_RED = _S.bg_error
+    BG_GREEN = _S.bg_success
 
 # ── ASCII Art Logo ───────────────────────────────────────────────────────────
 
@@ -326,7 +329,7 @@ def render_welcome() -> str:
 
     # ── Tip of the day ───────────────────────────────────────────────────
     tip_raw = random.choice(_TIPS)
-    tip = tip_raw.replace("{B}", _C.BOLD).replace("{R}", _C.R).replace("{C}", _C.CYAN)
+    tip = tip_raw.replace("{B}", _C.BOLD).replace("{R}", _C.R).replace("{C}", _C.CYAN).replace("{T}", _C.BCYAN)
     lines.append(f"  {_C.DIM}💡 Tip:{_C.R} {tip}")
     lines.append("")
 

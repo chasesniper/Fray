@@ -4524,6 +4524,10 @@ GitHub: https://github.com/dalisecurity/fray
         """
     )
 
+    # Global flags
+    parser.add_argument("--no-hints", action="store_true", default=False,
+                        help="Suppress 'Next Steps' hints after commands (or set FRAY_NO_HINTS=1)")
+
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # recon
@@ -5381,6 +5385,10 @@ GitHub: https://github.com/dalisecurity/fray
         from fray.welcome import print_welcome
         print_welcome()
         sys.exit(0)
+
+    # ── --no-hints → FRAY_NO_HINTS ──
+    if getattr(args, 'no_hints', False):
+        os.environ["FRAY_NO_HINTS"] = "1"
 
     # ── Environment variable overrides (FRAY_* → argparse defaults) ──
     _apply_env_overrides(args)
