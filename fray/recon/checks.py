@@ -896,6 +896,56 @@ def check_host_header_injection(host: str, port: int, use_ssl: bool,
 
 # ── Admin Panel Discovery ───────────────────────────────────────────────
 
+# #9 — Admin panel vendor fingerprints: (vendor_name, body_pattern, version_regex)
+_ADMIN_VENDOR_FINGERPRINTS = [
+    ("WordPress", re.compile(r'wp-admin|wordpress|wp-content|wp-includes', re.I),
+     re.compile(r'<meta[^>]+generator["\'][^>]*WordPress\s+([\d.]+)', re.I)),
+    ("Joomla", re.compile(r'joomla|com_content|/administrator/index\.php', re.I),
+     re.compile(r'<meta[^>]+generator["\'][^>]*Joomla!\s*([\d.]+)', re.I)),
+    ("Drupal", re.compile(r'drupal|sites/default|drupal\.js', re.I),
+     re.compile(r'Drupal\s+([\d.]+)', re.I)),
+    ("phpMyAdmin", re.compile(r'phpmyadmin|pma_password', re.I),
+     re.compile(r'phpMyAdmin\s+([\d.]+)', re.I)),
+    ("Adminer", re.compile(r'adminer', re.I),
+     re.compile(r'Adminer\s+([\d.]+)', re.I)),
+    ("Grafana", re.compile(r'grafana', re.I),
+     re.compile(r'Grafana\s+v?([\d.]+)', re.I)),
+    ("Kibana", re.compile(r'kibana', re.I),
+     re.compile(r'Kibana\s+([\d.]+)', re.I)),
+    ("Jenkins", re.compile(r'jenkins|hudson', re.I),
+     re.compile(r'Jenkins\s+ver\.\s*([\d.]+)', re.I)),
+    ("GitLab", re.compile(r'gitlab', re.I),
+     re.compile(r'GitLab[^"]*?([\d]+\.[\d]+\.[\d]+)', re.I)),
+    ("Portainer", re.compile(r'portainer', re.I), None),
+    ("Rancher", re.compile(r'rancher', re.I), None),
+    ("cPanel", re.compile(r'cpanel|whm', re.I),
+     re.compile(r'cPanel\s+([\d.]+)', re.I)),
+    ("Plesk", re.compile(r'plesk', re.I),
+     re.compile(r'Plesk\s+([\d.]+)', re.I)),
+    ("Apache Tomcat", re.compile(r'tomcat|catalina', re.I),
+     re.compile(r'Apache Tomcat[/\s]+([\d.]+)', re.I)),
+    ("Spring Boot Actuator", re.compile(r'actuator|spring-boot', re.I), None),
+    ("Django Admin", re.compile(r'django|csrfmiddlewaretoken', re.I), None),
+    ("Laravel", re.compile(r'laravel|xsrf-token', re.I), None),
+    ("Rails", re.compile(r'rails|authenticity_token', re.I), None),
+    ("Express", re.compile(r'express', re.I), None),
+    ("Webmin", re.compile(r'webmin', re.I),
+     re.compile(r'Webmin\s+([\d.]+)', re.I)),
+    ("Cockpit", re.compile(r'cockpit-ws|cockpit-login', re.I), None),
+    ("Prometheus", re.compile(r'prometheus', re.I),
+     re.compile(r'Prometheus\s+([\d.]+)', re.I)),
+    ("Traefik", re.compile(r'traefik', re.I), None),
+    ("SonarQube", re.compile(r'sonarqube|sonar', re.I),
+     re.compile(r'SonarQube\s+([\d.]+)', re.I)),
+    ("Elasticsearch", re.compile(r'elasticsearch|you know, for search', re.I),
+     re.compile(r'"number"\s*:\s*"([\d.]+)"')),
+    ("MinIO", re.compile(r'minio', re.I), None),
+    ("Nagios", re.compile(r'nagios', re.I),
+     re.compile(r'Nagios[^"]*?([\d]+\.[\d]+\.[\d]+)', re.I)),
+    ("Zabbix", re.compile(r'zabbix', re.I),
+     re.compile(r'Zabbix\s+([\d.]+)', re.I)),
+]
+
 _ADMIN_PATHS = [
     # Generic
     ("/admin", "generic"),
@@ -1046,6 +1096,34 @@ def check_admin_panels(host: str, port: int, use_ssl: bool,
         elif status == 200:
             entry["protected"] = False
 
+        # #9 — Vendor fingerprinting
+        vendor = None
+        version = None
+        if body:
+            for vname, vpat, vver in _ADMIN_VENDOR_FINGERPRINTS:
+                if vpat.search(lower):
+                    vendor = vname
+                    if vver:
+                        vm = vver.search(body)
+                        if vm:
+                            version = vm.group(1)
+                    break
+        # Also check server header
+        if not vendor:
+            srv = hdrs.get("server", "").lower()
+            if "apache" in srv:
+                vendor = "Apache"
+            elif "nginx" in srv:
+                vendor = "nginx"
+            elif "tomcat" in srv:
+                vendor = "Apache Tomcat"
+            elif "iis" in srv:
+                vendor = "Microsoft IIS"
+        if vendor:
+            entry["vendor"] = vendor
+        if version:
+            entry["version"] = version
+
         return entry
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
@@ -1058,9 +1136,18 @@ def check_admin_panels(host: str, port: int, use_ssl: bool,
             except Exception:
                 pass
 
+    # #9 — Vendor distribution
+    vendor_counts: Dict[str, int] = {}
+    for f in found:
+        v = f.get("vendor")
+        if v:
+            vendor_counts[v] = vendor_counts.get(v, 0) + 1
+
     return {
         "panels_found": found,
         "total": len(found),
+        "vendors": vendor_counts,
+        "vendor_list": sorted(vendor_counts.keys()),
     }
 
 
@@ -4589,4 +4676,315 @@ def check_js_endpoints(host: str, port: int, use_ssl: bool,
         "js_files_analyzed": len(js_to_fetch),
         "has_websockets": bool(websocket_urls),
         "has_file_upload": bool(file_upload_forms),
+    }
+
+
+# ---------------------------------------------------------------------------
+# #2  Wayback Machine Historical URL Discovery
+# ---------------------------------------------------------------------------
+
+def check_wayback_urls(host: str, timeout: int = 10,
+                       limit: int = 500,
+                       ) -> Dict[str, Any]:
+    """Fetch historical URLs from the Wayback Machine CDX API.
+
+    Returns unique paths grouped by type (api, admin, auth, static, other)
+    with metadata about status codes and timestamps.
+    """
+    import urllib.request
+    import urllib.error
+
+    cdx_url = (
+        f"https://web.archive.org/cdx/search/cdx"
+        f"?url={host}/*&output=json&fl=original,statuscode,timestamp,mimetype"
+        f"&collapse=urlkey&limit={limit}&filter=statuscode:200"
+    )
+
+    result: Dict[str, Any] = {
+        "total_urls": 0,
+        "unique_paths": [],
+        "api_paths": [],
+        "admin_paths": [],
+        "auth_paths": [],
+        "config_paths": [],
+        "interesting_files": [],
+        "parameters_found": [],
+        "source": "web.archive.org",
+    }
+
+    try:
+        req = urllib.request.Request(cdx_url, headers={
+            "User-Agent": "Mozilla/5.0 (compatible; Fray/1.0; +https://github.com/dalisecurity/Fray)",
+        })
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+    except Exception:
+        result["error"] = "Wayback Machine unreachable or timed out"
+        return result
+
+    try:
+        rows = json.loads(raw)
+    except Exception:
+        result["error"] = "Invalid JSON from CDX API"
+        return result
+
+    if not rows or len(rows) < 2:
+        return result
+
+    # First row is header: [original, statuscode, timestamp, mimetype]
+    seen_paths: set = set()
+    api_paths: List[str] = []
+    admin_paths: List[str] = []
+    auth_paths: List[str] = []
+    config_paths: List[str] = []
+    interesting_files: List[str] = []
+    params_found: set = set()
+    all_paths: List[str] = []
+
+    _API_KW = {"api", "v1", "v2", "v3", "graphql", "rest", "json", "xml", "rpc"}
+    _ADMIN_KW = {"admin", "dashboard", "panel", "manage", "console", "backend",
+                 "phpmyadmin", "adminer", "cpanel", "wp-admin", "manager"}
+    _AUTH_KW = {"login", "signin", "sign-in", "auth", "oauth", "sso", "register",
+                "signup", "password", "forgot", "reset", "token", "session"}
+    _CONFIG_KW = {".env", ".git", "config", "settings", "web.config", ".htaccess",
+                  "wp-config", "database", ".yaml", ".yml", ".toml", ".ini"}
+    _INTERESTING_EXT = {".sql", ".bak", ".old", ".backup", ".zip", ".tar",
+                        ".gz", ".log", ".csv", ".xls", ".xlsx", ".doc",
+                        ".pdf", ".key", ".pem", ".p12"}
+
+    for row in rows[1:]:
+        if len(row) < 2:
+            continue
+        url = row[0]
+        try:
+            parsed = urllib.parse.urlparse(url)
+            path = parsed.path.rstrip("/") or "/"
+        except Exception:
+            continue
+
+        if path in seen_paths:
+            continue
+        seen_paths.add(path)
+        all_paths.append(path)
+
+        lower = path.lower()
+
+        # Extract query parameters
+        if parsed.query:
+            for param in parsed.query.split("&"):
+                pname = param.split("=")[0]
+                if pname and len(pname) < 50:
+                    params_found.add(pname)
+
+        # Classify
+        segments = set(lower.split("/"))
+        if segments & _API_KW or "/api" in lower:
+            api_paths.append(path)
+        if segments & _ADMIN_KW:
+            admin_paths.append(path)
+        if segments & _AUTH_KW:
+            auth_paths.append(path)
+        if any(kw in lower for kw in _CONFIG_KW):
+            config_paths.append(path)
+        if any(lower.endswith(ext) for ext in _INTERESTING_EXT):
+            interesting_files.append(path)
+
+    result["total_urls"] = len(all_paths)
+    result["unique_paths"] = sorted(all_paths)[:200]
+    result["api_paths"] = sorted(set(api_paths))[:50]
+    result["admin_paths"] = sorted(set(admin_paths))[:30]
+    result["auth_paths"] = sorted(set(auth_paths))[:20]
+    result["config_paths"] = sorted(set(config_paths))[:20]
+    result["interesting_files"] = sorted(set(interesting_files))[:20]
+    result["parameters_found"] = sorted(params_found)[:50]
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# #11  Server-Sent Events (SSE) Endpoint Detection
+# ---------------------------------------------------------------------------
+
+def check_sse_endpoints(host: str, port: int, use_ssl: bool,
+                        timeout: int = 5,
+                        extra_headers: Optional[Dict[str, str]] = None,
+                        body: str = "",
+                        ) -> Dict[str, Any]:
+    """Detect Server-Sent Events (SSE) endpoints from page source and headers.
+
+    Looks for EventSource usage in JS, text/event-stream content-type,
+    and common SSE path patterns.
+    """
+    from fray.recon.http import _fetch_url
+
+    scheme = "https" if use_ssl else "http"
+    port_str = "" if (use_ssl and port == 443) or (not use_ssl and port == 80) else f":{port}"
+    base = f"{scheme}://{host}{port_str}"
+
+    sse_endpoints: List[Dict[str, str]] = []
+    seen: set = set()
+
+    # Phase 1: Extract EventSource URLs from body
+    es_patterns = [
+        re.compile(r'new\s+EventSource\s*\(\s*["\']([^"\']+)["\']', re.I),
+        re.compile(r'EventSource\s*\(\s*["\']([^"\']+)["\']', re.I),
+        re.compile(r'text/event-stream["\s,;]', re.I),
+    ]
+    for pat in es_patterns[:2]:
+        for m in pat.finditer(body):
+            url = m.group(1)
+            if url not in seen:
+                seen.add(url)
+                sse_endpoints.append({"url": url, "source": "js_eventsource"})
+
+    # Phase 2: Probe common SSE paths
+    _SSE_PATHS = [
+        "/events", "/sse", "/stream", "/api/events", "/api/stream",
+        "/api/v1/events", "/api/sse", "/notifications/stream",
+        "/live", "/feed/stream", "/realtime",
+    ]
+    for path in _SSE_PATHS:
+        if path in seen:
+            continue
+        url = f"{base}{path}"
+        try:
+            status, resp_body, hdrs = _fetch_url(url, timeout=min(timeout, 3),
+                                                   verify_ssl=True,
+                                                   headers=extra_headers)
+            if status == 0 and use_ssl:
+                status, resp_body, hdrs = _fetch_url(url, timeout=min(timeout, 3),
+                                                       verify_ssl=False,
+                                                       headers=extra_headers)
+        except Exception:
+            continue
+
+        ct = hdrs.get("content-type", "")
+        if "text/event-stream" in ct:
+            seen.add(path)
+            sse_endpoints.append({"url": path, "source": "probe", "status": status})
+        elif status in (200, 401, 403) and resp_body:
+            lower = resp_body[:500].lower()
+            if "event:" in lower or "data:" in lower or "retry:" in lower:
+                seen.add(path)
+                sse_endpoints.append({"url": path, "source": "probe_body", "status": status})
+
+    return {
+        "sse_endpoints": sse_endpoints,
+        "total_found": len(sse_endpoints),
+        "has_sse": bool(sse_endpoints),
+    }
+
+
+# ---------------------------------------------------------------------------
+# #6  API Endpoint Auto-Classification (REST / GraphQL / gRPC)
+# ---------------------------------------------------------------------------
+
+def classify_api_endpoints(api_security_data: Dict[str, Any],
+                           graphql_data: Dict[str, Any],
+                           ) -> Dict[str, Any]:
+    """Classify discovered API endpoints by protocol type.
+
+    Takes output from check_api_security() and check_graphql_introspection()
+    and returns a unified classification with protocol, version, and auth info.
+    """
+    classified: List[Dict[str, Any]] = []
+    protocol_counts = {"rest": 0, "graphql": 0, "grpc": 0, "soap": 0, "unknown": 0}
+
+    # From API security specs
+    for spec in api_security_data.get("specs_found", []):
+        path = spec.get("path", "")
+        cat = spec.get("category", "")
+        proto = "unknown"
+        version = ""
+
+        if cat in ("swagger", "openapi"):
+            proto = "rest"
+            version = spec.get("spec_version", "")
+        elif cat in ("graphql", "graphiql", "altair", "graphql_playground"):
+            proto = "graphql"
+        elif cat == "spring_actuator":
+            proto = "rest"
+        elif cat == "metrics":
+            proto = "rest"
+
+        protocol_counts[proto] += 1
+        classified.append({
+            "path": path,
+            "protocol": proto,
+            "version": version,
+            "endpoints_count": spec.get("endpoints_count", 0),
+            "auth_schemes": spec.get("auth_schemes", []),
+            "severity": spec.get("severity", "info"),
+            "title": spec.get("title", ""),
+        })
+
+    # From API endpoints (non-spec)
+    for ep in api_security_data.get("api_endpoints", []):
+        path = ep.get("path", "")
+        # Skip if already classified via spec
+        if any(c["path"] == path for c in classified):
+            continue
+
+        cat = ep.get("category", "")
+        proto = "unknown"
+
+        if cat == "graphql":
+            proto = "graphql"
+        elif cat in ("grpc", "grpc_web"):
+            proto = "grpc"
+        elif cat == "soap":
+            proto = "soap"
+        elif cat in ("swagger", "openapi", "swagger_ui", "fastapi_docs", "redoc"):
+            proto = "rest"
+        elif "/api" in path.lower() or "/v1" in path.lower() or "/v2" in path.lower():
+            proto = "rest"
+        elif ep.get("auth_required"):
+            proto = "rest"
+
+        protocol_counts[proto] += 1
+        classified.append({
+            "path": path,
+            "protocol": proto,
+            "auth_required": ep.get("auth_required", False),
+            "auth_scheme": ep.get("auth_scheme"),
+            "status": ep.get("status"),
+        })
+
+    # From GraphQL introspection
+    gql_endpoints = graphql_data.get("endpoints_found", [])
+    gql_introspection = graphql_data.get("introspection_enabled", [])
+    for gql_path in gql_endpoints:
+        if any(c["path"] == gql_path for c in classified):
+            # Update existing entry
+            for c in classified:
+                if c["path"] == gql_path:
+                    c["protocol"] = "graphql"
+                    c["introspection_enabled"] = gql_path in gql_introspection
+                    c["types_count"] = graphql_data.get("total_types", 0)
+            continue
+        protocol_counts["graphql"] += 1
+        classified.append({
+            "path": gql_path,
+            "protocol": "graphql",
+            "introspection_enabled": gql_path in gql_introspection,
+            "types_count": graphql_data.get("total_types", 0),
+            "fields_count": graphql_data.get("total_fields", 0),
+        })
+
+    # Gateway info
+    gw = api_security_data.get("api_gateway", {})
+    rl = api_security_data.get("rate_limiting", {})
+    auth = api_security_data.get("authentication", {})
+
+    return {
+        "classified_endpoints": classified,
+        "protocol_distribution": {k: v for k, v in protocol_counts.items() if v > 0},
+        "total_classified": len(classified),
+        "has_rest": protocol_counts["rest"] > 0,
+        "has_graphql": protocol_counts["graphql"] > 0,
+        "has_grpc": protocol_counts["grpc"] > 0,
+        "has_soap": protocol_counts["soap"] > 0,
+        "gateway": gw,
+        "rate_limiting": rl,
+        "authentication": auth,
     }

@@ -214,6 +214,89 @@ def _detect_vendor(domain: str) -> str:
     return ""
 
 
+def check_waf_config_change(domain: str, current_vendor: str = "") -> Dict:
+    """#42 — Detect WAF configuration changes and invalidate stale cache.
+
+    Compares the current WAF vendor against cached vendor. If the vendor
+    changed (e.g. migrated from Cloudflare to Akamai), all cached
+    blocked/passed data is invalidated because the WAF rules are different.
+
+    Also checks if the cache is older than MAX_CACHE_AGE_DAYS.
+
+    Returns:
+        Dict with 'changed' (bool), 'reason' (str), 'invalidated' (int),
+        'old_vendor', 'new_vendor'.
+    """
+    from datetime import datetime
+
+    MAX_CACHE_AGE_DAYS = 30
+
+    result = {
+        "changed": False,
+        "reason": "",
+        "invalidated": 0,
+        "old_vendor": "",
+        "new_vendor": current_vendor,
+    }
+
+    domain = _extract_domain(domain) if domain else ""
+    if not domain:
+        return result
+
+    # Auto-detect if not supplied
+    if not current_vendor:
+        current_vendor = _detect_vendor(domain)
+        result["new_vendor"] = current_vendor
+
+    with _cache_lock:
+        cache = load_cache()
+        entry = cache.get(domain)
+        if not entry or not isinstance(entry, dict):
+            return result
+
+        old_vendor = entry.get("waf_vendor", "")
+        result["old_vendor"] = old_vendor
+        updated_at = entry.get("updated_at", "")
+
+        # Check 1: Vendor changed
+        if (old_vendor and current_vendor and
+                old_vendor.lower() != current_vendor.lower()):
+            n_blocked = len(entry.get("blocked", {}))
+            n_passed = len(entry.get("passed", {}))
+            entry["blocked"] = {}
+            entry["passed"] = {}
+            entry["waf_vendor"] = current_vendor
+            entry["updated_at"] = _now_iso()
+            entry["invalidation_reason"] = f"WAF vendor changed: {old_vendor} → {current_vendor}"
+            _save_cache(cache)
+            result["changed"] = True
+            result["reason"] = f"WAF vendor changed: {old_vendor} → {current_vendor}"
+            result["invalidated"] = n_blocked + n_passed
+            return result
+
+        # Check 2: Cache too old
+        if updated_at:
+            try:
+                last_update = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
+                age_days = (datetime.now(last_update.tzinfo) - last_update).days
+                if age_days > MAX_CACHE_AGE_DAYS:
+                    n_blocked = len(entry.get("blocked", {}))
+                    n_passed = len(entry.get("passed", {}))
+                    entry["blocked"] = {}
+                    entry["passed"] = {}
+                    entry["updated_at"] = _now_iso()
+                    entry["invalidation_reason"] = f"Cache expired ({age_days} days old)"
+                    _save_cache(cache)
+                    result["changed"] = True
+                    result["reason"] = f"Cache expired ({age_days} days old, max {MAX_CACHE_AGE_DAYS})"
+                    result["invalidated"] = n_blocked + n_passed
+                    return result
+            except Exception:
+                pass
+
+    return result
+
+
 def save_scan_results(
     results: List[Dict],
     domain: str,
