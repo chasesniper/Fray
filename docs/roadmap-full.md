@@ -1,6 +1,6 @@
 # Fray Full Roadmap — 222 Items Across 27 Layers
 
-**Status:** 103 done · 119 pending  
+**Status:** 109 done · 113 pending  
 **Last updated:** 2026-03-11
 
 ---
@@ -39,8 +39,8 @@
 ## L4 — New Attack Classes / OWASP 2025 (10 items)
 | # | Item | Priority | Status |
 |---|------|----------|--------|
-| 20 | Server-Side Request Forgery (SSRF) deep testing | HIGH | pending |
-| 21 | Insecure Deserialization payloads | HIGH | pending |
+| 20 | Server-Side Request Forgery (SSRF) deep testing | HIGH | done |
+| 21 | Insecure Deserialization payloads | HIGH | done |
 | 22 | Mass Assignment / parameter pollution | MEDIUM | pending |
 | 23 | GraphQL-specific attacks (batching, introspection abuse) | MEDIUM | done |
 | 24 | Race condition testing (TOCTOU) | MEDIUM | pending |
@@ -231,17 +231,17 @@
 |---|------|----------|--------|
 | 154 | YAML Template DSL (Nuclei-like with WAF bypass logic) | HIGH | done |
 | 155 | Template Bounty Program ($25-100 per template) | HIGH | pending |
-| 156 | Deep SQLi Module (sqlmap-level: 6 techniques, 34+ DBMS) | HIGH | pending |
-| 157 | Deep XSS Module (XSStrike-level: context-aware, DOM verify) | HIGH | pending |
+| 156 | Deep SQLi Module (sqlmap-level: 6 techniques, 34+ DBMS) | HIGH | done |
+| 157 | Deep XSS Module (XSStrike-level: context-aware, DOM verify) | HIGH | done |
 | 158 | Deep CMDi Module (commix-level: auto-shell) | MEDIUM | pending |
 | 159 | Content Discovery / Fuzzing (ffuf-like FUZZ keyword) | HIGH | done |
 | 160 | Stdin/Stdout Pipeline (cat | fray recon -) | HIGH | done |
 | 161 | WAF Fingerprint DB Expansion (30→150+ WAFs) | HIGH | done |
-| 162 | Vulnerability Verification/Proof (dump data, screenshot XSS) | HIGH | pending |
+| 162 | Vulnerability Verification/Proof (dump data, screenshot XSS) | HIGH | done |
 | 163 | Plugin / Extension API (Python hooks, marketplace) | MEDIUM | pending |
 | 164 | Multi-Protocol (WebSocket, GraphQL, gRPC testing) | MEDIUM | pending |
 | 165 | SARIF + Standard Formats (JUnit XML, CSV, JSONL) | HIGH | done |
-| 166 | Headless Browser Engine (Playwright SPA, DOM XSS) | HIGH | pending |
+| 166 | Headless Browser Engine (Playwright SPA, DOM XSS) | HIGH | done |
 | 167 | Scan Profile Presets (--profile quick/standard/deep) | HIGH | done |
 | 168 | Performance Benchmark Suite (vs Nuclei/ZAP/Nikto) | MEDIUM | pending |
 | 169 | i18n / Multilingual (JP/CN/KR/ES/PT docs + CLI) | MEDIUM | pending |
