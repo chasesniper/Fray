@@ -937,7 +937,7 @@ _ADMIN_VENDOR_FINGERPRINTS = [
     ("Traefik", re.compile(r'traefik', re.I), None),
     ("SonarQube", re.compile(r'sonarqube|sonar', re.I),
      re.compile(r'SonarQube\s+([\d.]+)', re.I)),
-    ("Elasticsearch", re.compile(r'elasticsearch|you know, for search', re.I),
+    ("Elasticsearch", re.compile(r'elasticsearch|you know,?\s*for search|"cluster_name"\s*:|"lucene_version"', re.I),
      re.compile(r'"number"\s*:\s*"([\d.]+)"')),
     ("MinIO", re.compile(r'minio', re.I), None),
     ("Nagios", re.compile(r'nagios', re.I),
