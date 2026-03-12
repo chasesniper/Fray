@@ -711,6 +711,156 @@ def run_recon(url: str, timeout: int = 8,
     else:
         result["subdomain_takeover"] = {"vulnerable": [], "checked": 0, "count": 0}
 
+    # ── Per-subdomain security checks ──────────────────────────────────
+    # Run bot detection, API security, cloud buckets, and JS endpoints
+    # across discovered subdomains (not just the main host).
+    # Cap at 50 subdomains to bound scan time; use 10 concurrent threads.
+    _SUB_CHECK_LIMIT = 50
+    _SUB_CHECK_WORKERS = 10
+    _sub_check_timeout = 4 if is_fast else 6
+
+    # Exclude the main host (already scanned) and filter to unique FQDNs
+    _main_host_lower = host.lower()
+    _sub_fqdns = []
+    _sub_seen = set()
+    for _s in all_subs:
+        fqdn = _s.get("fqdn", _s) if isinstance(_s, dict) else str(_s)
+        fqdn_l = fqdn.lower().strip(".")
+        if fqdn_l and fqdn_l != _main_host_lower and fqdn_l not in _sub_seen:
+            _sub_seen.add(fqdn_l)
+            _sub_fqdns.append(fqdn_l)
+    _sub_fqdns = _sub_fqdns[:_SUB_CHECK_LIMIT]
+
+    # Per-subdomain result accumulators
+    _sub_bot_findings = []       # (subdomain, vendor_entries)
+    _sub_api_findings = []       # (subdomain, api_result)
+    _sub_bucket_findings = []    # (subdomain, bucket_result)
+    _sub_js_findings = []        # (subdomain, js_result)
+
+    if _sub_fqdns and not is_fast:
+        if not quiet:
+            sys.stderr.write(f"\r  ⏳ Per-subdomain checks on {len(_sub_fqdns)} subdomain(s)...          \n")
+            sys.stderr.flush()
+
+        from fray.recon.http import _fetch_url as _sub_fetch
+
+        def _scan_subdomain(sub_fqdn: str):
+            """Fetch one subdomain and run all new checks."""
+            findings = {"fqdn": sub_fqdn}
+            try:
+                _st, _bd, _hd = _sub_fetch(
+                    f"https://{sub_fqdn}", timeout=_sub_check_timeout, verify_ssl=False)
+                if _st == 0:
+                    _st, _bd, _hd = _sub_fetch(
+                        f"http://{sub_fqdn}", timeout=_sub_check_timeout, verify_ssl=False)
+                if _st == 0:
+                    return findings
+                _use_ssl = True  # tried https first
+                findings["status"] = _st
+                findings["body_len"] = len(_bd)
+
+                # Bot protection (CPU-only, uses fetched body + headers)
+                bp = check_bot_protection(sub_fqdn, 443, _use_ssl,
+                                          body=_bd, resp_headers=_hd)
+                if bp.get("vendors"):
+                    findings["bot_protection"] = bp
+
+                # API security (probes API paths on this subdomain)
+                api = check_api_security(sub_fqdn, 443, _use_ssl,
+                                         timeout=_sub_check_timeout)
+                if (api.get("total_specs", 0) > 0 or
+                    api.get("api_gateway", {}).get("detected") or
+                    api.get("rate_limiting", {}).get("detected") or
+                        api.get("authentication", {}).get("detected")):
+                    findings["api_security"] = api
+
+                # Cloud buckets (uses body for reference discovery)
+                cb = check_cloud_buckets(sub_fqdn, timeout=_sub_check_timeout,
+                                         body=_bd)
+                if cb.get("total_public", 0) > 0:
+                    findings["cloud_buckets"] = cb
+
+                # JS endpoints (extracts from body + fetches JS files)
+                if len(_bd) > 200:
+                    js = check_js_endpoints(sub_fqdn, 443, _use_ssl,
+                                            timeout=_sub_check_timeout, body=_bd)
+                    if (js.get("total_endpoints", 0) > 5 or
+                        js.get("has_file_upload") or
+                            js.get("has_websockets")):
+                        findings["js_endpoints"] = js
+
+            except Exception:
+                pass
+            return findings
+
+        import concurrent.futures as _cf
+        with _cf.ThreadPoolExecutor(max_workers=_SUB_CHECK_WORKERS) as _pool:
+            _futures = {_pool.submit(_scan_subdomain, sf): sf for sf in _sub_fqdns}
+            for _fut in _cf.as_completed(_futures, timeout=_sub_check_timeout * 8):
+                try:
+                    _res = _fut.result(timeout=_sub_check_timeout * 2)
+                    if not _res:
+                        continue
+                    _sf = _res.get("fqdn", "")
+                    if _res.get("bot_protection"):
+                        _sub_bot_findings.append((_sf, _res["bot_protection"]))
+                    if _res.get("api_security"):
+                        _sub_api_findings.append((_sf, _res["api_security"]))
+                    if _res.get("cloud_buckets"):
+                        _sub_bucket_findings.append((_sf, _res["cloud_buckets"]))
+                    if _res.get("js_endpoints"):
+                        _sub_js_findings.append((_sf, _res["js_endpoints"]))
+                except Exception:
+                    pass
+
+        if not quiet:
+            _n_bot = len(_sub_bot_findings)
+            _n_api = len(_sub_api_findings)
+            _n_bkt = len(_sub_bucket_findings)
+            _n_js = len(_sub_js_findings)
+            if _n_bot or _n_api or _n_bkt or _n_js:
+                sys.stderr.write(
+                    f"\r  ✓ Subdomain findings: {_n_bot} bot, {_n_api} API, "
+                    f"{_n_bkt} bucket, {_n_js} JS          \n")
+                sys.stderr.flush()
+
+    # Store per-subdomain findings in result for report consumption
+    result["subdomain_security"] = {
+        "scanned": len(_sub_fqdns),
+        "bot_protection": _sub_bot_findings,
+        "api_security": _sub_api_findings,
+        "cloud_buckets": _sub_bucket_findings,
+        "js_endpoints": _sub_js_findings,
+    }
+
+    # Merge per-subdomain bot findings into main bot_protection
+    _main_bp = result.get("bot_protection", {})
+    _main_vendors = _main_bp.get("vendors", [])
+    _main_vendor_ids = {v["id"] for v in _main_vendors}
+    for _sf, _bp in _sub_bot_findings:
+        for v in _bp.get("vendors", []):
+            # Add unique vendor detections found on subdomains
+            if v["id"] not in _main_vendor_ids:
+                v["found_on"] = _sf
+                _main_vendors.append(v)
+                _main_vendor_ids.add(v["id"])
+
+    # Merge per-subdomain cloud bucket findings into main
+    _main_cb = result.get("cloud_buckets", {})
+    _main_buckets = _main_cb.get("buckets", [])
+    _main_bucket_names = {b.get("name", "") for b in _main_buckets}
+    for _sf, _cb in _sub_bucket_findings:
+        for b in _cb.get("buckets", []):
+            if b.get("name") not in _main_bucket_names:
+                b["found_on"] = _sf
+                _main_buckets.append(b)
+                _main_bucket_names.add(b.get("name", ""))
+        # Update public count
+        _main_cb["total_public"] = sum(
+            1 for b in _main_buckets
+            if b.get("public_read") or b.get("public_listing"))
+        _main_cb["total_found"] = len(_main_buckets)
+
     # Subdomain sprawl detection (#76) + cloud distribution (#77)
     from fray.recon.dns import score_dns_hygiene, detect_subdomain_sprawl, analyze_cloud_distribution
     merged_sub_list = result["subdomains"].get("subdomains", [])
@@ -1419,6 +1569,129 @@ def _enrich_for_report(result: Dict[str, Any]) -> None:
                 "impact": "Cross-Site WebSocket Hijacking, injection attacks, unauthorized data access, and denial of service.",
                 "mitre": "T1071 — Application Layer Protocol",
                 "detail": ws_detail,
+            })
+            priority_counter -= 5
+
+    # Per-subdomain security findings — aggregate into attack vectors
+    sub_sec = result.get("subdomain_security", {})
+
+    # Subdomain bot protection diversity
+    sub_bot = sub_sec.get("bot_protection", [])
+    if sub_bot:
+        # Group by vendor
+        _vendor_subs = {}
+        for sf, bp in sub_bot:
+            for v in bp.get("vendors", []):
+                vid = v.get("id", "")
+                if vid not in _vendor_subs:
+                    _vendor_subs[vid] = {"label": v["label"], "subs": []}
+                _vendor_subs[vid]["subs"].append(sf)
+        bot_detail_parts = []
+        for vid, info in _vendor_subs.items():
+            bot_detail_parts.append(f"{info['label']} on {', '.join(info['subs'][:3])}"
+                                    + (f" +{len(info['subs'])-3}" if len(info['subs']) > 3 else ""))
+        bot_detail = (f"Bot protection detected on {len(sub_bot)} subdomain(s): "
+                      + "; ".join(bot_detail_parts))
+        # Only add as vector if there's inconsistency (some subs protected, some not)
+        _n_scanned = sub_sec.get("scanned", 0)
+        if _n_scanned > len(sub_bot):
+            n_unprotected = _n_scanned - len(sub_bot)
+            bot_detail += f". {n_unprotected}/{_n_scanned} subdomain(s) lack bot protection — inconsistent coverage."
+            vectors.append({
+                "type": "Inconsistent Bot Protection", "severity": "medium",
+                "count": n_unprotected, "priority": priority_counter,
+                "targets": [f"https://{host}"],
+                "description": "Bot protection is not uniformly deployed across subdomains. Unprotected subdomains can be used to bypass bot defenses.",
+                "impact": "Credential stuffing, scraping, and automated attacks via unprotected subdomains.",
+                "mitre": "T1595 — Active Scanning",
+                "detail": bot_detail,
+            })
+            priority_counter -= 5
+
+    # Subdomain API security findings
+    sub_api = sub_sec.get("api_security", [])
+    if sub_api:
+        api_detail_parts = []
+        all_spec_targets = []
+        for sf, api_data in sub_api[:10]:
+            specs = api_data.get("specs_found", [])
+            gw = api_data.get("api_gateway", {})
+            parts = []
+            if specs:
+                parts.append(f"{len(specs)} spec(s)")
+                for sp in specs[:2]:
+                    all_spec_targets.append(f"https://{sf}{sp.get('path', '')}")
+            if gw.get("detected"):
+                parts.append(f"gateway: {', '.join(gw.get('vendors', []))}")
+            if parts:
+                api_detail_parts.append(f"{sf}: {', '.join(parts)}")
+        api_sub_detail = (f"API security findings on {len(sub_api)} subdomain(s): "
+                          + "; ".join(api_detail_parts[:5]))
+        vectors.append({
+            "type": "Subdomain API Exposure", "severity": "high",
+            "count": len(sub_api), "priority": priority_counter,
+            "targets": all_spec_targets[:10] or [f"https://{sf}" for sf, _ in sub_api[:5]],
+            "description": "API documentation, specs, or gateway endpoints discovered on subdomains.",
+            "impact": "Subdomain APIs may have weaker access controls — full endpoint enumeration, auth bypass, and data exposure.",
+            "mitre": "T1592 — Gather Victim Host Information",
+            "detail": api_sub_detail,
+        })
+        priority_counter -= 5
+
+    # Subdomain cloud bucket findings (public buckets found via subdomains)
+    sub_bkt = sub_sec.get("cloud_buckets", [])
+    if sub_bkt:
+        all_pub = []
+        for sf, cb in sub_bkt:
+            for b in cb.get("buckets", []):
+                if b.get("public_read") or b.get("public_listing"):
+                    all_pub.append((sf, b))
+        if all_pub:
+            bkt_detail = f"{len(all_pub)} public bucket(s) found via subdomain scanning: "
+            bkt_detail += ", ".join(f"{b['name']} ({b['provider']}) via {sf}" for sf, b in all_pub[:5])
+            vectors.append({
+                "type": "Subdomain Cloud Storage Exposure", "severity": "high",
+                "count": len(all_pub), "priority": priority_counter,
+                "targets": [b.get("url", f"https://{sf}") for sf, b in all_pub[:5]],
+                "description": "Public cloud storage buckets discovered via subdomain content analysis.",
+                "impact": "Data exfiltration, sensitive file exposure, and backup leakage via subdomain-referenced buckets.",
+                "mitre": "T1530 — Data from Cloud Storage",
+                "detail": bkt_detail,
+            })
+            priority_counter -= 5
+
+    # Subdomain JS endpoint findings (file uploads, WebSockets on subdomains)
+    sub_js = sub_sec.get("js_endpoints", [])
+    if sub_js:
+        _upload_subs = []
+        _ws_subs = []
+        _total_eps = 0
+        for sf, js_data in sub_js:
+            _total_eps += js_data.get("total_endpoints", 0)
+            if js_data.get("has_file_upload"):
+                _upload_subs.append(sf)
+            if js_data.get("has_websockets"):
+                _ws_subs.append(sf)
+        if _upload_subs:
+            vectors.append({
+                "type": "Subdomain File Upload", "severity": "high",
+                "count": len(_upload_subs), "priority": priority_counter,
+                "targets": [f"https://{s}" for s in _upload_subs[:5]],
+                "description": "File upload functionality detected on subdomains — potential for unrestricted upload and webshell deployment.",
+                "impact": "Remote code execution, stored XSS, and directory traversal via subdomain upload endpoints.",
+                "mitre": "T1105 — Ingress Tool Transfer",
+                "detail": f"File upload on {len(_upload_subs)} subdomain(s): {', '.join(_upload_subs[:5])}",
+            })
+            priority_counter -= 5
+        if _ws_subs:
+            vectors.append({
+                "type": "Subdomain WebSocket", "severity": "medium",
+                "count": len(_ws_subs), "priority": priority_counter,
+                "targets": [f"https://{s}" for s in _ws_subs[:5]],
+                "description": "WebSocket endpoints discovered on subdomains — real-time channels that may lack authentication.",
+                "impact": "Cross-Site WebSocket Hijacking, injection, and unauthorized data access via subdomain WS endpoints.",
+                "mitre": "T1071 — Application Layer Protocol",
+                "detail": f"WebSocket on {len(_ws_subs)} subdomain(s): {', '.join(_ws_subs[:5])}. {_total_eps} total JS endpoints extracted.",
             })
             priority_counter -= 5
 
