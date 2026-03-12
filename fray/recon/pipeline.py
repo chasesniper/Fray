@@ -116,6 +116,7 @@ from fray.recon.checks import (
     check_cloud_buckets,
     check_js_endpoints,
     check_api_security,
+    check_vpn_endpoints,
 )
 from fray.recon.discovery import (
     discover_historical_urls,
@@ -523,6 +524,11 @@ def run_recon(url: str, timeout: int = 8,
             lambda: check_api_security(host, port, use_ssl, timeout=timeout,
                                         extra_headers=headers),
             "API security detection"))
+        t_vpn = asyncio.create_task(_run(
+            lambda: check_vpn_endpoints(host, port, use_ssl, timeout=timeout,
+                                         extra_headers=headers, body=body,
+                                         resp_headers=resp_headers),
+            "VPN endpoint detection"))
 
         # ── Collect remaining tier 1 results ──
         result["http"]          = await _safe(t_http, {})
@@ -556,6 +562,7 @@ def run_recon(url: str, timeout: int = 8,
         result["source_maps"] = await _safe(t_srcmaps, {})
         result["cloud_buckets"] = await _safe(t_buckets, {})
         result["api_security"] = await _safe(t_api_sec, {})
+        result["vpn_endpoints"] = await _safe(t_vpn, {})
         if t_dnssec:
             result["dnssec"] = await _safe(t_dnssec, {})
         if t_axfr:
@@ -746,6 +753,11 @@ def run_recon(url: str, timeout: int = 8,
     _JS_KEYWORDS = {"app", "portal", "dashboard", "admin", "console",
                     "web", "www2", "m", "mobile", "spa", "ui", "frontend",
                     "panel", "cms", "editor", "manage", "management"}
+    _VPN_KEYWORDS = {"vpn", "remote", "ra", "ssl", "sslvpn", "ras",
+                     "gateway", "gw", "connect", "anyconnect", "pulse",
+                     "globalprotect", "netscaler", "citrixgw", "access",
+                     "fortivpn", "bastion", "jump", "tunnel", "ipsec",
+                     "wireguard", "openvpn", "zerotrust", "ztna", "sase"}
 
     def _classify_subdomain(fqdn_lower: str):
         """Return set of check types this subdomain should receive."""
@@ -770,6 +782,8 @@ def run_recon(url: str, timeout: int = 8,
             checks.add("bucket")
         if labels & _JS_KEYWORDS:
             checks.add("js")
+        if labels & _VPN_KEYWORDS or "vpn" in fqdn_lower:
+            checks.add("vpn")
 
         # Subdomains containing "api" anywhere in them get API checks
         if "api" in fqdn_lower:
@@ -794,12 +808,14 @@ def run_recon(url: str, timeout: int = 8,
     _n_bot_targets = sum(1 for _, c in _sub_tasks if "bot" in c)
     _n_bkt_targets = sum(1 for _, c in _sub_tasks if "bucket" in c)
     _n_js_targets = sum(1 for _, c in _sub_tasks if "js" in c)
+    _n_vpn_targets = sum(1 for _, c in _sub_tasks if "vpn" in c)
 
     # Per-subdomain result accumulators
     _sub_bot_findings = []       # (subdomain, vendor_entries)
     _sub_api_findings = []       # (subdomain, api_result)
     _sub_bucket_findings = []    # (subdomain, bucket_result)
     _sub_js_findings = []        # (subdomain, js_result)
+    _sub_vpn_findings = []       # (subdomain, vpn_result)
     _sub_tech_findings = []      # (subdomain, tech_dict)
 
     if _sub_tasks and not is_fast:
@@ -807,7 +823,8 @@ def run_recon(url: str, timeout: int = 8,
             sys.stderr.write(
                 f"\r  ⏳ Smart subdomain checks: {len(_sub_tasks)} sub(s) "
                 f"[API:{_n_api_targets} Bot:{_n_bot_targets} "
-                f"Bucket:{_n_bkt_targets} JS:{_n_js_targets}]          \n")
+                f"Bucket:{_n_bkt_targets} JS:{_n_js_targets} "
+                f"VPN:{_n_vpn_targets}]          \n")
             sys.stderr.flush()
 
         from fray.recon.http import _fetch_url as _sub_fetch
@@ -865,6 +882,14 @@ def run_recon(url: str, timeout: int = 8,
                             js.get("has_websockets")):
                         findings["js_endpoints"] = js
 
+                # VPN endpoints — only on vpn/remote/gateway subdomains
+                if "vpn" in check_types:
+                    vpn = check_vpn_endpoints(sub_fqdn, 443, True,
+                                              timeout=_sub_check_timeout,
+                                              body=_bd, resp_headers=_hd)
+                    if vpn.get("total_found", 0) > 0:
+                        findings["vpn_endpoints"] = vpn
+
             except Exception:
                 pass
             return findings
@@ -891,6 +916,8 @@ def run_recon(url: str, timeout: int = 8,
                         _sub_bucket_findings.append((_sf, _res["cloud_buckets"]))
                     if _res.get("js_endpoints"):
                         _sub_js_findings.append((_sf, _res["js_endpoints"]))
+                    if _res.get("vpn_endpoints"):
+                        _sub_vpn_findings.append((_sf, _res["vpn_endpoints"]))
                 except Exception:
                     pass
 
@@ -899,6 +926,7 @@ def run_recon(url: str, timeout: int = 8,
             _n_api = len(_sub_api_findings)
             _n_bkt = len(_sub_bucket_findings)
             _n_js = len(_sub_js_findings)
+            _n_vpn = len(_sub_vpn_findings)
             _n_tech = len(_sub_tech_findings)
             parts = []
             if _n_tech:
@@ -911,6 +939,8 @@ def run_recon(url: str, timeout: int = 8,
                 parts.append(f"{_n_bkt} bucket")
             if _n_js:
                 parts.append(f"{_n_js} JS")
+            if _n_vpn:
+                parts.append(f"{_n_vpn} VPN")
             if parts:
                 sys.stderr.write(
                     f"\r  ✓ Subdomain findings: {', '.join(parts)}          \n")
@@ -923,11 +953,13 @@ def run_recon(url: str, timeout: int = 8,
         "bot_targeted": _n_bot_targets,
         "bucket_targeted": _n_bkt_targets,
         "js_targeted": _n_js_targets,
+        "vpn_targeted": _n_vpn_targets,
         "tech_fingerprints": _sub_tech_findings,
         "bot_protection": _sub_bot_findings,
         "api_security": _sub_api_findings,
         "cloud_buckets": _sub_bucket_findings,
         "js_endpoints": _sub_js_findings,
+        "vpn_endpoints": _sub_vpn_findings,
     }
 
     # Merge per-subdomain bot findings into main bot_protection
@@ -1685,6 +1717,69 @@ def _enrich_for_report(result: Dict[str, Any]) -> None:
                 "impact": "Cross-Site WebSocket Hijacking, injection attacks, unauthorized data access, and denial of service.",
                 "mitre": "T1071 — Application Layer Protocol",
                 "detail": ws_detail,
+            })
+            priority_counter -= 5
+
+    # VPN / Remote Access endpoints — critical attack surface
+    vpn_data = result.get("vpn_endpoints", {})
+    if isinstance(vpn_data, dict) and vpn_data.get("total_found", 0) > 0:
+        vpn_list = vpn_data.get("vpn_endpoints", [])
+        vpn_detail_parts = []
+        for v in vpn_list[:5]:
+            part = v["label"]
+            if v.get("paths"):
+                part += f" ({', '.join(v['paths'][:2])})"
+            if v.get("severity_note"):
+                part += f" — {v['severity_note']}"
+            vpn_detail_parts.append(part)
+        vpn_detail = f"{len(vpn_list)} VPN/remote access endpoint(s): " + "; ".join(vpn_detail_parts)
+        sev = "critical" if vpn_data.get("has_critical_cves") else "high"
+        vectors.append({
+            "type": "VPN / Remote Access", "severity": sev,
+            "count": len(vpn_list), "priority": priority_counter,
+            "targets": [f"https://{host}{v['paths'][0]}" for v in vpn_list if v.get("paths")][:5],
+            "description": "Enterprise VPN concentrator detected — network perimeter entry point. VPN appliances are consistently targeted by ransomware groups and APTs via pre-auth RCE exploits.",
+            "impact": "Full internal network access via VPN exploitation, credential theft, lateral movement, and ransomware deployment.",
+            "mitre": "T1133 — External Remote Services",
+            "detail": vpn_detail,
+        })
+        priority_counter -= 5
+
+    # Also merge per-subdomain VPN findings
+    sub_sec = result.get("subdomain_security", {})
+    sub_vpn = sub_sec.get("vpn_endpoints", [])
+    if sub_vpn:
+        # Merge into main vpn_endpoints
+        _main_vpn = result.get("vpn_endpoints", {})
+        _main_vpn_prods = {v["product_id"] for v in _main_vpn.get("vpn_endpoints", [])}
+        for _sf, _vpn_data in sub_vpn:
+            for v in _vpn_data.get("vpn_endpoints", []):
+                if v["product_id"] not in _main_vpn_prods:
+                    v["found_on"] = _sf
+                    _main_vpn.setdefault("vpn_endpoints", []).append(v)
+                    _main_vpn_prods.add(v["product_id"])
+
+        # Create attack vector for subdomain VPN findings
+        vpn_sub_parts = []
+        vpn_sub_targets = []
+        for _sf, _vpn_data in sub_vpn[:10]:
+            for v in _vpn_data.get("vpn_endpoints", []):
+                vpn_sub_parts.append(f"{v['label']} on {_sf}")
+                if v.get("paths"):
+                    vpn_sub_targets.append(f"https://{_sf}{v['paths'][0]}")
+        if vpn_sub_parts:
+            has_crit = any(
+                v.get("severity_note", "").startswith("Critical")
+                for _, vd in sub_vpn for v in vd.get("vpn_endpoints", []))
+            vpn_sub_detail = f"VPN endpoints on {len(sub_vpn)} subdomain(s): " + "; ".join(vpn_sub_parts[:5])
+            vectors.append({
+                "type": "Subdomain VPN / Remote Access", "severity": "critical" if has_crit else "high",
+                "count": len(sub_vpn), "priority": priority_counter,
+                "targets": vpn_sub_targets[:5],
+                "description": "VPN/remote access endpoints discovered on subdomains — direct network entry points often with weaker monitoring than the main VPN.",
+                "impact": "Internal network penetration via subdomain VPN appliances, lateral movement, and potential ransomware deployment.",
+                "mitre": "T1133 — External Remote Services",
+                "detail": vpn_sub_detail,
             })
             priority_counter -= 5
 

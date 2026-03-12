@@ -3495,6 +3495,312 @@ def check_api_security(host: str, port: int, use_ssl: bool,
 
 
 # ---------------------------------------------------------------------------
+# VPN / Remote Access Endpoint Detection
+# ---------------------------------------------------------------------------
+# Enterprise VPN concentrators are high-value targets:
+#   - CVE-2023-46805 / CVE-2024-21887: Ivanti Connect Secure (Pulse) RCE chain
+#   - CVE-2023-27997: FortiGate SSL-VPN heap overflow (pre-auth RCE)
+#   - CVE-2024-3400: Palo Alto PAN-OS GlobalProtect command injection
+#   - CVE-2023-20269: Cisco ASA/FTD brute-force + unauthorized VPN
+#   - CVE-2023-3519: Citrix NetScaler ADC/Gateway RCE (zero-day)
+#   - CVE-2024-23113: FortiOS format string vulnerability
+# These are consistently in CISA KEV and used by ransomware groups.
+
+_VPN_PRODUCTS = [
+    # (path, body_pattern, product_id, product_label, severity_note)
+    # ── Ivanti Connect Secure / Pulse Secure ──────────────────────────
+    ("/dana-na/auth/url_default/welcome.cgi", re.compile(r'pulse|ivanti|connect\s*secure', re.I),
+     "ivanti_pulse", "Ivanti Connect Secure (Pulse Secure)",
+     "Critical: CVE-2023-46805 + CVE-2024-21887 auth bypass + RCE chain"),
+    ("/dana/html5acc/guacamole/", re.compile(r'pulse|ivanti|guacamole', re.I),
+     "ivanti_pulse", "Ivanti Connect Secure (Pulse Secure)", None),
+    ("/dana-na/auth/url_0/welcome.cgi", None,
+     "ivanti_pulse", "Ivanti Connect Secure (Pulse Secure)", None),
+    # Ivanti Policy Secure
+    ("/dana-na/auth/url_admin/welcome.cgi", None,
+     "ivanti_policy", "Ivanti Policy Secure", None),
+    # ── Fortinet FortiGate SSL-VPN ────────────────────────────────────
+    ("/remote/login", re.compile(r'fortinet|fortigate|fortios|fgt_lang', re.I),
+     "fortinet_sslvpn", "Fortinet FortiGate SSL-VPN",
+     "Critical: CVE-2023-27997 heap overflow, CVE-2024-23113 format string"),
+    ("/remote/logincheck", None,
+     "fortinet_sslvpn", "Fortinet FortiGate SSL-VPN", None),
+    ("/remote/fgt_lang", None,
+     "fortinet_sslvpn", "Fortinet FortiGate SSL-VPN", None),
+    # ── Palo Alto GlobalProtect ───────────────────────────────────────
+    ("/global-protect/login.esp", re.compile(r'globalprotect|palo\s*alto|pan-os', re.I),
+     "paloalto_gp", "Palo Alto GlobalProtect",
+     "Critical: CVE-2024-3400 PAN-OS command injection (zero-day)"),
+    ("/global-protect/portal/css/login.css", None,
+     "paloalto_gp", "Palo Alto GlobalProtect", None),
+    ("/ssl-vpn/login.esp", None,
+     "paloalto_gp", "Palo Alto GlobalProtect", None),
+    # ── Cisco AnyConnect / ASA / FTD ──────────────────────────────────
+    ("/+CSCOE+/logon.html", re.compile(r'cisco|anyconnect|asa|webvpn', re.I),
+     "cisco_anyconnect", "Cisco AnyConnect (ASA/FTD)",
+     "High: CVE-2023-20269 brute-force + unauthorized VPN access"),
+    ("/+CSCOT+/oem-customization", None,
+     "cisco_anyconnect", "Cisco AnyConnect (ASA/FTD)", None),
+    ("/CACHE/sdesktop/install/binaries/", None,
+     "cisco_anyconnect", "Cisco AnyConnect (ASA/FTD)", None),
+    # ── Citrix NetScaler / ADC Gateway ────────────────────────────────
+    ("/vpn/index.html", re.compile(r'citrix|netscaler|nsg|gateway', re.I),
+     "citrix_gateway", "Citrix NetScaler Gateway",
+     "Critical: CVE-2023-3519 RCE (zero-day), CVE-2023-4966 info disclosure"),
+    ("/logon/LogonPoint/tmindex.html", None,
+     "citrix_gateway", "Citrix NetScaler Gateway", None),
+    ("/vpn/tmindex.html", None,
+     "citrix_gateway", "Citrix NetScaler Gateway", None),
+    # ── SonicWall SMA / NetExtender ───────────────────────────────────
+    ("/cgi-bin/welcome", re.compile(r'sonicwall|sma|netextender', re.I),
+     "sonicwall", "SonicWall SSL-VPN",
+     "High: CVE-2023-44221/CVE-2024-38475 SMA command injection"),
+    ("/cgi-bin/main", re.compile(r'sonicwall', re.I),
+     "sonicwall", "SonicWall SSL-VPN", None),
+    # ── Check Point Mobile Access / SNX ───────────────────────────────
+    ("/sslvpn/Login/Login", re.compile(r'check\s*point|mobile.*access|SNX', re.I),
+     "checkpoint_vpn", "Check Point Mobile Access VPN",
+     "High: CVE-2024-24919 info disclosure (zero-day)"),
+    ("/sslvpn/xsl/sslvpn.xsl", None,
+     "checkpoint_vpn", "Check Point Mobile Access VPN", None),
+    # ── F5 BIG-IP APM ────────────────────────────────────────────────
+    ("/my.policy", re.compile(r'f5|big-?ip|apm|access\s*policy', re.I),
+     "f5_apm", "F5 BIG-IP APM VPN",
+     "Critical: CVE-2023-46747 auth bypass, CVE-2022-1388 RCE"),
+    ("/vdesk/", re.compile(r'f5|big-?ip', re.I),
+     "f5_apm", "F5 BIG-IP APM VPN", None),
+    # ── Juniper Secure Connect / SRX ──────────────────────────────────
+    ("/dana/", re.compile(r'juniper|srx|secure\s*connect', re.I),
+     "juniper_vpn", "Juniper Secure Connect VPN",
+     "High: CVE-2023-36845 Junos PHP env injection"),
+    # ── OpenVPN Access Server ─────────────────────────────────────────
+    ("/__session_start__/", re.compile(r'openvpn', re.I),
+     "openvpn_as", "OpenVPN Access Server", None),
+    ("/admin/", re.compile(r'openvpn\s*access\s*server', re.I),
+     "openvpn_as", "OpenVPN Access Server", None),
+    # ── Barracuda CloudGen Access ─────────────────────────────────────
+    ("/vpn/", re.compile(r'barracuda', re.I),
+     "barracuda_vpn", "Barracuda VPN", None),
+    # ── Array Networks AG/vxAG ────────────────────────────────────────
+    ("/prx/000/http/localhost/login", re.compile(r'array\s*networks|arrayos', re.I),
+     "array_vpn", "Array Networks SSL-VPN",
+     "Critical: CVE-2023-28461 RCE (CISA KEV)"),
+    # ── Sophos SSLVPN ────────────────────────────────────────────────
+    ("/userportal/webpages/myaccount/login.jsp",
+     re.compile(r'sophos|cyberoam', re.I),
+     "sophos_vpn", "Sophos SSL-VPN", None),
+]
+
+# VPN-related response headers
+_VPN_HEADERS = {
+    "x-pulse-version": ("ivanti_pulse", "Ivanti Connect Secure (Pulse Secure)"),
+    "x-fortigate": ("fortinet_sslvpn", "Fortinet FortiGate"),
+    "server": None,  # special handling below
+}
+
+# VPN server header fingerprints
+_VPN_SERVER_PATTERNS = [
+    (re.compile(r'BigIP|BIG-IP|F5', re.I), "f5_apm", "F5 BIG-IP"),
+    (re.compile(r'SonicWALL', re.I), "sonicwall", "SonicWall"),
+    (re.compile(r'Check\s*Point', re.I), "checkpoint_vpn", "Check Point"),
+    (re.compile(r'NetScaler|Citrix', re.I), "citrix_gateway", "Citrix NetScaler"),
+    (re.compile(r'Juniper', re.I), "juniper_vpn", "Juniper"),
+    (re.compile(r'Barracuda', re.I), "barracuda_vpn", "Barracuda"),
+    (re.compile(r'Array', re.I), "array_vpn", "Array Networks"),
+]
+
+# Common VPN-related ports (for enrichment, not active scanning)
+_VPN_PORTS = {
+    443: "SSL-VPN (HTTPS)",
+    8443: "SSL-VPN (alt)",
+    10443: "Fortinet SSL-VPN",
+    4443: "Pulse Secure",
+    1194: "OpenVPN (UDP/TCP)",
+    51820: "WireGuard",
+    500: "IPsec IKE",
+    4500: "IPsec NAT-T",
+}
+
+
+def check_vpn_endpoints(host: str, port: int, use_ssl: bool,
+                        timeout: int = 5,
+                        extra_headers: Optional[Dict[str, str]] = None,
+                        body: str = "",
+                        resp_headers: Optional[Dict[str, str]] = None,
+                        ) -> Dict[str, Any]:
+    """Detect VPN / remote access endpoints and identify the vendor/product.
+
+    Probes known VPN login paths for major enterprise VPN products,
+    fingerprints via response body, headers, and server strings.
+    Each finding includes associated CVEs for the vendor.
+    """
+    from fray.recon.http import _fetch_url
+    import concurrent.futures
+
+    scheme = "https" if use_ssl else "http"
+    port_str = "" if (use_ssl and port == 443) or (not use_ssl and port == 80) else f":{port}"
+    base = f"{scheme}://{host}{port_str}"
+
+    detected: Dict[str, Dict[str, Any]] = {}  # product_id -> info
+    probed_paths: List[str] = []
+
+    def _probe_vpn_path(path, body_pat, prod_id, prod_label, sev_note):
+        """Probe a single VPN path."""
+        url = f"{base}{path}"
+        try:
+            status, rbody, rhdrs = _fetch_url(url, timeout=timeout, verify_ssl=False,
+                                               headers=extra_headers)
+        except Exception:
+            return None
+
+        if status == 0 or status == 404:
+            return None
+
+        # Match: 200/301/302/401/403 all indicate the path exists
+        matched = False
+        match_signals = []
+
+        if status == 200:
+            if body_pat and rbody and body_pat.search(rbody):
+                matched = True
+                match_signals.append(f"body_match:{path}")
+            elif not body_pat and len(rbody) > 50:
+                # No body pattern — path exists with content
+                matched = True
+                match_signals.append(f"path_exists:{path}")
+        elif status in (301, 302):
+            # Redirects are NOT reliable for VPN detection.
+            # Many CMSes redirect all unknown paths. Only trust redirects
+            # if we also see VPN-specific headers in the response.
+            pass
+        elif status == 401:
+            # 401 with WWW-Authenticate is a strong signal (actual auth challenge)
+            if rhdrs.get('www-authenticate'):
+                matched = True
+                match_signals.append(f"auth_challenge:{path} ({rhdrs['www-authenticate'][:40]})")
+        elif status == 403:
+            # 403 alone is too weak (generic WAF/Apache), only trust with
+            # VPN-specific headers present
+            pass
+
+        # Check headers for VPN vendor signals
+        for hdr_key, hdr_info in _VPN_HEADERS.items():
+            if hdr_key == "server":
+                continue  # handled separately
+            val = rhdrs.get(hdr_key)
+            if val and hdr_info:
+                matched = True
+                match_signals.append(f"header:{hdr_key}={val[:40]}")
+
+        # Server header fingerprint
+        server = rhdrs.get("server", "")
+        if server:
+            for spat, sid, slabel in _VPN_SERVER_PATTERNS:
+                if spat.search(server):
+                    matched = True
+                    match_signals.append(f"server:{server[:40]}")
+                    break
+
+        if matched:
+            return {
+                "product_id": prod_id, "label": prod_label,
+                "path": path, "status": status,
+                "signals": match_signals, "severity_note": sev_note,
+            }
+        return None
+
+    # Probe all VPN paths concurrently
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        futures = {}
+        seen_prods = set()
+        for path, body_pat, prod_id, prod_label, sev_note in _VPN_PRODUCTS:
+            f = pool.submit(_probe_vpn_path, path, body_pat, prod_id, prod_label, sev_note)
+            futures[f] = (path, prod_id)
+            probed_paths.append(path)
+
+        for f in concurrent.futures.as_completed(futures, timeout=timeout * 6):
+            try:
+                r = f.result()
+                if r:
+                    pid = r["product_id"]
+                    if pid not in detected:
+                        detected[pid] = {
+                            "product_id": pid,
+                            "label": r["label"],
+                            "paths": [],
+                            "signals": [],
+                            "severity_note": r.get("severity_note"),
+                        }
+                    detected[pid]["paths"].append(r["path"])
+                    detected[pid]["signals"].extend(r["signals"])
+            except Exception:
+                pass
+
+    # Also check main page body/headers for VPN indicators
+    hdrs = resp_headers or {}
+    if body:
+        for _pat, _sid, _label in _VPN_SERVER_PATTERNS:
+            if _pat.search(body):
+                if _sid not in detected:
+                    detected[_sid] = {
+                        "product_id": _sid, "label": _label,
+                        "paths": ["/"], "signals": ["body_main_page"],
+                        "severity_note": None,
+                    }
+    # Check VPN-specific response headers (x-pulse-version, x-fortigate, etc.)
+    for hdr_key, hdr_info in _VPN_HEADERS.items():
+        if hdr_key == "server":
+            continue
+        val = hdrs.get(hdr_key)
+        if val and hdr_info:
+            _hdr_pid, _hdr_label = hdr_info
+            if _hdr_pid not in detected:
+                # Look up severity_note from _VPN_PRODUCTS
+                _sev = None
+                for _p in _VPN_PRODUCTS:
+                    if _p[2] == _hdr_pid and _p[4]:
+                        _sev = _p[4]
+                        break
+                detected[_hdr_pid] = {
+                    "product_id": _hdr_pid, "label": _hdr_label,
+                    "paths": ["/"], "signals": [f"header:{hdr_key}={val[:60]}"],
+                    "severity_note": _sev,
+                }
+    # Check Server header for VPN product fingerprints
+    server_hdr = hdrs.get("server", "")
+    if server_hdr:
+        for _pat, _sid, _label in _VPN_SERVER_PATTERNS:
+            if _pat.search(server_hdr):
+                if _sid not in detected:
+                    detected[_sid] = {
+                        "product_id": _sid, "label": _label,
+                        "paths": ["/"], "signals": [f"server_header:{server_hdr[:60]}"],
+                        "severity_note": None,
+                    }
+
+    # Filter out generic detections if a specific product was found
+    specific = {k for k in detected if not k.startswith("generic_")}
+    if specific:
+        detected = {k: v for k, v in detected.items() if not k.startswith("generic_")}
+
+    vpn_list = sorted(detected.values(), key=lambda x: x["label"])
+
+    return {
+        "vpn_endpoints": vpn_list,
+        "total_found": len(vpn_list),
+        "paths_probed": len(probed_paths),
+        "products": [v["label"] for v in vpn_list],
+        "has_critical_cves": any(
+            (v.get("severity_note") or "").startswith("Critical")
+            for v in vpn_list),
+        "severity": ("critical" if any((v.get("severity_note") or "").startswith("Critical") for v in vpn_list)
+                     else "high" if vpn_list else "info"),
+        "summary": (f"{len(vpn_list)} VPN endpoint(s): {', '.join(v['label'] for v in vpn_list)}"
+                    if vpn_list else "No VPN endpoints detected"),
+    }
+
+
+# ---------------------------------------------------------------------------
 # Secret / Credential Detection (#16, #17, #18, #19)
 # ---------------------------------------------------------------------------
 
