@@ -1886,7 +1886,8 @@ _WAF_CDN_SIGNATURES = [
     # ── Google Cloud ──
     {"name": "Google Cloud Armor", "waf": "Google Cloud Armor", "cdn": "Google CDN",
      "headers": {"via": "google", "x-goog-": ""},
-     "cname_hints": ["googleusercontent", "googlevideo", "withgoogle"]},
+     "server_contains": ["gws", "gfe"],
+     "cname_hints": ["googleusercontent", "googlevideo", "withgoogle", "google.com"]},
     {"name": "Google Cloud CDN", "waf": None, "cdn": "Google CDN",
      "headers": {"x-goog-hash": ""},
      "cname_hints": ["storage.googleapis.com"]},
@@ -1894,6 +1895,7 @@ _WAF_CDN_SIGNATURES = [
     # ── Imperva / Incapsula ──
     {"name": "Imperva", "waf": "Imperva", "cdn": "Imperva",
      "headers": {"x-iinfo": "", "x-cdn": "imperva", "x-iinfo-origin-env": ""},
+     "cookie_hints": ["visid_incap_", "incap_ses_", "x-mapping-"],
      "cname_hints": ["incapsula", "imperva"]},
     {"name": "Imperva Advanced Bot Protection", "waf": "Imperva ABP", "cdn": "Imperva",
      "headers": {"x-cdn": "incapsula"},
@@ -1901,15 +1903,16 @@ _WAF_CDN_SIGNATURES = [
 
     # ── Fastly ──
     {"name": "Fastly", "waf": "Fastly (Signal Sciences)", "cdn": "Fastly",
-     "headers": {"x-served-by": "", "x-fastly-request-id": ""},
-     "cname_hints": ["fastly"]},
+     "headers": {"x-served-by": "", "x-fastly-request-id": "", "x-cache-hits": ""},
+     "cname_hints": ["fastly", "fastlylb"]},
     {"name": "Fastly Next-Gen WAF", "waf": "Fastly (Signal Sciences)", "cdn": "Fastly",
      "headers": {"x-sigsci-decision": ""},
      "cname_hints": []},
 
     # ── Sucuri ──
     {"name": "Sucuri", "waf": "Sucuri", "cdn": "Sucuri",
-     "headers": {"x-sucuri-id": "", "x-sucuri-cache": ""},
+     "headers": {"x-sucuri-id": "", "x-sucuri-cache": "",
+                 "x-gateway-request-id": "", "x-gateway-cache-status": ""},
      "cname_hints": ["sucuri"]},
 
     # ── Verizon / Edgecast ──
@@ -1969,7 +1972,7 @@ _WAF_CDN_SIGNATURES = [
     # ── ChinaCache ──
     {"name": "ChinaCache", "waf": None, "cdn": "ChinaCache",
      "headers": {"server": "chinacache"},
-     "cname_hints": ["chinacache"]},
+     "cname_hints": ["chinacache", "ccgslb"]},
 
     # ── CDNetworks ──
     {"name": "CDNetworks", "waf": "CDNetworks WAF", "cdn": "CDNetworks",
@@ -1998,7 +2001,7 @@ _WAF_CDN_SIGNATURES = [
 
     # ── Render ──
     {"name": "Render", "waf": None, "cdn": "Render",
-     "headers": {"server": "render", "rndr-id": ""},
+     "headers": {"server": "render", "rndr-id": "", "x-render-origin-server": ""},
      "cname_hints": ["onrender"]},
 
     # ── Railway ──
@@ -2067,7 +2070,8 @@ _WAF_CDN_SIGNATURES = [
 
     # ── Comodo / Sectigo WAF ──
     {"name": "Comodo WAF", "waf": "Comodo WAF", "cdn": None,
-     "headers": {"server": "comodo", "x-cwaf-detected": ""},
+     "headers": {"server": "comodo", "x-cwaf-detected": "", "x-beluga-cache-status": ""},
+     "server_contains": ["comodo", "nucdn"],
      "cname_hints": []},
 
     # ── Wordfence (WordPress) ──
@@ -2137,7 +2141,7 @@ _WAF_CDN_SIGNATURES = [
 
     # ── DataDome ──
     {"name": "DataDome", "waf": "DataDome", "cdn": None,
-     "headers": {"x-datadome": "", "x-dd-b": "", "server": "datadome"},
+     "headers": {"x-datadome": "", "x-datadome-cid": "", "x-dd-b": "", "server": "datadome"},
      "cname_hints": ["datadome"]},
 
     # ── Kasada ──
@@ -2168,6 +2172,7 @@ _WAF_CDN_SIGNATURES = [
     # ── AWS Elastic Load Balancer (not WAF, but infra detection) ──
     {"name": "AWS ELB", "waf": None, "cdn": None,
      "headers": {"server": "awselb"},
+     "server_contains": ["awselb"],
      "cname_hints": ["elb.amazonaws.com"]},
 
     # ── LiteSpeed (with built-in WAF) ──
@@ -2188,16 +2193,20 @@ _WAF_CDN_SIGNATURES = [
     # ── DDoS-Guard ──
     {"name": "DDoS-Guard", "waf": "DDoS-Guard", "cdn": "DDoS-Guard",
      "headers": {"server": "ddos-guard"},
+     "cookie_hints": ["__ddg8_", "__ddg9_", "__ddg10_", "__ddgid_", "__ddgmark_"],
      "cname_hints": ["ddos-guard"]},
 
     # ── Qrator ──
     {"name": "Qrator", "waf": "Qrator", "cdn": None,
      "headers": {"x-qrator-request-id": ""},
+     "server_contains": ["qrator"],
+     "cookie_hints": ["qrator_msid"],
      "cname_hints": ["qrator"]},
 
     # ── StormWall ──
     {"name": "StormWall", "waf": "StormWall", "cdn": None,
      "headers": {"server": "stormwall"},
+     "server_contains": ["stormwall", "sw"],
      "cname_hints": ["stormwall"]},
 
     # ── ArvanCloud ──
@@ -2237,7 +2246,7 @@ _WAF_CDN_SIGNATURES = [
 
     # ── GCore CDN ──
     {"name": "GCore", "waf": None, "cdn": "GCore",
-     "headers": {"server": "gcore", "x-gc-cache": ""},
+     "headers": {"server": "gcore", "x-gc-cache": "", "x-id-fe": "", "x-id": ""},
      "cname_hints": ["gcore", "gcdn"]},
 
     # ── Webscale Networks ──
@@ -2325,7 +2334,14 @@ def _fingerprint_waf_cdn(fqdn: str, timeout: float = 3.0) -> Dict[str, Any]:
                 c.request("GET", path, headers={"User-Agent": _ua, "Accept": "*/*"})
                 r = c.getresponse()
                 r.read(8192)
-                hdrs = {k.lower(): v.lower() for k, v in r.getheaders()}
+                hdrs = {}
+                for k, v in r.getheaders():
+                    kl = k.lower()
+                    vl = v.lower()
+                    if kl == "set-cookie" and kl in hdrs:
+                        hdrs[kl] = hdrs[kl] + "; " + vl
+                    else:
+                        hdrs[kl] = vl
                 c.close()
                 return r.status, hdrs
             except Exception:
@@ -2409,6 +2425,14 @@ def _fingerprint_waf_cdn(fqdn: str, timeout: float = 3.0) -> Dict[str, Any]:
                 if fragment in server_hdr:
                     matched = True
                     result["headers_matched"].append(f"{sig['name']}:server~{fragment}")
+                    break
+        # Check cookie hints (from set-cookie header)
+        if not matched and "cookie_hints" in sig:
+            cookie_hdr = resp_headers.get("set-cookie", "")
+            for cookie_pat in sig["cookie_hints"]:
+                if cookie_pat.lower() in cookie_hdr:
+                    matched = True
+                    result["headers_matched"].append(f"{sig['name']}:cookie~{cookie_pat}")
                     break
         # Check CNAME hints
         if not matched and result["cname"]:
